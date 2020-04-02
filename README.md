@@ -1,3 +1,1 @@
-__LINGUALIZATION__
-
-language trainer offering several functionalities
+language trainer offering several acquisition facilitating functionalities
