@@ -1,3 +1,7 @@
+"""
+http://www.manythings.org/anki/
+"""
+
 import sys
 import os
 import time
