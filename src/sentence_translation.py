@@ -8,6 +8,8 @@ from typing import List, ClassVar
 import numpy as np
 import matplotlib.pyplot as plt
 
+from .web_interaction import ContentRetriever
+
 
 class SentenceTranslationTrainer:
 	default_names = ['Tom', 'Mary']
@@ -15,14 +17,15 @@ class SentenceTranslationTrainer:
 	full_language_names = {'ita': 'Italian', 'fre': 'French', 'hun': 'Hungarian', 'por': 'Portuguese', 'spa': 'Spanish', 'deu': 'German'}
 
 	def __init__(self):
-		self.data_path = os.path.join(os.getcwd(), 'LanguageData')
-		self.eligible_languages: List[str] = [i[:3] for i in os.listdir(self.data_path)]
+		self.data_path = os.path.join(os.getcwd(), 'sentence_pair_data')
 		self.date = str(date.today())
 
-		self.language_abb = None
+		self.chosen_language = None
 		self.language_file_path = None
 		self.sentence_data = None
 		self.vocabulary_file_link = None
+
+		self.webpage_interactor = ContentRetriever()
 
 		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
 
@@ -57,26 +60,31 @@ class SentenceTranslationTrainer:
 	# ---------------
 	# INITIALIZATION
 	# ---------------
-	def choose_language(self) -> ClassVar:
-		print("Eligible languages: ", end="")
-		[print(lan[:3].upper(), end=" " if ind < len(self.eligible_languages)-1 else '\n') for ind, lan in enumerate(self.eligible_languages)]
+	def choose_language(self) -> str:
+		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys())
+		print('Eligible languages: ')
+		for l in eligible_languages:
+			print(l)
 
-		language = input("Which language do you want to practice your yet demigodlike skills in? \n")
-		language_abb = language[:3].lower()
-		
-		if language_abb not in self.eligible_languages:
-			print('Invalid language')
+		selection = input("Which language do you want to practice your yet demigodlike skills in? \n")
+		if selection.title() not in eligible_languages:
+			print('Invalid selection')
 			time.sleep(1)
 			self.clear_screen()
 			return self.choose_language()
 
-		self.language_abb = language_abb
-		self.language_file_path = f"{self.data_path}/{self.language_abb}.txt"
+		return selection
+
+	def procure_sentence_data(self, language):
+		language_dir_path = f"{self.data_path}/{language}"
+		if language not in os.listdir(language_dir_path):
+			zip_file_link = self.webpage_interactor.download_zipfile(language)
+			self.webpage_interactor.unzip_file(zip_file_link)
 
 	def load_sentence_data(self) -> np.ndarray:
 		data = open(self.language_file_path, 'r', encoding='utf-8').readlines()
 		data = [i.split('\t') for i in data]
-		return [[i[0], i[1].strip('\n')] for i in data]
+		return np.array([[i[0], i[1].strip('\n')] for i in data])
 
 	def pre_exec_display(self):
 		self.clear_screen()

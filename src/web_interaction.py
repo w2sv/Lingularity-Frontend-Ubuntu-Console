@@ -40,7 +40,7 @@ class ContentRetriever:
 
     def download_zipfile(self, language: str) -> str:
         zip_link = f'{self.PAGE_URL}/{self.languages_2_ziplinks[language]}'
-        save_destination_dir = os.path.join(os.path.join(os.getcwd(), 'SentencePairData'), language)
+        save_destination_dir = os.path.join(os.path.join(os.getcwd(), 'sentence_pair_data'), language)
         if not os.path.exists(save_destination_dir):
             os.makedirs(save_destination_dir)
 
