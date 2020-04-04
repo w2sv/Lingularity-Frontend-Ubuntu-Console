@@ -1,12 +1,7 @@
-"""
-http://www.manythings.org/anki/
-"""
-
 import sys
 import os
 import time
-from datetime import date, timedelta
-import warnings
+from datetime import date
 import json
 from typing import List, ClassVar
 
@@ -14,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-class TranslationTrainer:
+class SentenceTranslationTrainer:
 	default_names = ['Tom', 'Mary']
 	names_dict = {'ita': ['Alessandro', 'Christina'], 'fre': ['Antoine', 'Amelie'], 'spa': ['Emilio', 'Luciana'], 'hun': ['László', 'Zsóka'], 'deu': ['Günther', 'Irmgard']}
 	full_language_names = {'ita': 'Italian', 'fre': 'French', 'hun': 'Hungarian', 'por': 'Portuguese', 'spa': 'Spanish', 'deu': 'German'}
@@ -24,11 +19,10 @@ class TranslationTrainer:
 		self.eligible_languages: List[str] = [i[:3] for i in os.listdir(self.data_path)]
 		self.date = str(date.today())
 
-		self.starting_screen()
-		self.choose_language()
-		self.data: np.array(List[str]) = self.load_data()
-
-		self.vocabulary_file_link = self.get_vocabulary_file_link()
+		self.language_abb = None
+		self.language_file_path = None
+		self.sentence_data = None
+		self.vocabulary_file_link = None
 
 		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
 
@@ -43,31 +37,29 @@ class TranslationTrainer:
 	def clear_screen():
 		os.system('cls' if os.name == 'nt' else 'clear')
 
-	def starting_screen(self):
-		banner = """
-		 _____            _                        _____                   _       _   _             
-		/  ___|          | |                      |_   _|                 | |     | | (_)            
-		\ `--.  ___ _ __ | |_ ___ _ __   ___ ___    | |_ __ __ _ _ __  ___| | __ _| |_ _  ___  _ __  
-		 `--. \/ _ \ '_ \| __/ _ \ '_ \ / __/ _ \   | | '__/ _` | '_ \/ __| |/ _` | __| |/ _ \| '_ \ 
-		/\__/ /  __/ | | | ||  __/ | | | (_|  __/   | | | | (_| | | | \__ \ | (_| | |_| | (_) | | | |
-		\____/ \___|_| |_|\__\___|_| |_|\___\___|   \_/_|  \__,_|_| |_|___/_|\__,_|\__|_|\___/|_| |_|
-                                                                                             
-		"""
+	def run(self):
+		self.display_starting_screen()
+		self.choose_language()
+		self.sentence_data = self.load_sentence_data()
+		self.vocabulary_file_link = self.get_vocabulary_file_link()
+		self.pre_exec_display()
+		self.training_loop()
+
+	def display_starting_screen(self):
+		banner = open(os.path.join(os.getcwd(), 'ressources/banner.txt'), 'r').read()
 		print(banner)
 		print("							W2SV", '\n' * 1)
 		print("					         by Janek Zangenberg ", '\n' * 2)
 
 		time.sleep(3)
-
-		# clear screen
 		self.clear_screen()
 
 	# ---------------
 	# INITIALIZATION
 	# ---------------
 	def choose_language(self) -> ClassVar:
-		print("Eligible languages: ",end="")
-		[print(lan[:3].upper(),end=" " if ind < len(self.eligible_languages)-1 else '\n') for ind, lan in enumerate(self.eligible_languages)]
+		print("Eligible languages: ", end="")
+		[print(lan[:3].upper(), end=" " if ind < len(self.eligible_languages)-1 else '\n') for ind, lan in enumerate(self.eligible_languages)]
 
 		language = input("Which language do you want to practice your yet demigodlike skills in? \n")
 		language_abb = language[:3].lower()
@@ -78,23 +70,21 @@ class TranslationTrainer:
 			self.clear_screen()
 			return self.choose_language()
 
-		setattr(self, 'language_abb', language_abb)
-		setattr(self, 'language_file_path', f"{self.data_path}/{self.language_abb}.txt")
+		self.language_abb = language_abb
+		self.language_file_path = f"{self.data_path}/{self.language_abb}.txt"
 
-	def load_data(self) -> ClassVar:
-		data = open(self.language_file_path,'r',encoding='utf-8').readlines()
+	def load_sentence_data(self) -> np.ndarray:
+		data = open(self.language_file_path, 'r', encoding='utf-8').readlines()
 		data = [i.split('\t') for i in data]
-		data = np.array([[i[0], i[1].strip('\n')] for i in data])
-		
-		return data
+		return [[i[0], i[1].strip('\n')] for i in data]
 
 	def pre_exec_display(self):
 		self.clear_screen()
-		print(f"Data file comprises {len(self.data):,d} sentences.")
+		print(f"Data file comprises {len(self.sentence_data):,d} sentences.")
 		print("Press Enter to advance to next sentence, v to append new entry to language corresponding vocabulary text file.")
 		print("Type 'exit' to terminate program.")
 
-		lets_go_dict = {'spa': '¡Vamonos!', 'fre' : 'Allons-y!', 'deu': "Auf geht's! ", 'ita': 'Andiamo!', 'hun': 'Kezdjük el!', 'por': 'Vamos!'}
+		lets_go_dict = {'spa': '¡Vamonos!', 'fre': 'Allons-y!', 'deu': "Auf geht's! ", 'ita': 'Andiamo!', 'hun': 'Kezdjük el!', 'por': 'Vamos!'}
 		print(lets_go_dict.get(self.language_abb), '\n')
 
 	# ----------------
@@ -141,19 +131,18 @@ class TranslationTrainer:
 
 			return sentence_pair
 
-	def exec(self):
-		self.pre_exec_display()
+	def training_loop(self):
 		faced_sentences = 0
-		indices = np.arange(len(self.data))
+		indices = np.arange(len(self.sentence_data))
 		np.random.shuffle(indices)
-		self.data = self.data[indices]
+		self.sentence_data = self.sentence_data[indices]
 
 		while True:
-			sentence_pair = self.data[faced_sentences]
+			sentence_pair = self.sentence_data[faced_sentences]
 			if any(name in sentence_pair[0] for name in self.default_names):
 				sentence_pair = self.convert_names(sentence_pair)
 
-			print(sentence_pair[0],'\t')
+			print(sentence_pair[0], '\t')
 			try:
 				try:
 					response = input("pending...")
@@ -233,4 +222,4 @@ class TranslationTrainer:
 
 
 if __name__ == '__main__':
-	TranslationTrainer().exec()
+	SentenceTranslationTrainer().run()
