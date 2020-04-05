@@ -23,47 +23,26 @@ class SentenceTranslationTrainer(Trainer):
 				  'German': ['Günther', 'Irmgard']}
 
 	def __init__(self):
-		self.base_data_path = os.path.join(os.getcwd(), 'language_data')
+		super().__init__()
 		self.date = str(date.today())
-
-		self.reference_language_inversion = False
-
-		self._language = None  # equals reference language in case of reference language inversion
-		self.sentence_data = None
 
 		self.webpage_interactor = ContentRetriever()
 
 		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
 
-	@property
-	def language(self):
-		return self._language if not self.reference_language_inversion else 'English'
-
-	@language.setter
-	def language(self, value):
-		self._language = value
-
-	@property
-	def sentence_file_path(self):
-		return f'{self.base_data_path}/{self._language}/sentence_data.txt'
-
-	@property
-	def vocabulary_file_path(self):
-		return f'{self.base_data_path}/{self.language}/vocabulary.txt'
-
 	def run(self):
-		self.language = self.choose_language()
+		self.language = self.select_language()
 		if self._language not in os.listdir(self.base_data_path):
 			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
 			self.webpage_interactor.unzip_file(zip_file_link)
-		self.sentence_data = self.load_sentence_data()
+		self.sentence_data = self.parse_sentence_data()
 		self.pre_exec_display()
 		self.training_loop()
 
 	# ---------------
 	# INITIALIZATION
 	# ---------------
-	def choose_language(self) -> str:
+	def select_language(self) -> str:
 		def indicate_invalid_selection():
 			print('Invalid selection')
 			time.sleep(1)
@@ -87,7 +66,7 @@ class SentenceTranslationTrainer(Trainer):
 		if selection not in eligible_languages:
 			indicate_invalid_selection()
 			self.clear_screen()
-			return self.choose_language()
+			return self.select_language()
 
 		elif selection == 'English':
 			reference_language_validity = False
@@ -101,24 +80,6 @@ class SentenceTranslationTrainer(Trainer):
 					self.reference_language_inversion, reference_language_validity = [True]*2
 
 		return selection
-
-	def load_sentence_data(self) -> np.ndarray:
-		data = open(self.sentence_file_path, 'r', encoding='utf-8').readlines()
-		split_data = [i.split('\t') for i in data]
-
-		# remove reference appendices from source file if still present
-		if len(split_data[0]) > 2:
-			bilateral_sentences = ('\t'.join(row_splits[:2]) + '\n' for row_splits in split_data)
-			with open(self.sentence_file_path, 'w', encoding='utf-8') as write_file:
-				write_file.writelines(bilateral_sentences)
-
-		for i, row in enumerate(split_data):
-			split_data[i][1] = row[1].strip('\n')
-
-		if self.reference_language_inversion:
-			split_data = [list(reversed(row)) for row in split_data]
-
-		return np.array(split_data)
 
 	def pre_exec_display(self):
 		self.clear_screen()
