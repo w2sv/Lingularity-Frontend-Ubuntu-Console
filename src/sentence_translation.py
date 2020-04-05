@@ -44,6 +44,11 @@ class SentenceTranslationTrainer:
 	def clear_screen():
 		os.system('cls' if platform.system() == 'Windows' else 'clear')
 
+	@staticmethod
+	def erase_previous_line():
+		sys.stdout.write("\033[F")
+		sys.stdout.write("\033[K")
+
 	def run(self):
 		# self.display_starting_screen()
 		self.language = self.choose_language()
@@ -120,11 +125,6 @@ class SentenceTranslationTrainer:
 	# ----------------
 	# VOCABULARY FILE
 	# ----------------
-	@staticmethod
-	def erase_previous_line():
-		sys.stdout.write("\033[F")
-		sys.stdout.write("\033[K")
-
 	def append_2_vocabulary_file(self):
 		word = input('Enter word in reference language: ')
 		translation = input('Enter translation: ')
