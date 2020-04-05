@@ -28,7 +28,7 @@ class SentenceTranslationTrainer:
 
 		self.reference_language_inversion = False
 
-		self._language = None  # differing from self.language in case of reference language inversion
+		self._language = None  # equals reference language in case of reference language inversion
 		self.sentence_data = None
 
 		self.webpage_interactor = ContentRetriever()
@@ -98,7 +98,7 @@ class SentenceTranslationTrainer:
 			sys.exit(0)
 
 		starting_letter_grouped = groupby(eligible_languages, lambda x: x[0])
-		print('Eligible languages: ')
+		print('Eligible languages: '.upper())
 		for _, values in starting_letter_grouped:
 			print(', '.join(list(values)))
 
