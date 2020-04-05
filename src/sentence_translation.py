@@ -6,6 +6,7 @@ from datetime import date
 import json
 from typing import List
 from itertools import groupby
+from bisect import insort
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -25,7 +26,9 @@ class SentenceTranslationTrainer:
 		self.base_data_path = os.path.join(os.getcwd(), 'language_data')
 		self.date = str(date.today())
 
-		self.language = None
+		self.reference_language_inversion = False
+
+		self._language = None  # differing from self.language in case of reference language inversion
 		self.sentence_data = None
 
 		self.webpage_interactor = ContentRetriever()
@@ -33,8 +36,16 @@ class SentenceTranslationTrainer:
 		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
 
 	@property
+	def language(self):
+		return self._language if not self.reference_language_inversion else 'English'
+
+	@language.setter
+	def language(self, value):
+		self._language = value
+
+	@property
 	def sentence_file_path(self):
-		return f'{self.base_data_path}/{self.language}/sentence_data.txt'
+		return f'{self.base_data_path}/{self._language}/sentence_data.txt'
 
 	@property
 	def vocabulary_file_path(self):
@@ -52,8 +63,8 @@ class SentenceTranslationTrainer:
 	def run(self):
 		# self.display_starting_screen()
 		self.language = self.choose_language()
-		if self.language not in os.listdir(self.base_data_path):
-			zip_file_link = self.webpage_interactor.download_zipfile(self.language)
+		if self._language not in os.listdir(self.base_data_path):
+			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
 			self.webpage_interactor.unzip_file(zip_file_link)
 		self.sentence_data = self.load_sentence_data()
 		self.pre_exec_display()
@@ -72,11 +83,17 @@ class SentenceTranslationTrainer:
 	# INITIALIZATION
 	# ---------------
 	def choose_language(self) -> str:
+		def indicate_invalid_selection():
+			print('Invalid selection')
+			time.sleep(1)
+
 		webpage_request_success = self.webpage_interactor.get_language_ziplink_dict()
 		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if webpage_request_success else os.listdir(self.base_data_path)
-		if not eligible_languages:
+		insort(eligible_languages, 'English')
+
+		if len(eligible_languages) == 1:  # solely artificially appended english
 			print('Please establish an internet connection in order to download sentence data.')
-			print('Program terminating.')
+			print('Terminating program.')
 			time.sleep(3)
 			sys.exit(0)
 
@@ -87,10 +104,20 @@ class SentenceTranslationTrainer:
 
 		selection = input('\nWhich language do you want to practice your yet demigodlike skills in? \n').title()
 		if selection not in eligible_languages:
-			print('Invalid selection')
-			time.sleep(1)
+			indicate_invalid_selection()
 			self.clear_screen()
 			return self.choose_language()
+
+		elif selection == 'English':
+			reference_language_validity = False
+
+			while not reference_language_validity:
+				reference_language = input('Enter desired reference language: \n').title()
+				if reference_language not in eligible_languages:
+					indicate_invalid_selection()
+				else:
+					selection = reference_language
+					self.reference_language_inversion, reference_language_validity = [True]*2
 
 		return selection
 
@@ -106,6 +133,10 @@ class SentenceTranslationTrainer:
 
 		for i, row in enumerate(split_data):
 			split_data[i][1] = row[1].strip('\n')
+
+		if self.reference_language_inversion:
+			split_data = [list(reversed(row)) for row in split_data]
+
 		return np.array(split_data)
 
 	def pre_exec_display(self):
