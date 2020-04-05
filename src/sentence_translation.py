@@ -1,6 +1,5 @@
 import sys
 import os
-import platform
 import time
 from datetime import date
 import json
@@ -11,10 +10,11 @@ from bisect import insort
 import numpy as np
 import matplotlib.pyplot as plt
 
+from .trainer import Trainer
 from .web_interaction import ContentRetriever
 
 
-class SentenceTranslationTrainer:
+class SentenceTranslationTrainer(Trainer):
 	DEFAULT_NAMES = ['Tom', 'Mary']
 	LANGUAGE_CORRESPONDING_NAMES = {'Italian': ['Alessandro', 'Christina'],
 				  'French': ['Antoine', 'Amelie'],
@@ -51,17 +51,7 @@ class SentenceTranslationTrainer:
 	def vocabulary_file_path(self):
 		return f'{self.base_data_path}/{self.language}/vocabulary.txt'
 
-	@staticmethod
-	def clear_screen():
-		os.system('cls' if platform.system() == 'Windows' else 'clear')
-
-	@staticmethod
-	def erase_previous_line():
-		sys.stdout.write("\033[F")
-		sys.stdout.write("\033[K")
-
 	def run(self):
-		# self.display_starting_screen()
 		self.language = self.choose_language()
 		if self._language not in os.listdir(self.base_data_path):
 			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
@@ -69,15 +59,6 @@ class SentenceTranslationTrainer:
 		self.sentence_data = self.load_sentence_data()
 		self.pre_exec_display()
 		self.training_loop()
-
-	def display_starting_screen(self):
-		banner = open(os.path.join(os.getcwd(), 'ressources/banner.txt'), 'r').read()
-		print(banner)
-		print("							W2SV", '\n' * 1)
-		print("					         by Janek Zangenberg ", '\n' * 2)
-
-		time.sleep(3)
-		self.clear_screen()
 
 	# ---------------
 	# INITIALIZATION
