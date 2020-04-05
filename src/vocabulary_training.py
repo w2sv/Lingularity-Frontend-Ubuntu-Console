@@ -1,9 +1,11 @@
 from typing import List, Dict, Optional
 import os
-import time
 import json
 
 from .trainer import Trainer
+
+
+# TODO: test loading, actual training, score alteration ...
 
 
 class VocabularyTrainer(Trainer):

@@ -14,9 +14,6 @@ def display_starting_screen():
     print("							W2SV", '\n' * 1)
     print("					         by Janek Zangenberg ", '\n' * 2)
 
-    time.sleep(3)
-    Trainer.clear_screen()
-
 
 def select_training() -> str:
     indentation = '\t' * 4
