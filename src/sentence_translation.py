@@ -1,5 +1,6 @@
 import sys
 import os
+import platform
 import time
 from datetime import date
 import json
@@ -40,15 +41,8 @@ class SentenceTranslationTrainer:
 		return f'{self.base_data_path}/{self.language}/vocabulary.txt'
 
 	@staticmethod
-	def index(liste, targetvalue):
-		for i in range(len(liste)):
-			if liste[i] == targetvalue:
-				return i
-		return None
-
-	@staticmethod
 	def clear_screen():
-		os.system('cls' if os.name == 'nt' else 'clear')
+		os.system('cls' if platform.system() == 'Windows' else 'clear')
 
 	def run(self):
 		# self.display_starting_screen()
@@ -98,11 +92,13 @@ class SentenceTranslationTrainer:
 	def load_sentence_data(self) -> np.ndarray:
 		data = open(self.sentence_file_path, 'r', encoding='utf-8').readlines()
 		split_data = [i.split('\t') for i in data]
+
 		# remove reference appendices from source file if still present
 		if len(split_data[0]) > 2:
 			bilateral_sentences = ('\t'.join(row_splits[:2]) + '\n' for row_splits in split_data)
 			with open(self.sentence_file_path, 'w', encoding='utf-8') as write_file:
 				write_file.writelines(bilateral_sentences)
+
 		for i, row in enumerate(split_data):
 			split_data[i][1] = row[1].strip('\n')
 		return np.array(split_data)
@@ -151,9 +147,11 @@ class SentenceTranslationTrainer:
 			sentence_tokens = sentence[:-1].split(' ')
 
 			for name_ind, name in enumerate(self.DEFAULT_NAMES):
-				ind = self.index(sentence_tokens, name)
-				if ind is not None:
+				try:
+					ind = sentence_tokens.index(name)
 					sentence_tokens[ind] = self.LANGUAGE_CORRESPONDING_NAMES[self.language][name_ind]
+				except ValueError:
+					pass
 			sentence_pair[sentence_ind] = ' '.join(sentence_tokens) + punctuation
 
 		return sentence_pair
@@ -188,6 +186,7 @@ class SentenceTranslationTrainer:
 
 			except SyntaxError:  # progressing with enter stroke
 				pass
+			self.erase_previous_line()
 			print(translation, '\n', '_______________')
 			faced_sentences += 1
 	

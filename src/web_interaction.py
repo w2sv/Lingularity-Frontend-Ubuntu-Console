@@ -52,7 +52,8 @@ class ContentRetriever:
         urllib._urlopener.retrieve(zip_link, save_destination_link)
         return save_destination_link
 
-    def unzip_file(self, zip_file_link):
+    @staticmethod
+    def unzip_file(zip_file_link):
         language_dir_link = zip_file_link[:zip_file_link.rfind(os.sep)]
         with zipfile.ZipFile(zip_file_link, 'r') as zip_ref:
             zip_ref.extractall(language_dir_link)
