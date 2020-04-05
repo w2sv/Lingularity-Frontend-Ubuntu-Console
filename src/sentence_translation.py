@@ -3,7 +3,8 @@ import os
 import time
 from datetime import date
 import json
-from typing import List, ClassVar
+from typing import List
+from itertools import groupby
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,22 +13,31 @@ from .web_interaction import ContentRetriever
 
 
 class SentenceTranslationTrainer:
-	default_names = ['Tom', 'Mary']
-	names_dict = {'ita': ['Alessandro', 'Christina'], 'fre': ['Antoine', 'Amelie'], 'spa': ['Emilio', 'Luciana'], 'hun': ['László', 'Zsóka'], 'deu': ['Günther', 'Irmgard']}
-	full_language_names = {'ita': 'Italian', 'fre': 'French', 'hun': 'Hungarian', 'por': 'Portuguese', 'spa': 'Spanish', 'deu': 'German'}
+	DEFAULT_NAMES = ['Tom', 'Mary']
+	LANGUAGE_CORRESPONDING_NAMES = {'Italian': ['Alessandro', 'Christina'],
+				  'French': ['Antoine', 'Amelie'],
+				  'Spanish': ['Emilio', 'Luciana'],
+				  'Hungarian': ['László', 'Zsóka'],
+				  'German': ['Günther', 'Irmgard']}
 
 	def __init__(self):
-		self.data_path = os.path.join(os.getcwd(), 'sentence_pair_data')
+		self.base_data_path = os.path.join(os.getcwd(), 'language_data')
 		self.date = str(date.today())
 
-		self.chosen_language = None
-		self.language_file_path = None
+		self.language = None
 		self.sentence_data = None
-		self.vocabulary_file_link = None
 
 		self.webpage_interactor = ContentRetriever()
 
 		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
+
+	@property
+	def sentence_file_path(self):
+		return f'{self.base_data_path}/{self.language}/sentence_data.txt'
+
+	@property
+	def vocabulary_file_path(self):
+		return f'{self.base_data_path}/{self.language}/vocabulary.txt'
 
 	@staticmethod
 	def index(liste, targetvalue):
@@ -41,10 +51,12 @@ class SentenceTranslationTrainer:
 		os.system('cls' if os.name == 'nt' else 'clear')
 
 	def run(self):
-		self.display_starting_screen()
-		self.choose_language()
+		# self.display_starting_screen()
+		self.language = self.choose_language()
+		if self.language not in os.listdir(self.base_data_path):
+			zip_file_link = self.webpage_interactor.download_zipfile(self.language)
+			self.webpage_interactor.unzip_file(zip_file_link)
 		self.sentence_data = self.load_sentence_data()
-		self.vocabulary_file_link = self.get_vocabulary_file_link()
 		self.pre_exec_display()
 		self.training_loop()
 
@@ -61,13 +73,21 @@ class SentenceTranslationTrainer:
 	# INITIALIZATION
 	# ---------------
 	def choose_language(self) -> str:
-		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys())
-		print('Eligible languages: ')
-		for l in eligible_languages:
-			print(l)
+		webpage_request_success = self.webpage_interactor.get_language_ziplink_dict()
+		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if webpage_request_success else os.listdir(self.base_data_path)
+		if not eligible_languages:
+			print('Please establish an internet connection in order to download sentence data.')
+			print('Program terminating.')
+			time.sleep(3)
+			sys.exit(0)
 
-		selection = input("Which language do you want to practice your yet demigodlike skills in? \n")
-		if selection.title() not in eligible_languages:
+		starting_letter_grouped = groupby(eligible_languages, lambda x: x[0])
+		print('Eligible languages: ')
+		for _, values in starting_letter_grouped:
+			print(', '.join(list(values)))
+
+		selection = input('\nWhich language do you want to practice your yet demigodlike skills in? \n').title()
+		if selection not in eligible_languages:
 			print('Invalid selection')
 			time.sleep(1)
 			self.clear_screen()
@@ -75,69 +95,68 @@ class SentenceTranslationTrainer:
 
 		return selection
 
-	def procure_sentence_data(self, language):
-		language_dir_path = f"{self.data_path}/{language}"
-		if language not in os.listdir(language_dir_path):
-			zip_file_link = self.webpage_interactor.download_zipfile(language)
-			self.webpage_interactor.unzip_file(zip_file_link)
-
 	def load_sentence_data(self) -> np.ndarray:
-		data = open(self.language_file_path, 'r', encoding='utf-8').readlines()
-		data = [i.split('\t') for i in data]
-		return np.array([[i[0], i[1].strip('\n')] for i in data])
+		data = open(self.sentence_file_path, 'r', encoding='utf-8').readlines()
+		split_data = [i.split('\t') for i in data]
+		# remove reference appendices from source file if still present
+		if len(split_data[0]) > 2:
+			bilateral_sentences = ('\t'.join(row_splits[:2]) + '\n' for row_splits in split_data)
+			with open(self.sentence_file_path, 'w', encoding='utf-8') as write_file:
+				write_file.writelines(bilateral_sentences)
+		for i, row in enumerate(split_data):
+			split_data[i][1] = row[1].strip('\n')
+		return np.array(split_data)
 
 	def pre_exec_display(self):
 		self.clear_screen()
-		print(f"Data file comprises {len(self.sentence_data):,d} sentences.")
-		print("Press Enter to advance to next sentence, v to append new entry to language corresponding vocabulary text file.")
-		print("Type 'exit' to terminate program.")
+		instruction_text = f"""Data file comprises {len(self.sentence_data):,d} sentences.\nPress Enter to advance to next sentence, v to append new entry to language corresponding vocabulary text file.\nType 'exit' to terminate program.\n"""
+		print(instruction_text)
 
-		lets_go_dict = {'spa': '¡Vamonos!', 'fre': 'Allons-y!', 'deu': "Auf geht's! ", 'ita': 'Andiamo!', 'hun': 'Kezdjük el!', 'por': 'Vamos!'}
-		print(lets_go_dict.get(self.language_abb), '\n')
+		lets_go_occurrence_range = ((sentence_pair[0], i) for i, sentence_pair in enumerate(self.sentence_data[:int(len(self.sentence_data)*0.3)]))
+
+		for content, i in lets_go_occurrence_range:
+			if content == "Let's go!":
+				print(self.sentence_data[i][1], '\n')
+				return
+
+		print("Let's go!", '\n')
 
 	# ----------------
 	# VOCABULARY FILE
 	# ----------------
-	def get_vocabulary_file_link(self) -> str:
-		vocab_dir = os.path.join(os.path.join(os.getcwd(), 'Vocabulary'))
-		if not os.path.isdir(vocab_dir):
-			os.mkdir(vocab_dir)
-
-		return os.path.join(vocab_dir, f'{self.full_language_names[self.language_abb]}.txt')
+	@staticmethod
+	def erase_previous_line():
+		sys.stdout.write("\033[F")
+		sys.stdout.write("\033[K")
 
 	def append_2_vocabulary_file(self):
-		word = input('Enter word: ')
+		word = input('Enter word in reference language: ')
 		translation = input('Enter translation: ')
 
-		with open(self.vocabulary_file_link, 'a+') as vocab_file:
-			if os.path.getsize(self.vocabulary_file_link):
+		with open(self.vocabulary_file_path, 'a+') as vocab_file:
+			if os.path.getsize(self.vocabulary_file_path):
 				vocab_file.write('\n') 
 			vocab_file.write(f'{word} - {translation}')
-			print('Appended to vocabulary file')
+		[self.erase_previous_line() for _ in range(2)]
 
 	# -----------------
 	# EXECUTION
 	# -----------------
-	def convert_names(self, sentence_pair: List[str]):		
-		"""
-		 	stores sentence finishing punctuation instance to enable 
-		    the finding of default names directly attached to
-		 	aforementioned and reinserts it afterwards
-		""" 
-
-		if self.names_dict.get(self.language_abb) is not None:
-			punctuation = sentence_pair[0][-1]
-			
-			for sentence_ind, sentence in enumerate(sentence_pair):
-				sentence_tokens = sentence[:-1].split(' ')
-				
-				for name_ind, name in enumerate(self.default_names):
-					ind = self.index(sentence_tokens, name)
-					if ind is not None:
-						sentence_tokens[ind] = self.names_dict[self.language_abb][name_ind]
-				sentence_pair[sentence_ind] = ' '.join(sentence_tokens) + punctuation
-
+	def convert_names(self, sentence_pair: List[str]) -> List[str]:
+		if not self.LANGUAGE_CORRESPONDING_NAMES.get(self.language):
 			return sentence_pair
+
+		punctuation = sentence_pair[0][-1]
+		for sentence_ind, sentence in enumerate(sentence_pair):
+			sentence_tokens = sentence[:-1].split(' ')
+
+			for name_ind, name in enumerate(self.DEFAULT_NAMES):
+				ind = self.index(sentence_tokens, name)
+				if ind is not None:
+					sentence_tokens[ind] = self.LANGUAGE_CORRESPONDING_NAMES[self.language][name_ind]
+			sentence_pair[sentence_ind] = ' '.join(sentence_tokens) + punctuation
+
+		return sentence_pair
 
 	def training_loop(self):
 		faced_sentences = 0
@@ -146,11 +165,11 @@ class SentenceTranslationTrainer:
 		self.sentence_data = self.sentence_data[indices]
 
 		while True:
-			sentence_pair = self.sentence_data[faced_sentences]
-			if any(name in sentence_pair[0] for name in self.default_names):
-				sentence_pair = self.convert_names(sentence_pair)
+			reference_sentence, translation = self.sentence_data[faced_sentences]
+			if any(name in reference_sentence for name in self.DEFAULT_NAMES):
+				reference_sentence, translation = self.convert_names([reference_sentence, translation])
 
-			print(sentence_pair[0], '\t')
+			print(reference_sentence, '\t')
 			try:
 				try:
 					response = input("pending...")
@@ -159,7 +178,7 @@ class SentenceTranslationTrainer:
 						print(" ")
 
 					elif response.lower() == 'exit':
-						print("Number of faced sentences: ",faced_sentences)
+						print("Number of faced sentences: ", faced_sentences)
 						doc_dict = self.add_number_2_file(faced_sentences)
 						if faced_sentences > 4:
 							self.visualize_exercising_chronic(doc_dict)
@@ -169,7 +188,7 @@ class SentenceTranslationTrainer:
 
 			except SyntaxError:  # progressing with enter stroke
 				pass
-			print(sentence_pair[1], '\n', '_______________')
+			print(translation, '\n', '_______________')
 			faced_sentences += 1
 	
 	# ---------------
@@ -179,21 +198,21 @@ class SentenceTranslationTrainer:
 		if not os.path.isfile(self.chronic_file):
 			# create new documentation dict
 			with open(self.chronic_file, 'w+') as empty_file:
-				doc_dict = {self.language_abb: {self.date: n_faced_sentences}}
+				doc_dict = {self.language: {self.date: n_faced_sentences}}
 				json.dump(doc_dict, empty_file)
 		else:
 			with open(self.chronic_file) as read_file:
 				doc_dict = json.load(read_file)
 			
-			if self.language_abb in doc_dict.keys():
-				date_dict = doc_dict[self.language_abb]
+			if self.language in doc_dict.keys():
+				date_dict = doc_dict[self.language]
 				if self.date in date_dict.keys():
 					date_dict[self.date] += n_faced_sentences
 				else:
 					date_dict[self.date] = n_faced_sentences
-				doc_dict[self.language_abb] = date_dict
+				doc_dict[self.language] = date_dict
 			else:
-				doc_dict[self.language_abb] = {self.date: n_faced_sentences}
+				doc_dict[self.language] = {self.date: n_faced_sentences}
 			
 			with open(self.chronic_file, 'w+') as write_file:
 				json.dump(doc_dict, write_file)
@@ -201,7 +220,7 @@ class SentenceTranslationTrainer:
 		return doc_dict
 
 	def visualize_exercising_chronic(self, doc_dict):
-		date_dict = doc_dict[self.language_abb]
+		date_dict = doc_dict[self.language]
 		
 		items = date_dict.items()
 		# convert postunzipped tuples to lists for subsequent date assignment 
@@ -214,13 +233,13 @@ class SentenceTranslationTrainer:
 
 		fig, ax = plt.subplots()
 		fig.canvas.draw()
-		fig.canvas.set_window_title("You had in the very least one more in the tank...")
+		fig.canvas.set_window_title("Way to go!")
 
 		x_range = np.arange(len(items))
 		ax.plot(x_range, sentence_amounts, marker='.', markevery=list(x_range), color='r')
 		ax.set_xticks(x_range)
 		ax.set_xticklabels(dates, minor=False, rotation=45)
-		ax.set_title(f'{self.full_language_names[self.language_abb]} exercising chronic')
+		ax.set_title(f'{self.language} exercising chronic')
 		ax.set_ylabel('number of sentences')
 		ax.set_ylim(bottom=0)
 		plt.show()		

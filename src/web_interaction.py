@@ -21,26 +21,29 @@ class ContentRetriever:
     PAGE_URL = 'http://www.manythings.org/anki'
 
     def __init__(self):
-        self.languages_2_ziplinks = self._get_language_ziplink_dict()
+        self.languages_2_ziplinks = None
 
-    def _get_language_ziplink_dict(self) -> Dict[str, str]:
-        FLAG_URL = 'http://www.manythings.org/img/usa.png'  # preceding every zip link row
+    def get_language_ziplink_dict(self) -> int:
+        FLAG_URL = 'http://www.manythings.org/img/usa.png'  # starting every zip link row
 
-        response = requests.get(self.PAGE_URL, headers={'User-Agent': 'XY'})  # specific header for erroneous response 406 resolution
-        response_code = int(''.join(filter(lambda c: c.isdigit(), str(response))))
-        if response_code != 200:
-            print('Erroneous webpage response')
-            return {}
+        try:
+            response = requests.get(self.PAGE_URL, headers={'User-Agent': 'XY'})  # specific header for erroneous response 406 resolution
+            response_code = int(''.join(filter(lambda c: c.isdigit(), str(response))))
+            if response_code != 200:
+                print('Erroneous webpage response')
+                return 0
 
-        page_content = str(BeautifulSoup(response.text, "html.parser"))
-        download_link_rows = page_content[page_content.find(FLAG_URL):page_content.rfind(FLAG_URL)].split('\n')
-        relevant_columns = (row.split('\t')[1:][0] for row in download_link_rows[:-1])
-        language_2_ziplink = {row[:row.find(' ')]: row[row.find('"')+1:row.rfind('"')] for row in relevant_columns}
-        return language_2_ziplink
+            page_content = str(BeautifulSoup(response.text, "html.parser"))
+            download_link_rows = page_content[page_content.find(FLAG_URL):page_content.rfind(FLAG_URL)].split('\n')
+            relevant_columns = (row.split('\t')[1:][0] for row in download_link_rows[:-1])
+            self.languages_2_ziplinks = {row[:row.find(' ')]: row[row.find('"')+1:row.rfind('"')] for row in relevant_columns}
+            return 1
+        except requests.exceptions.ConnectionError:
+            return 0
 
     def download_zipfile(self, language: str) -> str:
         zip_link = f'{self.PAGE_URL}/{self.languages_2_ziplinks[language]}'
-        save_destination_dir = os.path.join(os.path.join(os.getcwd(), 'sentence_pair_data'), language)
+        save_destination_dir = os.path.join(os.path.join(os.getcwd(), 'language_data'), language)
         if not os.path.exists(save_destination_dir):
             os.makedirs(save_destination_dir)
 
@@ -57,6 +60,9 @@ class ContentRetriever:
         # remove unpacked zip file, about.txt
         os.remove(zip_file_link)
         os.remove(os.path.join(language_dir_link, '_about.txt'))
+
+        # rename sentence data file
+        os.rename(os.path.join(language_dir_link, os.listdir(language_dir_link)[0]), os.path.join(language_dir_link, 'sentence_data.txt'))
 
 
 if __name__ == '__main__':
