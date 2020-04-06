@@ -71,5 +71,9 @@ class Trainer(ABC):
         pass
 
     @abstractmethod
+    def train(self):
+        pass
+
+    @abstractmethod
     def run(self):
         pass

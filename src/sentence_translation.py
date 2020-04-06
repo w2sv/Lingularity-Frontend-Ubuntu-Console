@@ -14,6 +14,9 @@ from .trainer import Trainer
 from .web_interaction import ContentRetriever
 
 
+# TODO: debug italian sentence pair parsing, display connection status
+
+
 class SentenceTranslationTrainer(Trainer):
 	DEFAULT_NAMES = ['Tom', 'Mary']
 	LANGUAGE_CORRESPONDING_NAMES = {'Italian': ['Alessandro', 'Christina'],
@@ -37,7 +40,7 @@ class SentenceTranslationTrainer(Trainer):
 			self.webpage_interactor.unzip_file(zip_file_link)
 		self.sentence_data = self.parse_sentence_data()
 		self.pre_exec_display()
-		self.training_loop()
+		self.train()
 
 	# ---------------
 	# INITIALIZATION
@@ -129,7 +132,7 @@ class SentenceTranslationTrainer(Trainer):
 
 		return sentence_pair
 
-	def training_loop(self):
+	def train(self):
 		faced_sentences = 0
 		indices = np.arange(len(self.sentence_data))
 		np.random.shuffle(indices)
