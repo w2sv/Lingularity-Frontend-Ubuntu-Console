@@ -112,11 +112,11 @@ class VocabularyTrainer(Trainer):
         entries = np.array(list(self.vocabulary.keys()))
         np.random.shuffle(entries)
 
-        display_token = lambda entry: self.vocabulary[entry] if self.reference_2_foreign else entry
-        translation = lambda entry: entry if self.reference_2_foreign else self.vocabulary[entry]
+        get_display_token = lambda entry: self.vocabulary[entry] if self.reference_2_foreign else entry
+        get_translation = lambda entry: entry if self.reference_2_foreign else self.vocabulary[entry]
 
         for entry in entries:
-            display_token, translation = display_token(entry), translation(entry)
+            display_token, translation = get_display_token(entry), get_translation(entry)
             response = input(f'{display_token} : ')
             response_evaluation = self.evaluate_response(response, translation)
             if self.RESPONSE_EVALUATIONS[response_evaluation] != 'perfect':
@@ -130,6 +130,7 @@ class VocabularyTrainer(Trainer):
         self.vocabulary = self.parse_vocabulary()
         self.training_documentation = self.load_training_documentation()
         self.training_documentation = self.update_documentation()
+        self.train()
 
 
 if __name__ == '__main__':
