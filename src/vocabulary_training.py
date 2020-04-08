@@ -22,14 +22,14 @@ TokenSentenceindsMap = Dict[str, List[int]]
 class VocabularyTrainer(Trainer):
     RESPONSE_EVALUATIONS = {0: 'wrong', 1: 'accent fault', 2: 'correct', 3: 'perfect'}
     COMPLETION_SCORE = 5
-    ROOT_END_IND = -4
     N_RELATED_SENTENCES = 2
+    ROOT_LENGTH = 4
 
     def __init__(self):
         super().__init__()
 
         self.token_2_rowinds: Optional[TokenSentenceindsMap] = None
-        self.root_2_rowinds: Optional[TokenSentenceindsMap] = None
+        # self.root_2_rowinds: Optional[TokenSentenceindsMap] = None
         self.training_documentation: Optional[TrainingDocumentation] = None
         self.vocabulary: Optional[Dict[str, str]] = None
 
@@ -62,27 +62,24 @@ class VocabularyTrainer(Trainer):
                     token_2_rowinds[token].append(i)
         return token_2_rowinds
 
-    def procure_root_2_rowinds_map(self) -> TokenSentenceindsMap:
-        MIN_ROOT_LENGTH = 4
-
-        root_2_sentenceinds = {}
-        token_2_rowinds = self.token_2_rowinds.copy()
-
-        while len(token_2_rowinds):
-            token = next(iter(token_2_rowinds.keys()))
-            root = token[:-self.ROOT_END_IND]
-            if len(root) < MIN_ROOT_LENGTH:
-                token_2_rowinds.pop(token)
-            else:
-                root_2_sentenceinds[root] = token_2_rowinds.pop(token)
-                for c, c_inds in iter(token_2_rowinds.items()):
-                    if root in c:
-                        root_2_sentenceinds[root].extend(token_2_rowinds.pop(c))
-
-        return root_2_sentenceinds
-
-    def get_root_comprising_tokens(self, root):
-        return [k for k in self.token_2_rowinds.keys() if root in k]
+    # def procure_root_2_rowinds_map(self) -> TokenSentenceindsMap:
+    #     MIN_ROOT_LENGTH = 4
+    #
+    #     root_2_sentenceinds = {}
+    #     token_2_rowinds = self.token_2_rowinds.copy()
+    #
+    #     while len(token_2_rowinds):
+    #         token = next(iter(token_2_rowinds.keys()))
+    #         root = token[:-self.ROOT_END_IND]
+    #         if len(root) < MIN_ROOT_LENGTH:
+    #             token_2_rowinds.pop(token)
+    #         else:
+    #             root_2_sentenceinds[root] = token_2_rowinds.pop(token)
+    #             for c, c_inds in iter(token_2_rowinds.items()):
+    #                 if root in c:
+    #                     root_2_sentenceinds[root].extend(token_2_rowinds.pop(c))
+    #
+    #     return root_2_sentenceinds
 
     def parse_vocabulary(self) -> Dict[str, str]:
         with open(self.vocabulary_file_path, 'r') as file:
@@ -163,17 +160,25 @@ class VocabularyTrainer(Trainer):
             print('\t', self.RESPONSE_EVALUATIONS[response_evaluation].upper(), end=' ')
             if self.RESPONSE_EVALUATIONS[response_evaluation] != 'perfect':
                 print(translation)
-            comprising_sentences = self.get_comprising_sentences(entry.split('')[0])
+            comprising_sentences = self.get_comprising_sentences(entry.split(',')[0])
             if comprising_sentences is not None:
                 [print(s) for s in comprising_sentences]
             print('_______________')
 
             self.update_documentation_entry(entry, response_evaluation)
 
+    def get_root_comprising_tokens(self, root) -> List[str]:
+        return [k for k in self.token_2_rowinds.keys() if root in k]
+
+    def get_root_comprising_sentence_inds(self, root: str) -> List[int]:
+        return list(chain.from_iterable([v for k, v in self.token_2_rowinds.items() if root in k]))
+
     def get_comprising_sentences(self, token: str) -> Optional[List[str]]:
-        sentence_indices = np.array(list(chain.from_iterable([self.root_2_rowinds[token[:i]] for i in range(3, len(token)) if self.root_2_rowinds.get(self.root_2_rowinds[token[:i]]) is not None])))
+        root = token[:self.ROOT_LENGTH]
+        sentence_indices = np.array(self.get_root_comprising_sentence_inds(root))
         if not len(sentence_indices):
             return None
+
         random_indices = np.random.randint(0, len(sentence_indices), self.N_RELATED_SENTENCES)
         return self.sentence_data[sentence_indices[random_indices]][:, 1]
 
@@ -181,13 +186,10 @@ class VocabularyTrainer(Trainer):
         self._language = self.select_language()
         self.sentence_data = self.parse_sentence_data()
         self.token_2_rowinds = self.procure_token_2_rowinds_map()
-        a = self.get_root_comprising_tokens('usci')
         self.vocabulary = self.parse_vocabulary()
         self.training_documentation = self.load_training_documentation()
         self.training_documentation = self.update_documentation()
         self.pre_training_display()
-        print(a)
-        print(dur)
         self.train()
 
 
