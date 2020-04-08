@@ -72,7 +72,7 @@ class SentenceTranslationTrainer(Trainer):
 			reference_language_validity = False
 
 			while not reference_language_validity:
-				reference_language = self.resolve_input(input('Enter desired reference language: \n'), eligible_languages)
+				reference_language = self.resolve_input(input('Enter desired reference language: \n').title(), eligible_languages)
 				if reference_language is None:
 					print("Couldn't resolve input")
 					time.sleep(1)
