@@ -115,8 +115,9 @@ class VocabularyTrainer(Trainer):
             def n_deviations(a: str, b: str) -> int:
                 def dict_value_sum(dictionary):
                     return sum(list(dictionary.values()))
-                ac, bc = map(Counter, [a, b])
-                return dict_value_sum(ac - bc) or dict_value_sum(bc - ac)
+                short, long = sorted([a, b], key=lambda string: len(string))
+                short_c, long_c = map(Counter, [short, long])
+                return dict_value_sum(long_c - short_c)
 
             TOLERATED_CHAR_DEVIATIONS = 1
             return any(n_deviations(response, translation) <= TOLERATED_CHAR_DEVIATIONS for translation in distinct_translations)
