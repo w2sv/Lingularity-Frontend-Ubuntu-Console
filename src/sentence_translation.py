@@ -14,6 +14,9 @@ from .trainer import Trainer
 from .web_interaction import ContentRetriever
 
 
+# TODO: difficulty selection
+
+
 class SentenceTranslationTrainer(Trainer):
 	DEFAULT_NAMES = ['Tom', 'Mary']
 	LANGUAGE_CORRESPONDING_NAMES = {'Italian': ['Alessandro', 'Christina'],
@@ -29,6 +32,18 @@ class SentenceTranslationTrainer(Trainer):
 		self.webpage_interactor = ContentRetriever()
 
 		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
+
+	def complexity_selection(self):
+		N_LEVELS = 3
+		token_2_sentenceinds = self.procure_token_2_rowinds_map()
+
+		occurence_distribution = [len(v) for v in token_2_sentenceinds.values()]
+		step_size = (max(occurence_distribution) - min(occurence_distribution)) / N_LEVELS
+
+		selected_level = 3
+		min_occurrence = step_size * selected_level
+		indices = set([v for v in token_2_sentenceinds.values() if len(v) >= min_occurrence])
+		self.sentence_data = self.sentence_data[indices]
 
 	def run(self):
 		self.language = self.select_language()

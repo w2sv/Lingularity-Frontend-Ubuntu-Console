@@ -5,17 +5,20 @@ from collections import Counter
 from datetime import date
 from itertools import chain
 from time import time
-from tqdm import tqdm
 import time
 
 import unidecode
 import numpy as np
 
-from .trainer import Trainer
+from .trainer import Trainer, TokenSentenceindsMap
 
 
-TrainingDocumentation = Dict[str, Dict[str, int]]  # entry -> Dict[score, times seen, last seen]
-TokenSentenceindsMap = Dict[str, List[int]]
+TrainingDocumentation = Dict[str, Dict[str, int, int]]  # entry -> Dict[score, times seen, last seen]
+
+
+# TODO: training documentation, disabling strg + c, append new meanings, progress plotting, vocabulary statistics, prioritizazion
+#  ignoring perfected vocabulary, motivation throughout training, english training, method structuring, display of new vocabulary if desired
+#  sentence finding for other translation tokens
 
 
 class VocabularyTrainer(Trainer):
@@ -52,17 +55,6 @@ class VocabularyTrainer(Trainer):
 
     def query_settings(self):
         pass
-
-    def procure_token_2_rowinds_map(self) -> TokenSentenceindsMap:
-        token_2_rowinds = {}
-        print('Parsing data...')
-        for i, sentence in enumerate(tqdm(self.sentence_data[:, 1])):
-            for token in sentence.split(' '):
-                if token_2_rowinds.get(token) is None:
-                    token_2_rowinds[token] = [i]
-                else:
-                    token_2_rowinds[token].append(i)
-        return token_2_rowinds
 
     def parse_vocabulary(self) -> Dict[str, str]:
         with open(self.vocabulary_file_path, 'r') as file:

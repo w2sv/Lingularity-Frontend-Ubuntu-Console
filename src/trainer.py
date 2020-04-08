@@ -1,11 +1,15 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, List
+from typing import Callable, Optional, List, Dict
 import os
 import platform
 import sys
 import time
 
+from tqdm import tqdm
 import numpy as np
+
+
+TokenSentenceindsMap = Dict[str, List[int]]
 
 
 class Trainer(ABC):
@@ -74,6 +78,17 @@ class Trainer(ABC):
             split_data = [list(reversed(row)) for row in split_data]
 
         return np.array(split_data)
+
+    def procure_token_2_rowinds_map(self) -> TokenSentenceindsMap:
+        token_2_rowinds = {}
+        print('Parsing data...')
+        for i, sentence in enumerate(tqdm(self.sentence_data[:, 1])):
+            for token in sentence.split(' '):
+                if token_2_rowinds.get(token) is None:
+                    token_2_rowinds[token] = [i]
+                else:
+                    token_2_rowinds[token].append(i)
+        return token_2_rowinds
 
     def get_lets_go_translation(self) -> Optional[str]:
         lets_go_occurrence_range = ((sentence_pair[0], i) for i, sentence_pair in
