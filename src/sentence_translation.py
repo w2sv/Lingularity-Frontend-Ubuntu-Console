@@ -63,7 +63,7 @@ class SentenceTranslationTrainer(Trainer):
 		for _, values in starting_letter_grouped:
 			print(', '.join(list(values)))
 
-		selection = self.resolve_input(input('\nWhich language do you want to practice your yet demigodlike skills in? \n').title(), eligible_languages)
+		selection = self.resolve_input(input('\nSelect language: \n').title(), eligible_languages)
 		if selection is None:
 			self.recurse_on_invalid_input(self.select_language)
 
