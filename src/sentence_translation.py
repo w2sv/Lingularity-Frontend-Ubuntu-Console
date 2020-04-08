@@ -39,7 +39,7 @@ class SentenceTranslationTrainer(Trainer):
 			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
 			self.webpage_interactor.unzip_file(zip_file_link)
 		self.sentence_data = self.parse_sentence_data()
-		self.pre_exec_display()
+		self.pre_training_display()
 		self.train()
 
 	# ---------------
@@ -84,19 +84,13 @@ class SentenceTranslationTrainer(Trainer):
 
 		return selection
 
-	def pre_exec_display(self):
+	def pre_training_display(self):
 		self.clear_screen()
 		instruction_text = f"""Data file comprises {len(self.sentence_data):,d} sentences.\nPress Enter to advance to next sentence, v to append new entry to language corresponding vocabulary text file.\nType 'exit' to terminate program.\n"""
 		print(instruction_text)
 
-		lets_go_occurrence_range = ((sentence_pair[0], i) for i, sentence_pair in enumerate(self.sentence_data[:int(len(self.sentence_data)*0.3)]))
-
-		for content, i in lets_go_occurrence_range:
-			if content == "Let's go!":
-				print(self.sentence_data[i][1], '\n')
-				return
-
-		print("Let's go!", '\n')
+		lets_go_translation = self.get_lets_go_translation()
+		print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')
 
 	# ----------------
 	# VOCABULARY FILE

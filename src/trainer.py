@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Callable, Optional
 import os
 import platform
 import sys
@@ -65,6 +65,18 @@ class Trainer(ABC):
             split_data = [list(reversed(row)) for row in split_data]
 
         return np.array(split_data)
+
+    def get_lets_go_translation(self) -> Optional[str]:
+        lets_go_occurrence_range = ((sentence_pair[0], i) for i, sentence_pair in
+                                    enumerate(self.sentence_data[:int(len(self.sentence_data) * 0.3)]))
+        for content, i in lets_go_occurrence_range:
+            if content == "Let's go!":
+                return self.sentence_data[i][1]
+        return None
+
+    @abstractmethod
+    def pre_training_display(self):
+        pass
 
     @abstractmethod
     def select_language(self):

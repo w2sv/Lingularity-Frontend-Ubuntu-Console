@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="40bbd82a-aa0c-4573-b219-bd4e514e781c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/environment.yml" beforeDir="false" afterPath="$PROJECT_DIR$/environment.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/sentence_translation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/sentence_translation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/vocabulary_training.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/vocabulary_training.py" afterDir="false" />
@@ -69,10 +67,10 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state x="301" y="72" key="SettingsEditor" timestamp="1586201748138">
+    <state x="301" y="72" key="SettingsEditor" timestamp="1586324463204">
       <screen x="0" y="0" width="1600" height="860" />
     </state>
-    <state x="301" y="72" key="SettingsEditor/0.0.1600.860@0.0.1600.860" timestamp="1586201748138" />
+    <state x="301" y="72" key="SettingsEditor/0.0.1600.860@0.0.1600.860" timestamp="1586324463204" />
     <state x="541" y="73" key="refactoring.ChangeSignatureDialog" timestamp="1586077394405">
       <screen x="0" y="0" width="1600" height="860" />
     </state>
