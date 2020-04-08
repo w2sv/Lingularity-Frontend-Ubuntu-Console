@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Optional
+from typing import Callable, Optional, List
 import os
 import platform
 import sys
@@ -43,10 +43,17 @@ class Trainer(ABC):
 
     @staticmethod
     def recurse_on_invalid_input(func: Callable):
-        print('Invalid input')
+        print("Couldn't resolve input")
         time.sleep(1)
         Trainer.clear_screen()
         return func()
+
+    def resolve_input(self, input: str, options: List[str]) -> Optional[str]:
+        options_starting_with = [o for o in options if o.startswith(input)]
+        if len(options_starting_with) == 1:
+            return options_starting_with[0]
+        else:
+            return None
 
     def parse_sentence_data(self) -> np.ndarray:
         data = open(self.sentence_file_path, 'r', encoding='utf-8').readlines()

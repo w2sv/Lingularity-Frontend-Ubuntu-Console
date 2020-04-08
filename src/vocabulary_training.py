@@ -13,8 +13,6 @@ import numpy as np
 from .trainer import Trainer
 
 
-# TODO: query whether new vocabulary to be displayed
-
 TrainingDocumentation = Dict[str, Dict[str, int]]  # entry -> Dict[score, times seen, last seen]
 TokenSentenceindsMap = Dict[str, List[int]]
 
@@ -45,16 +43,18 @@ class VocabularyTrainer(Trainer):
         print('ELIGIBLE LANGUAGES: ')
         [print(language) for language in sorted(eligible_languages)]
         language_selection = input('\nEnter desired language:\n').title()
-        if language_selection not in eligible_languages:
+        input_resolution = self.resolve_input(language_selection, eligible_languages)
+        if input_resolution is None:
             return self.recurse_on_invalid_input(self.select_language)
-        return language_selection
+        return input_resolution
 
     def query_settings(self):
         pass
 
     def procure_token_2_rowinds_map(self) -> TokenSentenceindsMap:
         token_2_rowinds = {}
-        for i, sentence in enumerate(self.sentence_data[:, 1]):
+        print('Parsing data...')
+        for i, sentence in enumerate(tqdm(self.sentence_data[:, 1])):
             for token in sentence.split(' '):
                 if token_2_rowinds.get(token) is None:
                     token_2_rowinds[token] = [i]
@@ -100,7 +100,7 @@ class VocabularyTrainer(Trainer):
 
         # create new documentation file if necessary
         if not self.training_documentation:
-            return {entry: INIT for entry in self.vocabulary.keys()}
+            return {entry: INIT.copy() for entry in self.vocabulary.keys()}
 
         for entry in self.vocabulary.keys():
             if self.training_documentation.get(entry) is None:
@@ -134,9 +134,9 @@ class VocabularyTrainer(Trainer):
         return self.reverse_response_evaluations[evaluation]
 
     def update_documentation_entry(self, entry, response_evaluation):
-        self.training_documentation[entry]['lfd'] = date.today()
+        self.training_documentation[entry]['lfd'] = str(date.today())
         self.training_documentation[entry]['tf'] += 1
-        self.training_documentation[entry]['s'] = 0.5 if self.RESPONSE_EVALUATIONS[response_evaluation] in ['accent fault', 'correct'] else 3 // 1
+        self.training_documentation[entry]['s'] += 0.5 if self.RESPONSE_EVALUATIONS[response_evaluation] in ['accent fault', 'correct'] else response_evaluation // 3
 
     def pre_training_display(self):
         self.clear_screen()
@@ -156,6 +156,9 @@ class VocabularyTrainer(Trainer):
         for entry in entries:
             display_token, translation = get_display_token(entry), get_translation(entry)
             response = input(f'{display_token} = ')
+            if response.lower() == 'exit':
+                break
+
             response_evaluation = self.evaluate_response(response, translation)
 
             print('\t', self.RESPONSE_EVALUATIONS[response_evaluation].upper(), end=' ')
@@ -168,7 +171,7 @@ class VocabularyTrainer(Trainer):
 
             self.update_documentation_entry(entry, response_evaluation)
 
-    def get_root_comprising_tokens(self, root) -> List[str]:
+    def __get_root_comprising_tokens(self, root) -> List[str]:
         return [k for k in self.token_2_rowinds.keys() if root in k]
 
     def get_root_comprising_sentence_inds(self, root: str) -> List[int]:
@@ -183,6 +186,10 @@ class VocabularyTrainer(Trainer):
         random_indices = np.random.randint(0, len(sentence_indices), self.N_RELATED_SENTENCES)
         return self.sentence_data[sentence_indices[random_indices]][:, 1]
 
+    def save_documentation(self):
+        with open(self.training_documentation_path, 'w+') as dump_file:
+            json.dump(self.training_documentation, dump_file)
+
     def run(self):
         self._language = self.select_language()
         self.sentence_data = self.parse_sentence_data()
@@ -192,6 +199,7 @@ class VocabularyTrainer(Trainer):
         self.training_documentation = self.update_documentation()
         self.pre_training_display()
         self.train()
+        self.save_documentation()
 
 
 if __name__ == '__main__':

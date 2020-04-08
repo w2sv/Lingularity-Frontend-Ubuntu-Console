@@ -65,18 +65,16 @@ class SentenceTranslationTrainer(Trainer):
 		for _, values in starting_letter_grouped:
 			print(', '.join(list(values)))
 
-		selection = input('\nWhich language do you want to practice your yet demigodlike skills in? \n').title()
-		if selection not in eligible_languages:
-			indicate_invalid_selection()
-			self.clear_screen()
-			return self.select_language()
+		selection = self.resolve_input(input('\nWhich language do you want to practice your yet demigodlike skills in? \n').title(), eligible_languages)
+		if selection is None:
+			self.recurse_on_invalid_input(self.select_language)
 
 		elif selection == 'English':
 			reference_language_validity = False
 
 			while not reference_language_validity:
-				reference_language = input('Enter desired reference language: \n').title()
-				if reference_language not in eligible_languages:
+				reference_language = self.resolve_input(input('Enter desired reference language: \n'), eligible_languages)
+				if reference_language is None:
 					indicate_invalid_selection()
 				else:
 					selection = reference_language
