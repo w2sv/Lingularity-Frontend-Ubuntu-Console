@@ -14,9 +14,6 @@ from .trainer import Trainer
 from .web_interaction import ContentRetriever
 
 
-# TODO: debug italian sentence pair parsing, display connection status
-
-
 class SentenceTranslationTrainer(Trainer):
 	DEFAULT_NAMES = ['Tom', 'Mary']
 	LANGUAGE_CORRESPONDING_NAMES = {'Italian': ['Alessandro', 'Christina'],
@@ -46,19 +43,20 @@ class SentenceTranslationTrainer(Trainer):
 	# INITIALIZATION
 	# ---------------
 	def select_language(self) -> str:
-		def indicate_invalid_selection():
-			print('Invalid selection')
-			time.sleep(1)
-
+		print('Trying to connect to webpage...')
 		webpage_request_success = self.webpage_interactor.get_language_ziplink_dict()
 		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if webpage_request_success else os.listdir(self.base_data_path)
 		insort(eligible_languages, 'English')
 
+		self.clear_screen()
 		if len(eligible_languages) == 1:  # solely artificially appended english
 			print('Please establish an internet connection in order to download sentence data.')
 			print('Terminating program.')
 			time.sleep(3)
 			sys.exit(0)
+
+		elif webpage_request_success == 0:
+			print("Couldn't establish a connection")
 
 		starting_letter_grouped = groupby(eligible_languages, lambda x: x[0])
 		print('Eligible languages: '.upper())
@@ -70,12 +68,14 @@ class SentenceTranslationTrainer(Trainer):
 			self.recurse_on_invalid_input(self.select_language)
 
 		elif selection == 'English':
+			eligible_languages.remove('English')
 			reference_language_validity = False
 
 			while not reference_language_validity:
 				reference_language = self.resolve_input(input('Enter desired reference language: \n'), eligible_languages)
 				if reference_language is None:
-					indicate_invalid_selection()
+					print("Couldn't resolve input")
+					time.sleep(1)
 				else:
 					selection = reference_language
 					self.reference_language_inversion, reference_language_validity = [True]*2

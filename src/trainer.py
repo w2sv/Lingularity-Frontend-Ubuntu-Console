@@ -48,7 +48,8 @@ class Trainer(ABC):
         Trainer.clear_screen()
         return func()
 
-    def resolve_input(self, input: str, options: List[str]) -> Optional[str]:
+    @staticmethod
+    def resolve_input(input: str, options: List[str]) -> Optional[str]:
         options_starting_with = [o for o in options if o.startswith(input)]
         if len(options_starting_with) == 1:
             return options_starting_with[0]
@@ -59,11 +60,12 @@ class Trainer(ABC):
         data = open(self.sentence_file_path, 'r', encoding='utf-8').readlines()
         split_data = [i.split('\t') for i in data]
 
-        # remove reference appendices from source file if still present
+        # remove reference appendices from source file if newly downloaded
         if len(split_data[0]) > 2:
-            bilateral_sentences = ('\t'.join(row_splits[:2]) + '\n' for row_splits in split_data)
+            bilingual_sentence_data = ['\t'.join(row_splits[:2]) + '\n' for row_splits in split_data]
             with open(self.sentence_file_path, 'w', encoding='utf-8') as write_file:
-                write_file.writelines(bilateral_sentences)
+                write_file.writelines(bilingual_sentence_data)
+            split_data = [i.split('\t') for i in bilingual_sentence_data]
 
         for i, row in enumerate(split_data):
             split_data[i][1] = row[1].strip('\n')
