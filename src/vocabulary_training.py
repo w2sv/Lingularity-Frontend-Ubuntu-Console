@@ -27,7 +27,6 @@ class VocabularyTrainer(Trainer):
         super().__init__()
 
         self.token_2_rowinds: Optional[TokenSentenceindsMap] = None
-        # self.root_2_rowinds: Optional[TokenSentenceindsMap] = None
         self.training_documentation: Optional[TrainingDocumentation] = None
         self.vocabulary: Optional[Dict[str, str]] = None
 
@@ -61,25 +60,6 @@ class VocabularyTrainer(Trainer):
                 else:
                     token_2_rowinds[token].append(i)
         return token_2_rowinds
-
-    # def procure_root_2_rowinds_map(self) -> TokenSentenceindsMap:
-    #     MIN_ROOT_LENGTH = 4
-    #
-    #     root_2_sentenceinds = {}
-    #     token_2_rowinds = self.token_2_rowinds.copy()
-    #
-    #     while len(token_2_rowinds):
-    #         token = next(iter(token_2_rowinds.keys()))
-    #         root = token[:-self.ROOT_END_IND]
-    #         if len(root) < MIN_ROOT_LENGTH:
-    #             token_2_rowinds.pop(token)
-    #         else:
-    #             root_2_sentenceinds[root] = token_2_rowinds.pop(token)
-    #             for c, c_inds in iter(token_2_rowinds.items()):
-    #                 if root in c:
-    #                     root_2_sentenceinds[root].extend(token_2_rowinds.pop(c))
-    #
-    #     return root_2_sentenceinds
 
     def parse_vocabulary(self) -> Dict[str, str]:
         with open(self.vocabulary_file_path, 'r') as file:
