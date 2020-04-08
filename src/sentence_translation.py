@@ -191,6 +191,9 @@ class SentenceTranslationTrainer(Trainer):
 		return doc_dict
 
 	def visualize_exercising_chronic(self, doc_dict):
+		plt.style.use('dark_background')
+		plt.rcParams['toolbar'] = 'None'
+
 		date_dict = doc_dict[self.language]
 		
 		items = date_dict.items()
