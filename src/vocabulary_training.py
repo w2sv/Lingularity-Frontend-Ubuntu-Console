@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 import os
 import json
 from collections import Counter
@@ -6,6 +6,7 @@ from datetime import date
 from itertools import chain
 from time import time
 from tqdm import tqdm
+import time
 
 import unidecode
 import numpy as np
@@ -32,6 +33,8 @@ class VocabularyTrainer(Trainer):
 
         self.reference_2_foreign = True
         self.reverse_response_evaluations = {v: k for k, v in self.RESPONSE_EVALUATIONS.items()}
+
+        self.n_trained, self.n_correct_responses = [0] * 2
 
     @property
     def training_documentation_path(self):
@@ -143,13 +146,32 @@ class VocabularyTrainer(Trainer):
 
             print('\t', self.RESPONSE_EVALUATIONS[response_evaluation].upper(), end=' ')
             if self.RESPONSE_EVALUATIONS[response_evaluation] != 'perfect':
-                print(translation)
+                print('| Correct translation: ', translation, end='')
+            print('')
             comprising_sentences = self.get_comprising_sentences(entry.split(',')[0])
             if comprising_sentences is not None:
-                [print(s) for s in comprising_sentences]
+                [print('\t', s) for s in comprising_sentences]
             print('_______________')
 
             self.update_documentation_entry(entry, response_evaluation)
+
+            self.n_trained += 1
+            if self.RESPONSE_EVALUATIONS[response_evaluation] != 'wrong':
+                self.n_correct_responses += 1
+
+    def exit_screen(self):
+        ratings = {0: 'You suck.',
+                   20: 'Get your shit together m8.',
+                   40: "You can't climb the ladder of success with your hands in your pockets.",
+                   60: "Keep hustlin' young blood.",
+                   80: 'Attayboy!',
+                   100: '0361/2180494. Call me.'}
+
+        percentage = int(self.n_correct_responses/self.n_trained * 100)
+        print(f'You got {self.n_correct_responses}/{self.n_trained}, i.e. {percentage}% right', '\n')
+        rating = ratings[percentage // 20 * 20]
+        time.sleep(3)
+        print(rating)
 
     def __get_root_comprising_tokens(self, root) -> List[str]:
         return [k for k in self.token_2_rowinds.keys() if root in k]
@@ -180,6 +202,7 @@ class VocabularyTrainer(Trainer):
         self.pre_training_display()
         self.train()
         self.save_documentation()
+        self.exit_screen()
 
 
 if __name__ == '__main__':
