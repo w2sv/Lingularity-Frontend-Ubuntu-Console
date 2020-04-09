@@ -4,7 +4,7 @@ import time
 from datetime import date
 import json
 from typing import List
-from itertools import groupby
+from itertools import groupby, chain
 from bisect import insort
 
 import numpy as np
@@ -33,16 +33,29 @@ class SentenceTranslationTrainer(Trainer):
 
 		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
 
-	def complexity_selection(self):
-		N_LEVELS = 3
+	def introduce_complexity(self):
+		""" to be ML boosted or
+		improved by introducing word occurrence based weight value function regarding entire sentence """
+
+		difficulty_2_coefficient = {'easy': 0, 'medium': 1, 'hard': 2}
+
+		self.clear_screen()
+		print('Select difficulty:\t', '\t\t'.join([diff.title() for diff in difficulty_2_coefficient.keys()]))
+		level_selection = self.resolve_input(input().lower(), list(difficulty_2_coefficient.keys()))
+		if level_selection is None:
+			self.recurse_on_invalid_input(self.introduce_complexity)
+
+		elif level_selection == 'easy':
+			return
+
 		token_2_sentenceinds = self.procure_token_2_rowinds_map()
 
 		occurence_distribution = [len(v) for v in token_2_sentenceinds.values()]
-		step_size = (max(occurence_distribution) - min(occurence_distribution)) / N_LEVELS
+		min_occ, max_occ = min(occurence_distribution), max(occurence_distribution)
+		step_size = (max_occ - min_occ) / len(difficulty_2_coefficient)
 
-		selected_level = 3
-		min_occurrence = step_size * selected_level
-		indices = set([v for v in token_2_sentenceinds.values() if len(v) >= min_occurrence])
+		min_occurrence = step_size * (difficulty_2_coefficient[level_selection] + 1) + min_occ
+		indices = list(set(chain.from_iterable((v for v in token_2_sentenceinds.values() if len(v) >= min_occurrence))))
 		self.sentence_data = self.sentence_data[indices]
 
 	def run(self):
@@ -51,6 +64,7 @@ class SentenceTranslationTrainer(Trainer):
 			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
 			self.webpage_interactor.unzip_file(zip_file_link)
 		self.sentence_data = self.parse_sentence_data()
+		self.introduce_complexity()
 		self.pre_training_display()
 		self.train()
 
@@ -99,7 +113,7 @@ class SentenceTranslationTrainer(Trainer):
 
 	def pre_training_display(self):
 		self.clear_screen()
-		instruction_text = f"""Data file comprises {len(self.sentence_data):,d} sentences.\nPress Enter to advance to next sentence, v to append new entry to language corresponding vocabulary text file.\nType 'exit' to terminate program.\n"""
+		instruction_text = f"""Data file comprises {len(self.sentence_data):,d} sentences.\nPress Enter to advance to next sentence, v to append new entry to language corresponding vocabulary text file.\nEnter 'exit' to terminate program.\n"""
 		print(instruction_text)
 
 		lets_go_translation = self.get_lets_go_translation()
