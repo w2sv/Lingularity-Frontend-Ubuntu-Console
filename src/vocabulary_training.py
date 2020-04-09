@@ -19,7 +19,7 @@ TrainingDocumentation = Dict[str, Dict[str, int]]  # entry -> Dict[score, times 
 
 
 # TODO: training documentation, disabling strg + c, append new meanings, progress plotting, vocabulary statistics, prioritizazion
-#  ignoring perfected vocabulary, motivation throughout training, english training, method structuring, display of new vocabulary if desired
+#  ignoring perfected vocabulary, motivation throughout training, english training, display of new vocabulary if desired
 #  sentence finding for other translation tokens
 
 
@@ -51,7 +51,7 @@ class VocabularyTrainer(Trainer):
         self.token_2_rowinds = self.procure_token_2_rowinds_map()
         self.vocabulary = self.parse_vocabulary()
         self.training_documentation = self.load_training_documentation()
-        self.training_documentation = self.update_documentation()
+        self.update_documentation()
         self.pre_training_display()
         self.train()
         self.save_documentation()
@@ -94,7 +94,7 @@ class VocabularyTrainer(Trainer):
         with open(self.training_documentation_path) as read_file:
             return json.load(read_file)
 
-    def update_documentation(self) -> TrainingDocumentation:
+    def update_documentation(self):
         # TODO: account for target language entry changes
 
         INIT = {'s': 0, 'tf': 0, 'lfd': None}
@@ -106,7 +106,6 @@ class VocabularyTrainer(Trainer):
         for entry in self.vocabulary.keys():
             if self.training_documentation.get(entry) is None:
                 self.training_documentation[entry] = INIT
-        return self.training_documentation
 
     def pre_training_display(self):
         self.clear_screen()
@@ -182,6 +181,7 @@ class VocabularyTrainer(Trainer):
         return list(chain.from_iterable([v for k, v in self.token_2_rowinds.items() if root in k]))
 
     def get_root_preceded_token_comprising_sentence_inds(self, root: str) -> List[int]:
+        """ not used """
         return list(chain.from_iterable([v for k, v in self.token_2_rowinds.items() if any(token.startswith(root) for token in k.split(' '))]))
 
     def get_comprising_sentences(self, token: str) -> Optional[List[str]]:
