@@ -1,19 +1,21 @@
 from typing import List, Dict, Optional, Tuple
 import os
+import sys
 import json
 from collections import Counter
 from datetime import date
 from itertools import chain
-from time import time
+from time import time, sleep
 import time
 
 import unidecode
 import numpy as np
 
 from .trainer import Trainer, TokenSentenceindsMap
+from .sentence_translation import SentenceTranslationTrainer
 
 
-TrainingDocumentation = Dict[str, Dict[str, int, int]]  # entry -> Dict[score, times seen, last seen]
+TrainingDocumentation = Dict[str, Dict[str, int]]  # entry -> Dict[score, times seen, last seen]
 
 
 # TODO: training documentation, disabling strg + c, append new meanings, progress plotting, vocabulary statistics, prioritizazion
@@ -45,6 +47,15 @@ class VocabularyTrainer(Trainer):
 
     def select_language(self) -> str:
         eligible_languages = [language for language in os.listdir(self.base_data_path) if 'vocabulary.txt' in os.listdir(f'{self.base_data_path}/{language}')]
+        if not eligible_languages:
+            print('You have to accumulate vocabulary by means of the SentenceTranslation™ Trainer or manual amassment first.')
+            sleep(3)
+            print('Starting SentenceTranslation Trainer...')
+            sleep(2)
+            self.clear_screen()
+            SentenceTranslationTrainer().run()
+            sys.exit(0)
+
         print('ELIGIBLE LANGUAGES: ')
         [print(language) for language in sorted(eligible_languages)]
         language_selection = input('\nEnter desired language:\n').title()
