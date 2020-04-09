@@ -14,7 +14,7 @@ def display_starting_screen():
     print(banner)
     print("							W2SV", '\n' * 1)
     print("					         by Janek Zangenberg ", '\n' * 2)
-    print("         Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n'*2)
+    print("         Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
 
 
 def select_training() -> str:

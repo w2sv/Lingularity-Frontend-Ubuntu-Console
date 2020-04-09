@@ -45,6 +45,21 @@ class VocabularyTrainer(Trainer):
     def training_documentation_path(self):
         return f'{self.base_data_path}/{self.language}/vocabulary_training_documentation.json'
 
+    def run(self):
+        self._language = self.select_language()
+        self.sentence_data = self.parse_sentence_data()
+        self.token_2_rowinds = self.procure_token_2_rowinds_map()
+        self.vocabulary = self.parse_vocabulary()
+        self.training_documentation = self.load_training_documentation()
+        self.training_documentation = self.update_documentation()
+        self.pre_training_display()
+        self.train()
+        self.save_documentation()
+        self.exit_screen()
+
+    # ---------------
+    # INITIALIZATION
+    # ---------------
     def select_language(self) -> str:
         eligible_languages = [language for language in os.listdir(self.base_data_path) if 'vocabulary.txt' in os.listdir(f'{self.base_data_path}/{language}')]
         if not eligible_languages:
@@ -93,37 +108,6 @@ class VocabularyTrainer(Trainer):
                 self.training_documentation[entry] = INIT
         return self.training_documentation
 
-    def evaluate_response(self, response: str, translation: str) -> int:
-        distinct_translations = translation.split(',')
-        accent_pruned_translations = list(map(unidecode.unidecode, distinct_translations))
-
-        def tolerable_error():
-            def n_deviations(a: str, b: str) -> int:
-                def dict_value_sum(dictionary):
-                    return sum(list(dictionary.values()))
-                short, long = sorted([a, b], key=lambda string: len(string))
-                short_c, long_c = map(Counter, [short, long])
-                return dict_value_sum(long_c - short_c)
-
-            TOLERATED_CHAR_DEVIATIONS = 1
-            return any(n_deviations(response, translation) <= TOLERATED_CHAR_DEVIATIONS for translation in distinct_translations)
-
-        distinct_translations = translation.split(',')
-        if response in distinct_translations:
-            evaluation = 'perfect'
-        elif response in accent_pruned_translations:
-            evaluation = 'accent fault'
-        elif tolerable_error():
-            evaluation = 'correct'
-        else:
-            evaluation = 'wrong'
-        return self.reverse_response_evaluations[evaluation]
-
-    def update_documentation_entry(self, entry, response_evaluation):
-        self.training_documentation[entry]['lfd'] = str(date.today())
-        self.training_documentation[entry]['tf'] += 1
-        self.training_documentation[entry]['s'] += 0.5 if self.RESPONSE_EVALUATIONS[response_evaluation] in ['accent fault', 'correct'] else response_evaluation // 3
-
     def pre_training_display(self):
         self.clear_screen()
         n_imperfect_entries = len([e for e in self.training_documentation.values() if e['s'] < self.COMPLETION_SCORE])
@@ -132,6 +116,9 @@ class VocabularyTrainer(Trainer):
         lets_go_translation = self.get_lets_go_translation()
         print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')
 
+    # ------------------
+    # TRAINING LOOP
+    # ------------------
     def train(self):
         entries = np.array(list(self.vocabulary.keys()))
         np.random.shuffle(entries)
@@ -162,6 +149,58 @@ class VocabularyTrainer(Trainer):
             if self.RESPONSE_EVALUATIONS[response_evaluation] != 'wrong':
                 self.n_correct_responses += 1
 
+    def evaluate_response(self, response: str, translation: str) -> int:
+        distinct_translations = translation.split(',')
+        accent_pruned_translations = list(map(unidecode.unidecode, distinct_translations))
+
+        def tolerable_error():
+            def n_deviations(a: str, b: str) -> int:
+                def dict_value_sum(dictionary):
+                    return sum(list(dictionary.values()))
+                short, long = sorted([a, b], key=lambda string: len(string))
+                short_c, long_c = map(Counter, [short, long])
+                return dict_value_sum(long_c - short_c)
+
+            TOLERATED_CHAR_DEVIATIONS = 1
+            return any(n_deviations(response, translation) <= TOLERATED_CHAR_DEVIATIONS for translation in distinct_translations)
+
+        distinct_translations = translation.split(',')
+        if response in distinct_translations:
+            evaluation = 'perfect'
+        elif response in accent_pruned_translations:
+            evaluation = 'accent fault'
+        elif tolerable_error():
+            evaluation = 'correct'
+        else:
+            evaluation = 'wrong'
+        return self.reverse_response_evaluations[evaluation]
+
+    def __get_root_comprising_tokens(self, root) -> List[str]:
+        return [k for k in self.token_2_rowinds.keys() if root in k]
+
+    def get_root_comprising_sentence_inds(self, root: str) -> List[int]:
+        return list(chain.from_iterable([v for k, v in self.token_2_rowinds.items() if root in k]))
+
+    def get_root_preceded_token_comprising_sentence_inds(self, root: str) -> List[int]:
+        return list(chain.from_iterable([v for k, v in self.token_2_rowinds.items() if any(token.startswith(root) for token in k.split(' '))]))
+
+    def get_comprising_sentences(self, token: str) -> Optional[List[str]]:
+        root = token[:self.ROOT_LENGTH]
+        sentence_indices = np.array(self.get_root_comprising_sentence_inds(root))
+        if not len(sentence_indices):
+            return None
+
+        random_indices = np.random.randint(0, len(sentence_indices), self.N_RELATED_SENTENCES)
+        return self.sentence_data[sentence_indices[random_indices]][:, 1]
+
+    def update_documentation_entry(self, entry, response_evaluation):
+        self.training_documentation[entry]['lfd'] = str(date.today())
+        self.training_documentation[entry]['tf'] += 1
+        self.training_documentation[entry]['s'] += 0.5 if self.RESPONSE_EVALUATIONS[response_evaluation] in ['accent fault', 'correct'] else response_evaluation // 3
+
+    # -----------------
+    # PROGRAM TERMINATION
+    # -----------------
     def exit_screen(self):
         ratings = {0: 'You suck.',
                    20: 'Get your shit together m8.',
@@ -176,36 +215,9 @@ class VocabularyTrainer(Trainer):
         time.sleep(3)
         print(rating)
 
-    def __get_root_comprising_tokens(self, root) -> List[str]:
-        return [k for k in self.token_2_rowinds.keys() if root in k]
-
-    def get_root_comprising_sentence_inds(self, root: str) -> List[int]:
-        return list(chain.from_iterable([v for k, v in self.token_2_rowinds.items() if root in k]))
-
-    def get_comprising_sentences(self, token: str) -> Optional[List[str]]:
-        root = token[:self.ROOT_LENGTH]
-        sentence_indices = np.array(self.get_root_comprising_sentence_inds(root))
-        if not len(sentence_indices):
-            return None
-
-        random_indices = np.random.randint(0, len(sentence_indices), self.N_RELATED_SENTENCES)
-        return self.sentence_data[sentence_indices[random_indices]][:, 1]
-
     def save_documentation(self):
         with open(self.training_documentation_path, 'w+') as dump_file:
             json.dump(self.training_documentation, dump_file)
-
-    def run(self):
-        self._language = self.select_language()
-        self.sentence_data = self.parse_sentence_data()
-        self.token_2_rowinds = self.procure_token_2_rowinds_map()
-        self.vocabulary = self.parse_vocabulary()
-        self.training_documentation = self.load_training_documentation()
-        self.training_documentation = self.update_documentation()
-        self.pre_training_display()
-        self.train()
-        self.save_documentation()
-        self.exit_screen()
 
 
 if __name__ == '__main__':
