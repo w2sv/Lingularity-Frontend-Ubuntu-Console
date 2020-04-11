@@ -20,8 +20,7 @@ from .sentence_translation import SentenceTranslationTrainer
 TrainingDocumentation = Dict[str, Dict[str, Any]]  # entry -> Dict[score: float, times_seen: int, last_seen_date: str]
 
 
-# TODO: training documentation, append new meanings, progress plotting, vocabulary statistics, prioritizazion
-#  motivation throughout training, english training
+# TODO: append new meanings, prioritization, motivation throughout training, english training
 #  sentence finding for other translation tokens
 
 
@@ -65,10 +64,10 @@ class VocabularyTrainer(Trainer):
         self.display_new_vocabulary()
         self.pre_training_display()
         self.train()
-        self.save_vocabulary_documentation()
+        self.save_vocabulary_statistics()
         self.append_2_training_history()
-        # self.pie_chart_display()
-        # self.exit_screen()
+        self.pie_chart_display()
+        self.plot_training_history()
 
     # ---------------
     # INITIALIZATION
@@ -238,6 +237,7 @@ class VocabularyTrainer(Trainer):
         return self.PERCENTAGE_VERDICTS[int(self.correctness_percentage) // 20 * 20]
 
     def exit_screen(self):
+        """ deprecated """
         print(f'You got {self.n_correct_responses}/{self.n_trained_items} correct, i.e. {int(self.correctness_percentage)}% right', '\n')
         time.sleep(3)
         print(self.performance_verdict)
@@ -266,7 +266,7 @@ class VocabularyTrainer(Trainer):
         fig.canvas.set_window_title(f'You got {self.n_correct_responses}/{self.n_trained_items} right')
         plt.show()
 
-    def save_vocabulary_documentation(self):
+    def save_vocabulary_statistics(self):
         with open(self.voccabulary_statistics_file_path, 'w+') as dump_file:
             json.dump(self.vocabulary_statistics, dump_file)
 

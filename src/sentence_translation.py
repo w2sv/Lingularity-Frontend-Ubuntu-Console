@@ -177,9 +177,9 @@ class SentenceTranslationTrainer(Trainer):
 
 					elif response.lower() == 'exit':
 						print("Number of faced sentences: ", self.n_trained_items)
-						doc_dict = self.append_2_training_history(self.n_trained_items)
+						doc_dict = self.append_2_training_history()
 						if self.n_trained_items > 4:
-							self.visualize_exercising_chronic(doc_dict)
+							self.plot_training_history()
 						sys.exit()
 				except KeyboardInterrupt:
 					print("Enter 'exit' to terminate program.")
@@ -193,33 +193,6 @@ class SentenceTranslationTrainer(Trainer):
 	# ---------------
 	# PROGRAM TERMINATION
 	# ---------------
-	def visualize_exercising_chronic(self, doc_dict):
-		plt.style.use('dark_background')
-
-		date_dict = doc_dict[self.language]
-		
-		items = date_dict.items()
-		# convert postunzipped tuples to lists for subsequent date assignment 
-		dates, sentence_amounts = map(lambda x: list(x), zip(*items))
-		
-		# ommitting year, inverting day & month for proper tick label display
-		for i, date in enumerate(dates):
-			date_components = date.split('-')[1:]
-			dates[i] = '-'.join(date_components[::-1])
-
-		fig, ax = plt.subplots()
-		fig.canvas.draw()
-		fig.canvas.set_window_title("Way to go!")
-
-		x_range = np.arange(len(items))
-		ax.plot(x_range, sentence_amounts, marker='.', markevery=list(x_range), color='r')
-		ax.set_xticks(x_range)
-		ax.set_xticklabels(dates, minor=False, rotation=45)
-		ax.set_title(f'{self.language} exercising chronic')
-		ax.set_ylabel('number of sentences')
-		ax.set_ylim(bottom=0)
-		plt.show()		
-
 	def last_session_display(self):
 		pass
 

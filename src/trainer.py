@@ -127,15 +127,39 @@ class Trainer(ABC):
         return None
 
     def append_2_training_history(self):
-        documentation = self.load_training_history()
+        training_history = self.load_training_history()
         trainer_abbreviation = self.__class__.__name__[0].lower()
         try:
-            documentation[self.today][trainer_abbreviation] += self.n_trained_items
-        except KeyError:
-            documentation[self.today] = {trainer_abbreviation: self.n_trained_items}
+            training_history[self.today][trainer_abbreviation] += self.n_trained_items
+        except (KeyError, TypeError):
+            training_history[self.today] = {trainer_abbreviation: self.n_trained_items}
 
         with open(self.training_documentation_file_path, 'w+') as write_file:
-            json.dump(documentation, write_file)
+            json.dump(training_history, write_file)
+
+    def plot_training_history(self):
+        plt.style.use('dark_background')
+
+        training_history = self.load_training_history()
+        trained_sentences, trained_vocabulary = map(lambda abb: [date_dict[abb] if date_dict.get(abb) is not None else 0 for date_dict in training_history.values()], ['s', 'v'])
+
+        # ommitting year, inverting day & month for proper tick label display
+        dates = ['-'.join(date.split('-')[1:][::-1]) for date in training_history.keys()]
+
+        fig, ax = plt.subplots()
+        fig.canvas.draw()
+        fig.canvas.set_window_title("Way to go!")
+
+        x_range = np.arange(len(dates))
+        ax.plot(x_range, trained_sentences, marker='.', markevery=list(x_range), color='r', label='sentences')
+        ax.plot(x_range, trained_vocabulary, marker='.', markevery=list(x_range), color='b', label='vocabulary')
+        ax.set_xticks(x_range)
+        ax.set_xticklabels(dates, minor=False, rotation=45)
+        ax.set_title(f'{self.language} training history')
+        ax.set_ylabel('n faced items')
+        ax.set_ylim(bottom=0)
+        ax.legend(loc='upper left')
+        plt.show()
 
     # -----------------
     # ABSTRACTS
