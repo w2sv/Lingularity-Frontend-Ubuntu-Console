@@ -7,7 +7,6 @@ import datetime
 from itertools import chain
 from time import time, sleep
 import time
-import signal
 
 import unidecode
 import numpy as np
@@ -20,7 +19,7 @@ from .sentence_translation import SentenceTranslationTrainer
 TrainingDocumentation = Dict[str, Dict[str, Any]]  # entry -> Dict[score: float, times_seen: int, last_seen_date: str]
 
 
-# TODO: append new meanings, prioritization, motivation throughout training, english training
+# TODO: append new meanings, english training
 #  sentence finding for other translation tokens
 
 
@@ -66,7 +65,7 @@ class VocabularyTrainer(Trainer):
         self.train()
         self.save_vocabulary_statistics()
         self.append_2_training_history()
-        self.pie_chart_display()
+        self.display_pie_chart()
         self.plot_training_history()
 
     # ---------------
@@ -77,7 +76,7 @@ class VocabularyTrainer(Trainer):
         if not eligible_languages:
             print('You have to accumulate vocabulary by means of the SentenceTranslation™ Trainer or manual amassment first.')
             sleep(3)
-            print('Starting SentenceTranslation Trainer...')
+            print('Initiating SentenceTranslation Trainer...')
             sleep(2)
             self.clear_screen()
             SentenceTranslationTrainer().run()
@@ -93,7 +92,7 @@ class VocabularyTrainer(Trainer):
 
     def parse_vocabulary(self) -> Dict[str, str]:
         with open(self.vocabulary_file_path, 'r') as file:
-            return {target_language_entry: translation.strip('\n') for target_language_entry, translation in [row.split(' - ') for row in  file.readlines()]}
+            return {target_language_entry: translation.strip('\n') for target_language_entry, translation in [row.split(' - ') for row in file.readlines()]}
 
     def load_vocabulary_statistics(self) -> Optional[TrainingDocumentation]:
         """ structure: entry -> Dict[score, n_seen, date last seen] """
@@ -131,6 +130,7 @@ class VocabularyTrainer(Trainer):
         self.clear_screen()
         n_imperfect_entries = len([e for e in self.vocabulary_statistics.values() if e['s'] < self.COMPLETION_SCORE])
         print(f'Vocabulary file comprises {n_imperfect_entries} entries.')
+        print(f"Enter 'append' in order to append an additional translation to the ones of the previously faced item.")
 
         lets_go_translation = self.get_lets_go_translation()
         print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')
@@ -149,7 +149,7 @@ class VocabularyTrainer(Trainer):
         get_display_token = lambda entry: self.vocabulary[entry] if self.reference_2_foreign else entry
         get_translation = lambda entry: entry if self.reference_2_foreign else self.vocabulary[entry]
 
-        for entry in entries:
+        for i, entry in enumerate(entries):
             display_token, translation = get_display_token(entry), get_translation(entry)
             response = input(f'{display_token} = ')
             if response.lower() == 'exit':
@@ -171,6 +171,9 @@ class VocabularyTrainer(Trainer):
             self.n_trained_items += 1
             if self.RESPONSE_EVALUATIONS[response_evaluation] != 'wrong':
                 self.n_correct_responses += 1
+
+            if i and not i % 9:
+                print(f'{i} Entries faced, {len(entries) - i} more to go', '\n')
 
     def evaluate_response(self, response: str, translation: str) -> int:
         distinct_translations = translation.split(',')
@@ -205,7 +208,7 @@ class VocabularyTrainer(Trainer):
         return list(chain.from_iterable([v for k, v in self.token_2_rowinds.items() if root in k]))
 
     def get_root_preceded_token_comprising_sentence_inds(self, root: str) -> List[int]:
-        """ not used """
+        """ unused """
         return list(chain.from_iterable([v for k, v in self.token_2_rowinds.items() if any(token.startswith(root) for token in k.split(' '))]))
 
     def get_comprising_sentences(self, token: str) -> Optional[List[str]]:
@@ -242,7 +245,7 @@ class VocabularyTrainer(Trainer):
         time.sleep(3)
         print(self.performance_verdict)
 
-    def pie_chart_display(self):
+    def display_pie_chart(self):
         correct_percentage = (self.n_correct_responses / self.n_trained_items) * 100
         incorrect_percentage = 100 - correct_percentage
 
@@ -251,11 +254,11 @@ class VocabularyTrainer(Trainer):
         sizes = correct_percentage, incorrect_percentage
         colors = ['g', 'r']
         try:
-            def retain_valid_value(*iterables):
+            def discard_futile_value(*iterables):
                 hundred_percent_index = [correct_percentage, incorrect_percentage].index(100)
                 return ([i[hundred_percent_index]] for i in iterables)
 
-            labels, explode, sizes, colors = retain_valid_value(labels, explode, sizes, colors)
+            labels, explode, sizes, colors = discard_futile_value(labels, explode, sizes, colors)
         except ValueError:
             pass
 

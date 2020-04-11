@@ -189,12 +189,6 @@ class SentenceTranslationTrainer(Trainer):
 			self.erase_previous_line()
 			print(translation, '\n', '_______________')
 			self.n_trained_items += 1
-	
-	# ---------------
-	# PROGRAM TERMINATION
-	# ---------------
-	def last_session_display(self):
-		pass
 
 
 if __name__ == '__main__':
