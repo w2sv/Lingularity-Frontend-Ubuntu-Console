@@ -67,7 +67,7 @@ class VocabularyTrainer(Trainer):
         self.train()
         self.save_documentation()
         self.pie_chart_display()
-        self.exit_screen()
+        # self.exit_screen()
 
     # ---------------
     # INITIALIZATION
@@ -246,11 +246,21 @@ class VocabularyTrainer(Trainer):
         labels = ['Correct', 'Incorrect']
         explode = (0.1, 0)
         sizes = correct_percentage, incorrect_percentage
+        colors = ['g', 'r']
+        try:
+            def retain_valid_value(*iterables):
+                hundred_percent_index = [correct_percentage, incorrect_percentage].index(100)
+                return ([i[hundred_percent_index]] for i in iterables)
+
+            labels, explode, sizes = retain_valid_value(labels, explode, sizes)
+        except ValueError:
+            pass
+
         fig, ax = plt.subplots()
-        ax.pie(sizes, labels=labels, shadow=True, startangle=120, autopct='%1.1f%%', explode=explode)
+        ax.pie(sizes, labels=labels, shadow=True, startangle=120, autopct='%1.1f%%', explode=explode, colors=colors)
         ax.axis('equal')
         ax.set_title(self.performance_verdict)
-        fig.canvas.set_window_title(f'You got {self.n_correct_responses}/{self.n_trained} right, that is')
+        fig.canvas.set_window_title(f'You got {self.n_correct_responses}/{self.n_trained} right')
         plt.show()
 
     def save_documentation(self):
