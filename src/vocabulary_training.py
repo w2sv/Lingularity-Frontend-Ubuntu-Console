@@ -20,7 +20,7 @@ TrainingDocumentation = Dict[str, Dict[str, Any]]  # entry -> Dict[score: float,
 
 
 # TODO: training documentation, append new meanings, progress plotting, vocabulary statistics, prioritizazion
-#  motivation throughout training, english training, display of new vocabulary if desired
+#  motivation throughout training, english training
 #  sentence finding for other translation tokens
 
 
@@ -114,8 +114,10 @@ class VocabularyTrainer(Trainer):
             new_vocabulary = (key for key in self.training_documentation.keys() if self.training_documentation[key]['lfd'] is None)
             [print('\t', entry, ' = ', self.vocabulary[entry]) for entry in new_vocabulary]
             print('\n')
+            input('Press any key to continue')
 
     def pre_training_display(self):
+        self.clear_screen()
         n_imperfect_entries = len([e for e in self.training_documentation.values() if e['s'] < self.COMPLETION_SCORE])
         print(f'Vocabulary file comprises {n_imperfect_entries} entries.')
 

@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="40bbd82a-aa0c-4573-b219-bd4e514e781c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/vocabulary_training.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/vocabulary_training.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
