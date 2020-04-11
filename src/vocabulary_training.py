@@ -1,12 +1,13 @@
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
 import os
 import sys
 import json
 from collections import Counter
-from datetime import date
+import datetime
 from itertools import chain
 from time import time, sleep
 import time
+import signal
 
 import unidecode
 import numpy as np
@@ -15,11 +16,11 @@ from .trainer import Trainer, TokenSentenceindsMap
 from .sentence_translation import SentenceTranslationTrainer
 
 
-TrainingDocumentation = Dict[str, Dict[str, int]]  # entry -> Dict[score, times seen, last seen]
+TrainingDocumentation = Dict[str, Dict[str, Any]]  # entry -> Dict[score: float, times_seen: int, last_seen_date: str]
 
 
-# TODO: training documentation, disabling strg + c, append new meanings, progress plotting, vocabulary statistics, prioritizazion
-#  ignoring perfected vocabulary, motivation throughout training, english training, display of new vocabulary if desired
+# TODO: training documentation, append new meanings, progress plotting, vocabulary statistics, prioritizazion
+#  motivation throughout training, english training, display of new vocabulary if desired
 #  sentence finding for other translation tokens
 
 
@@ -28,6 +29,7 @@ class VocabularyTrainer(Trainer):
     COMPLETION_SCORE = 5
     N_RELATED_SENTENCES = 2
     ROOT_LENGTH = 4
+    N_RETENTION_ASSERTION_DAYS = 50
 
     def __init__(self):
         super().__init__()
@@ -118,8 +120,12 @@ class VocabularyTrainer(Trainer):
     # ------------------
     # TRAINING LOOP
     # ------------------
+    @staticmethod
+    def day_difference(date: str) -> int:
+        return (datetime.date.today() - datetime.datetime.strptime(date, '%Y-%M-%d')).days
+
     def train(self):
-        entries = np.array(list(self.vocabulary.keys()))
+        entries = [entry for entry in self.vocabulary.keys() if self.training_documentation[entry]['s'] < 5 or self.day_difference(self.training_documentation[entry]['lfd']) >= self.N_RETENTION_ASSERTION_DAYS]
         np.random.shuffle(entries)
 
         get_display_token = lambda entry: self.vocabulary[entry] if self.reference_2_foreign else entry
@@ -194,9 +200,12 @@ class VocabularyTrainer(Trainer):
         return self.sentence_data[sentence_indices[random_indices]][:, 1]
 
     def update_documentation_entry(self, entry, response_evaluation):
-        self.training_documentation[entry]['lfd'] = str(date.today())
+        self.training_documentation[entry]['lfd'] = str(datetime.date.today())
         self.training_documentation[entry]['tf'] += 1
-        self.training_documentation[entry]['s'] += 0.5 if self.RESPONSE_EVALUATIONS[response_evaluation] in ['accent fault', 'correct'] else response_evaluation // 3
+        if self.training_documentation[entry]['s'] == 5 and self.RESPONSE_EVALUATIONS[response_evaluation] != 'perfect':
+            self.training_documentation[entry]['s'] -= 1
+        else:
+            self.training_documentation[entry]['s'] += 0.5 if self.RESPONSE_EVALUATIONS[response_evaluation] in ['accent fault', 'correct'] else response_evaluation // 3
 
     # -----------------
     # PROGRAM TERMINATION
