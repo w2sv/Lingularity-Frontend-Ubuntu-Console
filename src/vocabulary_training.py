@@ -54,6 +54,7 @@ class VocabularyTrainer(Trainer):
         self.vocabulary = self.parse_vocabulary()
         self.training_documentation = self.load_training_documentation()
         self.update_documentation()
+        self.display_new_vocabulary()
         self.pre_training_display()
         self.train()
         self.save_documentation()
@@ -81,9 +82,6 @@ class VocabularyTrainer(Trainer):
             return self.recurse_on_invalid_input(self.select_language)
         return input_resolution
 
-    def query_settings(self):
-        pass
-
     def parse_vocabulary(self) -> Dict[str, str]:
         with open(self.vocabulary_file_path, 'r') as file:
             return {target_language_entry: translation.strip('\n') for target_language_entry, translation in [row.split(' - ') for row in  file.readlines()]}
@@ -109,8 +107,15 @@ class VocabularyTrainer(Trainer):
             if self.training_documentation.get(entry) is None:
                 self.training_documentation[entry] = INIT
 
-    def pre_training_display(self):
+    def display_new_vocabulary(self):
         self.clear_screen()
+        display_vocabulary = self.resolve_input(input('Do you want new vocabulary to be displayed once? (y)es/(n)o\n').lower(), ['yes', 'no'])
+        if display_vocabulary == 'yes':
+            new_vocabulary = (key for key in self.training_documentation.keys() if self.training_documentation[key]['lfd'] is None)
+            [print('\t', entry, ' = ', self.vocabulary[entry]) for entry in new_vocabulary]
+            print('\n')
+
+    def pre_training_display(self):
         n_imperfect_entries = len([e for e in self.training_documentation.values() if e['s'] < self.COMPLETION_SCORE])
         print(f'Vocabulary file comprises {n_imperfect_entries} entries.')
 
