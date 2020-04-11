@@ -11,6 +11,7 @@ import signal
 
 import unidecode
 import numpy as np
+import matplotlib.pyplot as plt
 
 from .trainer import Trainer, TokenSentenceindsMap
 from .sentence_translation import SentenceTranslationTrainer
@@ -30,6 +31,13 @@ class VocabularyTrainer(Trainer):
     N_RELATED_SENTENCES = 2
     ROOT_LENGTH = 4
     N_RETENTION_ASSERTION_DAYS = 50
+    PERCENTAGE_VERDICTS = {
+               0: 'You suck.',
+               20: 'Get your shit together m8.',
+               40: "You can't climb the ladder of success with your hands in your pockets.",
+               60: "Keep hustlin' young blood.",
+               80: 'Attayboy!',
+               100: '0361/2180494. Call me.'}
 
     def __init__(self):
         super().__init__()
@@ -58,6 +66,7 @@ class VocabularyTrainer(Trainer):
         self.pre_training_display()
         self.train()
         self.save_documentation()
+        self.pie_chart_display()
         self.exit_screen()
 
     # ---------------
@@ -217,19 +226,32 @@ class VocabularyTrainer(Trainer):
     # -----------------
     # PROGRAM TERMINATION
     # -----------------
-    def exit_screen(self):
-        ratings = {0: 'You suck.',
-                   20: 'Get your shit together m8.',
-                   40: "You can't climb the ladder of success with your hands in your pockets.",
-                   60: "Keep hustlin' young blood.",
-                   80: 'Attayboy!',
-                   100: '0361/2180494. Call me.'}
+    @property
+    def correctness_percentage(self) -> float:
+        return self.n_correct_responses / self.n_trained * 100
 
-        percentage = int(self.n_correct_responses/self.n_trained * 100)
-        print(f'You got {self.n_correct_responses}/{self.n_trained}, i.e. {percentage}% right', '\n')
-        rating = ratings[percentage // 20 * 20]
+    @property
+    def performance_verdict(self) -> str:
+        return self.PERCENTAGE_VERDICTS[int(self.correctness_percentage) // 20 * 20]
+
+    def exit_screen(self):
+        print(f'You got {self.n_correct_responses}/{self.n_trained} correct, i.e. {int(self.correctness_percentage)}% right', '\n')
         time.sleep(3)
-        print(rating)
+        print(self.performance_verdict)
+
+    def pie_chart_display(self):
+        correct_percentage = (self.n_correct_responses / self.n_trained) * 100
+        incorrect_percentage = 100 - correct_percentage
+
+        labels = ['Correct', 'Incorrect']
+        explode = (0.1, 0)
+        sizes = correct_percentage, incorrect_percentage
+        fig, ax = plt.subplots()
+        ax.pie(sizes, labels=labels, shadow=True, startangle=120, autopct='%1.1f%%', explode=explode)
+        ax.axis('equal')
+        ax.set_title(self.performance_verdict)
+        fig.canvas.set_window_title(f'You got {self.n_correct_responses}/{self.n_trained} right, that is')
+        plt.show()
 
     def save_documentation(self):
         with open(self.training_documentation_path, 'w+') as dump_file:

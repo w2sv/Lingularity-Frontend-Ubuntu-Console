@@ -7,6 +7,7 @@ import time
 
 from tqdm import tqdm
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 TokenSentenceindsMap = Dict[str, List[int]]
@@ -19,6 +20,8 @@ class Trainer(ABC):
         self.reference_language_inversion = False
 
         self.sentence_data = None
+
+        plt.rcParams['toolbar'] = 'None'
 
     @property
     def language(self):
