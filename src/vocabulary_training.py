@@ -49,7 +49,7 @@ class VocabularyTrainer(Trainer):
         self.reference_2_foreign = True
         self.reverse_response_evaluations = {v: k for k, v in self.RESPONSE_EVALUATIONS.items()}
 
-        self.n_trained, self.n_correct_responses = [0] * 2
+        self.n_correct_responses = 0
 
     @property
     def voccabulary_statistics_file_path(self):
@@ -66,7 +66,7 @@ class VocabularyTrainer(Trainer):
         self.pre_training_display()
         self.train()
         self.save_vocabulary_documentation()
-        self.append_2_training_documentation()
+        self.append_2_training_history()
         # self.pie_chart_display()
         # self.exit_screen()
 
@@ -169,7 +169,7 @@ class VocabularyTrainer(Trainer):
 
             self.update_documentation_entry(entry, response_evaluation)
 
-            self.n_trained += 1
+            self.n_trained_items += 1
             if self.RESPONSE_EVALUATIONS[response_evaluation] != 'wrong':
                 self.n_correct_responses += 1
 
@@ -231,19 +231,19 @@ class VocabularyTrainer(Trainer):
     # -----------------
     @property
     def correctness_percentage(self) -> float:
-        return self.n_correct_responses / self.n_trained * 100
+        return self.n_correct_responses / self.n_trained_items * 100
 
     @property
     def performance_verdict(self) -> str:
         return self.PERCENTAGE_VERDICTS[int(self.correctness_percentage) // 20 * 20]
 
     def exit_screen(self):
-        print(f'You got {self.n_correct_responses}/{self.n_trained} correct, i.e. {int(self.correctness_percentage)}% right', '\n')
+        print(f'You got {self.n_correct_responses}/{self.n_trained_items} correct, i.e. {int(self.correctness_percentage)}% right', '\n')
         time.sleep(3)
         print(self.performance_verdict)
 
     def pie_chart_display(self):
-        correct_percentage = (self.n_correct_responses / self.n_trained) * 100
+        correct_percentage = (self.n_correct_responses / self.n_trained_items) * 100
         incorrect_percentage = 100 - correct_percentage
 
         labels = ['Correct', 'Incorrect']
@@ -263,18 +263,8 @@ class VocabularyTrainer(Trainer):
         ax.pie(sizes, labels=labels, shadow=True, startangle=120, autopct='%1.1f%%', explode=explode, colors=colors)
         ax.axis('equal')
         ax.set_title(self.performance_verdict)
-        fig.canvas.set_window_title(f'You got {self.n_correct_responses}/{self.n_trained} right')
+        fig.canvas.set_window_title(f'You got {self.n_correct_responses}/{self.n_trained_items} right')
         plt.show()
-
-    def append_2_training_documentation(self):
-        documentation = self.load_documentation()
-        today = str(datetime.date.today())
-        if today in documentation.keys():
-            documentation[today]['v'] += self.n_trained
-        else:
-            documentation[today] = {'v': self.n_trained}
-        with open(self.training_documentation_file_path, 'w+') as write_file:
-            json.dump(documentation, write_file)
 
     def save_vocabulary_documentation(self):
         with open(self.voccabulary_statistics_file_path, 'w+') as dump_file:

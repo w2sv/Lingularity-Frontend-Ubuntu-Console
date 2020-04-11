@@ -5,6 +5,7 @@ import platform
 import sys
 import time
 import json
+import datetime
 
 from tqdm import tqdm
 import numpy as np
@@ -23,6 +24,8 @@ class Trainer(ABC):
         self.sentence_data = None
 
         plt.rcParams['toolbar'] = 'None'
+
+        self.n_trained_items = 0
 
     @property
     def language(self):
@@ -43,6 +46,10 @@ class Trainer(ABC):
     @property
     def training_documentation_file_path(self):
         return f'{self.base_data_path}/{self.language}/training_documentation.json'
+
+    @property
+    def today(self):
+        return str(datetime.date.today())
 
     # ------------------
     # STATICS
@@ -74,7 +81,7 @@ class Trainer(ABC):
     # ----------------
     # METHODS
     # ----------------
-    def load_documentation(self) -> Dict[str, Dict[str, int]]:
+    def load_training_history(self) -> Dict[str, Dict[str, int]]:
         if not os.path.exists(self.training_documentation_file_path):
             return {}
         with open(self.training_documentation_file_path, 'r') as load_file:
@@ -118,6 +125,17 @@ class Trainer(ABC):
             if content == "Let's go!":
                 return self.sentence_data[i][1]
         return None
+
+    def append_2_training_history(self):
+        documentation = self.load_training_history()
+        trainer_abbreviation = self.__class__.__name__[0].lower()
+        try:
+            documentation[self.today][trainer_abbreviation] += self.n_trained_items
+        except KeyError:
+            documentation[self.today] = {trainer_abbreviation: self.n_trained_items}
+
+        with open(self.training_documentation_file_path, 'w+') as write_file:
+            json.dump(documentation, write_file)
 
     # -----------------
     # ABSTRACTS

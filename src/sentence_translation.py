@@ -154,14 +154,13 @@ class SentenceTranslationTrainer(Trainer):
 		return sentence_pair
 
 	def train(self):
-		faced_sentences = 0
 		indices = np.arange(len(self.sentence_data))
 		np.random.shuffle(indices)
 		self.sentence_data = self.sentence_data[indices]
 
 		while True:
 			try:
-				reference_sentence, translation = self.sentence_data[faced_sentences]
+				reference_sentence, translation = self.sentence_data[self.n_trained_items]
 			except ValueError as ve:
 				print(ve)
 				continue
@@ -177,9 +176,9 @@ class SentenceTranslationTrainer(Trainer):
 						print(" ")
 
 					elif response.lower() == 'exit':
-						print("Number of faced sentences: ", faced_sentences)
-						doc_dict = self.append_2_training_documentation(faced_sentences)
-						if faced_sentences > 4:
+						print("Number of faced sentences: ", self.n_trained_items)
+						doc_dict = self.append_2_training_history(self.n_trained_items)
+						if self.n_trained_items > 4:
 							self.visualize_exercising_chronic(doc_dict)
 						sys.exit()
 				except KeyboardInterrupt:
@@ -189,35 +188,19 @@ class SentenceTranslationTrainer(Trainer):
 				pass
 			self.erase_previous_line()
 			print(translation, '\n', '_______________')
-			faced_sentences += 1
+			self.n_trained_items += 1
 	
 	# ---------------
 	# PROGRAM TERMINATION
 	# ---------------
-	def append_2_training_documentation(self):
-		if not os.path.isfile(self.chronic_file):
-			# create new documentation dict
-			with open(self.chronic_file, 'w+') as empty_file:
-				doc_dict = {self.language: {self.date: n_faced_sentences}}
-				json.dump(doc_dict, empty_file)
-		else:
-			with open(self.chronic_file) as read_file:
-				doc_dict = json.load(read_file)
-			
-			if self.language in doc_dict.keys():
-				date_dict = doc_dict[self.language]
-				if self.date in date_dict.keys():
-					date_dict[self.date] += n_faced_sentences
-				else:
-					date_dict[self.date] = n_faced_sentences
-				doc_dict[self.language] = date_dict
-			else:
-				doc_dict[self.language] = {self.date: n_faced_sentences}
-			
-			with open(self.chronic_file, 'w+') as write_file:
-				json.dump(doc_dict, write_file)
+	def append_2_training_history(self):
+		training_history = self.load_training_history()
+		try:
+			training_history[self.today]['s'] += self.n_trained_items
+		except KeyError:
+			training_history[self.today] = {'s': self.n_trained_items}
 
-		return doc_dict
+		self.save_training_history(training_history)
 
 	def visualize_exercising_chronic(self, doc_dict):
 		plt.style.use('dark_background')
