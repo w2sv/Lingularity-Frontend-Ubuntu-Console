@@ -178,7 +178,7 @@ class SentenceTranslationTrainer(Trainer):
 
 					elif response.lower() == 'exit':
 						print("Number of faced sentences: ", faced_sentences)
-						doc_dict = self.add_number_2_file(faced_sentences)
+						doc_dict = self.append_2_training_documentation(faced_sentences)
 						if faced_sentences > 4:
 							self.visualize_exercising_chronic(doc_dict)
 						sys.exit()
@@ -194,7 +194,7 @@ class SentenceTranslationTrainer(Trainer):
 	# ---------------
 	# PROGRAM TERMINATION
 	# ---------------
-	def add_number_2_file(self, n_faced_sentences):
+	def append_2_training_documentation(self):
 		if not os.path.isfile(self.chronic_file):
 			# create new documentation dict
 			with open(self.chronic_file, 'w+') as empty_file:

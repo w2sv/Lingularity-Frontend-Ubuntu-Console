@@ -4,6 +4,7 @@ import os
 import platform
 import sys
 import time
+import json
 
 from tqdm import tqdm
 import numpy as np
@@ -39,6 +40,13 @@ class Trainer(ABC):
     def vocabulary_file_path(self):
         return f'{self.base_data_path}/{self.language}/vocabulary.txt'
 
+    @property
+    def training_documentation_file_path(self):
+        return f'{self.base_data_path}/{self.language}/training_documentation.json'
+
+    # ------------------
+    # STATICS
+    # ------------------
     @staticmethod
     def clear_screen():
         os.system('cls' if platform.system() == 'Windows' else 'clear')
@@ -63,6 +71,15 @@ class Trainer(ABC):
         else:
             return None
 
+    # ----------------
+    # METHODS
+    # ----------------
+    def load_documentation(self) -> Dict[str, Dict[str, int]]:
+        if not os.path.exists(self.training_documentation_file_path):
+            return {}
+        with open(self.training_documentation_file_path, 'r') as load_file:
+            return json.load(load_file)
+
     def parse_sentence_data(self) -> np.ndarray:
         data = open(self.sentence_file_path, 'r', encoding='utf-8').readlines()
         split_data = [i.split('\t') for i in data]
@@ -76,6 +93,7 @@ class Trainer(ABC):
 
         for i, row in enumerate(split_data):
             split_data[i][1] = row[1].strip('\n')
+        # split_data = (row[0], row[1].strip('\n') for row in split_data)
 
         if self.reference_language_inversion:
             split_data = [list(reversed(row)) for row in split_data]
@@ -101,6 +119,9 @@ class Trainer(ABC):
                 return self.sentence_data[i][1]
         return None
 
+    # -----------------
+    # ABSTRACTS
+    # -----------------
     @abstractmethod
     def pre_training_display(self):
         pass
