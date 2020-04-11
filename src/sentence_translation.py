@@ -193,15 +193,6 @@ class SentenceTranslationTrainer(Trainer):
 	# ---------------
 	# PROGRAM TERMINATION
 	# ---------------
-	def append_2_training_history(self):
-		training_history = self.load_training_history()
-		try:
-			training_history[self.today]['s'] += self.n_trained_items
-		except KeyError:
-			training_history[self.today] = {'s': self.n_trained_items}
-
-		self.save_training_history(training_history)
-
 	def visualize_exercising_chronic(self, doc_dict):
 		plt.style.use('dark_background')
 
