@@ -16,7 +16,7 @@ from .trainer import Trainer, TokenSentenceindsMap
 from .sentence_translation import SentenceTranslationTrainer
 
 
-TrainingDocumentation = Dict[str, Dict[str, Any]]  # entry -> Dict[score: float, times_seen: int, last_seen_date: str]
+VocabularyStatistics = Dict[str, Dict[str, Any]]  # foreign language token -> Dict[score: float, times_seen: int, last_seen_date: str]
 
 
 # TODO: english training
@@ -40,11 +40,11 @@ class VocabularyTrainer(Trainer):
         super().__init__()
 
         self.token_2_rowinds: Optional[TokenSentenceindsMap] = None
-        self.vocabulary_statistics: Optional[TrainingDocumentation] = None
+        self.vocabulary_statistics: Optional[VocabularyStatistics] = None
         self.vocabulary: Optional[Dict[str, str]] = None
 
         self.reference_2_foreign = True
-        self.reverse_response_evaluations = {v: k for k, v in self.RESPONSE_EVALUATIONS.items()}
+        self.reverse_response_evaluations: Dict[str, int] = {v: k for k, v in self.RESPONSE_EVALUATIONS.items()}
 
         self.n_correct_responses = 0
         self.display_new_vocabulary_absence = False
@@ -94,8 +94,7 @@ class VocabularyTrainer(Trainer):
         with open(self.vocabulary_file_path, 'r') as file:
             return {target_language_entry: translation.strip('\n') for target_language_entry, translation in [row.split(' - ') for row in file.readlines()]}
 
-    def load_vocabulary_statistics(self) -> Optional[TrainingDocumentation]:
-        """ structure: entry -> Dict[score, n_seen, date last seen] """
+    def load_vocabulary_statistics(self) -> Optional[VocabularyStatistics]:
         if not os.path.exists(self.voccabulary_statistics_file_path):
             return None
 
@@ -105,7 +104,7 @@ class VocabularyTrainer(Trainer):
     def update_documentation(self):
         # TODO: account for target language entry changes
 
-        INIT = {'s': 0, 'tf': 0, 'lfd': None}
+        INIT = {'s': 0, 'tf': 0, 'lfd': None}  # score, times_faced, last_faced_date
 
         # create new documentation file if necessary
         if self.vocabulary_statistics is None:
