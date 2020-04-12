@@ -34,14 +34,14 @@ class ContentRetriever:
             response_code = int(''.join(filter(lambda c: c.isdigit(), str(response))))
             if response_code != 200:
                 print('Erroneous webpage response')
-                self.languages_2_ziplinks = None
+                self.languages_2_ziplinks = {}
 
             page_content = str(BeautifulSoup(response.text, "html.parser"))
             download_link_rows = page_content[page_content.find(FLAG_URL):page_content.rfind(FLAG_URL)].split('\n')
             relevant_columns = (row.split('\t')[1:][0] for row in download_link_rows[:-1])
             self.languages_2_ziplinks = {row[:row.find(' ')]: row[row.find('"')+1:row.rfind('"')] for row in relevant_columns}
         except requests.exceptions.ConnectionError:
-            self.languages_2_ziplinks = None
+            self.languages_2_ziplinks = {}
 
     def download_zipfile(self, language: str) -> str:
         zip_link = f'{self.PAGE_URL}/{self.languages_2_ziplinks[language]}'

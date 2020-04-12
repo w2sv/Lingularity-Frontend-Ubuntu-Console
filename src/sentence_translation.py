@@ -12,7 +12,8 @@ from .trainer import Trainer
 from .web_interaction import ContentRetriever
 
 
-# TODO: difficulty selection amelioration
+# TODO: clean up, restructuring, encoding problem abortion, weight score regarding entire sentence
+#  asynchronous stem map computation, instruction text complexity, renaming
 
 
 class SentenceTranslationTrainer(Trainer):
@@ -47,7 +48,7 @@ class SentenceTranslationTrainer(Trainer):
 	def select_language(self) -> str:
 		print('Trying to connect to webpage...')
 		self.webpage_interactor.get_language_ziplink_dict()
-		sucessfully_retrieved = self.webpage_interactor.languages_2_ziplinks is not None
+		sucessfully_retrieved = len(self.webpage_interactor.languages_2_ziplinks) != 0
 		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if sucessfully_retrieved else os.listdir(self.base_data_path)
 		insort(eligible_languages, 'English')
 
@@ -89,7 +90,7 @@ class SentenceTranslationTrainer(Trainer):
 		""" to be ML boosted or
 		improved by introducing word occurrence based weight value function regarding entire sentence """
 
-		difficulty_2_coefficient = {'easy': 2, 'medium': 1, 'hard': 0}
+		difficulty_2_coefficient = {'easy': 4, 'rookie': 3, 'medium': 2, 'hard': 1, 'boss': 0}
 
 		self.clear_screen()
 		print('Select difficulty:\t', '\t\t\t'.join([diff.title() for diff in difficulty_2_coefficient.keys()]))
@@ -100,15 +101,17 @@ class SentenceTranslationTrainer(Trainer):
 		elif level_selection == 'easy':
 			return
 
-		token_2_sentenceinds = self.procure_token_2_rowinds_map(stem=True)
+		tokens_2_inds = self.procure_token_2_rowinds_map()
+		stems_2_inds = self.procure_stems_2_rowinds_map(tokens_2_inds)
 
-		occurence_distribution = [len(v) for v in token_2_sentenceinds.values()]
+		occurence_distribution = [len(v) for v in stems_2_inds.values()]
 		min_occ, max_occ = min(occurence_distribution), max(occurence_distribution)
 		step_size = (max_occ - min_occ) / len(difficulty_2_coefficient)
 
 		max_occurrence = step_size * (difficulty_2_coefficient[level_selection] + 1) + min_occ
-		indices = list(set(chain.from_iterable((v for v in token_2_sentenceinds.values() if len(v) <= max_occurrence))))
-		# tokens = [k for k, v in token_2_sentenceinds.items() if len(v) <= max_occurrence]
+		indices = list(set(chain.from_iterable((v for v in stems_2_inds.values() if len(v) <= max_occurrence))))
+		tokens = [k for k, v in stems_2_inds.items() if len(v) <= max_occurrence]
+		print(tokens)
 		self.sentence_data = self.sentence_data[indices]
 
 	def pre_training_display(self):

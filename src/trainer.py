@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, List, Dict
+from typing import Callable, Optional, List, Dict, Set, Any
 import os
 import platform
 import sys
@@ -8,11 +8,15 @@ import json
 import datetime
 import re
 from functools import lru_cache
+from itertools import groupby
 
-from nltk.stem import SnowballStemmer
+import nltk
 from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
+
+
+# TODO combination title based, equality based name procuration
 
 
 TokenSentenceindsMap = Dict[str, List[int]]
@@ -40,12 +44,12 @@ class Trainer(ABC):
 
     @property
     @lru_cache()
-    def stemmer(self) -> Optional[SnowballStemmer]:
+    def stemmer(self) -> Optional[nltk.stem.SnowballStemmer]:
         assert self.language is not None, 'stemmer to be initially called after language setting'
-        if self.language.lower() not in SnowballStemmer.languages:
+        if self.language.lower() not in nltk.stem.SnowballStemmer.languages:
             return None
         else:
-            return SnowballStemmer(self.language.lower())
+            return nltk.stem.SnowballStemmer(self.language.lower())
 
     @property
     def sentence_file_path(self):
@@ -119,6 +123,11 @@ class Trainer(ABC):
 
         return np.array(split_data)
 
+    @staticmethod
+    def get_tokenized_sentence(sentence) -> List[str]:
+        tokens = re.split("[' -]", sentence)
+        return [token.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^_`{|}~»«')) for token in tokens]
+
     def procure_token_2_rowinds_map(self, stem=False) -> TokenSentenceindsMap:
         token_2_rowinds = {}
         print('Parsing data...')
@@ -137,9 +146,55 @@ class Trainer(ABC):
                     token_2_rowinds[token].append(i)
         return token_2_rowinds
 
-    def procure_nltkd_token_2_rowinds_map(self):
+    def title_based_name_retrieval(self) -> Set[str]:
+        """ Embacy, We, You ... """
+
+        names = []
+        print('procuring names...')
+        for entry in tqdm(self.sentence_data[:, 0]):
+            # lower case sentence heralding words
+            point_positions = [i for i in range(len(entry) - 1) if entry[i: i + 2] == '. ']
+            ssle = entry  # sentence_start_lowercased_entry
+            if point_positions:
+                chars = list(ssle)
+                for i in point_positions:
+                    chars[i + 2] = chars[i + 2].lower()
+                ssle = ''.join(chars)
+
+            ssle = np.array(self.get_tokenized_sentence(ssle))
+            ssle[0] = ssle[0].lower()
+            [names.append(token) for token in ssle if token.istitle()]
+        return set(names)
+
+    def equality_based_name_retrieval(self) -> Set[str]:
+        names = []
+        for sentence_pair in tqdm(self.sentence_data):
+            ref_tokens, tar_tokens = map(lambda x: set(' '.join(self.get_tokenized_sentence(x)).lower().split(' ')), sentence_pair)
+            names.extend(ref_tokens & tar_tokens)
+        return set(names)
+
+    def procure_stems_2_rowinds_map(self, token_2_rowinds: TokenSentenceindsMap) -> TokenSentenceindsMap:
         """ carrying out time expensive name dismissal, stemming """
-        pass
+        names = self.title_based_name_retrieval()
+        starting_letter_grouped: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted([name.lower() for name in names]), lambda name: name[0])}
+
+        stemmed_token_2_rowinds = {}
+        print('stemming...')
+        for token, inds in tqdm(list(token_2_rowinds.items())):
+            try:
+                if starting_letter_grouped.get(token[0]) is not None and token in starting_letter_grouped[token[0]]:
+                    continue
+            except IndexError:  # one whitespace in token map
+                pass
+            if self.stemmer is not None:
+                token = self.stemmer.stem(token)
+
+            if stemmed_token_2_rowinds.get(token) is not None:
+                stemmed_token_2_rowinds[token].extend(inds)
+            else:
+                stemmed_token_2_rowinds[token] = inds
+
+        return stemmed_token_2_rowinds
 
     def get_lets_go_translation(self) -> Optional[str]:
         lets_go_occurrence_range = ((sentence_pair[0], i) for i, sentence_pair in
