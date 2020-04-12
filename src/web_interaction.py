@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 import os
 import warnings
 
@@ -24,25 +24,24 @@ class ContentRetriever:
     PAGE_URL = 'http://www.manythings.org/anki'
 
     def __init__(self):
-        self.languages_2_ziplinks = None
+        self.languages_2_ziplinks: Optional[Dict[str, str]] = None
 
-    def get_language_ziplink_dict(self) -> int:
-        FLAG_URL = 'http://www.manythings.org/img/usa.png'  # starting every zip link row
+    def get_language_ziplink_dict(self):
+        FLAG_URL = 'http://www.manythings.org/img/usa.png'  # initiating every zip link row
 
         try:
             response = requests.get(self.PAGE_URL, headers={'User-Agent': 'XY'})  # specific header for erroneous response 406 resolution
             response_code = int(''.join(filter(lambda c: c.isdigit(), str(response))))
             if response_code != 200:
                 print('Erroneous webpage response')
-                return 0
+                self.languages_2_ziplinks = None
 
             page_content = str(BeautifulSoup(response.text, "html.parser"))
             download_link_rows = page_content[page_content.find(FLAG_URL):page_content.rfind(FLAG_URL)].split('\n')
             relevant_columns = (row.split('\t')[1:][0] for row in download_link_rows[:-1])
             self.languages_2_ziplinks = {row[:row.find(' ')]: row[row.find('"')+1:row.rfind('"')] for row in relevant_columns}
-            return 1
         except requests.exceptions.ConnectionError:
-            return 0
+            self.languages_2_ziplinks = None
 
     def download_zipfile(self, language: str) -> str:
         zip_link = f'{self.PAGE_URL}/{self.languages_2_ziplinks[language]}'

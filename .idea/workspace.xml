@@ -3,7 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="40bbd82a-aa0c-4573-b219-bd4e514e781c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nltk_playground.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/nltk_playground.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/sentence_translation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/sentence_translation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/web_interaction.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/web_interaction.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,17 +76,17 @@
       <screen x="0" y="0" width="1600" height="860" />
     </state>
     <state x="301" y="72" key="SettingsEditor/0.0.1600.860@0.0.1600.860" timestamp="1586599302842" />
-    <state x="609" y="346" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1586360088368">
+    <state x="609" y="346" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1586685903094">
       <screen x="0" y="0" width="1600" height="860" />
     </state>
-    <state x="609" y="346" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1600.860@0.0.1600.860" timestamp="1586360088368" />
+    <state x="609" y="346" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1600.860@0.0.1600.860" timestamp="1586685903094" />
     <state x="541" y="73" key="refactoring.ChangeSignatureDialog" timestamp="1586683201292">
       <screen x="0" y="0" width="1600" height="860" />
     </state>
     <state x="541" y="73" key="refactoring.ChangeSignatureDialog/0.0.1600.860@0.0.1600.860" timestamp="1586683201292" />
-    <state x="463" y="180" width="672" height="678" key="search.everywhere.popup" timestamp="1586078436235">
+    <state x="463" y="180" width="672" height="678" key="search.everywhere.popup" timestamp="1586700289021">
       <screen x="0" y="0" width="1600" height="860" />
     </state>
-    <state x="463" y="180" width="672" height="678" key="search.everywhere.popup/0.0.1600.860@0.0.1600.860" timestamp="1586078436235" />
+    <state x="463" y="180" width="672" height="678" key="search.everywhere.popup/0.0.1600.860@0.0.1600.860" timestamp="1586700289021" />
   </component>
 </project>

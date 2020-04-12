@@ -6,7 +6,10 @@ import sys
 import time
 import json
 import datetime
+import re
+from functools import lru_cache
 
+from nltk.stem import SnowballStemmer
 from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
@@ -27,6 +30,8 @@ class Trainer(ABC):
 
         self.n_trained_items = 0
 
+        stemmer: Optional[SnowballStemmer] = None
+
     @property
     def language(self):
         return self._language if not self.reference_language_inversion else 'English'
@@ -34,6 +39,15 @@ class Trainer(ABC):
     @language.setter
     def language(self, value):
         self._language = value
+
+    @property
+    @lru_cache()
+    def stemmer(self) -> Optional[SnowballStemmer]:
+        assert self.language is not None, 'stemmer to be initially called after language setting'
+        if self.language.lower() not in SnowballStemmer.languages:
+            return None
+        else:
+            return SnowballStemmer(self.language.lower())
 
     @property
     def sentence_file_path(self):
@@ -94,7 +108,7 @@ class Trainer(ABC):
         # remove reference appendices from source file if newly downloaded
         if len(split_data[0]) > 2:
             bilingual_sentence_data = ['\t'.join(row_splits[:2]) + '\n' for row_splits in split_data]
-            with open(self.sentence_file_path, 'w', encoding='utf-8') as write_file:
+            with open(self.sentence_file_path, 'w') as write_file:
                 write_file.writelines(bilingual_sentence_data)
             split_data = [i.split('\t') for i in bilingual_sentence_data]
 
@@ -107,11 +121,19 @@ class Trainer(ABC):
 
         return np.array(split_data)
 
-    def procure_token_2_rowinds_map(self) -> TokenSentenceindsMap:
+    def procure_token_2_rowinds_map(self, stem=False) -> TokenSentenceindsMap:
         token_2_rowinds = {}
+        print(self.language)
         print('Parsing data...')
         for i, sentence in enumerate(tqdm(self.sentence_data[:, 1])):
-            for token in sentence.split(' '):
+            for token in re.split("[' -]", sentence):
+                # remove meaningless chars, discard numbers
+                token = token.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^_`{|}~»«')).lower()
+                if token.isnumeric():
+                    continue
+                # stem if desired and possible
+                if self.stemmer is not None and stem:
+                    token = self.stemmer.stem(token)
                 if token_2_rowinds.get(token) is None:
                     token_2_rowinds[token] = [i]
                 else:

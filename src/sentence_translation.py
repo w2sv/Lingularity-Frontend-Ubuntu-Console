@@ -46,8 +46,9 @@ class SentenceTranslationTrainer(Trainer):
 	# ---------------
 	def select_language(self) -> str:
 		print('Trying to connect to webpage...')
-		webpage_request_success = self.webpage_interactor.get_language_ziplink_dict()
-		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if webpage_request_success else os.listdir(self.base_data_path)
+		self.webpage_interactor.get_language_ziplink_dict()
+		sucessfully_retrieved = self.webpage_interactor.languages_2_ziplinks is not None
+		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if sucessfully_retrieved else os.listdir(self.base_data_path)
 		insort(eligible_languages, 'English')
 
 		self.clear_screen()
@@ -57,7 +58,7 @@ class SentenceTranslationTrainer(Trainer):
 			time.sleep(3)
 			sys.exit(0)
 
-		elif webpage_request_success == 0:
+		elif not sucessfully_retrieved:
 			print("Couldn't establish a connection")
 
 		starting_letter_grouped = groupby(eligible_languages, lambda x: x[0])
@@ -91,7 +92,7 @@ class SentenceTranslationTrainer(Trainer):
 		difficulty_2_coefficient = {'easy': 2, 'medium': 1, 'hard': 0}
 
 		self.clear_screen()
-		print('Select difficulty:\t', '\t\t'.join([diff.title() for diff in difficulty_2_coefficient.keys()]))
+		print('Select difficulty:\t', '\t\t\t'.join([diff.title() for diff in difficulty_2_coefficient.keys()]))
 		level_selection = self.resolve_input(input().lower(), list(difficulty_2_coefficient.keys()))
 		if level_selection is None:
 			self.recurse_on_invalid_input(self.introduce_complexity)
@@ -99,7 +100,7 @@ class SentenceTranslationTrainer(Trainer):
 		elif level_selection == 'easy':
 			return
 
-		token_2_sentenceinds = self.procure_token_2_rowinds_map()
+		token_2_sentenceinds = self.procure_token_2_rowinds_map(stem=True)
 
 		occurence_distribution = [len(v) for v in token_2_sentenceinds.values()]
 		min_occ, max_occ = min(occurence_distribution), max(occurence_distribution)
@@ -107,6 +108,7 @@ class SentenceTranslationTrainer(Trainer):
 
 		max_occurrence = step_size * (difficulty_2_coefficient[level_selection] + 1) + min_occ
 		indices = list(set(chain.from_iterable((v for v in token_2_sentenceinds.values() if len(v) <= max_occurrence))))
+		# tokens = [k for k, v in token_2_sentenceinds.items() if len(v) <= max_occurrence]
 		self.sentence_data = self.sentence_data[indices]
 
 	def pre_training_display(self):
