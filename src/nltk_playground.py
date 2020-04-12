@@ -1,11 +1,9 @@
 import nltk
 from nltk.stem.snowball import SnowballStemmer
-
-stemmer = SnowballStemmer('english')
-print(stemmer.stem('mice'))
-
 from nltk.stem import WordNetLemmatizer
 
+stemmer = SnowballStemmer('french')
+print(stemmer.stem('éveiller'))
 
 wnl = WordNetLemmatizer()
-print(wnl.lemmatize('mice'))
+print(wnl.lemmatize('éveillées'))

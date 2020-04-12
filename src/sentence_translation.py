@@ -88,7 +88,7 @@ class SentenceTranslationTrainer(Trainer):
 		""" to be ML boosted or
 		improved by introducing word occurrence based weight value function regarding entire sentence """
 
-		difficulty_2_coefficient = {'easy': 0, 'medium': 1, 'hard': 2}
+		difficulty_2_coefficient = {'easy': 2, 'medium': 1, 'hard': 0}
 
 		self.clear_screen()
 		print('Select difficulty:\t', '\t\t'.join([diff.title() for diff in difficulty_2_coefficient.keys()]))
@@ -105,8 +105,8 @@ class SentenceTranslationTrainer(Trainer):
 		min_occ, max_occ = min(occurence_distribution), max(occurence_distribution)
 		step_size = (max_occ - min_occ) / len(difficulty_2_coefficient)
 
-		min_occurrence = step_size * (difficulty_2_coefficient[level_selection] + 1) + min_occ
-		indices = list(set(chain.from_iterable((v for v in token_2_sentenceinds.values() if len(v) >= min_occurrence))))
+		max_occurrence = step_size * (difficulty_2_coefficient[level_selection] + 1) + min_occ
+		indices = list(set(chain.from_iterable((v for v in token_2_sentenceinds.values() if len(v) <= max_occurrence))))
 		self.sentence_data = self.sentence_data[indices]
 
 	def pre_training_display(self):
