@@ -19,7 +19,7 @@ from .sentence_translation import SentenceTranslationTrainer
 TrainingDocumentation = Dict[str, Dict[str, Any]]  # entry -> Dict[score: float, times_seen: int, last_seen_date: str]
 
 
-# TODO: append new meanings, english training
+# TODO: english training
 #  sentence finding for other translation tokens
 
 
@@ -130,7 +130,8 @@ class VocabularyTrainer(Trainer):
         self.clear_screen()
         n_imperfect_entries = len([e for e in self.vocabulary_statistics.values() if e['s'] < self.COMPLETION_SCORE])
         print(f'Vocabulary file comprises {n_imperfect_entries} entries.')
-        print(f"Enter 'append' in order to append an additional translation to the ones of the previously faced item.")
+        print("Enter 'append' + additional translation(s) in order to append to the ones of the previously faced item.")
+        print("Distinct newly entered translation tokens are to be separated by commas.")
 
         lets_go_translation = self.get_lets_go_translation()
         print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')
@@ -142,6 +143,26 @@ class VocabularyTrainer(Trainer):
     def day_difference(date: str) -> int:
         return (datetime.date.today() - datetime.datetime.strptime(date, '%Y-%M-%d')).days
 
+    def append_translation(self, entry: str, additional_translations: str):
+        additional_translations = additional_translations.rstrip().lstrip()
+
+        # insert whitespaces after commas if not already present
+        tokens = list(additional_translations)
+        for i in range(len(tokens)-1, 1, -1):
+            if tokens[i-1] == ',' and tokens[i] != ' ':
+                tokens.insert(i, ' ')
+        additional_translations = ''.join(tokens)
+
+        with open(self.vocabulary_file_path, 'r') as read_file:
+            vocabulary = read_file.readlines()
+            split_data = [row.split(' - ') for row in vocabulary]
+            corresponding_row_ind = [i for i in range(len(split_data)) if entry in split_data[i][0]][0]
+            vocabulary[corresponding_row_ind] = vocabulary[corresponding_row_ind][:-1] + ', ' + additional_translations + '\n'
+
+        with open(self.vocabulary_file_path, 'w') as write_file:
+            write_file.writelines(vocabulary)
+        print('Enter translation of current item: ', end='')
+
     def train(self):
         entries = [entry for entry in self.vocabulary.keys() if self.vocabulary_statistics[entry]['s'] < 5 or self.day_difference(self.vocabulary_statistics[entry]['lfd']) >= self.N_RETENTION_ASSERTION_DAYS]
         np.random.shuffle(entries)
@@ -149,11 +170,19 @@ class VocabularyTrainer(Trainer):
         get_display_token = lambda entry: self.vocabulary[entry] if self.reference_2_foreign else entry
         get_translation = lambda entry: entry if self.reference_2_foreign else self.vocabulary[entry]
 
-        for i, entry in enumerate(entries):
+        i, display_item = 0, True
+        while i < len(entries):
+            entry = entries[i]
             display_token, translation = get_display_token(entry), get_translation(entry)
-            response = input(f'{display_token} = ')
+            if display_item:
+                print(f'{display_token} = ', end='')
+            response = input()
             if response.lower() == 'exit':
                 break
+            elif response.lower().startswith('append') and i:
+                self.append_translation(entries[i-1], response[len('append'):])
+                display_item = False
+                continue
 
             response_evaluation = self.evaluate_response(response, translation)
 
@@ -174,6 +203,9 @@ class VocabularyTrainer(Trainer):
 
             if i and not i % 9:
                 print(f'{i} Entries faced, {len(entries) - i} more to go', '\n')
+
+            i += 1
+            display_item = True
 
     def evaluate_response(self, response: str, translation: str) -> int:
         distinct_translations = translation.split(',')

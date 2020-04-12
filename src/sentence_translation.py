@@ -2,13 +2,11 @@ import sys
 import os
 import time
 from datetime import date
-import json
 from typing import List
 from itertools import groupby, chain
 from bisect import insort
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 from .trainer import Trainer
 from .web_interaction import ContentRetriever
@@ -177,7 +175,7 @@ class SentenceTranslationTrainer(Trainer):
 
 					elif response.lower() == 'exit':
 						print("Number of faced sentences: ", self.n_trained_items)
-						doc_dict = self.append_2_training_history()
+						self.append_2_training_history()
 						if self.n_trained_items > 4:
 							self.plot_training_history()
 						sys.exit()
