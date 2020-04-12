@@ -48,6 +48,7 @@ class VocabularyTrainer(Trainer):
         self.reverse_response_evaluations = {v: k for k, v in self.RESPONSE_EVALUATIONS.items()}
 
         self.n_correct_responses = 0
+        self.display_new_vocabulary_absence = False
 
     @property
     def voccabulary_statistics_file_path(self):
@@ -121,6 +122,7 @@ class VocabularyTrainer(Trainer):
         if display_vocabulary == 'yes':
             new_vocabulary = [key for key in self.vocabulary_statistics.keys() if self.vocabulary_statistics[key]['lfd'] is None]
             if not new_vocabulary:
+                self.display_new_vocabulary_absence = True
                 return
             [print('\t', entry, ' = ', self.vocabulary[entry]) for entry in new_vocabulary]
             print('\n')
@@ -129,9 +131,11 @@ class VocabularyTrainer(Trainer):
     def pre_training_display(self):
         self.clear_screen()
         n_imperfect_entries = len([e for e in self.vocabulary_statistics.values() if e['s'] < self.COMPLETION_SCORE])
+        if self.display_new_vocabulary_absence:
+            print("Couldn't find any new vocabulary.")
         print(f'Vocabulary file comprises {n_imperfect_entries} entries.')
         print("Enter 'append' + additional translation(s) in order to append to the ones of the previously faced item.")
-        print("Distinct newly entered translation tokens are to be separated by commas.")
+        print("Distinct newly entered translation tokens are to be separated by commas.", '\n')
 
         lets_go_translation = self.get_lets_go_translation()
         print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')
