@@ -15,6 +15,8 @@ def display_starting_screen():
     print("							W2SV", '\n' * 1)
     print("					         by Janek Zangenberg ", '\n' * 2)
     print("         Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
+    print('Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,')
+    print("  e.g. 'i' suffices for selecting italian since there's no other eligible language starting with an i", '\n')
 
 
 def select_training() -> str:
