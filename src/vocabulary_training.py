@@ -20,16 +20,15 @@ TrainingDocumentation = Dict[str, Dict[str, Any]]  # entry -> Dict[score: float,
 
 
 # TODO: english training
-#  sentence finding for other translation tokens
 
 
 class VocabularyTrainer(Trainer):
     RESPONSE_EVALUATIONS = {0: 'wrong', 1: 'accent fault', 2: 'correct', 3: 'perfect'}
     COMPLETION_SCORE = 5
-    N_RELATED_SENTENCES = 2
+    N_SENTENCES_TO_BE_DISPLAYED = 2
     ROOT_LENGTH = 4
-    N_RETENTION_ASSERTION_DAYS = 50
-    PERCENTAGE_VERDICTS = {
+    DAYS_TIL_RETENTION_ASSERTION = 50
+    PERCENTAGE_CORRESPONDING_VERDICTS = {
                0: 'You suck.',
                20: 'Get your shit together m8.',
                40: "You can't climb the ladder of success with your hands in your pockets.",
@@ -168,7 +167,7 @@ class VocabularyTrainer(Trainer):
         print('Enter translation of current item: ', end='')
 
     def train(self):
-        entries = [entry for entry in self.vocabulary.keys() if self.vocabulary_statistics[entry]['s'] < 5 or self.day_difference(self.vocabulary_statistics[entry]['lfd']) >= self.N_RETENTION_ASSERTION_DAYS]
+        entries = [entry for entry in self.vocabulary.keys() if self.vocabulary_statistics[entry]['s'] < 5 or self.day_difference(self.vocabulary_statistics[entry]['lfd']) >= self.DAYS_TIL_RETENTION_ASSERTION]
         np.random.shuffle(entries)
 
         get_display_token = lambda entry: self.vocabulary[entry] if self.reference_2_foreign else entry
@@ -253,7 +252,7 @@ class VocabularyTrainer(Trainer):
         if not len(sentence_indices):
             return None
 
-        random_indices = np.random.randint(0, len(sentence_indices), self.N_RELATED_SENTENCES)
+        random_indices = np.random.randint(0, len(sentence_indices), self.N_SENTENCES_TO_BE_DISPLAYED)
         return self.sentence_data[sentence_indices[random_indices]][:, 1]
 
     def update_documentation_entry(self, entry, response_evaluation):
@@ -273,7 +272,7 @@ class VocabularyTrainer(Trainer):
 
     @property
     def performance_verdict(self) -> str:
-        return self.PERCENTAGE_VERDICTS[int(self.correctness_percentage) // 20 * 20]
+        return self.PERCENTAGE_CORRESPONDING_VERDICTS[int(self.correctness_percentage) // 20 * 20]
 
     def exit_screen(self):
         """ deprecated """
@@ -312,4 +311,3 @@ class VocabularyTrainer(Trainer):
 
 if __name__ == '__main__':
     VocabularyTrainer().run()
-

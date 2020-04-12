@@ -111,46 +111,15 @@ class SentenceTranslationTrainer(Trainer):
 
 	def pre_training_display(self):
 		self.clear_screen()
-		instruction_text = f"""Data file comprises {len(self.sentence_data):,d} sentences.\nPress Enter to advance to next sentence, v to append new entry to language corresponding vocabulary text file.\nEnter 'exit' to terminate program.\n"""
+		instruction_text = f"""Data file comprises {len(self.sentence_data):,d} sentences.\nPress Enter to advance to next sentence\nEnter 'vocabulary' to append new entry to language specific vocabulary file, 'exit' to terminate program.\n"""
 		print(instruction_text)
 
 		lets_go_translation = self.get_lets_go_translation()
 		print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')
 
-	# ----------------
-	# VOCABULARY FILE
-	# ----------------
-	def append_2_vocabulary_file(self):
-		word = input('Enter word in reference language: ')
-		translation = input('Enter translation: ')
-
-		with open(self.vocabulary_file_path, 'a+') as vocab_file:
-			if os.path.getsize(self.vocabulary_file_path):
-				vocab_file.write('\n') 
-			vocab_file.write(f'{word} - {translation}')
-		[self.erase_previous_line() for _ in range(2)]
-
 	# -----------------
 	# TRAINING LOOP
 	# -----------------
-	def convert_names(self, sentence_pair: List[str]) -> List[str]:
-		if not self.LANGUAGE_CORRESPONDING_NAMES.get(self.language):
-			return sentence_pair
-
-		punctuation = sentence_pair[0][-1]
-		for sentence_ind, sentence in enumerate(sentence_pair):
-			sentence_tokens = sentence[:-1].split(' ')
-
-			for name_ind, name in enumerate(self.DEFAULT_NAMES):
-				try:
-					ind = sentence_tokens.index(name)
-					sentence_tokens[ind] = self.LANGUAGE_CORRESPONDING_NAMES[self.language][name_ind]
-				except ValueError:
-					pass
-			sentence_pair[sentence_ind] = ' '.join(sentence_tokens) + punctuation
-
-		return sentence_pair
-
 	def train(self):
 		indices = np.arange(len(self.sentence_data))
 		np.random.shuffle(indices)
@@ -168,25 +137,53 @@ class SentenceTranslationTrainer(Trainer):
 			print(reference_sentence, '\t')
 			try:
 				try:
-					response = input("pending...")
-					if response == 'v':
-						self.append_2_vocabulary_file()
-						print(" ")
-
-					elif response.lower() == 'exit':
-						print("Number of faced sentences: ", self.n_trained_items)
-						self.append_2_training_history()
-						if self.n_trained_items > 4:
-							self.plot_training_history()
-						sys.exit()
+					response = self.resolve_input(input("pending...").lower(), ['vocabulary', 'exit'])
+					if response is not None:
+						if response == 'vocabulary':
+							self.append_2_vocabulary_file()
+							print(" ")
+						elif response == 'exit':
+							print("Number of faced sentences: ", self.n_trained_items)
+							self.append_2_training_history()
+							if self.n_trained_items > 4:
+								self.plot_training_history()
+							sys.exit()
 				except KeyboardInterrupt:
-					print("Enter 'exit' to terminate program.")
+					pass
 
-			except SyntaxError:  # progressing with enter stroke
+			except SyntaxError:
 				pass
 			self.erase_previous_line()
 			print(translation, '\n', '_______________')
 			self.n_trained_items += 1
+
+	def append_2_vocabulary_file(self):
+		word = input('Enter word in reference language: ')
+		translation = input(f'Enter {self.language} translation: ')
+
+		with open(self.vocabulary_file_path, 'a+') as vocab_file:
+			if os.path.getsize(self.vocabulary_file_path):
+				vocab_file.write('\n')
+			vocab_file.write(f'{word} - {translation}')
+		[self.erase_previous_line() for _ in range(2)]
+
+	def convert_names(self, sentence_pair: List[str]) -> List[str]:
+		if not self.LANGUAGE_CORRESPONDING_NAMES.get(self.language):
+			return sentence_pair
+
+		punctuation = sentence_pair[0][-1]
+		for sentence_ind, sentence in enumerate(sentence_pair):
+			sentence_tokens = sentence[:-1].split(' ')
+
+			for name_ind, name in enumerate(self.DEFAULT_NAMES):
+				try:
+					ind = sentence_tokens.index(name)
+					sentence_tokens[ind] = self.LANGUAGE_CORRESPONDING_NAMES[self.language][name_ind]
+				except ValueError:
+					pass
+			sentence_pair[sentence_ind] = ' '.join(sentence_tokens) + punctuation
+
+		return sentence_pair
 
 
 if __name__ == '__main__':

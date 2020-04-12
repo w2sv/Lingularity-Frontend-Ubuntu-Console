@@ -16,7 +16,7 @@ def display_starting_screen():
     print("					         by Janek Zangenberg ", '\n' * 2)
     print("         Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
     print('Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,')
-    print("  e.g. 'i' suffices for selecting italian since there's no other eligible language starting with an i", '\n')
+    print("  e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on it", '\n')
 
 
 def select_training() -> str:
@@ -25,9 +25,7 @@ def select_training() -> str:
     training = input(f"{indentation}(S)entence translation{indentation}(V)ocabulary training\n").lower()
 
     if training not in _TRAINERS.keys():
-        print('Invalid input')
-        time.sleep(1)
-        Trainer.clear_screen()
+        Trainer.recurse_on_invalid_input(select_training)
         return select_training()
 
     Trainer.clear_screen()
