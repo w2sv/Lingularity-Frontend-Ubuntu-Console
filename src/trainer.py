@@ -30,8 +30,6 @@ class Trainer(ABC):
 
         self.n_trained_items = 0
 
-        stemmer: Optional[SnowballStemmer] = None
-
     @property
     def language(self):
         return self._language if not self.reference_language_inversion else 'English'
@@ -123,7 +121,6 @@ class Trainer(ABC):
 
     def procure_token_2_rowinds_map(self, stem=False) -> TokenSentenceindsMap:
         token_2_rowinds = {}
-        print(self.language)
         print('Parsing data...')
         for i, sentence in enumerate(tqdm(self.sentence_data[:, 1])):
             for token in re.split("[' -]", sentence):
@@ -139,6 +136,10 @@ class Trainer(ABC):
                 else:
                     token_2_rowinds[token].append(i)
         return token_2_rowinds
+
+    def procure_nltkd_token_2_rowinds_map(self):
+        """ carrying out time expensive name dismissal, stemming """
+        pass
 
     def get_lets_go_translation(self) -> Optional[str]:
         lets_go_occurrence_range = ((sentence_pair[0], i) for i, sentence_pair in
