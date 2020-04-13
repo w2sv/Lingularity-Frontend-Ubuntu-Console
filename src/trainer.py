@@ -16,9 +16,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# TODO combination title based, equality based name procuration
-
-
 TokenSentenceindsMap = Dict[str, List[int]]
 
 
@@ -153,14 +150,12 @@ class Trainer(ABC):
                     token_2_rowinds[token] = [i]
                 else:
                     token_2_rowinds[token].append(i)
-        print([token for token in token_2_rowinds.keys()])
-        time.sleep(100)
         return token_2_rowinds
 
     def title_based_name_retrieval(self) -> Dict[str, int]:
         """ returns lowercase name candidates """
         names_2_occurrenceind = {}
-        print('procuring names...')
+        print('Procuring names...')
         for i, eng_sent in enumerate(tqdm(self.sentence_data[:, 0])):
             # lower case sentence heralding words
             point_positions = [i for i in range(len(eng_sent) - 1) if eng_sent[i: i + 2] == '. ']
@@ -181,12 +176,12 @@ class Trainer(ABC):
         """ carrying out time expensive name dismissal, stemming """
         name_candidates = self.title_based_name_retrieval()
         names = self.bilateral_presence_based_name_retrieval(name_candidates)
-        starting_letter_grouped: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted(names), lambda name: name[0])}
+        starting_letter_grouped_names: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted(names), lambda name: name[0])}
 
         stemmed_token_2_rowinds = {}
-        print('stemming...')
+        print('Stemming...')
         for token, inds in tqdm(list(token_2_rowinds.items())):
-            if starting_letter_grouped.get(token[0]) is not None and token in starting_letter_grouped[token[0]]:
+            if starting_letter_grouped_names.get(token[0]) is not None and token in starting_letter_grouped_names[token[0]]:
                 continue
             if self.stemmer is not None:
                 token = self.stemmer.stem(token)
@@ -195,7 +190,6 @@ class Trainer(ABC):
                 stemmed_token_2_rowinds[token].extend(inds)
             else:
                 stemmed_token_2_rowinds[token] = inds
-
         return stemmed_token_2_rowinds
 
     def get_lets_go_translation(self) -> Optional[str]:

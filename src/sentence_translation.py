@@ -2,17 +2,20 @@ import sys
 import os
 import time
 from datetime import date
-from typing import List
+from typing import List, Tuple, Dict
 from itertools import groupby, chain
 from bisect import insort
+from operator import itemgetter
 
 import numpy as np
 
-from .trainer import Trainer
+from .trainer import Trainer, TokenSentenceindsMap
 from .web_interaction import ContentRetriever
+from .utils.statistics import get_positive_outliers
+from .utils.native import append_2_or_insert_key
 
 
-# TODO: clean up, restructuring, encoding problem abortion, weight score regarding entire sentence
+# TODO: restructuring, weight score regarding entire sentence
 #  asynchronous stem map computation, instruction text complexity, renaming
 
 
@@ -86,10 +89,18 @@ class SentenceTranslationTrainer(Trainer):
 
 		return selection
 
-	def introduce_complexity(self):
-		""" to be ML boosted or
-		improved by introducing word occurrence based weight value function regarding entire sentence """
+	@staticmethod
+	def get_sorted_token_n_occurrences_list(token_2_inds: TokenSentenceindsMap) -> List[Tuple[str, int]]:
+		return [(i[0], len(i[1])) for i in sorted(list(token_2_inds.items()), key=lambda x: len(x[1]))]
 
+	@staticmethod
+	def get_n_occurrences_2_tokens_map(token_2_inds: TokenSentenceindsMap) -> Dict[int, List[str]]:
+		occurrence_2_tokens = {}
+		for token, inds in token_2_inds.items():
+			append_2_or_insert_key(occurrence_2_tokens, len(inds), token)
+		return occurrence_2_tokens
+
+	def introduce_complexity(self):
 		difficulty_2_coefficient = {'easy': 4, 'rookie': 3, 'medium': 2, 'hard': 1, 'boss': 0}
 
 		self.clear_screen()
@@ -104,15 +115,30 @@ class SentenceTranslationTrainer(Trainer):
 		tokens_2_inds = self.procure_token_2_rowinds_map()
 		stems_2_inds = self.procure_stems_2_rowinds_map(tokens_2_inds)
 
-		occurence_distribution = [len(v) for v in stems_2_inds.values()]
-		min_occ, max_occ = min(occurence_distribution), max(occurence_distribution)
-		step_size = (max_occ - min_occ) / len(difficulty_2_coefficient)
+		def discard_positive_outliers(occurrence_map: TokenSentenceindsMap):
+			noccurrence_2_tokens = self.get_n_occurrences_2_tokens_map(occurrence_map)
+			occurrence_outliers = get_positive_outliers(list(noccurrence_2_tokens.keys()), iqr_coeff=1)
+			corresponding_tokens = itemgetter(*occurrence_outliers)(noccurrence_2_tokens)
+			[[occurrence_map.pop(outlier_token) for outlier_token in outlier_tokens] for outlier_tokens in corresponding_tokens]
 
-		max_occurrence = step_size * (difficulty_2_coefficient[level_selection] + 1) + min_occ
-		indices = list(set(chain.from_iterable((v for v in stems_2_inds.values() if len(v) <= max_occurrence))))
-		tokens = [k for k, v in stems_2_inds.items() if len(v) <= max_occurrence]
-		print(tokens)
-		self.sentence_data = self.sentence_data[indices]
+		def filter_sentences(occurrence_map: TokenSentenceindsMap):
+			discard_positive_outliers(occurrence_map)
+			print(self.get_sorted_token_n_occurrences_list(occurrence_map))
+			occurrence_distribution = [len(v) for v in occurrence_map.values()]
+			min_occ, max_occ = min(occurrence_distribution), max(occurrence_distribution)
+			step_size = (max_occ - min_occ) / len(difficulty_2_coefficient)
+
+			max_occurrence = step_size * (difficulty_2_coefficient[level_selection] + 1) + min_occ
+
+			indices = set(chain.from_iterable(filter(lambda indices: len(indices) <= max_occurrence, occurrence_map.values())))
+			tokens = [k for k, v in occurrence_map.items() if len(v) <= max_occurrence]
+			print(tokens)
+			print(max_occurrence)
+			print(len(indices) / len(self.sentence_data))
+			time.sleep(100)
+			self.sentence_data = self.sentence_data[indices]
+
+		filter_sentences(stems_2_inds)
 
 	def pre_training_display(self):
 		self.clear_screen()
