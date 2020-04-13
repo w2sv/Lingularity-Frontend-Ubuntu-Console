@@ -144,8 +144,7 @@ class Trainer(ABC):
             # split, discard impertinent characters, lower all
             tokens = (token.lower() for token in self.get_meaningful_tokens(sentence))
             for token in tokens:
-                # token = self.strip_unicode(token)
-                if token.isnumeric() or not len(token):
+                if not len(token) or any(i.isdigit() for i in token):
                     continue
                 # stem if desired and possible
                 if self.stemmer is not None and stem:
@@ -170,8 +169,6 @@ class Trainer(ABC):
                 for i in point_positions:
                     chars[i + 2] = chars[i + 2].lower()
                 eng_sent = ''.join(chars)
-
-
             tokens = np.array(self.get_meaningful_tokens(eng_sent))
             [names_2_occurrenceind.update({name.lower(): i}) for name in filter(lambda token: token.istitle() and (len(token) > 1 or ord(token) > 255), tokens[1:])]  # omit first word since inconceivable whether name
         return names_2_occurrenceind
