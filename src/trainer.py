@@ -124,17 +124,22 @@ class Trainer(ABC):
         return np.array(split_data)
 
     @staticmethod
-    def get_tokenized_sentence(sentence) -> List[str]:
-        tokens = re.split("[' -]", sentence)
-        return [token.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^_`{|}~»«')) for token in tokens]
+    def get_meaningful_tokens(sentence: str) -> List[str]:
+        """ splitting at relevant delimiters, stripping off semantically irrelevant characters """
+        sentence = sentence.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^_`{|}~»«'))
+        return re.split("[' ’-]", sentence)
 
     def procure_token_2_rowinds_map(self, stem=False) -> TokenSentenceindsMap:
+        """ returns dict with
+                keys: distinct lowercase delimiter split punctuation stripped foreign language vocabulary tokens
+                    excluding numbers
+                values: lists of sentence indices in which occurring """
         token_2_rowinds = {}
         print('Parsing data...')
         for i, sentence in enumerate(tqdm(self.sentence_data[:, 1])):
-            for token in re.split("[' -]", sentence):
-                # remove meaningless chars, discard numbers
-                token = token.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^_`{|}~»«')).lower()
+            # split, discard impertinent characters, lower all
+            tokens = (token.lower() for token in self.get_meaningful_tokens(sentence))
+            for token in tokens:
                 if token.isnumeric():
                     continue
                 # stem if desired and possible
@@ -147,35 +152,34 @@ class Trainer(ABC):
         return token_2_rowinds
 
     def title_based_name_retrieval(self) -> Set[str]:
-        """ Embacy, We, You ... """
-
+        """ returns lowercase name candidates """
         names = []
         print('procuring names...')
-        for entry in tqdm(self.sentence_data[:, 0]):
+        for eng_sent in tqdm(self.sentence_data[:, 0]):
             # lower case sentence heralding words
-            point_positions = [i for i in range(len(entry) - 1) if entry[i: i + 2] == '. ']
-            ssle = entry  # sentence_start_lowercased_entry
+            point_positions = [i for i in range(len(eng_sent) - 1) if eng_sent[i: i + 2] == '. ']
             if point_positions:
-                chars = list(ssle)
+                chars = list(eng_sent)
                 for i in point_positions:
                     chars[i + 2] = chars[i + 2].lower()
-                ssle = ''.join(chars)
+                eng_sent = ''.join(chars)
 
-            ssle = np.array(self.get_tokenized_sentence(ssle))
-            ssle[0] = ssle[0].lower()
-            [names.append(token) for token in ssle if token.istitle()]
-        return set(names)
+            tokens = np.array(self.get_meaningful_tokens(eng_sent))
+            names.extend(filter(lambda token: token.istitle() and (len(token) > 1 or ord(token) > 255), tokens[1:]))  # omit first word since inconceivable whether name
+        return set(map(lambda name: name.lower(), names))
 
-    def equality_based_name_retrieval(self) -> Set[str]:
+    def equality_based_name_retrieval(self, title_based_names: List[str]) -> Set[str]:
         names = []
         for sentence_pair in tqdm(self.sentence_data):
-            ref_tokens, tar_tokens = map(lambda x: set(' '.join(self.get_tokenized_sentence(x)).lower().split(' ')), sentence_pair)
+            ref_tokens, tar_tokens = map(lambda x: set(' '.join(self.get_meaningful_tokens(x)).lower().split(' ')), sentence_pair)
             names.extend(ref_tokens & tar_tokens)
         return set(names)
 
     def procure_stems_2_rowinds_map(self, token_2_rowinds: TokenSentenceindsMap) -> TokenSentenceindsMap:
         """ carrying out time expensive name dismissal, stemming """
         names = self.title_based_name_retrieval()
+        print(names)
+        time.sleep(100)
         starting_letter_grouped: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted([name.lower() for name in names]), lambda name: name[0])}
 
         stemmed_token_2_rowinds = {}

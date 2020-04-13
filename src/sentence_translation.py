@@ -33,7 +33,7 @@ class SentenceTranslationTrainer(Trainer):
 		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
 
 	def run(self):
-		self.language = self.select_language()
+		self.language = 'French'  # self.select_language()
 		if self._language not in os.listdir(self.base_data_path):
 			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
 			self.webpage_interactor.unzip_file(zip_file_link)

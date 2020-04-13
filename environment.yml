@@ -10,5 +10,6 @@ dependencies:
   - unidecode=1.1.1
   - requests=2.23.0
   - tqdm
+  - nltk=3.4.5
   pip:
     - bs4==0.0.1
