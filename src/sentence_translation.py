@@ -5,14 +5,12 @@ from datetime import date
 from typing import List, Tuple, Dict
 from itertools import groupby, chain
 from bisect import insort
-from operator import itemgetter
+from operator import ge, le
 
 import numpy as np
 
-from .trainer import Trainer, TokenSentenceindsMap
+from .trainer import Trainer
 from .web_interaction import ContentRetriever
-from .utils.statistics import get_outliers
-from .utils.generic import append_2_or_insert_key
 
 
 # TODO: restructuring, weight score regarding entire sentence
@@ -36,12 +34,12 @@ class SentenceTranslationTrainer(Trainer):
 		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
 
 	def run(self):
-		self.language = 'German'  # self.select_language()
+		self.language = self.select_language()
 		if self._language not in os.listdir(self.base_data_path):
 			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
 			self.webpage_interactor.unzip_file(zip_file_link)
 		self.sentence_data = self.parse_sentence_data()
-		self.introduce_complexity()
+		self.select_mode()
 		self.pre_training_display()
 		self.train()
 
@@ -86,60 +84,33 @@ class SentenceTranslationTrainer(Trainer):
 				else:
 					selection = reference_language
 					self.reference_language_inversion, reference_language_validity = [True]*2
-
 		return selection
 
-	@staticmethod
-	def get_sorted_token_n_occurrences_list(token_2_inds: TokenSentenceindsMap) -> List[Tuple[str, int]]:
-		return [(i[0], len(i[1])) for i in sorted(list(token_2_inds.items()), key=lambda x: len(x[1]))]
-
-	@staticmethod
-	def get_n_occurrences_2_tokens_map(token_2_inds: TokenSentenceindsMap) -> Dict[int, List[str]]:
-		occurrence_2_tokens = {}
-		for token, inds in token_2_inds.items():
-			append_2_or_insert_key(occurrence_2_tokens, len(inds), token)
-		return occurrence_2_tokens
-
-	def introduce_complexity(self):
-		difficulty_2_coefficient = {'easy': 4, 'rookie': 3, 'medium': 2, 'hard': 1, 'boss': 0}
+	def select_mode(self):
+		modes = ['vocabulary acquisition', 'lowkey', 'random']
 
 		self.clear_screen()
-		print('Select difficulty:\t', '\t\t\t'.join([diff.title() for diff in difficulty_2_coefficient.keys()]))
-		level_selection = self.resolve_input(input().lower(), list(difficulty_2_coefficient.keys()))
+		print('Select mode:\t', '\t\t\t'.join([mode.title() for mode in modes]))
+		level_selection = self.resolve_input(input().lower(), modes)
 		if level_selection is None:
-			self.recurse_on_invalid_input(self.introduce_complexity)
+			self.recurse_on_invalid_input(self.select_mode)
 
-		elif level_selection == 'easy':
+		elif level_selection == 'random':
 			return
 
 		tokens_2_inds = self.procure_token_2_rowinds_map()
 		stems_2_inds = self.procure_stems_2_rowinds_map(tokens_2_inds)
 
-		def discard_positive_outliers(occurrence_map: TokenSentenceindsMap):
-			noccurrence_2_tokens = self.get_n_occurrences_2_tokens_map(occurrence_map)
-			occurrence_outliers = get_outliers(list(noccurrence_2_tokens.keys()), positive=True, iqr_coeff=0.2)
-			corresponding_tokens = itemgetter(*occurrence_outliers)(noccurrence_2_tokens)
-			[[occurrence_map.pop(outlier_token) for outlier_token in outlier_tokens] for outlier_tokens in corresponding_tokens]
+		def get_limit_corresponding_sentence_indices(occurrence_limit: int, mode: str) -> List[int]:
+			assert mode in ['max', 'min']
+			operator = ge if mode == 'min' else le
+			return list(chain.from_iterable((indices for indices in stems_2_inds.values() if operator(len(indices), occurrence_limit))))
 
-		def filter_sentences(occurrence_map: TokenSentenceindsMap):
-			discard_positive_outliers(occurrence_map)
-			print(self.get_sorted_token_n_occurrences_list(occurrence_map))
-			occurrence_distribution = [len(v) for v in occurrence_map.values()]
-			min_occ, max_occ = min(occurrence_distribution), max(occurrence_distribution)
-			step_size = (max_occ - min_occ) / len(difficulty_2_coefficient)
-
-			max_occurrence = step_size * (difficulty_2_coefficient[level_selection] + 1) + min_occ
-			max_occurrence = 10
-
-			indices = list(set(chain.from_iterable(filter(lambda indices: len(indices) <= max_occurrence, occurrence_map.values()))))
-			# tokens = [k for k, v in occurrence_map.items() if len(v) <= max_occurrence]
-			# print(tokens)
-			# print(max_occurrence)
-			# print(len(indices) / len(self.sentence_data))
-			# time.sleep(100)
-			self.sentence_data = self.sentence_data[indices]
-
-		filter_sentences(stems_2_inds)
+		if level_selection == 'vocabulary acquisition':
+			indices = get_limit_corresponding_sentence_indices(20, 'max')
+		elif level_selection == 'lowkey':
+			indices = get_limit_corresponding_sentence_indices(50, 'min')
+		self.sentence_data = self.sentence_data[indices]
 
 	def pre_training_display(self):
 		self.clear_screen()
