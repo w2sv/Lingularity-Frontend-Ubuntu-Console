@@ -11,8 +11,8 @@ import numpy as np
 
 from .trainer import Trainer, TokenSentenceindsMap
 from .web_interaction import ContentRetriever
-from .utils.statistics import get_positive_outliers
-from .utils.native import append_2_or_insert_key
+from .utils.statistics import get_outliers
+from .utils.generic import append_2_or_insert_key
 
 
 # TODO: restructuring, weight score regarding entire sentence
@@ -36,7 +36,7 @@ class SentenceTranslationTrainer(Trainer):
 		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
 
 	def run(self):
-		self.language = 'French'  # self.select_language()
+		self.language = 'German'  # self.select_language()
 		if self._language not in os.listdir(self.base_data_path):
 			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
 			self.webpage_interactor.unzip_file(zip_file_link)
@@ -117,7 +117,7 @@ class SentenceTranslationTrainer(Trainer):
 
 		def discard_positive_outliers(occurrence_map: TokenSentenceindsMap):
 			noccurrence_2_tokens = self.get_n_occurrences_2_tokens_map(occurrence_map)
-			occurrence_outliers = get_positive_outliers(list(noccurrence_2_tokens.keys()), iqr_coeff=1)
+			occurrence_outliers = get_outliers(list(noccurrence_2_tokens.keys()), positive=True, iqr_coeff=0.2)
 			corresponding_tokens = itemgetter(*occurrence_outliers)(noccurrence_2_tokens)
 			[[occurrence_map.pop(outlier_token) for outlier_token in outlier_tokens] for outlier_tokens in corresponding_tokens]
 
@@ -129,13 +129,14 @@ class SentenceTranslationTrainer(Trainer):
 			step_size = (max_occ - min_occ) / len(difficulty_2_coefficient)
 
 			max_occurrence = step_size * (difficulty_2_coefficient[level_selection] + 1) + min_occ
+			max_occurrence = 10
 
-			indices = set(chain.from_iterable(filter(lambda indices: len(indices) <= max_occurrence, occurrence_map.values())))
-			tokens = [k for k, v in occurrence_map.items() if len(v) <= max_occurrence]
-			print(tokens)
-			print(max_occurrence)
-			print(len(indices) / len(self.sentence_data))
-			time.sleep(100)
+			indices = list(set(chain.from_iterable(filter(lambda indices: len(indices) <= max_occurrence, occurrence_map.values()))))
+			# tokens = [k for k, v in occurrence_map.items() if len(v) <= max_occurrence]
+			# print(tokens)
+			# print(max_occurrence)
+			# print(len(indices) / len(self.sentence_data))
+			# time.sleep(100)
 			self.sentence_data = self.sentence_data[indices]
 
 		filter_sentences(stems_2_inds)
