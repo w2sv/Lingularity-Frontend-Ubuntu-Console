@@ -151,11 +151,11 @@ class Trainer(ABC):
                     token_2_rowinds[token].append(i)
         return token_2_rowinds
 
-    def title_based_name_retrieval(self) -> Set[str]:
+    def title_based_name_retrieval(self) -> Dict[str, int]:
         """ returns lowercase name candidates """
-        names = []
+        names_2_occurrenceind = {}
         print('procuring names...')
-        for eng_sent in tqdm(self.sentence_data[:, 0]):
+        for i, eng_sent in tqdm(enumerate(self.sentence_data[:, 0])):
             # lower case sentence heralding words
             point_positions = [i for i in range(len(eng_sent) - 1) if eng_sent[i: i + 2] == '. ']
             if point_positions:
@@ -165,19 +165,20 @@ class Trainer(ABC):
                 eng_sent = ''.join(chars)
 
             tokens = np.array(self.get_meaningful_tokens(eng_sent))
-            names.extend(filter(lambda token: token.istitle() and (len(token) > 1 or ord(token) > 255), tokens[1:]))  # omit first word since inconceivable whether name
-        return set(map(lambda name: name.lower(), names))
+            [names_2_occurrenceind.update({name.lower(): i}) for name in filter(lambda token: token.istitle() and (len(token) > 1 or ord(token) > 255), tokens[1:])]  # omit first word since inconceivable whether name
+        return names_2_occurrenceind
 
-    def equality_based_name_retrieval(self, title_based_names: List[str]) -> Set[str]:
+    def bilateral_presence_based_name_retrieval(self, namecandidate_2_sentenceind: Dict[str, int]) -> List[str]:
         names = []
-        for sentence_pair in tqdm(self.sentence_data):
-            ref_tokens, tar_tokens = map(lambda x: set(' '.join(self.get_meaningful_tokens(x)).lower().split(' ')), sentence_pair)
-            names.extend(ref_tokens & tar_tokens)
-        return set(names)
+        for name_candidate, i in namecandidate_2_sentenceind.items():
+            if name_candidate in map(lambda token: token.lower(), self.get_meaningful_tokens(self.sentence_data[i][1])):
+                names.append(name_candidate)
+        return names
 
     def procure_stems_2_rowinds_map(self, token_2_rowinds: TokenSentenceindsMap) -> TokenSentenceindsMap:
         """ carrying out time expensive name dismissal, stemming """
-        names = self.title_based_name_retrieval()
+        name_candidates = self.title_based_name_retrieval()
+        names = self.bilateral_presence_based_name_retrieval(name_candidates)
         print(names)
         time.sleep(100)
         starting_letter_grouped: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted([name.lower() for name in names]), lambda name: name[0])}
