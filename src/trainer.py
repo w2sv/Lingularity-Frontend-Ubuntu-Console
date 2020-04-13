@@ -126,8 +126,12 @@ class Trainer(ABC):
     @staticmethod
     def get_meaningful_tokens(sentence: str) -> List[str]:
         """ splitting at relevant delimiters, stripping off semantically irrelevant characters """
-        sentence = sentence.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^_`{|}~»«'))
-        return re.split("[' ’-]", sentence)
+        sentence = sentence.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^`{|}~»«'))
+        return re.split("[' ’\u2009\u202f\xa0\xa2-]", sentence)
+
+    @staticmethod
+    def strip_unicode(token: str) -> str:
+        return token.translate(str.maketrans('', '', "\u2009\u202f\xa0\xa2"))
 
     def procure_token_2_rowinds_map(self, stem=False) -> TokenSentenceindsMap:
         """ returns dict with
@@ -140,7 +144,8 @@ class Trainer(ABC):
             # split, discard impertinent characters, lower all
             tokens = (token.lower() for token in self.get_meaningful_tokens(sentence))
             for token in tokens:
-                if token.isnumeric():
+                # token = self.strip_unicode(token)
+                if token.isnumeric() or not len(token):
                     continue
                 # stem if desired and possible
                 if self.stemmer is not None and stem:
@@ -149,13 +154,15 @@ class Trainer(ABC):
                     token_2_rowinds[token] = [i]
                 else:
                     token_2_rowinds[token].append(i)
+        print([token for token in token_2_rowinds.keys()])
+        time.sleep(100)
         return token_2_rowinds
 
     def title_based_name_retrieval(self) -> Dict[str, int]:
         """ returns lowercase name candidates """
         names_2_occurrenceind = {}
         print('procuring names...')
-        for i, eng_sent in tqdm(enumerate(self.sentence_data[:, 0])):
+        for i, eng_sent in enumerate(tqdm(self.sentence_data[:, 0])):
             # lower case sentence heralding words
             point_positions = [i for i in range(len(eng_sent) - 1) if eng_sent[i: i + 2] == '. ']
             if point_positions:
@@ -164,33 +171,26 @@ class Trainer(ABC):
                     chars[i + 2] = chars[i + 2].lower()
                 eng_sent = ''.join(chars)
 
+
             tokens = np.array(self.get_meaningful_tokens(eng_sent))
             [names_2_occurrenceind.update({name.lower(): i}) for name in filter(lambda token: token.istitle() and (len(token) > 1 or ord(token) > 255), tokens[1:])]  # omit first word since inconceivable whether name
         return names_2_occurrenceind
 
-    def bilateral_presence_based_name_retrieval(self, namecandidate_2_sentenceind: Dict[str, int]) -> List[str]:
-        names = []
-        for name_candidate, i in namecandidate_2_sentenceind.items():
-            if name_candidate in map(lambda token: token.lower(), self.get_meaningful_tokens(self.sentence_data[i][1])):
-                names.append(name_candidate)
-        return names
+    def bilateral_presence_based_name_retrieval(self, namecandidate_2_sentenceind: Dict[str, int]) -> np.ndarray:
+        """ returns lowercase names """
+        return np.array(list(filter(lambda item: item[0] in map(lambda token: token.lower(), self.get_meaningful_tokens(self.sentence_data[item[1]][1])), list(namecandidate_2_sentenceind.items()))))[:, 0]
 
     def procure_stems_2_rowinds_map(self, token_2_rowinds: TokenSentenceindsMap) -> TokenSentenceindsMap:
         """ carrying out time expensive name dismissal, stemming """
         name_candidates = self.title_based_name_retrieval()
         names = self.bilateral_presence_based_name_retrieval(name_candidates)
-        print(names)
-        time.sleep(100)
-        starting_letter_grouped: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted([name.lower() for name in names]), lambda name: name[0])}
+        starting_letter_grouped: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted(names), lambda name: name[0])}
 
         stemmed_token_2_rowinds = {}
         print('stemming...')
         for token, inds in tqdm(list(token_2_rowinds.items())):
-            try:
-                if starting_letter_grouped.get(token[0]) is not None and token in starting_letter_grouped[token[0]]:
-                    continue
-            except IndexError:  # one whitespace in token map
-                pass
+            if starting_letter_grouped.get(token[0]) is not None and token in starting_letter_grouped[token[0]]:
+                continue
             if self.stemmer is not None:
                 token = self.stemmer.stem(token)
 
