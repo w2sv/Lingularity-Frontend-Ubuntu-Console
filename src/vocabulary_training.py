@@ -34,7 +34,7 @@ class VocabularyTrainer(Trainer):
                40: "You can't climb the ladder of success with your hands in your pockets.",
                60: "Keep hustlin' young blood.",
                80: 'Attayboy!',
-               100: '0361/2180494. Call me.'}
+               100: '0361/2680494. Call me.'}
 
     def __init__(self):
         super().__init__()

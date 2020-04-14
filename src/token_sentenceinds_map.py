@@ -1,69 +1,17 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Dict, Optional, AbstractSet, ValuesView, Any, Iterator
+from typing import List, Tuple, Dict, Optional, Iterator
 from operator import itemgetter
 from itertools import chain, groupby
 from functools import lru_cache
 from collections.abc import MutableMapping
-from collections import Mapping
 
 from tqdm import tqdm
 import numpy as np
 import nltk
 
+from .dictionary_abstractions import FrozenIterableKeyDict, IterableKeyDict
 from .utils.statistics import get_outliers
-from .utils.generic import append_2_or_insert_key
 from .utils.strings import get_meaningful_tokens, strip_unicode
-
-
-class CustomDict(MutableMapping, ABC):
-    def __init__(self, mapping_data: Optional[MutableMapping] = None):
-        self.mapping = {}
-        self.update(mapping_data)
-
-    def __getitem__(self, key):
-        return self.mapping[key]
-
-    def __setitem__(self, key, value):
-        self.mapping[key] = value
-
-    def __delitem__(self, key):
-        del self.mapping[key]
-
-    def __iter__(self):
-        return iter(self.mapping)
-
-    def __len__(self):
-        return len(self.mapping)
-
-    def __str__(self):
-        return str(self.mapping)
-
-    def items(self) -> AbstractSet[Tuple[Any, Any]]:
-        return self.mapping.items()
-
-    def keys(self) -> AbstractSet[Any]:
-        return self.mapping.keys()
-
-    def values(self) -> ValuesView[Any]:
-        return self.mapping.values()
-
-
-class IterableKeyDict(CustomDict):
-    def __init__(self, mapping_data: Optional[MutableMapping] = None):
-        super().__init__(mapping_data)
-
-    def append_or_insert(self, key, value):
-        if key in self:
-            if not hasattr('__iter__', value):
-                self[key].append(value)
-            else:
-                self[key].extend(value)
-        else:
-            self[key] = [value]
-
-
-class FrozenIterableKeyDict(Mapping):
-    pass
 
 
 class Token2Indices(IterableKeyDict):
@@ -95,11 +43,11 @@ class Token2Indices(IterableKeyDict):
 
     @property
     @lru_cache()
-    def occurrences_2_tokens(self) -> Dict[int, List[str]]:
+    def occurrences_2_tokens(self) -> FrozenIterableKeyDict:
         # TODO: implement frozen, hence hashable dict
-        occurrence_2_tokens = {}
+        occurrence_2_tokens = FrozenIterableKeyDict()
         for token, indices in self.items():
-            append_2_or_insert_key(occurrence_2_tokens, len(indices), token)
+            occurrence_2_tokens.append_or_insert(len(indices), token)
         return occurrence_2_tokens
 
     # ----------------
@@ -151,8 +99,6 @@ class Stem2SentenceIndices(Token2Indices):
     def __init__(self, raw_token_map: RawToken2SentenceIndices, stemmer: Optional[nltk.stem.SnowballStemmer]):
         self.raw_token_map: RawToken2SentenceIndices = raw_token_map
         self.stemmer: Optional[nltk.stem.SnowballStemmer] = stemmer
-
-        self.names: Optional[List[str]] = None
         super().__init__()
 
     @classmethod
@@ -164,9 +110,8 @@ class Stem2SentenceIndices(Token2Indices):
 
     def initialize(self):
         stemming_possible = self.stemmer is not None
-        self.names = self.get_proper_nouns()
 
-        starting_letter_grouped_names: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted(self.names), lambda name: name[0])}
+        starting_letter_grouped_names: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted(self.proper_nouns), lambda name: name[0])}
 
         print('Name Dismissal, Stemming...') if stemming_possible else print('Name Dismissal...')
         for token, indices in tqdm(list(self.raw_token_map.items())):
@@ -179,10 +124,12 @@ class Stem2SentenceIndices(Token2Indices):
     # ----------------
     # PROPER NOUN QUERY
     # ----------------
-    def get_proper_nouns(self) -> List[str]:
+    @property
+    @lru_cache()
+    def proper_nouns(self) -> Tuple[str]:
         # TODO: possibly refactor to tuple property
         name_candidates_2_sentence_indices = self._title_based_proper_noun_retrieval()
-        return self._bilateral_presence_based_proper_noun_filtering(name_candidates_2_sentence_indices)
+        return tuple(self._bilateral_presence_based_proper_noun_filtering(name_candidates_2_sentence_indices))
 
     def _title_based_proper_noun_retrieval(self) -> Dict[str, int]:
         """ returns lowercase name candidates """
@@ -199,5 +146,4 @@ class Stem2SentenceIndices(Token2Indices):
 
 
 if __name__ == '__main__':
-    dic = CustomDict({3: 5, 5: 9})
-    print(dic.get(4))
+    pass
