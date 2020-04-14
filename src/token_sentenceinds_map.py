@@ -62,11 +62,11 @@ class IterableKeyDict(CustomDict):
             self[key] = [value]
 
 
-class FrozenDict(Mapping):
+class FrozenIterableKeyDict(Mapping):
     pass
 
 
-class Token2Indices(CustomDict):
+class Token2Indices(IterableKeyDict):
     def __init__(self, mapping_data: Optional[MutableMapping] = None):
         super().__init__(mapping_data)
         self.initialize()
@@ -164,7 +164,7 @@ class Stem2SentenceIndices(Token2Indices):
 
     def initialize(self):
         stemming_possible = self.stemmer is not None
-        self.names = self.get_names()
+        self.names = self.get_proper_nouns()
 
         starting_letter_grouped_names: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted(self.names), lambda name: name[0])}
 
@@ -176,11 +176,15 @@ class Stem2SentenceIndices(Token2Indices):
                 token = self.stemmer.stem(token)
             self.append_or_insert(token, indices)
 
-    def get_names(self) -> List[str]:
-        name_candidates_2_sentence_indices = self._title_based_name_retrieval()
-        return self._bilateral_presence_based_name_filtering(name_candidates_2_sentence_indices)
+    # ----------------
+    # PROPER NOUN QUERY
+    # ----------------
+    def get_proper_nouns(self) -> List[str]:
+        # TODO: possibly refactor to tuple property
+        name_candidates_2_sentence_indices = self._title_based_proper_noun_retrieval()
+        return self._bilateral_presence_based_proper_noun_filtering(name_candidates_2_sentence_indices)
 
-    def _title_based_name_retrieval(self) -> Dict[str, int]:
+    def _title_based_proper_noun_retrieval(self) -> Dict[str, int]:
         """ returns lowercase name candidates """
         names_2_occurrenceind = {}
         print('Procuring names...')
@@ -189,7 +193,7 @@ class Stem2SentenceIndices(Token2Indices):
             [names_2_occurrenceind.update({name.lower(): i}) for name in filter(lambda token: token.istitle() and (len(token) > 1 or ord(token) > 255), tokens)]
         return names_2_occurrenceind
 
-    def _bilateral_presence_based_name_filtering(self, namecandidate_2_sentenceind: Dict[str, int]) -> List[str]:
+    def _bilateral_presence_based_proper_noun_filtering(self, namecandidate_2_sentenceind: Dict[str, int]) -> List[str]:
         """ returns lowercase names """
         return list(np.array(list(filter(lambda item: item[0] in map(lambda token: token.lower(), get_meaningful_tokens(self.sentence_data[item[1]][1])), list(namecandidate_2_sentenceind.items()))))[:, 0])
 
