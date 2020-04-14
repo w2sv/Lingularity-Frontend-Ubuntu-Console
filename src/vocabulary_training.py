@@ -12,8 +12,9 @@ import unidecode
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .trainer import Trainer, TokenSentenceindsMap
+from .trainer import Trainer
 from .sentence_translation import SentenceTranslationTrainer
+from .token_sentenceinds_map import RawToken2SentenceIndices
 
 
 VocabularyStatistics = Dict[str, Dict[str, Any]]  # foreign language token -> Dict[score: float, times_seen: int, last_seen_date: str]
@@ -39,7 +40,7 @@ class VocabularyTrainer(Trainer):
     def __init__(self):
         super().__init__()
 
-        self.token_2_rowinds: Optional[TokenSentenceindsMap] = None
+        self.token_2_rowinds: Optional[RawToken2SentenceIndices] = None
         self.vocabulary_statistics: Optional[VocabularyStatistics] = None
         self.vocabulary: Optional[Dict[str, str]] = None
 
@@ -56,7 +57,7 @@ class VocabularyTrainer(Trainer):
     def run(self):
         self._language = self.select_language()
         self.sentence_data = self.parse_sentence_data()
-        self.token_2_rowinds = self.procure_token_2_rowinds_map()
+        self.token_2_rowinds = RawToken2SentenceIndices(self.sentence_data)
         self.vocabulary = self.parse_vocabulary()
         self.vocabulary_statistics = self.load_vocabulary_statistics()
         self.update_documentation()
@@ -237,7 +238,7 @@ class VocabularyTrainer(Trainer):
 
     def get_comprising_sentences(self, token: str) -> Optional[List[str]]:
         root = token[:self.ROOT_LENGTH]
-        sentence_indices = np.array(self.get_root_comprising_sentence_inds(root))
+        sentence_indices = np.array(self.token_2_rowinds.get_root_comprising_sentence_indices(root))
         if not len(sentence_indices):
             return None
 

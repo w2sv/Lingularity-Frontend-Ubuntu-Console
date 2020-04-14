@@ -44,7 +44,6 @@ class Token2Indices(IterableKeyDict):
     @property
     @lru_cache()
     def occurrences_2_tokens(self) -> FrozenIterableKeyDict:
-        # TODO: implement frozen, hence hashable dict
         occurrence_2_tokens = FrozenIterableKeyDict()
         for token, indices in self.items():
             occurrence_2_tokens.append_or_insert(len(indices), token)
@@ -85,7 +84,7 @@ class RawToken2SentenceIndices(Token2Indices):
                     excluding numbers
                 values: lists of sentence indices in which occurring """
 
-        print('Parsing data...')
+        print('Mapping tokens...')
         for i, sentence in enumerate(tqdm(self.sentence_data[:, 1])):
             # split, discard impertinent characters, lower all
             tokens = (token.lower() for token in get_meaningful_tokens(sentence))

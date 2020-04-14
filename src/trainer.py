@@ -16,9 +16,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-TokenSentenceindsMap = Dict[str, List[int]]
-
-
 class Trainer(ABC):
     def __init__(self):
         self.base_data_path = os.path.join(os.getcwd(), 'language_data')

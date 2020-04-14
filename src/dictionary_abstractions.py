@@ -6,7 +6,8 @@ from collections.abc import MutableMapping
 class CustomDict(MutableMapping, ABC):
     def __init__(self, mapping_data: Optional[MutableMapping] = None):
         self.mapping = {}
-        self.update(mapping_data)
+        if mapping_data is not None:
+            self.update(mapping_data)
 
     def __getitem__(self, key):
         return self.mapping[key]
@@ -42,9 +43,9 @@ class IterableKeyDict(CustomDict):
 
     def append_or_insert(self, key: Any, value: Union[Iterable[Any], Any]):
         if key in self:
-            self[key].append(value) if not hasattr('__iter__', value) else self[key].extend(value)
+            self[key].append(value) if not hasattr(value, '__iter__') else self[key].extend(value)
         else:
-            self[key] = [value] if not hasattr('__iter__', value) else value
+            self[key] = [value] if not hasattr(value, '__iter__') else value
 
 
 class FrozenIterableKeyDict(IterableKeyDict):
