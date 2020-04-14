@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Dict, Optional, AbstractSet, ValuesView, Any
+from typing import List, Tuple, Dict, Optional, AbstractSet, ValuesView, Any, Iterator
 from operator import itemgetter
 from itertools import chain, groupby
+from functools import lru_cache
 from collections.abc import MutableMapping
+from collections import Mapping
 
 from tqdm import tqdm
 import numpy as np
@@ -46,12 +48,11 @@ class CustomDict(MutableMapping, ABC):
         return self.mapping.values()
 
 
-class Token2IndicesBase(CustomDict):
+class IterableKeyDict(CustomDict):
     def __init__(self, mapping_data: Optional[MutableMapping] = None):
         super().__init__(mapping_data)
 
     def append_or_insert(self, key, value):
-        """ assert that mapping values iterable """
         if key in self:
             if not hasattr('__iter__', value):
                 self[key].append(value)
@@ -60,38 +61,75 @@ class Token2IndicesBase(CustomDict):
         else:
             self[key] = [value]
 
-    @abstractmethod
-    def initialize(self):
-        pass
 
+class FrozenDict(Mapping):
+    pass
+
+
+class Token2Indices(CustomDict):
+    def __init__(self, mapping_data: Optional[MutableMapping] = None):
+        super().__init__(mapping_data)
+        self.initialize()
+
+    # -----------------
+    # TOKEN QUERY
+    # -----------------
+    def get_root_comprising_tokens(self, root) -> List[str]:
+        return [k for k in self.keys() if root in k]
+
+    # -----------------
+    # ROOT BASED SENTENCE INDEX QUERY
+    # -----------------
+    def get_root_comprising_sentence_indices(self, root: str) -> List[int]:
+        return list(chain.from_iterable([v for k, v in self.items() if root in k]))
+
+    def get_root_preceded_token_comprising_sentence_indices(self, root: str) -> List[int]:
+        """ unused """
+        return list(chain.from_iterable([v for k, v in self.items() if any(token.startswith(root) for token in k.split(' '))]))
+
+    # -----------------
+    # TOKEN OCCURRENCES
+    # -----------------
     def get_sorted_token_n_occurrences_list(self) -> List[Tuple[str, int]]:
         return [(i[0], len(i[1])) for i in sorted(list(self.items()), key=lambda x: len(x[1]))]
 
-    def get_n_occurrences_2_tokens_map(self) -> Dict[int, List[str]]:
+    @property
+    @lru_cache()
+    def occurrences_2_tokens(self) -> Dict[int, List[str]]:
+        # TODO: implement frozen, hence hashable dict
         occurrence_2_tokens = {}
         for token, indices in self.items():
             append_2_or_insert_key(occurrence_2_tokens, len(indices), token)
         return occurrence_2_tokens
 
-    def discard_positive_outliers(self):
-        noccurrence_2_tokens = self.get_n_occurrences_2_tokens_map()
-        occurrence_outliers = get_outliers(list(noccurrence_2_tokens.keys()), positive=True, iqr_coeff=0.2)
-        corresponding_tokens = chain.from_iterable(itemgetter(*occurrence_outliers)(noccurrence_2_tokens))
+    # ----------------
+    # OCCURRENCE OUTLIER BASED
+    # ----------------
+    def _get_occurrence_outlier_corresponding_tokens(self, occurrence_outliers: List[int]) -> Iterator[str]:
+        return chain.from_iterable(itemgetter(*occurrence_outliers)(self.occurrences_2_tokens))
+
+    def pop_positive_occurrence_outliers(self, iqr_coefficient: float = 0.2):
+        occurrence_outliers = get_outliers(list(self.occurrences_2_tokens.keys()), positive=True, iqr_coeff=iqr_coefficient)
+        corresponding_tokens = self._get_occurrence_outlier_corresponding_tokens(occurrence_outliers)
         [self.pop(outlier_token) for outlier_token in corresponding_tokens]
 
-    @classmethod
-    def get_negative_outliers(self):
-        noccurrence_2_tokens = self.get_n_occurrences_2_tokens_map()
-        occurrence_outliers = get_outliers(list(noccurrence_2_tokens.keys()), positive=False, iqr_coeff=0)
-        corresponding_tokens = chain.from_iterable((noccurrence_2_tokens[occ_out] for occ_out in occurrence_outliers))
+    def get_negative_occurrence_outliers(self, iqr_coefficient: float = 0):  # -> Token2IndicesBase
+        occurrence_outliers = get_outliers(list(self.occurrences_2_tokens.keys()), positive=False, iqr_coeff=iqr_coefficient)
+        corresponding_tokens = self._get_occurrence_outlier_corresponding_tokens(occurrence_outliers)
         return {token: self[token] for token in corresponding_tokens}
 
+    # ----------------
+    # ABSTRACTS
+    # ----------------
+    @abstractmethod
+    def initialize(self):
+        pass
 
-class Token2SentenceIndices(Token2IndicesBase):
+
+class RawToken2SentenceIndices(Token2Indices):
     def __init__(self, sentence_data: np.ndarray):
-        super().__init__()
         self.sentence_data = sentence_data
-        self.initialize()
+        super().__init__()
 
     def initialize(self):
         """ returns dict with
@@ -109,15 +147,17 @@ class Token2SentenceIndices(Token2IndicesBase):
                 self.append_or_insert(token, i)
 
 
-class Stem2SentenceIndices(Token2IndicesBase):
-    def __init__(self, raw_token_map: Token2SentenceIndices, stemmer: Optional[nltk.stem.SnowballStemmer]):
-        super().__init__()
-        self.raw_token_map: Token2SentenceIndices = raw_token_map
+class Stem2SentenceIndices(Token2Indices):
+    def __init__(self, raw_token_map: RawToken2SentenceIndices, stemmer: Optional[nltk.stem.SnowballStemmer]):
+        self.raw_token_map: RawToken2SentenceIndices = raw_token_map
         self.stemmer: Optional[nltk.stem.SnowballStemmer] = stemmer
 
         self.names: Optional[List[str]] = None
+        super().__init__()
 
-        self.initialize()
+    @classmethod
+    def from_sentence_data(cls, sentence_data: np.ndarray, stemmer: Optional[nltk.stem.SnowballStemmer]):
+        return cls(RawToken2SentenceIndices(sentence_data), stemmer)
 
     def __getattr__(self, item):
         return dir(self.raw_token_map)[item]

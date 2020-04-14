@@ -235,16 +235,6 @@ class VocabularyTrainer(Trainer):
             evaluation = 'wrong'
         return self.reverse_response_evaluations[evaluation]
 
-    def __get_root_comprising_tokens(self, root) -> List[str]:
-        return [k for k in self.token_2_rowinds.keys() if root in k]
-
-    def get_root_comprising_sentence_inds(self, root: str) -> List[int]:
-        return list(chain.from_iterable([v for k, v in self.token_2_rowinds.items() if root in k]))
-
-    def get_root_preceded_token_comprising_sentence_inds(self, root: str) -> List[int]:
-        """ unused """
-        return list(chain.from_iterable([v for k, v in self.token_2_rowinds.items() if any(token.startswith(root) for token in k.split(' '))]))
-
     def get_comprising_sentences(self, token: str) -> Optional[List[str]]:
         root = token[:self.ROOT_LENGTH]
         sentence_indices = np.array(self.get_root_comprising_sentence_inds(root))
