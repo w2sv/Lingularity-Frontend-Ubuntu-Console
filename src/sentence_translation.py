@@ -2,24 +2,23 @@ import sys
 import os
 import time
 from datetime import date
-from typing import List, Tuple, Dict
+from typing import List
 from itertools import groupby, chain
 from bisect import insort
 from operator import ge, le
 
 import numpy as np
-from tqdm import tqdm
 
 from .trainer import Trainer
 from .web_interaction import ContentRetriever
 from .token_sentenceinds_map import RawToken2SentenceIndices, Stem2SentenceIndices
 
 
-# TODO: asynchronous stem map computation
+# TODO: asynchronous stem map computation, dynamic mode specific occurrence frequency limits
 
 
 class SentenceTranslationTrainer(Trainer):
-	DEFAULT_NAMES = ['Tom', 'Mary']
+	DEFAULT_NAMES = ('Tom', 'Mary')
 	LANGUAGE_CORRESPONDING_NAMES = {'Italian': ['Alessandro', 'Christina'],
 				  'French': ['Antoine', 'Amelie'],
 				  'Spanish': ['Emilio', 'Luciana'],
@@ -93,10 +92,19 @@ class SentenceTranslationTrainer(Trainer):
 	# .MODE
 	# -----------------
 	def select_mode(self) -> str:
-		modes = ['vocabulary acquisition', 'lowkey', 'random']
+		modes = ('vocabulary acquisition', 'lowkey', 'random')
+		explanations = (
+			'show me sentences possessing an increased probability of containing rather infrequently used vocabulary',
+			'show me sentences comprising exclusively commonly used vocabulary',
+			'just hit me with dem sentences brah')
 
 		self.clear_screen()
-		print('Select mode:\t', '\t\t\t'.join([mode.title() for mode in modes]))
+
+		print('MODES\n')
+		for i in range(3):
+			print(f'{modes[i].title()}: ')
+			print('\t', explanations[i])
+		print('\nSelect mode:\t')
 		mode_selection = self.resolve_input(input().lower(), modes)
 		if mode_selection is None:
 			self.recurse_on_invalid_input(self.select_mode)
@@ -119,7 +127,7 @@ class SentenceTranslationTrainer(Trainer):
 
 	def pre_training_display(self):
 		self.clear_screen()
-		instruction_text = f"""Data file comprises {len(self.sentence_data):,d} sentences.\nPress Enter to advance to next sentence\nEnter 'vocabulary' to append new entry to language specific vocabulary file, 'exit' to terminate program.\n"""
+		instruction_text = f"""Database comprises {len(self.sentence_data):,d} sentences.\nPress Enter to advance to next sentence\nEnter 'vocabulary' to append new entry to language specific vocabulary file, 'exit' to terminate program.\n"""
 		print(instruction_text)
 
 		lets_go_translation = self.get_lets_go_translation()

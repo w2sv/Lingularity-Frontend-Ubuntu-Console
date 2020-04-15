@@ -1,17 +1,14 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, List, Dict, Set, Any
+from typing import Callable, Optional, Iterable, Dict
 import os
 import platform
 import sys
 import time
 import json
 import datetime
-import re
 from functools import lru_cache
-from itertools import groupby
 
 import nltk
-from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -81,7 +78,7 @@ class Trainer(ABC):
         return func()
 
     @staticmethod
-    def resolve_input(input: str, options: List[str]) -> Optional[str]:
+    def resolve_input(input: str, options: Iterable[str]) -> Optional[str]:
         options_starting_with = [o for o in options if o.startswith(input)]
         if len(options_starting_with) == 1:
             return options_starting_with[0]
