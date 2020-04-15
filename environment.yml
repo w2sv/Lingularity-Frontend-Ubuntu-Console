@@ -4,6 +4,7 @@ channels:
   - defaults
 dependencies:
   - python=3.7
+  - pip=19.3.1
   - matplotlib
   - numpy
   - pyinstaller
@@ -11,5 +12,5 @@ dependencies:
   - requests=2.23.0
   - tqdm
   - nltk=3.4.5
-  pip:
+  - pip:
     - bs4==0.0.1
