@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="40bbd82a-aa0c-4573-b219-bd4e514e781c" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sentence_translation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/sentence_translation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/token_sentenceinds_map.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/token_sentenceinds_map.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/vocabulary_training.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/vocabulary_training.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,6 +28,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/language_data/Italian" />
+    <property name="run.code.analysis.last.selected.profile" value="aDefault" />
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RecentsManager">
@@ -66,6 +65,10 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
+    <state x="547" y="285" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1" timestamp="1586948148141">
+      <screen x="0" y="0" width="1600" height="860" />
+    </state>
+    <state x="547" y="285" key="ANALYSIS_DLG_com.intellij.analysis.BaseAnalysisAction$1/0.0.1600.860@0.0.1600.860" timestamp="1586948148141" />
     <state x="579" y="204" key="FileChooserDialogImpl" timestamp="1586602577825">
       <screen x="0" y="0" width="1600" height="860" />
     </state>

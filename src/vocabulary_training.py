@@ -164,7 +164,6 @@ class VocabularyTrainer(Trainer):
 
         with open(self.vocabulary_file_path, 'w') as write_file:
             write_file.writelines(vocabulary)
-        print('Enter translation of current item: ', end='')
 
     def train(self):
         entries = [entry for entry in self.vocabulary.keys() if self.vocabulary_statistics[entry]['s'] < 5 or self.day_difference(self.vocabulary_statistics[entry]['lfd']) >= self.DAYS_TIL_RETENTION_ASSERTION]
@@ -179,7 +178,13 @@ class VocabularyTrainer(Trainer):
             display_token, translation = get_display_token(entry), get_translation(entry)
             if display_item:
                 print(f'{display_token} = ', end='')
-            response = input()
+            else:
+                print('Enter translation: ', end='')
+            try:
+                response = input()
+            except KeyboardInterrupt:
+                display_item = False
+                continue
             if response.lower() == 'exit':
                 break
             elif response.lower().startswith('append') and i:
