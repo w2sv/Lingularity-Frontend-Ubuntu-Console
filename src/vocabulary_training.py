@@ -133,7 +133,8 @@ class VocabularyTrainer(Trainer):
             print("Couldn't find any new vocabulary.")
         print(f'Vocabulary file comprises {n_imperfect_entries} entries.')
         print("Enter 'append' + additional translation(s) in order to append to the ones of the previously faced item.")
-        print("Distinct newly entered translation tokens are to be separated by commas.", '\n')
+        print("Distinct newly entered translation tokens are to be separated by commas.")
+        print("Enter 'exit' to terminate the program.", '\n')
 
         lets_go_translation = self.get_lets_go_translation()
         print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')
