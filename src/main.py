@@ -1,11 +1,10 @@
 import os
-import time
 
 from .sentence_translation import SentenceTranslationTrainer
 from .vocabulary_training import VocabularyTrainer
 from .trainer import Trainer
 
-_TRAINERS = {'s': SentenceTranslationTrainer, 'v': VocabularyTrainer}
+_TRAINERS = {'sentence translation': SentenceTranslationTrainer, 'vocabulary trainer': VocabularyTrainer}
 
 
 def display_starting_screen():
@@ -22,9 +21,8 @@ def display_starting_screen():
 def select_training() -> str:
     indentation = '\t' * 4
     print("\nSelect Training: ", end='')
-    training = input(f"{indentation}(S)entence translation{indentation}(V)ocabulary training\n").lower()[0]
-
-    if training not in _TRAINERS.keys():
+    training = Trainer.resolve_input(input(f"{indentation}(S)entence translation{indentation}(V)ocabulary training\n").lower(), _TRAINERS.keys())
+    if training is None:
         return Trainer.recurse_on_invalid_input(select_training)
 
     Trainer.clear_screen()
