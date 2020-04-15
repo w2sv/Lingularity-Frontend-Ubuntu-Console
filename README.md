@@ -5,7 +5,7 @@ bilingual sentence data based command line language trainer written in python
 ### Features
 
 __SentenceTranslation__
-translation of reference language sentences to desired target language with subsequent ground truth translation display foregoing time expensive entering of sentences
+translation of reference language sentences to desired target language with subsequent ground truth translation display foregoing laborious entering of sentences
 
 __VocabularyTrainer__
 flashcard learning of previously accumulated vocabulary querying and displaying ground truth sentences comprising respective word stems in order to facilitate the comprehension of the words true utilization within the language whilst grasping additional shades of meaning
@@ -18,8 +18,8 @@ flashcard learning of previously accumulated vocabulary querying and displaying 
 
 ### Execution 
 
-* activate env by entering `conda activate ./env` from repo root
-* run program by typing `python -m src.main` 
+* activate environment by entering `conda activate ./env` from repo root
+* run program by entering `python -m src.main` 
 
 ### Remarks
 
