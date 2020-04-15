@@ -22,11 +22,10 @@ def display_starting_screen():
 def select_training() -> str:
     indentation = '\t' * 4
     print("Select Training: ", end='')
-    training = input(f"{indentation}(S)entence translation{indentation}(V)ocabulary training\n").lower()
+    training = input(f"{indentation}(S)entence translation{indentation}(V)ocabulary training\n").lower()[0]
 
     if training not in _TRAINERS.keys():
-        Trainer.recurse_on_invalid_input(select_training)
-        return select_training()
+        return Trainer.recurse_on_invalid_input(select_training)
 
     Trainer.clear_screen()
     return training
