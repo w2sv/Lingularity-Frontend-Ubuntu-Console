@@ -8,14 +8,14 @@ from bisect import insort
 from operator import ge, le
 
 import numpy as np
+from tqdm import tqdm
 
 from .trainer import Trainer
 from .web_interaction import ContentRetriever
 from .token_sentenceinds_map import RawToken2SentenceIndices, Stem2SentenceIndices
 
 
-# TODO: restructuring, weight score regarding entire sentence
-#  asynchronous stem map computation, instruction text complexity, renaming
+# TODO: asynchronous stem map computation
 
 
 class SentenceTranslationTrainer(Trainer):
@@ -40,7 +40,9 @@ class SentenceTranslationTrainer(Trainer):
 			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
 			self.webpage_interactor.unzip_file(zip_file_link)
 		self.sentence_data = self.parse_sentence_data()
-		self.select_mode()
+		mode_selection = self.select_mode()
+		if mode_selection != 'random':
+			self.filter_sentences_mode_correspondingly(mode_selection)
 		self.pre_training_display()
 		self.train()
 
@@ -87,29 +89,32 @@ class SentenceTranslationTrainer(Trainer):
 					self.reference_language_inversion, reference_language_validity = [True]*2
 		return selection
 
-	def select_mode(self):
+	# -----------------
+	# .MODE
+	# -----------------
+	def select_mode(self) -> str:
 		modes = ['vocabulary acquisition', 'lowkey', 'random']
 
 		self.clear_screen()
 		print('Select mode:\t', '\t\t\t'.join([mode.title() for mode in modes]))
-		level_selection = self.resolve_input(input().lower(), modes)
-		if level_selection is None:
+		mode_selection = self.resolve_input(input().lower(), modes)
+		if mode_selection is None:
 			self.recurse_on_invalid_input(self.select_mode)
+		return mode_selection
 
-		elif level_selection == 'random':
-			return
-
+	def filter_sentences_mode_correspondingly(self, mode: str):
 		stems_2_indices = Stem2SentenceIndices.from_sentence_data(self.sentence_data, self.stemmer)
 
-		def get_limit_corresponding_sentence_indices(occurrence_limit: int, mode: str) -> List[int]:
-			assert mode in ['max', 'min']
-			operator = ge if mode == 'min' else le
+		def get_limit_corresponding_sentence_indices(occurrence_limit: int, filter_mode: str) -> List[int]:
+			assert filter_mode in ['max', 'min']
+			operator = ge if filter_mode == 'min' else le
 			return list(chain.from_iterable((indices for indices in stems_2_indices.values() if operator(len(indices), occurrence_limit))))
 
-		if level_selection == 'vocabulary acquisition':
+		if mode == 'vocabulary acquisition':
 			indices = get_limit_corresponding_sentence_indices(20, 'max')
-		elif level_selection == 'lowkey':
+		elif mode == 'lowkey':
 			indices = get_limit_corresponding_sentence_indices(50, 'min')
+		print('Getting corresponding sentences...')
 		self.sentence_data = self.sentence_data[indices]
 
 	def pre_training_display(self):

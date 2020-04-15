@@ -115,7 +115,7 @@ class Stem2SentenceIndices(Token2Indices):
 
         starting_letter_grouped_names: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted(self.proper_nouns), lambda name: name[0])}
 
-        print('Proper noun dismissal, stemming...') if stemming_possible else print('Proper noun dismissal...')
+        print('Discarding proper nouns, stemming...') if stemming_possible else print('Discarding proper nouns...')
         for token, indices in tqdm(list(self.raw_token_map.items())):
             if starting_letter_grouped_names.get(token[0]) is not None and token in starting_letter_grouped_names[token[0]]:
                 continue
