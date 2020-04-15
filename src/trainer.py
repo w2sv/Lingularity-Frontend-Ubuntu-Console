@@ -16,6 +16,8 @@ import matplotlib.pyplot as plt
 class Trainer(ABC):
     def __init__(self):
         self.base_data_path = os.path.join(os.getcwd(), 'language_data')
+        if not os.path.exists(self.base_data_path):
+            os.mkdir(self.base_data_path)
         self._language = None  # equals reference language in case of reference language inversion
         self.reference_language_inversion = False
 
@@ -101,7 +103,7 @@ class Trainer(ABC):
         # remove reference appendices from source file if newly downloaded
         if len(split_data[0]) > 2:
             bilingual_sentence_data = ['\t'.join(row_splits[:2]) + '\n' for row_splits in split_data]
-            with open(self.sentence_file_path, 'w') as write_file:
+            with open(self.sentence_file_path, 'w', encoding='utf-8') as write_file:
                 write_file.writelines(bilingual_sentence_data)
             split_data = [i.split('\t') for i in bilingual_sentence_data]
 
