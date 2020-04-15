@@ -1,22 +1,16 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, List, Dict, Set, Any
+from typing import Callable, Optional, Iterable, Dict
 import os
 import platform
 import sys
 import time
 import json
 import datetime
-import re
 from functools import lru_cache
-from itertools import groupby
 
 import nltk
-from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
-
-
-TokenSentenceindsMap = Dict[str, List[int]]
 
 
 class Trainer(ABC):
@@ -84,7 +78,7 @@ class Trainer(ABC):
         return func()
 
     @staticmethod
-    def resolve_input(input: str, options: List[str]) -> Optional[str]:
+    def resolve_input(input: str, options: Iterable[str]) -> Optional[str]:
         options_starting_with = [o for o in options if o.startswith(input)]
         if len(options_starting_with) == 1:
             return options_starting_with[0]
@@ -119,78 +113,6 @@ class Trainer(ABC):
             split_data = [list(reversed(row)) for row in split_data]
 
         return np.array(split_data)
-
-    @staticmethod
-    def get_meaningful_tokens(sentence: str) -> List[str]:
-        """ splitting at relevant delimiters, stripping off semantically irrelevant characters """
-        sentence = sentence.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^`{|}~»«'))
-        return re.split("[' ’\u2009\u202f\xa0\xa2-]", sentence)
-
-    @staticmethod
-    def strip_unicode(token: str) -> str:
-        return token.translate(str.maketrans('', '', "\u2009\u202f\xa0\xa2"))
-
-    def procure_token_2_rowinds_map(self, stem=False) -> TokenSentenceindsMap:
-        """ returns dict with
-                keys: distinct lowercase delimiter split punctuation stripped foreign language vocabulary tokens
-                    excluding numbers
-                values: lists of sentence indices in which occurring """
-        token_2_rowinds = {}
-        print('Parsing data...')
-        for i, sentence in enumerate(tqdm(self.sentence_data[:, 1])):
-            # split, discard impertinent characters, lower all
-            tokens = (token.lower() for token in self.get_meaningful_tokens(sentence))
-            for token in tokens:
-                if not len(token) or any(i.isdigit() for i in token):
-                    continue
-                # stem if desired and possible
-                if self.stemmer is not None and stem:
-                    token = self.stemmer.stem(token)
-                if token_2_rowinds.get(token) is None:
-                    token_2_rowinds[token] = [i]
-                else:
-                    token_2_rowinds[token].append(i)
-        return token_2_rowinds
-
-    def title_based_name_retrieval(self) -> Dict[str, int]:
-        """ returns lowercase name candidates """
-        names_2_occurrenceind = {}
-        print('Procuring names...')
-        for i, eng_sent in enumerate(tqdm(self.sentence_data[:, 0])):
-            # lower case sentence heralding words
-            point_positions = [i for i in range(len(eng_sent) - 1) if eng_sent[i: i + 2] == '. ']
-            if point_positions:
-                chars = list(eng_sent)
-                for i in point_positions:
-                    chars[i + 2] = chars[i + 2].lower()
-                eng_sent = ''.join(chars)
-            tokens = np.array(self.get_meaningful_tokens(eng_sent))
-            [names_2_occurrenceind.update({name.lower(): i}) for name in filter(lambda token: token.istitle() and (len(token) > 1 or ord(token) > 255), tokens[1:])]  # omit first word since inconceivable whether name
-        return names_2_occurrenceind
-
-    def bilateral_presence_based_name_retrieval(self, namecandidate_2_sentenceind: Dict[str, int]) -> np.ndarray:
-        """ returns lowercase names """
-        return np.array(list(filter(lambda item: item[0] in map(lambda token: token.lower(), self.get_meaningful_tokens(self.sentence_data[item[1]][1])), list(namecandidate_2_sentenceind.items()))))[:, 0]
-
-    def procure_stems_2_rowinds_map(self, token_2_rowinds: TokenSentenceindsMap) -> TokenSentenceindsMap:
-        """ carrying out time expensive name dismissal, stemming """
-        name_candidates = self.title_based_name_retrieval()
-        names = self.bilateral_presence_based_name_retrieval(name_candidates)
-        starting_letter_grouped_names: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted(names), lambda name: name[0])}
-
-        stemmed_token_2_rowinds = {}
-        print('Stemming...')
-        for token, inds in tqdm(list(token_2_rowinds.items())):
-            if starting_letter_grouped_names.get(token[0]) is not None and token in starting_letter_grouped_names[token[0]]:
-                continue
-            if self.stemmer is not None:
-                token = self.stemmer.stem(token)
-
-            if stemmed_token_2_rowinds.get(token) is not None:
-                stemmed_token_2_rowinds[token].extend(inds)
-            else:
-                stemmed_token_2_rowinds[token] = inds
-        return stemmed_token_2_rowinds
 
     def get_lets_go_translation(self) -> Optional[str]:
         lets_go_occurrence_range = ((sentence_pair[0], i) for i, sentence_pair in

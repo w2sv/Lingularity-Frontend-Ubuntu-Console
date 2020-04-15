@@ -1,8 +1,7 @@
 import sys
 import os
 import time
-from datetime import date
-from typing import List, Tuple, Dict
+from typing import List
 from itertools import groupby, chain
 from bisect import insort
 from operator import ge, le
@@ -10,15 +9,15 @@ from operator import ge, le
 import numpy as np
 
 from .trainer import Trainer
-from .web_interaction import ContentRetriever
+from .webpage_interaction import ContentRetriever
+from .token_sentenceinds_map import Stem2SentenceIndices
 
 
-# TODO: restructuring, weight score regarding entire sentence
-#  asynchronous stem map computation, instruction text complexity, renaming
+# TODO: asynchronous stem map computation, dynamic mode specific occurrence frequency limits
 
 
 class SentenceTranslationTrainer(Trainer):
-	DEFAULT_NAMES = ['Tom', 'Mary']
+	DEFAULT_NAMES = ('Tom', 'Mary')
 	LANGUAGE_CORRESPONDING_NAMES = {'Italian': ['Alessandro', 'Christina'],
 				  'French': ['Antoine', 'Amelie'],
 				  'Spanish': ['Emilio', 'Luciana'],
@@ -27,8 +26,6 @@ class SentenceTranslationTrainer(Trainer):
 
 	def __init__(self):
 		super().__init__()
-		self.date = str(date.today())
-
 		self.webpage_interactor = ContentRetriever()
 
 		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
@@ -39,7 +36,9 @@ class SentenceTranslationTrainer(Trainer):
 			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
 			self.webpage_interactor.unzip_file(zip_file_link)
 		self.sentence_data = self.parse_sentence_data()
-		self.select_mode()
+		mode_selection = self.select_mode()
+		if mode_selection != 'random':
+			self.filter_sentences_mode_correspondingly(mode_selection)
 		self.pre_training_display()
 		self.train()
 
@@ -47,8 +46,9 @@ class SentenceTranslationTrainer(Trainer):
 	# INITIALIZATION
 	# ---------------
 	def select_language(self) -> str:
-		print('Trying to connect to webpage...')
-		self.webpage_interactor.get_language_ziplink_dict()
+		if self.webpage_interactor.languages_2_ziplinks is None:
+			print('Trying to connect to webpage...')
+			self.webpage_interactor.get_language_ziplink_dict()
 		sucessfully_retrieved = len(self.webpage_interactor.languages_2_ziplinks) != 0
 		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if sucessfully_retrieved else os.listdir(self.base_data_path)
 		insort(eligible_languages, 'English')
@@ -70,7 +70,7 @@ class SentenceTranslationTrainer(Trainer):
 
 		selection = self.resolve_input(input('\nSelect language: \n').title(), eligible_languages)
 		if selection is None:
-			self.recurse_on_invalid_input(self.select_language)
+			return self.recurse_on_invalid_input(self.select_language)
 
 		elif selection == 'English':
 			eligible_languages.remove('English')
@@ -86,35 +86,46 @@ class SentenceTranslationTrainer(Trainer):
 					self.reference_language_inversion, reference_language_validity = [True]*2
 		return selection
 
-	def select_mode(self):
-		modes = ['vocabulary acquisition', 'lowkey', 'random']
+	# -----------------
+	# .MODE
+	# -----------------
+	def select_mode(self) -> str:
+		modes = ('vocabulary acquisition', 'lowkey', 'random')
+		explanations = (
+			'show me sentences possessing an increased probability of containing rather infrequently used vocabulary',
+			'show me sentences comprising exclusively commonly used vocabulary',
+			'just hit me with dem sentences brah')
 
 		self.clear_screen()
-		print('Select mode:\t', '\t\t\t'.join([mode.title() for mode in modes]))
-		level_selection = self.resolve_input(input().lower(), modes)
-		if level_selection is None:
+
+		print('MODES\n')
+		for i in range(3):
+			print(f'{modes[i].title()}: ')
+			print('\t', explanations[i])
+		print('\nSelect mode:\t')
+		mode_selection = self.resolve_input(input().lower(), modes)
+		if mode_selection is None:
 			self.recurse_on_invalid_input(self.select_mode)
+		return mode_selection
 
-		elif level_selection == 'random':
-			return
+	def filter_sentences_mode_correspondingly(self, mode: str):
+		stems_2_indices = Stem2SentenceIndices.from_sentence_data(self.sentence_data, self.stemmer)
 
-		tokens_2_inds = self.procure_token_2_rowinds_map()
-		stems_2_inds = self.procure_stems_2_rowinds_map(tokens_2_inds)
+		def get_limit_corresponding_sentence_indices(occurrence_limit: int, filter_mode: str) -> List[int]:
+			assert filter_mode in ['max', 'min']
+			operator = ge if filter_mode == 'min' else le
+			return list(chain.from_iterable((indices for indices in stems_2_indices.values() if operator(len(indices), occurrence_limit))))
 
-		def get_limit_corresponding_sentence_indices(occurrence_limit: int, mode: str) -> List[int]:
-			assert mode in ['max', 'min']
-			operator = ge if mode == 'min' else le
-			return list(chain.from_iterable((indices for indices in stems_2_inds.values() if operator(len(indices), occurrence_limit))))
-
-		if level_selection == 'vocabulary acquisition':
+		if mode == 'vocabulary acquisition':
 			indices = get_limit_corresponding_sentence_indices(20, 'max')
-		elif level_selection == 'lowkey':
+		elif mode == 'lowkey':
 			indices = get_limit_corresponding_sentence_indices(50, 'min')
+		print('Getting corresponding sentences...')
 		self.sentence_data = self.sentence_data[indices]
 
 	def pre_training_display(self):
 		self.clear_screen()
-		instruction_text = f"""Data file comprises {len(self.sentence_data):,d} sentences.\nPress Enter to advance to next sentence\nEnter 'vocabulary' to append new entry to language specific vocabulary file, 'exit' to terminate program.\n"""
+		instruction_text = f"""Database comprises {len(self.sentence_data):,d} sentences.\nPress Enter to advance to next sentence\nEnter 'vocabulary' to append new entry to language specific vocabulary file, 'exit' to terminate program.\n"""
 		print(instruction_text)
 
 		lets_go_translation = self.get_lets_go_translation()

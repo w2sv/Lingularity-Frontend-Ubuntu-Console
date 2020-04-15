@@ -4,7 +4,6 @@ import sys
 import json
 from collections import Counter
 import datetime
-from itertools import chain
 from time import time, sleep
 import time
 
@@ -12,8 +11,9 @@ import unidecode
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .trainer import Trainer, TokenSentenceindsMap
+from .trainer import Trainer
 from .sentence_translation import SentenceTranslationTrainer
+from .token_sentenceinds_map import RawToken2SentenceIndices
 
 
 VocabularyStatistics = Dict[str, Dict[str, Any]]  # foreign language token -> Dict[score: float, times_seen: int, last_seen_date: str]
@@ -34,12 +34,12 @@ class VocabularyTrainer(Trainer):
                40: "You can't climb the ladder of success with your hands in your pockets.",
                60: "Keep hustlin' young blood.",
                80: 'Attayboy!',
-               100: '0361/2180494. Call me.'}
+               100: '0361/2680494. Call me.'}
 
     def __init__(self):
         super().__init__()
 
-        self.token_2_rowinds: Optional[TokenSentenceindsMap] = None
+        self.token_2_rowinds: Optional[RawToken2SentenceIndices] = None
         self.vocabulary_statistics: Optional[VocabularyStatistics] = None
         self.vocabulary: Optional[Dict[str, str]] = None
 
@@ -56,7 +56,7 @@ class VocabularyTrainer(Trainer):
     def run(self):
         self._language = self.select_language()
         self.sentence_data = self.parse_sentence_data()
-        self.token_2_rowinds = self.procure_token_2_rowinds_map()
+        self.token_2_rowinds = RawToken2SentenceIndices(self.sentence_data)
         self.vocabulary = self.parse_vocabulary()
         self.vocabulary_statistics = self.load_vocabulary_statistics()
         self.update_documentation()
@@ -133,7 +133,8 @@ class VocabularyTrainer(Trainer):
             print("Couldn't find any new vocabulary.")
         print(f'Vocabulary file comprises {n_imperfect_entries} entries.')
         print("Enter 'append' + additional translation(s) in order to append to the ones of the previously faced item.")
-        print("Distinct newly entered translation tokens are to be separated by commas.", '\n')
+        print("Distinct newly entered translation tokens are to be separated by commas.")
+        print("Enter 'exit' to terminate the program.", '\n')
 
         lets_go_translation = self.get_lets_go_translation()
         print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')
@@ -163,7 +164,6 @@ class VocabularyTrainer(Trainer):
 
         with open(self.vocabulary_file_path, 'w') as write_file:
             write_file.writelines(vocabulary)
-        print('Enter translation of current item: ', end='')
 
     def train(self):
         entries = [entry for entry in self.vocabulary.keys() if self.vocabulary_statistics[entry]['s'] < 5 or self.day_difference(self.vocabulary_statistics[entry]['lfd']) >= self.DAYS_TIL_RETENTION_ASSERTION]
@@ -176,9 +176,12 @@ class VocabularyTrainer(Trainer):
         while i < len(entries):
             entry = entries[i]
             display_token, translation = get_display_token(entry), get_translation(entry)
-            if display_item:
-                print(f'{display_token} = ', end='')
-            response = input()
+            print(f'{display_token} = ', end='') if display_item else print('Enter translation: ', end='')
+            try:
+                response = input()
+            except KeyboardInterrupt:
+                display_item = False
+                continue
             if response.lower() == 'exit':
                 break
             elif response.lower().startswith('append') and i:
@@ -235,19 +238,9 @@ class VocabularyTrainer(Trainer):
             evaluation = 'wrong'
         return self.reverse_response_evaluations[evaluation]
 
-    def __get_root_comprising_tokens(self, root) -> List[str]:
-        return [k for k in self.token_2_rowinds.keys() if root in k]
-
-    def get_root_comprising_sentence_inds(self, root: str) -> List[int]:
-        return list(chain.from_iterable([v for k, v in self.token_2_rowinds.items() if root in k]))
-
-    def get_root_preceded_token_comprising_sentence_inds(self, root: str) -> List[int]:
-        """ unused """
-        return list(chain.from_iterable([v for k, v in self.token_2_rowinds.items() if any(token.startswith(root) for token in k.split(' '))]))
-
     def get_comprising_sentences(self, token: str) -> Optional[List[str]]:
         root = token[:self.ROOT_LENGTH]
-        sentence_indices = np.array(self.get_root_comprising_sentence_inds(root))
+        sentence_indices = np.array(self.token_2_rowinds.get_root_comprising_sentence_indices(root))
         if not len(sentence_indices):
             return None
 
