@@ -157,6 +157,7 @@ class SentenceTranslationTrainer(Trainer):
 							self.append_2_vocabulary_file()
 							print(" ")
 						elif response == 'exit':
+							print('----------------')
 							print("Number of faced sentences: ", self.n_trained_items)
 							self.append_2_training_history()
 							if self.n_trained_items > 4:

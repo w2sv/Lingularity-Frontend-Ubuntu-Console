@@ -21,7 +21,7 @@ def display_starting_screen():
 
 def select_training() -> str:
     indentation = '\t' * 4
-    print("Select Training: ", end='')
+    print("\nSelect Training: ", end='')
     training = input(f"{indentation}(S)entence translation{indentation}(V)ocabulary training\n").lower()[0]
 
     if training not in _TRAINERS.keys():
