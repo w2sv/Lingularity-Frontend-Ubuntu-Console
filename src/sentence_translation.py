@@ -11,6 +11,7 @@ import numpy as np
 
 from .trainer import Trainer
 from .web_interaction import ContentRetriever
+from .token_sentenceinds_map import RawToken2SentenceIndices, Stem2SentenceIndices
 
 
 # TODO: restructuring, weight score regarding entire sentence
@@ -98,13 +99,12 @@ class SentenceTranslationTrainer(Trainer):
 		elif level_selection == 'random':
 			return
 
-		tokens_2_inds = self.procure_token_2_rowinds_map()
-		stems_2_inds = self.procure_stems_2_rowinds_map(tokens_2_inds)
+		stems_2_indices = Stem2SentenceIndices.from_sentence_data(self.sentence_data, self.stemmer)
 
 		def get_limit_corresponding_sentence_indices(occurrence_limit: int, mode: str) -> List[int]:
 			assert mode in ['max', 'min']
 			operator = ge if mode == 'min' else le
-			return list(chain.from_iterable((indices for indices in stems_2_inds.values() if operator(len(indices), occurrence_limit))))
+			return list(chain.from_iterable((indices for indices in stems_2_indices.values() if operator(len(indices), occurrence_limit))))
 
 		if level_selection == 'vocabulary acquisition':
 			indices = get_limit_corresponding_sentence_indices(20, 'max')

@@ -1,13 +1,19 @@
-from typing import Iterable, Tuple, Optional, AbstractSet, ValuesView, Any, Union, Dict
-from abc import ABC, abstractmethod
+from typing import Iterable, Tuple, Optional, AbstractSet, ValuesView, Any, Union, Dict, Hashable
 from collections.abc import MutableMapping
 
 
-class CustomDict(MutableMapping, ABC):
-    def __init__(self, mapping_data: Optional[MutableMapping] = None):
+class CustomDict(MutableMapping):
+    def __init__(self, mapping_data: Optional[Dict[Hashable, Any]] = None):
         self.mapping = {}
         if mapping_data is not None:
             self.update(mapping_data)
+
+    def append_or_insert(self, key: Hashable, value: Any):
+        """ assuming iterable keys """
+        if key in self:
+            self[key].append(value) if not hasattr(value, '__iter__') else self[key].extend(value)
+        else:
+            self[key] = [value] if not hasattr(value, '__iter__') else value
 
     def __getitem__(self, key):
         return self.mapping[key]
@@ -37,31 +43,6 @@ class CustomDict(MutableMapping, ABC):
         return self.mapping.values()
 
 
-class IterableKeyDict(CustomDict):
-    def __init__(self, mapping_data: Optional[MutableMapping] = None):
-        super().__init__(mapping_data)
-
-    def append_or_insert(self, key: Any, value: Union[Iterable[Any], Any]):
-        if key in self:
-            self[key].append(value) if not hasattr(value, '__iter__') else self[key].extend(value)
-        else:
-            self[key] = [value] if not hasattr(value, '__iter__') else value
-
-
-class FrozenIterableKeyDict(IterableKeyDict):
-    def __init__(self, mapping_data: Optional[Dict[Any, Any]] = None):
-        super().__init__(mapping_data)
-        self.hash = None
-
-    def __hash__(self):
-        if self.hash is None:
-            _hash = 0
-            for pair in self.items():
-                _hash ^= hash(pair)
-            self.hash = _hash
-        return self.hash
-
-
 if __name__ == '__main__':
-    frozen_dict = FrozenIterableKeyDict({4: 7, 9: 3})
-    print(frozen_dict.__hash__())
+    dic = CustomDict({4: 8, 9: 5})
+    print(dic)

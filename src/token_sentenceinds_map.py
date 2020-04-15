@@ -2,22 +2,23 @@ from abc import ABC, abstractmethod
 from typing import List, Tuple, Dict, Optional, Iterator
 from operator import itemgetter
 from itertools import chain, groupby
-from functools import lru_cache
 from collections.abc import MutableMapping
 
 from tqdm import tqdm
 import numpy as np
 import nltk
 
-from .dictionary_abstractions import FrozenIterableKeyDict, IterableKeyDict
+from .dictionary_abstractions import CustomDict
 from .utils.statistics import get_outliers
 from .utils.strings import get_meaningful_tokens, strip_unicode
 
 
-class Token2Indices(IterableKeyDict):
+class Token2Indices(CustomDict):
     def __init__(self, mapping_data: Optional[MutableMapping] = None):
         super().__init__(mapping_data)
         self.initialize()
+
+        self._occurrence_2_tokens: Optional[CustomDict[int, List[str]]] = None
 
     # -----------------
     # TOKEN QUERY
@@ -42,12 +43,12 @@ class Token2Indices(IterableKeyDict):
         return [(i[0], len(i[1])) for i in sorted(list(self.items()), key=lambda x: len(x[1]))]
 
     @property
-    @lru_cache()
-    def occurrences_2_tokens(self) -> FrozenIterableKeyDict:
-        occurrence_2_tokens = FrozenIterableKeyDict()
-        for token, indices in self.items():
-            occurrence_2_tokens.append_or_insert(len(indices), token)
-        return occurrence_2_tokens
+    def occurrences_2_tokens(self) -> CustomDict:  # [int, List[str]]
+        if self._occurrence_2_tokens is None:
+            self._occurrence_2_tokens = CustomDict()
+            for token, indices in self.items():
+                self._occurrence_2_tokens.append_or_insert(len(indices), token)
+        return self._occurrence_2_tokens
 
     # ----------------
     # OCCURRENCE OUTLIER BASED
@@ -98,6 +99,7 @@ class Stem2SentenceIndices(Token2Indices):
     def __init__(self, raw_token_map: RawToken2SentenceIndices, stemmer: Optional[nltk.stem.SnowballStemmer]):
         self.raw_token_map: RawToken2SentenceIndices = raw_token_map
         self.stemmer: Optional[nltk.stem.SnowballStemmer] = stemmer
+        self._proper_nouns: Optional[List[str]] = None
         super().__init__()
 
     @classmethod
@@ -105,14 +107,15 @@ class Stem2SentenceIndices(Token2Indices):
         return cls(RawToken2SentenceIndices(sentence_data), stemmer)
 
     def __getattr__(self, item):
-        return dir(self.raw_token_map)[item]
+        """ forwarding sentence_data calls """
+        return getattr(self.raw_token_map, item)
 
     def initialize(self):
         stemming_possible = self.stemmer is not None
 
         starting_letter_grouped_names: Dict[str, List[str]] = {k: list(v) for k, v in groupby(sorted(self.proper_nouns), lambda name: name[0])}
 
-        print('Name Dismissal, Stemming...') if stemming_possible else print('Name Dismissal...')
+        print('Proper noun dismissal, stemming...') if stemming_possible else print('Proper noun dismissal...')
         for token, indices in tqdm(list(self.raw_token_map.items())):
             if starting_letter_grouped_names.get(token[0]) is not None and token in starting_letter_grouped_names[token[0]]:
                 continue
@@ -124,20 +127,20 @@ class Stem2SentenceIndices(Token2Indices):
     # PROPER NOUN QUERY
     # ----------------
     @property
-    @lru_cache()
-    def proper_nouns(self) -> Tuple[str]:
-        # TODO: possibly refactor to tuple property
-        name_candidates_2_sentence_indices = self._title_based_proper_noun_retrieval()
-        return tuple(self._bilateral_presence_based_proper_noun_filtering(name_candidates_2_sentence_indices))
+    def proper_nouns(self) -> List[str]:
+        if self._proper_nouns is None:
+            name_candidates_2_sentence_indices = self._title_based_proper_noun_retrieval()
+            self._proper_nouns = list(self._bilateral_presence_based_proper_noun_filtering(name_candidates_2_sentence_indices))
+        return self._proper_nouns
 
     def _title_based_proper_noun_retrieval(self) -> Dict[str, int]:
         """ returns lowercase name candidates """
-        names_2_occurrenceind = {}
-        print('Procuring names...')
+        names_2_sentenceind = {}
+        print('Procuring proper nouns...')
         for i, eng_sent in enumerate(tqdm(self.sentence_data[:, 0])):
             tokens = get_meaningful_tokens(eng_sent)
-            [names_2_occurrenceind.update({name.lower(): i}) for name in filter(lambda token: token.istitle() and (len(token) > 1 or ord(token) > 255), tokens)]
-        return names_2_occurrenceind
+            [names_2_sentenceind.update({name.lower(): i}) for name in filter(lambda token: token.istitle() and (len(token) > 1 or ord(token) > 255), tokens)]
+        return names_2_sentenceind
 
     def _bilateral_presence_based_proper_noun_filtering(self, namecandidate_2_sentenceind: Dict[str, int]) -> List[str]:
         """ returns lowercase names """
