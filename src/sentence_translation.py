@@ -142,8 +142,8 @@ class SentenceTranslationTrainer(Trainer):
 		while True:
 			try:
 				reference_sentence, translation = self.sentence_data[self.n_trained_items]
-			except ValueError as ve:
-				print(ve)
+			except (ValueError, IndexError) as e:
+				# print(e)
 				continue
 			if any(name in reference_sentence for name in self.DEFAULT_NAMES):
 				reference_sentence, translation = self.convert_names([reference_sentence, translation])
