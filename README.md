@@ -1,12 +1,14 @@
 # Lingularity
 
-> bilingual sentence data based command line language trainer written in python
+bilingual sentence data based command line language trainer written in python
 
 ### Features
 
-# SentenceTranslation - translation of reference language sentences to desired target language with subsequent ground truth translation display foregoing time expensive entering of sentences
+##SentenceTranslation
+translation of reference language sentences to desired target language with subsequent ground truth translation display foregoing time expensive entering of sentences
 
-# VocabularyTrainer - flashcard learning of previously accumulated vocabulary querying and displaying ground truth sentences comprising respective word stems in order to facilitate the comprehension of the words true utilization within the language whilst grasping additional shades of meaning
+##VocabularyTrainer 
+flashcard learning of previously accumulated vocabulary querying and displaying ground truth sentences comprising respective word stems in order to facilitate the comprehension of the words true utilization within the language whilst grasping additional shades of meaning
 
 
 ### Set up
