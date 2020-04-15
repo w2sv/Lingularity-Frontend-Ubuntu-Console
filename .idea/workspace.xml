@@ -4,6 +4,7 @@
     <list default="true" id="40bbd82a-aa0c-4573-b219-bd4e514e781c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/sentence_translation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/sentence_translation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/token_sentenceinds_map.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/token_sentenceinds_map.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

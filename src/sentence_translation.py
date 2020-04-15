@@ -36,6 +36,7 @@ class SentenceTranslationTrainer(Trainer):
 	def run(self):
 		self.language = self.select_language()
 		if self._language not in os.listdir(self.base_data_path):
+			print(self._language)
 			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
 			self.webpage_interactor.unzip_file(zip_file_link)
 		self.sentence_data = self.parse_sentence_data()
@@ -49,8 +50,9 @@ class SentenceTranslationTrainer(Trainer):
 	# INITIALIZATION
 	# ---------------
 	def select_language(self) -> str:
-		print('Trying to connect to webpage...')
-		self.webpage_interactor.get_language_ziplink_dict()
+		if self.webpage_interactor.languages_2_ziplinks is None:
+			print('Trying to connect to webpage...')
+			self.webpage_interactor.get_language_ziplink_dict()
 		sucessfully_retrieved = len(self.webpage_interactor.languages_2_ziplinks) != 0
 		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if sucessfully_retrieved else os.listdir(self.base_data_path)
 		insort(eligible_languages, 'English')
@@ -72,7 +74,7 @@ class SentenceTranslationTrainer(Trainer):
 
 		selection = self.resolve_input(input('\nSelect language: \n').title(), eligible_languages)
 		if selection is None:
-			self.recurse_on_invalid_input(self.select_language)
+			return self.recurse_on_invalid_input(self.select_language)
 
 		elif selection == 'English':
 			eligible_languages.remove('English')

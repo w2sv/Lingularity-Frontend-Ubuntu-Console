@@ -10,10 +10,10 @@ import nltk
 
 from .dictionary_abstractions import CustomDict
 from .utils.statistics import get_outliers
-from .utils.strings import get_meaningful_tokens, strip_unicode
+from .utils.strings import get_meaningful_tokens
 
 
-class Token2Indices(CustomDict):
+class Token2Indices(CustomDict, ABC):
     def __init__(self, mapping_data: Optional[MutableMapping] = None):
         super().__init__(mapping_data)
         self.initialize()
