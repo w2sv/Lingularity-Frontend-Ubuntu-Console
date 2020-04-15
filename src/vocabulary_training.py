@@ -176,10 +176,7 @@ class VocabularyTrainer(Trainer):
         while i < len(entries):
             entry = entries[i]
             display_token, translation = get_display_token(entry), get_translation(entry)
-            if display_item:
-                print(f'{display_token} = ', end='')
-            else:
-                print('Enter translation: ', end='')
+            print(f'{display_token} = ', end='') if display_item else print('Enter translation: ', end='')
             try:
                 response = input()
             except KeyboardInterrupt:
