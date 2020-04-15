@@ -18,8 +18,8 @@ class Trainer(ABC):
         self.base_data_path = os.path.join(os.getcwd(), 'language_data')
         if not os.path.exists(self.base_data_path):
             os.mkdir(self.base_data_path)
-        self._language = None  # equals reference language in case of reference language inversion
-        self.reference_language_inversion = False
+        self._language = None  # equals reference language in case of english training
+        self._train_english = False
 
         self.sentence_data = None
 
@@ -28,11 +28,23 @@ class Trainer(ABC):
         self.n_trained_items = 0
 
     @property
+    def train_english(self):
+        return self._train_english
+
+    @train_english.setter
+    def train_english(self, flag: bool):
+        """ create english dir if necessary """
+        self._train_english = flag
+        if flag is True:
+            if not os.path.exists(self.language_dir):
+                os.mkdir(self.language_dir)
+
+    @property
     def language(self):
-        return self._language if not self.reference_language_inversion else 'English'
+        return self._language if not self._train_english else 'English'
 
     @language.setter
-    def language(self, value):
+    def language(self, value: str):
         self._language = value
 
     @property
@@ -43,6 +55,10 @@ class Trainer(ABC):
             return None
         else:
             return nltk.stem.SnowballStemmer(self.language.lower())
+
+    @property
+    def language_dir(self):
+        return f'{self.base_data_path}/{self.language}'
 
     @property
     def sentence_file_path(self):
@@ -111,7 +127,7 @@ class Trainer(ABC):
             split_data[i][1] = row[1].strip('\n')
         # split_data = (row[0], row[1].strip('\n') for row in split_data)
 
-        if self.reference_language_inversion:
+        if self._train_english:
             split_data = [list(reversed(row)) for row in split_data]
 
         return np.array(split_data)

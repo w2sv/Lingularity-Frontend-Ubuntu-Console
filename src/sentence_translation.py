@@ -51,7 +51,8 @@ class SentenceTranslationTrainer(Trainer):
 			self.webpage_interactor.get_language_ziplink_dict()
 		sucessfully_retrieved = len(self.webpage_interactor.languages_2_ziplinks) != 0
 		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if sucessfully_retrieved else os.listdir(self.base_data_path)
-		insort(eligible_languages, 'English')
+		if 'English' not in eligible_languages:
+			insort(eligible_languages, 'English')
 
 		self.clear_screen()
 		if len(eligible_languages) == 1:  # solely artificially appended english
@@ -83,7 +84,7 @@ class SentenceTranslationTrainer(Trainer):
 					time.sleep(1)
 				else:
 					selection = reference_language
-					self.reference_language_inversion, reference_language_validity = [True]*2
+					self.train_english, reference_language_validity = [True]*2
 		return selection
 
 	# -----------------
