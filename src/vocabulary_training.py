@@ -4,7 +4,6 @@ import sys
 import json
 from collections import Counter
 import datetime
-from itertools import chain
 from time import time, sleep
 import time
 

@@ -13,6 +13,10 @@ from .utils.statistics import get_outliers
 from .utils.strings import get_meaningful_tokens
 
 
+# TODO: include upper case tokens in proper noun query
+#       distinct characters property
+
+
 class Token2Indices(CustomDict, ABC):
     def __init__(self, mapping_data: Optional[MutableMapping] = None):
         super().__init__(mapping_data)

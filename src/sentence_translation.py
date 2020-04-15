@@ -1,7 +1,6 @@
 import sys
 import os
 import time
-from datetime import date
 from typing import List
 from itertools import groupby, chain
 from bisect import insort
@@ -10,8 +9,8 @@ from operator import ge, le
 import numpy as np
 
 from .trainer import Trainer
-from .web_interaction import ContentRetriever
-from .token_sentenceinds_map import RawToken2SentenceIndices, Stem2SentenceIndices
+from .webpage_interaction import ContentRetriever
+from .token_sentenceinds_map import Stem2SentenceIndices
 
 
 # TODO: asynchronous stem map computation, dynamic mode specific occurrence frequency limits
@@ -27,8 +26,6 @@ class SentenceTranslationTrainer(Trainer):
 
 	def __init__(self):
 		super().__init__()
-		self.date = str(date.today())
-
 		self.webpage_interactor = ContentRetriever()
 
 		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
@@ -36,7 +33,6 @@ class SentenceTranslationTrainer(Trainer):
 	def run(self):
 		self.language = self.select_language()
 		if self._language not in os.listdir(self.base_data_path):
-			print(self._language)
 			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
 			self.webpage_interactor.unzip_file(zip_file_link)
 		self.sentence_data = self.parse_sentence_data()
