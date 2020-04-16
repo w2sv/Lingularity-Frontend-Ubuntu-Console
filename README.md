@@ -5,10 +5,10 @@ bilingual sentence data based command line language trainer written in python
 ### Features
 
 __SentenceTranslation__
-translation of reference language sentences to desired target language with subsequent ground truth translation display foregoing laborious entering of sentences
+translation of reference language sentences to desired target language with subsequent ground truth translation display enabling idiom acquisition whilst foregoing the laborious input of sentences
 
 __VocabularyTrainer__
-flashcard learning of previously accumulated vocabulary querying and displaying ground truth sentences comprising respective word stems in order to facilitate the comprehension of the words true utilization within the language whilst grasping additional shades of meaning
+flashcard learning of previously accumulated vocabulary querying and displaying ground truth sentences comprising respective word stems in order to facilitate the comprehension of the words true utilization within the language by grasping yet unknown shades of meaning
 
 
 ### Set up

@@ -69,5 +69,4 @@ class ContentRetriever:
 
 
 if __name__ == '__main__':
-    content_retriever = ContentRetriever()
-    content_retriever.unzip_file(r'C:\Users\User\Documents\download.zip')
+    pass

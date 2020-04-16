@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Tuple, Any
+from typing import List, Dict, Optional, Union
 import os
 import sys
 import json
@@ -16,10 +16,10 @@ from .sentence_translation import SentenceTranslationTrainer
 from .token_sentenceinds_map import RawToken2SentenceIndices
 
 
-VocabularyStatistics = Dict[str, Dict[str, Any]]  # foreign language token -> Dict[score: float, times_seen: int, last_seen_date: str]
+VocabularyStatistics = Dict[str, Dict[str, Union[float, int, str]]]  # foreign language token -> Dict[score: float, times_seen: int, last_seen_date: str]
 
 
-# TODO: english training
+# TODO: english training, refactor vocabulary statistics, possibly vocabulary file to separate class
 
 
 class VocabularyTrainer(Trainer):
@@ -112,7 +112,7 @@ class VocabularyTrainer(Trainer):
 
         for entry in self.vocabulary.keys():
             if self.vocabulary_statistics.get(entry) is None:
-                self.vocabulary_statistics[entry] = INIT
+                self.vocabulary_statistics[entry] = INIT.copy()
 
     def display_new_vocabulary(self):
         self.clear_screen()

@@ -14,6 +14,7 @@ from .token_sentenceinds_map import Stem2SentenceIndices
 
 
 # TODO: asynchronous stem map computation, dynamic mode specific occurrence frequency limits
+#  enhancement of mode selection screen
 
 
 class SentenceTranslationTrainer(Trainer):

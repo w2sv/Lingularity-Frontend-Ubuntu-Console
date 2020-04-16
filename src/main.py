@@ -4,6 +4,10 @@ from .sentence_translation import SentenceTranslationTrainer
 from .vocabulary_training import VocabularyTrainer
 from .trainer import Trainer
 
+
+# TODO: display of last session results, automatic full screening, color windows terminal
+
+
 _TRAINERS = {'sentence translation': SentenceTranslationTrainer, 'vocabulary trainer': VocabularyTrainer}
 
 
