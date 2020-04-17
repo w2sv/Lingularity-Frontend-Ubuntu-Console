@@ -1,4 +1,6 @@
 import os
+import platform
+from subprocess import Popen
 
 from .sentence_translation import SentenceTranslationTrainer
 from .vocabulary_training import VocabularyTrainer
@@ -9,6 +11,12 @@ from .trainer import Trainer
 
 
 _TRAINERS = {'sentence translation': SentenceTranslationTrainer, 'vocabulary trainer': VocabularyTrainer}
+
+
+def initialize_terminal():
+    if platform.system() == 'Windows':
+        Popen(f'{os.getcwd()}/terminal_inits/windows.cmd', cwd=os.getcwd())
+    Trainer.clear_screen()
 
 
 def display_starting_screen():
@@ -39,6 +47,7 @@ def commence_training(training_selection: str):
 
 
 if __name__ == '__main__':
+    initialize_terminal()
     display_starting_screen()
     training_selection = select_training()
     commence_training(training_selection)
