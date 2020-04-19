@@ -2,5 +2,6 @@ __pycache__
 /dist/
 /language_data/
 /SentenceTranslation.spec
+/oldstuff/
 /env/
 /.idea/
