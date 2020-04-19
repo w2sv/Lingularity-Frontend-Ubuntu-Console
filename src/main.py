@@ -1,3 +1,4 @@
+from typing import Optional
 import os
 import platform
 from subprocess import Popen
@@ -57,14 +58,42 @@ def display_starting_screen():
     print("         Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
     print('Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,')
     print("  e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on it", '\n')
+    last_session_display()
 
 
-def select_training() -> str:
-    indentation = '\t' * 4
+def add_vocabulary():
+    Trainer.clear_screen()
+    languages = [language.lower() for language in os.listdir(Trainer.BASE_DATA_PATH)]
+    print('EXTENSIBLE VOCABULARY FILES: ')
+    [print(language) for language in languages]
+    selection = Trainer.resolve_input(input('\nSelect language: ').lower(), languages)
+    if selection is None:
+        Trainer.recurse_on_invalid_input(add_vocabulary)
+    else:
+        sentence_trainer = SentenceTranslationTrainer()
+        sentence_trainer.language = selection
+        while True:
+            sentence_trainer.append_2_vocabulary_file()
+            try:
+                procedure_resolution = Trainer.resolve_input(input("Press Enter to continue adding, otherwise enter 'exit'\t"), ['exit', 'ZUNGENUNMUTSERLABUNG'])
+                if procedure_resolution == 'exit':
+                    Trainer.clear_screen()
+                    display_starting_screen()
+                    training_selection = select_training()
+                    return commence_training(training_selection)
+                Trainer.erase_previous_line()
+            except SyntaxError:
+                pass
+
+
+def select_training() -> Optional[str]:
+    indentation = '\t' * 2
     print("\nSelect Training: ", end='')
-    training = Trainer.resolve_input(input(f"{indentation}(S)entence translation{indentation}(V)ocabulary training\n").lower(), _TRAINERS.keys())
+    training = Trainer.resolve_input(input(f"{indentation}(S)entence translation{indentation}(V)ocabulary training{indentation}or (a)dd vocabulary\n").lower(), list(_TRAINERS.keys()) + ['add vocabulary'])
     if training is None:
         return Trainer.recurse_on_invalid_input(select_training)
+    elif training == 'add vocabulary':
+        return add_vocabulary()
 
     Trainer.clear_screen()
     return training
@@ -78,6 +107,5 @@ def commence_training(training_selection: str):
 if __name__ == '__main__':
     initialize_terminal()
     display_starting_screen()
-    last_session_display()
     training_selection = select_training()
     commence_training(training_selection)
