@@ -57,7 +57,7 @@ def display_starting_screen():
     print("					         by Janek Zangenberg ", '\n' * 2)
     print("         Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
     print('Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,')
-    print("  e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on it", '\n')
+    print("  e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n')
     last_session_display()
 
 
@@ -77,10 +77,7 @@ def add_vocabulary():
             try:
                 procedure_resolution = Trainer.resolve_input(input("Press Enter to continue adding, otherwise enter 'exit'\t"), ['exit', 'ZUNGENUNMUTSERLABUNG'])
                 if procedure_resolution == 'exit':
-                    Trainer.clear_screen()
-                    display_starting_screen()
-                    training_selection = select_training()
-                    return commence_training(training_selection)
+                    return complete_initialization()
                 Trainer.erase_previous_line()
             except SyntaxError:
                 pass
@@ -104,8 +101,12 @@ def commence_training(training_selection: str):
     trainer_instance.run()
 
 
-if __name__ == '__main__':
+def complete_initialization():
     initialize_terminal()
     display_starting_screen()
     training_selection = select_training()
     commence_training(training_selection)
+
+
+if __name__ == '__main__':
+    complete_initialization()
