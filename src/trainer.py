@@ -14,10 +14,11 @@ import matplotlib.pyplot as plt
 
 
 class Trainer(ABC):
+    BASE_DATA_PATH = os.path.join(os.getcwd(), 'language_data')
+
     def __init__(self):
-        self.base_data_path = os.path.join(os.getcwd(), 'language_data')
-        if not os.path.exists(self.base_data_path):
-            os.mkdir(self.base_data_path)
+        if not os.path.exists(self.BASE_DATA_PATH):
+            os.mkdir(self.BASE_DATA_PATH)
         self._language = None  # equals reference language in case of english training
         self._train_english = False
 
@@ -58,19 +59,19 @@ class Trainer(ABC):
 
     @property
     def language_dir(self):
-        return f'{self.base_data_path}/{self.language}'
+        return f'{self.BASE_DATA_PATH}/{self.language}'
 
     @property
     def sentence_file_path(self):
-        return f'{self.base_data_path}/{self._language}/sentence_data.txt'
+        return f'{self.BASE_DATA_PATH}/{self._language}/sentence_data.txt'
 
     @property
     def vocabulary_file_path(self):
-        return f'{self.base_data_path}/{self.language}/vocabulary.txt'
+        return f'{self.BASE_DATA_PATH}/{self.language}/vocabulary.txt'
 
     @property
     def training_documentation_file_path(self):
-        return f'{self.base_data_path}/{self.language}/training_documentation.json'
+        return f'{self.BASE_DATA_PATH}/{self.language}/training_documentation.json'
 
     @property
     def today(self):
@@ -143,9 +144,11 @@ class Trainer(ABC):
     def append_2_training_history(self):
         training_history = self.load_training_history()
         trainer_abbreviation = self.__class__.__name__[0].lower()
-        try:
+        if training_history.get(self.today) is not None and training_history[self.today].get(trainer_abbreviation) is not None:
             training_history[self.today][trainer_abbreviation] += self.n_trained_items
-        except (KeyError, TypeError):
+        elif training_history.get(self.today) is not None:
+            training_history[self.today][trainer_abbreviation] = self.n_trained_items
+        else:
             training_history[self.today] = {trainer_abbreviation: self.n_trained_items}
 
         with open(self.training_documentation_file_path, 'w+') as write_file:

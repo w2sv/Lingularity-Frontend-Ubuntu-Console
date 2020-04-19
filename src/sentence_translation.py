@@ -29,11 +29,9 @@ class SentenceTranslationTrainer(Trainer):
 		super().__init__()
 		self.webpage_interactor = ContentRetriever()
 
-		self.chronic_file = os.path.join(os.getcwd(), 'exercising_chronic.json')
-
 	def run(self):
 		self.language = self.select_language()
-		if self._language not in os.listdir(self.base_data_path):
+		if self._language not in os.listdir(self.BASE_DATA_PATH):
 			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
 			self.webpage_interactor.unzip_file(zip_file_link)
 		self.sentence_data = self.parse_sentence_data()
@@ -51,7 +49,7 @@ class SentenceTranslationTrainer(Trainer):
 			print('Trying to connect to webpage...')
 			self.webpage_interactor.get_language_ziplink_dict()
 		sucessfully_retrieved = len(self.webpage_interactor.languages_2_ziplinks) != 0
-		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if sucessfully_retrieved else os.listdir(self.base_data_path)
+		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if sucessfully_retrieved else os.listdir(self.BASE_DATA_PATH)
 		if 'English' not in eligible_languages:
 			insort(eligible_languages, 'English')
 
@@ -140,17 +138,20 @@ class SentenceTranslationTrainer(Trainer):
 		indices = np.arange(len(self.sentence_data))
 		np.random.shuffle(indices)
 		self.sentence_data = self.sentence_data[indices]
+		persevere = False
 
 		while True:
-			try:
-				reference_sentence, translation = self.sentence_data[self.n_trained_items]
-			except (ValueError, IndexError) as e:
-				# print(e)
-				continue
-			if any(name in reference_sentence for name in self.DEFAULT_NAMES):
-				reference_sentence, translation = self.convert_names([reference_sentence, translation])
+			if not persevere:
+				try:
+					reference_sentence, translation = self.sentence_data[self.n_trained_items]
+				except (ValueError, IndexError):
+					continue
+				if any(name in reference_sentence for name in self.DEFAULT_NAMES):
+					reference_sentence, translation = self.convert_names([reference_sentence, translation])
 
-			print(reference_sentence, '\t')
+				print(reference_sentence, '\t')
+			else:
+				persevere = False
 			try:
 				try:
 					response = self.resolve_input(input("pending...").lower(), ['vocabulary', 'exit'])
@@ -158,6 +159,7 @@ class SentenceTranslationTrainer(Trainer):
 						if response == 'vocabulary':
 							self.append_2_vocabulary_file()
 							print(" ")
+							persevere = True
 						elif response == 'exit':
 							print('----------------')
 							print("Number of faced sentences: ", self.n_trained_items)
@@ -171,17 +173,18 @@ class SentenceTranslationTrainer(Trainer):
 			except SyntaxError:
 				pass
 			self.erase_previous_line()
-			print(translation, '\n', '_______________')
-			self.n_trained_items += 1
+			if not persevere:
+				print(translation, '\n', '_______________')
+				self.n_trained_items += 1
 
 	def append_2_vocabulary_file(self):
-		word = input('Enter word in reference language: ')
-		translation = input(f'Enter {self.language} translation: ')
+		vocable = input(f'Enter {self.language} word/phrase: ')
+		meanings = input('Enter meaning(s): ')
 
 		with open(self.vocabulary_file_path, 'a+') as vocab_file:
 			if os.path.getsize(self.vocabulary_file_path):
 				vocab_file.write('\n')
-			vocab_file.write(f'{word} - {translation}')
+			vocab_file.write(f'{vocable} - {meanings}')
 		[self.erase_previous_line() for _ in range(2)]
 
 	def convert_names(self, sentence_pair: List[str]) -> List[str]:

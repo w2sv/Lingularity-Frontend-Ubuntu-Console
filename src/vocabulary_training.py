@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from .trainer import Trainer
 from .sentence_translation import SentenceTranslationTrainer
 from .token_sentenceinds_map import RawToken2SentenceIndices
+from .utils.datetime import n_days_ago
 
 
 VocabularyStatistics = Dict[str, Dict[str, Union[float, int, str]]]  # foreign language token -> Dict[score: float, times_seen: int, last_seen_date: str]
@@ -51,7 +52,7 @@ class VocabularyTrainer(Trainer):
 
     @property
     def voccabulary_statistics_file_path(self):
-        return f'{self.base_data_path}/{self.language}/vocabulary_statistics.json'
+        return f'{self.BASE_DATA_PATH}/{self.language}/vocabulary_statistics.json'
 
     def run(self):
         self._language = self.select_language()
@@ -72,7 +73,7 @@ class VocabularyTrainer(Trainer):
     # INITIALIZATION
     # ---------------
     def select_language(self) -> str:
-        eligible_languages = [language for language in os.listdir(self.base_data_path) if 'vocabulary.txt' in os.listdir(f'{self.base_data_path}/{language}')]
+        eligible_languages = [language for language in os.listdir(self.BASE_DATA_PATH) if 'vocabulary.txt' in os.listdir(f'{self.BASE_DATA_PATH}/{language}')]
         if not eligible_languages:
             print('You have to accumulate vocabulary by means of the SentenceTranslation™ Trainer or manual amassment first.')
             sleep(3)
@@ -143,8 +144,8 @@ class VocabularyTrainer(Trainer):
     # TRAINING
     # ------------------
     @staticmethod
-    def day_difference(date: str) -> int:
-        return (datetime.date.today() - datetime.datetime.strptime(date, '%Y-%M-%d')).days
+    def parse_date(date: str) -> datetime.datetime:
+        return datetime.datetime.strptime(date, '%Y-%M-%d')
 
     def append_translation(self, entry: str, additional_translations: str):
         additional_translations = additional_translations.rstrip().lstrip()
@@ -166,7 +167,7 @@ class VocabularyTrainer(Trainer):
             write_file.writelines(vocabulary)
 
     def train(self):
-        entries = [entry for entry in self.vocabulary.keys() if self.vocabulary_statistics[entry]['s'] < 5 or self.day_difference(self.vocabulary_statistics[entry]['lfd']) >= self.DAYS_TIL_RETENTION_ASSERTION]
+        entries = [entry for entry in self.vocabulary.keys() if self.vocabulary_statistics[entry]['s'] < 5 or n_days_ago(self.vocabulary_statistics[entry]['lfd']) >= self.DAYS_TIL_RETENTION_ASSERTION]
         np.random.shuffle(entries)
 
         get_display_token = lambda entry: self.vocabulary[entry] if self.reference_2_foreign else entry
