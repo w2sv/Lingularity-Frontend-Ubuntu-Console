@@ -1,9 +1,6 @@
 __pycache__
 /dist/
 /language_data/
-/Vocabulary/
-/exercising_chronic.json
 /SentenceTranslation.spec
-/oldstuff/
 /env/
 /.idea/

@@ -1,0 +1,32 @@
+pioverer - pleurer 1
+uscire = sortir, partir 1
+svegliare - reveiller 1
+scordare = dimenticare 0
+scegliere - choisir 1
+avere a che fare - have to do  0
+capovolgimento - reversal, overturning 0
+succedere - accadere, happen 1
+sembrare, parere - seem 1
+tornare, ritornare - revenir 1
+cioé - a savoir, ie, that is 1
+chiudere - fermer 2
+chiedere - ask for, demand  1
+pulire - netoyer 1
+spogliare - deshabiller 1
+per caso - happen to  1
+andarsene = partire 1
+invece di - au lieu de  1
+il denaro - l'argent 1
+abbracciare - embrasser 1
+sbrigherare - dêpecher  0
+ulteriori - plus 1
+circondare - entourer 1
+persa - perdu 1
+essere bravo a - être bon en 1
+buio - sombre, obscure, foncé 1
+pazza - folle, fou, dingue 1
+scherzare - plaisanter 1
+spostare, muovere - bouger 0
+pioverer - pleurer 1
+infastidito, infastidito - annoyed 0
+aumento - augmentation 1

@@ -41,9 +41,9 @@ def last_session_display():
         if corresponding_entry.get('s') is not None:
             print(f"{corresponding_entry['s']} {corresponding_language} sentences ", end='')
         parsed_date = parse_date(latest_training_session)
-        t_o_y = today_or_yesterday(parsed_date)
-        if t_o_y is not None:
-            print(t_o_y, '\n')
+        toy = today_or_yesterday(parsed_date)
+        if toy is not None:
+            print(toy, '\n')
         else:
             print(f'the {parsed_date.day}th of {parsed_date.strftime("%B")} {parsed_date.year}', '\n')
 
