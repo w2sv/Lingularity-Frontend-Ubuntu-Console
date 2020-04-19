@@ -9,9 +9,6 @@ from .trainer import Trainer
 from .utils.datetime import parse_date, today_or_yesterday
 
 
-# TODO: display of last session results, automatic full screening, color windows terminal
-
-
 _TRAINERS = {'sentence translation': SentenceTranslationTrainer, 'vocabulary trainer': VocabularyTrainer}
 
 
@@ -22,6 +19,7 @@ def initialize_terminal():
 
 
 def last_session_display():
+    # TODO: write last training session to training history to prevent date parity based mix-ups
     latest_training_session, corresponding_language, corresponding_entry = [None] * 3
     if not os.path.exists(Trainer.BASE_DATA_PATH):
         return
