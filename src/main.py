@@ -58,7 +58,6 @@ def display_starting_screen():
     print("         Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
     print('Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,')
     print("  e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n')
-    last_session_display()
 
 
 def add_vocabulary():
@@ -104,6 +103,7 @@ def commence_training(training_selection: str):
 def complete_initialization():
     initialize_terminal()
     display_starting_screen()
+    last_session_display()
     training_selection = select_training()
     commence_training(training_selection)
 
