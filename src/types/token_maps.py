@@ -8,7 +8,7 @@ from tqdm import tqdm
 import numpy as np
 import nltk
 
-from src.types.dictionary_abstractions import CustomDict
+from src.types.custom_dict import CustomDict
 from src.utils.statistics import get_outliers
 from src.utils.strings import get_meaningful_tokens
 
@@ -143,7 +143,6 @@ class Stem2SentenceIndices(Token2Indices):
 
     def _title_based_proper_noun_retrieval(self) -> Dict[str, int]:
         """ returns lowercase name candidates """
-
         names_2_sentenceind = {}
         print('Procuring proper nouns...')
         for i, eng_sent in enumerate(tqdm(self.sentence_data[:, 0])):
@@ -153,5 +152,4 @@ class Stem2SentenceIndices(Token2Indices):
 
     def _bilateral_presence_based_proper_noun_filtering(self, namecandidate_2_sentenceind: Dict[str, int]) -> List[str]:
         """ returns lowercase names """
-
         return list(np.asarray(list(filter(lambda item: item[0] in map(lambda token: token.lower(), get_meaningful_tokens(self.sentence_data[item[1]][1])), list(namecandidate_2_sentenceind.items()))))[:, 0])

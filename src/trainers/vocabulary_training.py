@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 from src.trainers.trainer import Trainer
 from src.trainers.sentence_translation import SentenceTranslationTrainer
-from src.types.token_sentenceinds_maps import RawToken2SentenceIndices
+from src.types.token_maps import RawToken2SentenceIndices
 from src.utils.datetime import n_days_ago
 from src.utils.strings import get_article_stripped_token
 

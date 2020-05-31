@@ -10,7 +10,7 @@ import numpy as np
 
 from src.trainers.trainer import Trainer
 from src.webpage_interaction import ContentRetriever
-from src.types.token_sentenceinds_maps import Stem2SentenceIndices
+from src.types.token_maps import Stem2SentenceIndices
 
 
 # TODO: asynchronous stem map computation, dynamic mode specific occurrence frequency limits
