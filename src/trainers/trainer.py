@@ -35,10 +35,9 @@ class Trainer(ABC):
     @train_english.setter
     def train_english(self, flag: bool):
         """ create english dir if necessary """
+        if flag is True and not os.path.exists(self.language_dir):
+            os.mkdir(self.language_dir)
         self._train_english = flag
-        if flag is True:
-            if not os.path.exists(self.language_dir):
-                os.mkdir(self.language_dir)
 
     @property
     def language(self):
@@ -52,29 +51,30 @@ class Trainer(ABC):
     @lru_cache()
     def stemmer(self) -> Optional[nltk.stem.SnowballStemmer]:
         assert self.language is not None, 'stemmer to be initially called after language setting'
-        if self.language.lower() not in nltk.stem.SnowballStemmer.languages:
-            return None
-        else:
-            return nltk.stem.SnowballStemmer(self.language.lower())
+        lowered_language = self.language.lower()
+        return None if lowered_language not in nltk.stem.SnowballStemmer.languages else nltk.stem.SnowballStemmer(lowered_language)
 
     @property
     def language_dir(self):
         return f'{self.BASE_DATA_PATH}/{self.language}'
 
+    def _language_dir_sub_path(self, sub_path: str) -> str:
+        return f'{self.language_dir}/{sub_path}'
+
     @property
     def sentence_file_path(self):
-        return f'{self.BASE_DATA_PATH}/{self._language}/sentence_data.txt'
+        return self._language_dir_sub_path('sentence_data.txt')
 
     @property
     def vocabulary_file_path(self):
-        return f'{self.BASE_DATA_PATH}/{self.language}/vocabulary.txt'
+        return self._language_dir_sub_path('vocabulary.txt')
 
     @property
     def training_documentation_file_path(self):
-        return f'{self.BASE_DATA_PATH}/{self.language}/training_documentation.json'
+        return self._language_dir_sub_path('training_documentation.json')
 
     @property
-    def today(self):
+    def today(self) -> str:
         return str(datetime.date.today())
 
     # ------------------
@@ -99,10 +99,7 @@ class Trainer(ABC):
     @staticmethod
     def resolve_input(input: str, options: Iterable[str]) -> Optional[str]:
         options_starting_with = [o for o in options if o.startswith(input)]
-        if len(options_starting_with) == 1:
-            return options_starting_with[0]
-        else:
-            return None
+        return options_starting_with[0] if len(options_starting_with) == 1 else None
 
     # ----------------
     # METHODS
@@ -131,7 +128,7 @@ class Trainer(ABC):
         if self._train_english:
             split_data = [list(reversed(row)) for row in split_data]
 
-        return np.array(split_data)
+        return np.asarray(split_data)
 
     def get_lets_go_translation(self) -> Optional[str]:
         lets_go_occurrence_range = ((sentence_pair[0], i) for i, sentence_pair in

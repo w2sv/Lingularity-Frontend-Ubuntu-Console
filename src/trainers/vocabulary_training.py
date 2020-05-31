@@ -118,7 +118,7 @@ class VocabularyTrainer(Trainer):
 
     def display_new_vocabulary(self):
         self.clear_screen()
-        display_vocabulary = self.resolve_input(input('Do you want new vocabulary to be displayed once? (y)es/(n)o\n').lower(), ['yes', 'no'])
+        display_vocabulary = self.resolve_input(input('Do you want new vocabulary to be displayed once before training? (y)es/(n)o\n').lower(), ['yes', 'no'])
         if display_vocabulary == 'yes':
             new_vocabulary = [key for key in self.vocabulary_statistics.keys() if self.vocabulary_statistics[key]['lfd'] is None]
             if not new_vocabulary:
@@ -132,7 +132,7 @@ class VocabularyTrainer(Trainer):
         self.clear_screen()
         n_imperfect_entries = len([e for e in self.vocabulary_statistics.values() if e['s'] < self.COMPLETION_SCORE])
         if self.display_new_vocabulary_absence:
-            print("Couldn't find any new vocabulary.")
+            print("Couldn't find any new vocabulary.\n")
         print(f'Vocabulary file comprises {n_imperfect_entries} entries.')
         print("Enter 'append' + additional translation(s) in order to append to the ones of the previously faced item.")
         print("Distinct newly entered translation tokens are to be separated by commas.")
