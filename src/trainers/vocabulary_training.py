@@ -4,8 +4,7 @@ import sys
 import json
 from collections import Counter
 import datetime
-from time import time, sleep
-import time
+from time import sleep
 
 import unidecode
 import numpy as np
@@ -41,9 +40,9 @@ class VocabularyTrainer(Trainer):
     def __init__(self):
         super().__init__()
 
-        self.token_2_rowinds: Optional[RawToken2SentenceIndices] = None
+        self.token_2_rowinds: RawToken2SentenceIndices = None
         self.vocabulary_statistics: Optional[VocabularyTrainer.VocabularyStatistics] = None
-        self.vocabulary: Optional[Dict[str, str]] = None
+        self.vocabulary: Dict[str, str] = None
 
         self.reference_2_foreign = True
         self.reverse_response_evaluations: Dict[str, int] = {v: k for k, v in self.RESPONSE_EVALUATIONS.items()}
@@ -85,7 +84,8 @@ class VocabularyTrainer(Trainer):
             sys.exit(0)
 
         print('ELIGIBLE LANGUAGES: ')
-        [print(language) for language in sorted(eligible_languages)]
+        for language in sorted(eligible_languages):
+            print(language)
         language_selection = input('\nEnter desired language:\n').title()
         input_resolution = self.resolve_input(language_selection, eligible_languages)
         if input_resolution is None:
@@ -219,7 +219,7 @@ class VocabularyTrainer(Trainer):
                 def dict_value_sum(dictionary):
                     return sum(list(dictionary.values()))
                 short, long = sorted([a, b], key=lambda string: len(string))
-                short_c, long_c = map(Counter, [short, long])
+                short_c, long_c = map(Counter, [short, long])  # type: ignore
                 return dict_value_sum(long_c - short_c)
 
             TOLERATED_CHAR_DEVIATIONS = 1

@@ -19,14 +19,13 @@ class Trainer(ABC):
     def __init__(self):
         if not os.path.exists(self.BASE_DATA_PATH):
             os.mkdir(self.BASE_DATA_PATH)
-        self._language = None  # equals reference language in case of english training
-        self._train_english = False
 
-        self.sentence_data = None
+        self._language: str = None  # equals reference language in case of english training
+        self._train_english: bool = False
+        self.sentence_data: np.ndarray = None
+        self.n_trained_items: int = 0
 
         plt.rcParams['toolbar'] = 'None'
-
-        self.n_trained_items = 0
 
     @property
     def train_english(self):
@@ -47,7 +46,7 @@ class Trainer(ABC):
     def language(self, value: str):
         self._language = value
 
-    @property
+    @property  # type: ignore
     @lru_cache()
     def stemmer(self) -> Optional[nltk.stem.SnowballStemmer]:
         assert self.language is not None, 'stemmer to be initially called after language setting'

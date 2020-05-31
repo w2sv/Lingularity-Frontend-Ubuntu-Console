@@ -5,3 +5,4 @@ __pycache__
 /oldstuff/
 /env/
 /.idea/
+/.mypy_cache/

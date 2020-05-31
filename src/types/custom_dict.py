@@ -1,4 +1,4 @@
-from typing import Any, Hashable, Iterable, Union
+from typing import Any, Hashable, Iterable, Union, Dict
 
 
 class CustomDict(dict):

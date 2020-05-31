@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import List, Tuple, Dict, Optional, Iterator
 from operator import itemgetter
 from itertools import chain, groupby
-from collections.abc import MutableMapping
 
 from tqdm import tqdm
 import numpy as np
@@ -18,11 +17,11 @@ from src.utils.strings import get_meaningful_tokens
 
 
 class Token2Indices(CustomDict, ABC):
-    def __init__(self, mapping_data: Optional[MutableMapping] = None):
-        super().__init__(mapping_data)
+    def __init__(self, token_map: Optional[Dict] = None):
+        super().__init__(token_map)
         self.initialize()
 
-        self._n_occurrences_2_tokens: Optional[CustomDict[int, List[str]]] = None
+        self._n_occurrences_2_tokens: Optional[CustomDict] = None
 
     @property
     def distinct_characters(self) -> List[str]:
@@ -51,7 +50,7 @@ class Token2Indices(CustomDict, ABC):
         return [(i[0], len(i[1])) for i in sorted(list(self.items()), key=lambda x: len(x[1]))]
 
     @property
-    def occurrences_2_tokens(self) -> CustomDict:  # [int, List[str]]
+    def occurrences_2_tokens(self) -> CustomDict:
         if self._n_occurrences_2_tokens is None:
             self._n_occurrences_2_tokens = CustomDict()
             for token, indices in self.items():

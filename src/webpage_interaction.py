@@ -17,14 +17,14 @@ class AppUrlOpener(urllib.request.FancyURLopener):
     version = 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.69 Safari/537.36'
 
 
-urllib._urlopener = AppUrlOpener()
+urllib._urlopener = AppUrlOpener()  # type: ignore
 
 
 class ContentRetriever:
     PAGE_URL = 'http://www.manythings.org/anki'
 
     def __init__(self):
-        self.languages_2_ziplinks: Optional[Dict[str, str]] = None
+        self.languages_2_ziplinks: Dict[str, str] = None
 
     def get_language_ziplink_dict(self):
         FLAG_URL = 'http://www.manythings.org/img/usa.png'  # initiating every zip link row
@@ -51,7 +51,7 @@ class ContentRetriever:
 
         save_destination_link = os.path.join(save_destination_dir, f'{language}.zip')
         print('Downloading sentence data...')
-        urllib._urlopener.retrieve(zip_link, save_destination_link)
+        urllib._urlopener.retrieve(zip_link, save_destination_link)  # type: ignore
         return save_destination_link
 
     @staticmethod

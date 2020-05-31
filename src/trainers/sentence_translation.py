@@ -105,7 +105,7 @@ class SentenceTranslationTrainer(Trainer):
 		print('\nSelect mode:\t')
 		mode_selection = self.resolve_input(input().lower(), modes)
 		if mode_selection is None:
-			self.recurse_on_invalid_input(self.select_mode)
+			return self.recurse_on_invalid_input(self.select_mode)
 		return mode_selection
 
 	def filter_sentences_mode_correspondingly(self, mode: str):
