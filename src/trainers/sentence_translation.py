@@ -27,7 +27,7 @@ class SentenceTranslationTrainer(Trainer):
 
 	def __init__(self):
 		super().__init__()
-		self.webpage_interactor = ContentRetriever()
+		self.webpage_interactor: ContentRetriever = ContentRetriever()
 
 	def run(self):
 		self.language = self.select_language()
@@ -46,7 +46,7 @@ class SentenceTranslationTrainer(Trainer):
 	# ---------------
 	def select_language(self) -> str:
 		if self.webpage_interactor.languages_2_ziplinks is None:
-			print('Trying to connect to webpage...')
+			print('Trying to connect to webpage...')  # type: ignore
 			self.webpage_interactor.get_language_ziplink_dict()
 		sucessfully_retrieved = len(self.webpage_interactor.languages_2_ziplinks) != 0
 		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if sucessfully_retrieved else os.listdir(self.BASE_DATA_PATH)
