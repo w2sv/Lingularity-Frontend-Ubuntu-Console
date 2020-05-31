@@ -8,9 +8,9 @@ from tqdm import tqdm
 import numpy as np
 import nltk
 
-from .dictionary_abstractions import CustomDict
-from .utils.statistics import get_outliers
-from .utils.strings import get_meaningful_tokens
+from src.types.dictionary_abstractions import CustomDict
+from src.utils.statistics import get_outliers
+from src.utils.strings import get_meaningful_tokens
 
 
 # TODO: include upper case tokens in proper noun query
@@ -22,7 +22,11 @@ class Token2Indices(CustomDict, ABC):
         super().__init__(mapping_data)
         self.initialize()
 
-        self._occurrence_2_tokens: Optional[CustomDict[int, List[str]]] = None
+        self._n_occurrences_2_tokens: Optional[CustomDict[int, List[str]]] = None
+
+    @property
+    def distinct_characters(self) -> List[str]:
+        return sorted(set(chain.from_iterable(map(list, list(self.keys())))))
 
     # -----------------
     # TOKEN QUERY
@@ -48,14 +52,14 @@ class Token2Indices(CustomDict, ABC):
 
     @property
     def occurrences_2_tokens(self) -> CustomDict:  # [int, List[str]]
-        if self._occurrence_2_tokens is None:
-            self._occurrence_2_tokens = CustomDict()
+        if self._n_occurrences_2_tokens is None:
+            self._n_occurrences_2_tokens = CustomDict()
             for token, indices in self.items():
-                self._occurrence_2_tokens.append_or_insert(len(indices), token)
-        return self._occurrence_2_tokens
+                self._n_occurrences_2_tokens.append_or_insert(len(indices), token)
+        return self._n_occurrences_2_tokens
 
     # ----------------
-    # OCCURRENCE OUTLIER BASED
+    # OCCURRENCE OUTLIER BASED, not used
     # ----------------
     def _get_occurrence_outlier_corresponding_tokens(self, occurrence_outliers: List[int]) -> Iterator[str]:
         return chain.from_iterable(itemgetter(*occurrence_outliers)(self.occurrences_2_tokens))
@@ -110,9 +114,9 @@ class Stem2SentenceIndices(Token2Indices):
     def from_sentence_data(cls, sentence_data: np.ndarray, stemmer: Optional[nltk.stem.SnowballStemmer]):
         return cls(RawToken2SentenceIndices(sentence_data), stemmer)
 
-    def __getattr__(self, item):
+    def __getattr__(self, attr):
         """ forwarding sentence_data calls """
-        return getattr(self.raw_token_map, item)
+        return getattr(self.raw_token_map, attr)
 
     def initialize(self):
         stemming_possible = self.stemmer is not None
@@ -139,6 +143,7 @@ class Stem2SentenceIndices(Token2Indices):
 
     def _title_based_proper_noun_retrieval(self) -> Dict[str, int]:
         """ returns lowercase name candidates """
+
         names_2_sentenceind = {}
         print('Procuring proper nouns...')
         for i, eng_sent in enumerate(tqdm(self.sentence_data[:, 0])):
@@ -148,8 +153,5 @@ class Stem2SentenceIndices(Token2Indices):
 
     def _bilateral_presence_based_proper_noun_filtering(self, namecandidate_2_sentenceind: Dict[str, int]) -> List[str]:
         """ returns lowercase names """
-        return list(np.array(list(filter(lambda item: item[0] in map(lambda token: token.lower(), get_meaningful_tokens(self.sentence_data[item[1]][1])), list(namecandidate_2_sentenceind.items()))))[:, 0])
 
-
-if __name__ == '__main__':
-    pass
+        return list(np.asarray(list(filter(lambda item: item[0] in map(lambda token: token.lower(), get_meaningful_tokens(self.sentence_data[item[1]][1])), list(namecandidate_2_sentenceind.items()))))[:, 0])

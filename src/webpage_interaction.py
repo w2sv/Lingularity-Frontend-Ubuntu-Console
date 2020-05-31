@@ -66,7 +66,3 @@ class ContentRetriever:
 
         # rename sentence data file
         os.rename(os.path.join(language_dir_link, os.listdir(language_dir_link)[0]), os.path.join(language_dir_link, 'sentence_data.txt'))
-
-
-if __name__ == '__main__':
-    pass

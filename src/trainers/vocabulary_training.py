@@ -11,37 +11,38 @@ import unidecode
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .trainer import Trainer
-from .sentence_translation import SentenceTranslationTrainer
-from .token_sentenceinds_map import RawToken2SentenceIndices
-from .utils.datetime import n_days_ago
-
-
-VocabularyStatistics = Dict[str, Dict[str, Union[float, int, str]]]  # foreign language token -> Dict[score: float, times_seen: int, last_seen_date: str]
+from src.trainers.trainer import Trainer
+from src.trainers.sentence_translation import SentenceTranslationTrainer
+from src.types.token_sentenceinds_maps import RawToken2SentenceIndices
+from src.utils.datetime import n_days_ago
+from src.utils.strings import get_article_stripped_token
 
 
 # TODO: english training, refactor vocabulary statistics, possibly vocabulary file to separate class
 
 
 class VocabularyTrainer(Trainer):
+    # foreign language token -> Dict[score: float, times_seen: int, last_seen_date: str]
+    VocabularyStatistics = Dict[str, Dict[str, Union[float, int, str]]]
+
     RESPONSE_EVALUATIONS = {0: 'wrong', 1: 'accent fault', 2: 'correct', 3: 'perfect'}
     COMPLETION_SCORE = 5
     N_SENTENCES_TO_BE_DISPLAYED = 2
     ROOT_LENGTH = 4
     DAYS_TIL_RETENTION_ASSERTION = 50
     PERCENTAGE_CORRESPONDING_VERDICTS = {
-               0: 'You suck.',
-               20: 'Get your shit together m8.',
-               40: "You can't climb the ladder of success with your hands in your pockets.",
-               60: "Keep hustlin' young blood.",
-               80: 'Attayboy!',
-               100: '0361/2680494. Call me.'}
+        0: 'You suck.',
+        20: 'Get your shit together m8.',
+        40: "You can't climb the ladder of success with your hands in your pockets.",
+        60: "Keep hustlin' young blood.",
+        80: 'Attayboy!',
+        100: '0361/2680494. Call me.'}
 
     def __init__(self):
         super().__init__()
 
         self.token_2_rowinds: Optional[RawToken2SentenceIndices] = None
-        self.vocabulary_statistics: Optional[VocabularyStatistics] = None
+        self.vocabulary_statistics: Optional[VocabularyTrainer.VocabularyStatistics] = None
         self.vocabulary: Optional[Dict[str, str]] = None
 
         self.reference_2_foreign = True
@@ -143,10 +144,6 @@ class VocabularyTrainer(Trainer):
     # ------------------
     # TRAINING
     # ------------------
-    @staticmethod
-    def parse_date(date: str) -> datetime.datetime:
-        return datetime.datetime.strptime(date, '%Y-%M-%d')
-
     def append_translation(self, entry: str, additional_translations: str):
         additional_translations = additional_translations.rstrip().lstrip()
 
@@ -196,7 +193,7 @@ class VocabularyTrainer(Trainer):
             if self.RESPONSE_EVALUATIONS[response_evaluation] != 'perfect':
                 print('| Correct translation: ', translation, end='')
             print('')
-            comprising_sentences = self.get_comprising_sentences(entry.split(',')[0])
+            comprising_sentences = self.get_comprising_sentences(display_token)
             if comprising_sentences is not None:
                 [print('\t', s) for s in comprising_sentences]
             print('_______________')
@@ -240,8 +237,8 @@ class VocabularyTrainer(Trainer):
         return self.reverse_response_evaluations[evaluation]
 
     def get_comprising_sentences(self, token: str) -> Optional[List[str]]:
-        root = token[:self.ROOT_LENGTH]
-        sentence_indices = np.array(self.token_2_rowinds.get_root_comprising_sentence_indices(root))
+        root = get_article_stripped_token(token)[:self.ROOT_LENGTH]
+        sentence_indices = np.asarray(self.token_2_rowinds.get_root_comprising_sentence_indices(root))
         if not len(sentence_indices):
             return None
 

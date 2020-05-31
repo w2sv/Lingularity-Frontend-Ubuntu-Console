@@ -4,9 +4,9 @@ import platform
 from subprocess import Popen
 import json
 
-from .sentence_translation import SentenceTranslationTrainer
-from .vocabulary_training import VocabularyTrainer
-from .trainer import Trainer
+from src.trainers.sentence_translation import SentenceTranslationTrainer
+from src.trainers.vocabulary_training import VocabularyTrainer
+from src.trainers.trainer import Trainer
 from .utils.datetime import parse_date, today_or_yesterday
 
 
@@ -15,7 +15,7 @@ _TRAINERS = {'sentence translation': SentenceTranslationTrainer, 'vocabulary tra
 
 def initialize_terminal():
     if platform.system() == 'Windows':
-        Popen(f'{os.getcwd()}/terminal_inits/windows.cmd', cwd=os.getcwd())
+        Popen(f'{os.getcwd()}/shell/windows.cmd', cwd=os.getcwd())
     Trainer.clear_screen()
 
 
@@ -51,7 +51,7 @@ def last_session_display():
 
 def display_starting_screen():
     Trainer.clear_screen()
-    banner = open(os.path.join(os.getcwd(), 'resources/banner.txt'), 'r').read()
+    banner = open(os.path.join(os.getcwd(), 'ressources/banner.txt'), 'r').read()
     print(banner)
     print("							W2SV", '\n' * 1)
     print("					         by Janek Zangenberg ", '\n' * 2)
