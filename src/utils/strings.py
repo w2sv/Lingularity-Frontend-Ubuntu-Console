@@ -15,10 +15,9 @@ def strip_unicode(token: str) -> str:
 def lower_case_sentence_beginnings(sentence: str) -> str:
     chars = list(sentence)
     chars[0] = chars[0].lower()
-    point_positions = [i for i in range(len(sentence) - 1) if sentence[i: i + 2] == '. ']
-    if point_positions:
-        for i in point_positions:
-            chars[i + 2] = chars[i + 2].lower()
+    point_positions = (i for i in range(len(sentence) - 1) if sentence[i: i + 2] == '. ')
+    for i in point_positions:
+        chars[i + 2] = chars[i + 2].lower()
     return ''.join(chars)
 
 
@@ -27,8 +26,3 @@ def get_article_stripped_token(token: str) -> str:
     if len(parts) == 2 and len(parts[0]) < len(parts[1]):
         return parts[1]
     return token
-
-
-if __name__ == '__main__':
-    token = "l'chute"
-    print(get_article_stripped_token(token))

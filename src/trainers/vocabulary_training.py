@@ -264,12 +264,6 @@ class VocabularyTrainer(Trainer):
     def performance_verdict(self) -> str:
         return self.PERCENTAGE_CORRESPONDING_VERDICTS[int(self.correctness_percentage) // 20 * 20]
 
-    def exit_screen(self):
-        """ deprecated """
-        print(f'You got {self.n_correct_responses}/{self.n_trained_items} correct, i.e. {int(self.correctness_percentage)}% right', '\n')
-        time.sleep(3)
-        print(self.performance_verdict)
-
     def display_pie_chart(self):
         correct_percentage = (self.n_correct_responses / self.n_trained_items) * 100
         incorrect_percentage = 100 - correct_percentage
