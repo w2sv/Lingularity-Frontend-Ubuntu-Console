@@ -51,7 +51,7 @@ def last_session_display():
 
 def display_starting_screen():
     Trainer.clear_screen()
-    banner = open(os.path.join(os.getcwd(), 'ressources/banner.txt'), 'r').read()
+    banner = open(os.path.join(os.getcwd(), 'resources/banner.txt'), 'r').read()
     print(banner)
     print("							W2SV", '\n' * 1)
     print("					         by Janek Zangenberg ", '\n' * 2)

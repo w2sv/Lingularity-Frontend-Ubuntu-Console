@@ -1,0 +1,4 @@
+- enable modification of last vocabulary file appension
+- only keep the last 5 shown sentences on screen
+- upload user data to global data base
+- infer lingual capability level by appended vocabulary
