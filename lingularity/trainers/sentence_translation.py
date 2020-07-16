@@ -7,49 +7,55 @@ from bisect import insort
 from operator import ge, le
 
 import numpy as np
+from pynput.keyboard import Controller as KeyboardController
 
-from src.trainers.trainer import Trainer
-from src.webpage_interaction import ContentRetriever
-from src.types.token_maps import Stem2SentenceIndices
-
-
-# TODO: asynchronous stem map computation, dynamic mode specific occurrence frequency limits
-#  enhancement of mode selection screen
+from lingularity.trainers.trainer import Trainer
+from lingularity.webpage_interaction import ContentRetriever
+from lingularity.types.token_maps import Stem2SentenceIndices
+from lingularity.utils.enum import ExtendedEnum
 
 
 class SentenceTranslationTrainer(Trainer):
 	DEFAULT_NAMES = ('Tom', 'Mary')
-	LANGUAGE_CORRESPONDING_NAMES = {'Italian': ['Alessandro', 'Christina'],
-				  'French': ['Antoine', 'Amelie'],
-				  'Spanish': ['Emilio', 'Luciana'],
-				  'Hungarian': ['László', 'Zsóka'],
-				  'German': ['Günther', 'Irmgard']}
+	LANGUAGE_CORRESPONDING_NAMES = {
+		'Italian': ['Alessandro', 'Christina'],
+		'French': ['Antoine', 'Amelie'],
+		'Spanish': ['Emilio', 'Luciana'],
+		'Hungarian': ['László', 'Zsóka'],
+		'German': ['Günther', 'Irmgard']
+	}
 
 	def __init__(self):
 		super().__init__()
-		self.webpage_interactor: ContentRetriever = ContentRetriever()
+		self.content_retriever = ContentRetriever()
 
 	def run(self):
 		self.language = self.select_language()
-		if self._language not in os.listdir(self.BASE_DATA_PATH):
-			zip_file_link = self.webpage_interactor.download_zipfile(self._language)
-			self.webpage_interactor.unzip_file(zip_file_link)
+
+		if self._language not in self.locally_available_languages:
+			self._download_and_process_zip_file()
+
 		self.sentence_data = self.parse_sentence_data()
-		mode_selection = self.select_mode()
-		if mode_selection != 'random':
-			self.filter_sentences_mode_correspondingly(mode_selection)
-		self.pre_training_display()
+
+		if (mode_selection := self.select_mode()) != self.Mode.Random.value:
+			self.filter_sentences_mode_accordingly(mode_selection)
+
+		self.display_pre_training_instructions()
 		self.train()
+
+	def _download_and_process_zip_file(self):
+		zip_file_link = self.content_retriever.download_zipfile(self._language)
+		self.content_retriever.unzip_file(zip_file_link)
 
 	# ---------------
 	# INITIALIZATION
 	# ---------------
 	def select_language(self) -> str:
-		if self.webpage_interactor.languages_2_ziplinks is None:
+		if self.content_retriever.languages_2_ziplinks is None:
 			print('Trying to connect to webpage...')  # type: ignore
-			self.webpage_interactor.get_language_ziplink_dict()
-		sucessfully_retrieved = len(self.webpage_interactor.languages_2_ziplinks) != 0
-		eligible_languages = list(self.webpage_interactor.languages_2_ziplinks.keys()) if sucessfully_retrieved else os.listdir(self.BASE_DATA_PATH)
+			self.content_retriever.get_language_ziplink_dict()
+		sucessfully_retrieved = len(self.content_retriever.languages_2_ziplinks) != 0
+		eligible_languages = list(self.content_retriever.languages_2_ziplinks.keys()) if sucessfully_retrieved else os.listdir(self.BASE_DATA_PATH)
 		if 'English' not in eligible_languages:
 			insort(eligible_languages, 'English')
 
@@ -89,8 +95,12 @@ class SentenceTranslationTrainer(Trainer):
 	# -----------------
 	# .MODE
 	# -----------------
+	class Mode(ExtendedEnum):
+		VocabularyAcquisition = 'vocabulary acquisition'
+		Lowkey = 'lowkey'
+		Random = 'random'
+
 	def select_mode(self) -> str:
-		modes = ('vocabulary acquisition', 'lowkey', 'random')
 		explanations = (
 			'show me sentences possessing an increased probability of containing rather infrequently used vocabulary',
 			'show me sentences comprising exclusively commonly used vocabulary',
@@ -98,17 +108,17 @@ class SentenceTranslationTrainer(Trainer):
 
 		self.clear_screen()
 
-		print('MODES\n')
+		print('TRAINING MODES\n')
 		for i in range(3):
-			print(f'{modes[i].title()}: ')
+			print(f'{self.Mode.values()[i].title()}: ')
 			print('\t', explanations[i])
-		print('\nSelect mode:\t')
-		mode_selection = self.resolve_input(input().lower(), modes)
+		print('\nEnter desired mode:\t')
+		mode_selection = self.resolve_input(input().lower(), self.Mode.values())
 		if mode_selection is None:
 			return self.recurse_on_invalid_input(self.select_mode)
 		return mode_selection
 
-	def filter_sentences_mode_correspondingly(self, mode: str):
+	def filter_sentences_mode_accordingly(self, mode: str):
 		stems_2_indices = Stem2SentenceIndices.from_sentence_data(self.sentence_data, self.stemmer)
 
 		def get_limit_corresponding_sentence_indices(occurrence_limit: int, filter_mode: str) -> List[int]:
@@ -116,16 +126,23 @@ class SentenceTranslationTrainer(Trainer):
 			operator = ge if filter_mode == 'min' else le
 			return list(chain.from_iterable((indices for indices in stems_2_indices.values() if operator(len(indices), occurrence_limit))))
 
-		if mode == 'vocabulary acquisition':
+		if mode == self.Mode.VocabularyAcquisition.value:
 			indices = get_limit_corresponding_sentence_indices(20, 'max')
-		elif mode == 'lowkey':
+		else:
 			indices = get_limit_corresponding_sentence_indices(50, 'min')
 		print('Getting corresponding sentences...')
 		self.sentence_data = self.sentence_data[indices]
 
-	def pre_training_display(self):
+	def display_pre_training_instructions(self):
 		self.clear_screen()
-		instruction_text = f"""Database comprises {len(self.sentence_data):,d} sentences.\nPress Enter to advance to next sentence\nEnter 'vocabulary' to append new entry to language specific vocabulary file, 'exit' to terminate program.\n"""
+		instruction_text = (f"Database comprises {len(self.sentence_data):,d} sentences.\n"
+		"Hit\n "
+		"\t- Enter to advance to next sentence\n"
+		"Enter \n"
+			"\t- 'vocabulary' to append new entry to language specific vocabulary file\n" 
+			"\t- 'exit' to terminate program\n"
+			"\t- 'modify' in order to modify latest vocabulary file entry\n")
+
 		print(instruction_text)
 
 		lets_go_translation = self.get_lets_go_translation()
@@ -135,13 +152,25 @@ class SentenceTranslationTrainer(Trainer):
 	# TRAINING LOOP
 	# -----------------
 	def train(self):
+		class Option(ExtendedEnum):
+			Exit = 'exit'
+			AppendVocabulary = 'vocabulary'
+			ModifyVocabulary = 'modify'
+
 		indices = np.arange(len(self.sentence_data))
 		np.random.shuffle(indices)
+
 		self.sentence_data = self.sentence_data[indices]
-		persevere = False
+
+		suspend_resolution = False
+
+		def maintain_resolution_suspension():
+			nonlocal suspend_resolution
+			print(" ")
+			suspend_resolution = True
 
 		while True:
-			if not persevere:
+			if not suspend_resolution:
 				try:
 					reference_sentence, translation = self.sentence_data[self.n_trained_items]
 				except (ValueError, IndexError):
@@ -151,29 +180,39 @@ class SentenceTranslationTrainer(Trainer):
 
 				print(reference_sentence, '\t')
 			else:
-				persevere = False
+				suspend_resolution = False
 			try:
-				try:
-					response = self.resolve_input(input("pending...").lower(), ['vocabulary', 'exit'])
-					if response is not None:
-						if response == 'vocabulary':
-							self.append_2_vocabulary_file()
-							print(" ")
-							persevere = True
-						elif response == 'exit':
-							print('----------------')
-							print("Number of faced sentences: ", self.n_trained_items)
-							self.append_2_training_history()
-							if self.n_trained_items > 4:
-								self.plot_training_history()
-							sys.exit()
-				except KeyboardInterrupt:
-					pass
+				response = self.resolve_input(input("pending...").lower(), Option.values())
+				if response is not None:
+					if response == Option.AppendVocabulary.value:
+						self.append_2_vocabulary_file()
+						maintain_resolution_suspension()
+						self.erase_previous_line()
 
-			except SyntaxError:
+					elif response == Option.ModifyVocabulary.value:
+						print('Last vocabulary file entry:\n\t', end='')
+						with open(self.vocabulary_file_path, 'r+') as vocab_file:
+							line_data = vocab_file.readlines()
+							vocab_file.seek(0)
+							KeyboardController().type(f'{line_data[-1]}')
+							line_data[-1] = input('')
+							vocab_file.writelines(line_data)
+							vocab_file.truncate()
+						[self.erase_previous_line() for _ in range(3)]
+						maintain_resolution_suspension()
+
+					elif response == Option.Exit.value:
+						print('----------------')
+						print("Number of faced sentences: ", self.n_trained_items)
+						self.append_2_training_history()
+						if self.n_trained_items > 4:
+							self.plot_training_history()
+						sys.exit()
+			except (KeyboardInterrupt, SyntaxError):
 				pass
+
 			self.erase_previous_line()
-			if not persevere:
+			if not suspend_resolution:
 				print(translation, '\n', '_______________')
 				self.n_trained_items += 1
 

@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Optional, Iterable, Dict
+from typing import Callable, Optional, Iterable, Dict, List
 import os
 import platform
 import sys
 import time
 import json
 import datetime
-from functools import lru_cache
+from functools import cached_property
 
 import nltk
 import numpy as np
@@ -33,7 +33,8 @@ class Trainer(ABC):
 
     @train_english.setter
     def train_english(self, flag: bool):
-        """ create english dir if necessary """
+        """ creates english dir if necessary """
+
         if flag is True and not os.path.exists(self.language_dir):
             os.mkdir(self.language_dir)
         self._train_english = flag
@@ -46,10 +47,13 @@ class Trainer(ABC):
     def language(self, value: str):
         self._language = value
 
-    @property  # type: ignore
-    @lru_cache()
+    @property
+    def locally_available_languages(self) -> List[str]:
+        return os.listdir(self.BASE_DATA_PATH)
+
+    @cached_property  # TODO: ascertain proper working
     def stemmer(self) -> Optional[nltk.stem.SnowballStemmer]:
-        assert self.language is not None, 'stemmer to be initially called after language setting'
+        assert self.language is not None, 'Stemmer to be initially called after language setting'
         lowered_language = self.language.lower()
         return None if lowered_language not in nltk.stem.SnowballStemmer.languages else nltk.stem.SnowballStemmer(lowered_language)
 
@@ -178,7 +182,7 @@ class Trainer(ABC):
     # ABSTRACTS
     # -----------------
     @abstractmethod
-    def pre_training_display(self):
+    def display_pre_training_instructions(self):
         pass
 
     @abstractmethod

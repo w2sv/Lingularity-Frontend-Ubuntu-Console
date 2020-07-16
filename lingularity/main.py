@@ -4,9 +4,9 @@ import platform
 from subprocess import Popen
 import json
 
-from src.trainers.sentence_translation import SentenceTranslationTrainer
-from src.trainers.vocabulary_training import VocabularyTrainer
-from src.trainers.trainer import Trainer
+from lingularity.trainers.sentence_translation import SentenceTranslationTrainer
+from lingularity.trainers.vocabulary_training import VocabularyTrainer
+from lingularity.trainers.trainer import Trainer
 from .utils.datetime import parse_date, today_or_yesterday
 
 

@@ -10,11 +10,11 @@ import unidecode
 import numpy as np
 import matplotlib.pyplot as plt
 
-from src.trainers.trainer import Trainer
-from src.trainers.sentence_translation import SentenceTranslationTrainer
-from src.types.token_maps import RawToken2SentenceIndices
-from src.utils.datetime import n_days_ago
-from src.utils.strings import get_article_stripped_token
+from lingularity.trainers.trainer import Trainer
+from lingularity.trainers.sentence_translation import SentenceTranslationTrainer
+from lingularity.types.token_maps import RawToken2SentenceIndices
+from lingularity.utils.datetime import n_days_ago
+from lingularity.utils.strings import get_article_stripped_token
 
 
 # TODO: english training, refactor vocabulary statistics, possibly vocabulary file to separate class
@@ -62,7 +62,7 @@ class VocabularyTrainer(Trainer):
         self.vocabulary_statistics = self.load_vocabulary_statistics()
         self.update_documentation()
         self.display_new_vocabulary()
-        self.pre_training_display()
+        self.display_pre_training_instructions()
         self.train()
         self.save_vocabulary_statistics()
         self.append_2_training_history()
@@ -128,7 +128,7 @@ class VocabularyTrainer(Trainer):
             print('\n')
             input('Press any key to continue')
 
-    def pre_training_display(self):
+    def display_pre_training_instructions(self):
         self.clear_screen()
         n_imperfect_entries = len([e for e in self.vocabulary_statistics.values() if e['s'] < self.COMPLETION_SCORE])
         if self.display_new_vocabulary_absence:
