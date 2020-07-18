@@ -90,10 +90,10 @@ def add_vocabulary():
 def select_training() -> Optional[str]:
     indentation = '\t' * 2
     print("\nSelect Training: ", end='')
-    training = resolve_input(input(f"{indentation}(S)entence translation{indentation}(V)ocabulary training{indentation}or (a)dd _vocabulary\n").lower(), list(TRAINERS.keys()) + ['add _vocabulary'])
+    training = resolve_input(input(f"{indentation}(S)entence translation{indentation}(V)ocabulary training{indentation}or (a)dd vocabulary\n").lower(), list(TRAINERS.keys()) + ['add _vocable_entries'])
     if training is None:
         return recurse_on_invalid_input(select_training)
-    elif training == 'add _vocabulary':
+    elif training == 'add vocabulary':
         return add_vocabulary()
 
     clear_screen()

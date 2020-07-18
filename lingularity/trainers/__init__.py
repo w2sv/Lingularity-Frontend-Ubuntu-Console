@@ -175,7 +175,7 @@ class Trainer(ABC):
 
         x_range = np.arange(len(dates))
         ax.plot(x_range, trained_sentences, marker='.', markevery=list(x_range), color='r', label='sentences')
-        ax.plot(x_range, trained_vocabulary, marker='.', markevery=list(x_range), color='b', label='_vocabulary')
+        ax.plot(x_range, trained_vocabulary, marker='.', markevery=list(x_range), color='b', label='_vocable_entries')
         ax.set_xticks(x_range)
         ax.set_xticklabels(dates, minor=False, rotation=45)
         ax.set_title(f'{self.language} training history')

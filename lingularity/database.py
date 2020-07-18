@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import pymongo
 
-from lingularity.utils.datetime import datetag_today
+from lingularity.utils.datetime import datetag_today, day_difference
 
 
 @dataclass(frozen=True)
@@ -25,7 +25,9 @@ class Credentials:
 
 
 class MongoDBClient:
-    def __init__(self, user: str, language: str, credentials: Credentials):
+    _cluster = None
+
+    def __init__(self, user: str, language: Optional[str], credentials: Credentials):
         self._user = user
         self._language = language
         self._cluster = pymongo.MongoClient(credentials.client_endpoint(srv_endpoint=True), serverSelectionTimeoutMS=1_000)
@@ -54,12 +56,12 @@ class MongoDBClient:
             upsert=True
         )
 
-    def update_vocable_entry(self, token: str, correctly_answered: bool):
+    def update_vocable_entry(self, token: str, score_increment: float):
         self.vocabulary_collection.find_one_and_update(
             filter={'_id': self._language, token: {'$exists': True}},
             update={'$inc': {
                         f'{token}.tf': 1,
-                        f'{token}.s': int(correctly_answered)},
+                        f'{token}.s': score_increment},
                     '$set': {f'{token}.lfd': datetag_today()}
             },
             upsert=False
@@ -85,6 +87,22 @@ class MongoDBClient:
 
     def query_vocable_attributes(self, vocable: str) -> Dict[str, Union[str, int]]:
         return self.vocabulary_collection.find_one(self._language)[vocable]
+
+    def query_vocabulary_data(self) -> List[Dict[str, Union[str, int, float]]]:
+        result = self.vocabulary_collection.find_one(self._language)
+        result.pop('_id')
+        return [{k: v} for k, v in result.items()]
+
+    def query_imperfect_vocabulary_entries(self, perfection_score=5, days_before_retention_assertion=50) -> List[Dict[str, Union[str, int]]]:
+        vocabulary_data = self.query_vocabulary_data()
+        original_length = vocabulary_data.__len__()
+        for i, vocabulary_entry in enumerate(vocabulary_data[::-1]):
+            if vocabulary_entry['s'] >= perfection_score and day_difference(vocabulary_entry['lfd']) < days_before_retention_assertion:
+                vocabulary_data.pop(original_length - i - 1)
+        return vocabulary_data
+
+    def get_vocabulary_possessing_languages(self) -> List[str]:
+        return list(self.vocabulary_collection.find().distinct('_id'))
 
     # ------------------
     # Training Chronic Collection
@@ -114,7 +132,6 @@ class MongoDBClient:
 
     
 if __name__ == '__main__':
-    client = MongoDBClient(user='janek_zangenberg', language='italian', credentials=Credentials.default())
+    client = MongoDBClient(user='janek_zangenberg', language='Italian', credentials=Credentials.default())
     # client.drop_all_databases()
     client.inject_session_statistics('s', 92)
-    print(client.query_training_chronic())

@@ -1,9 +1,5 @@
 from typing import List, Dict, Optional, Union
-import os
-import sys
-import json
 from collections import Counter
-import datetime
 from time import sleep
 
 import unidecode
@@ -13,60 +9,81 @@ import matplotlib.pyplot as plt
 from lingularity.trainers import Trainer
 from lingularity.trainers.sentence_translation import SentenceTranslationTrainer
 from lingularity.types.token_maps import RawToken2SentenceIndices
-from lingularity.utils.datetime import n_days_ago
+from lingularity import database
 from lingularity.utils.strings import get_article_stripped_token
 from lingularity.utils.output_manipulation import clear_screen
 from lingularity.utils.input_resolution import resolve_input, recurse_on_invalid_input
+from lingularity.utils.enum import ExtendedEnum
 
 
 class VocabularyTrainer(Trainer):
-    # foreign language token -> Dict[score: float, times_seen: int, last_seen_date: str]
-    VocabularyStatistics = Dict[str, Dict[str, Union[float, int, str]]]
+    class ResponseEvaluation(ExtendedEnum):
+        Wrong = 0
+        AccentError = 0.5
+        AlmostCorrect = 0.5
+        Perfect = 1
 
-    RESPONSE_EVALUATIONS = {0: 'wrong', 1: 'accent fault', 2: 'correct', 3: 'perfect'}
-    COMPLETION_SCORE = 5
-    N_SENTENCES_TO_BE_DISPLAYED = 2
+    class VocableEntry:
+        Type = Dict[str, Dict[str, Union[float, str, int]]]
+        REFERENCE_TO_FOREIGN = None
+
+        def __init__(self, entry: Type):
+            self._entry = entry
+
+        @property
+        def token(self) -> str:
+            return next(iter(self._entry.keys()))
+
+        @property
+        def display_token(self) -> str:
+            return self.translation if not self.REFERENCE_TO_FOREIGN else self.token
+
+        @property
+        def translation(self) -> str:
+            return self._entry[self.token]['translation']
+
+        @property
+        def display_translation(self) -> str:
+            return self.translation if self.REFERENCE_TO_FOREIGN else self.token
+
+        @property
+        def last_faced_date(self) -> Optional[str]:
+            return self._entry[self.token]['lfd']
+
+        def __str__(self):
+            return str(self._entry)
+
+    N_RELATED_SENTENCES = 2
     ROOT_LENGTH = 4
-    DAYS_TIL_RETENTION_ASSERTION = 50
-    PERCENTAGE_CORRESPONDING_VERDICTS = {
-        0: 'You suck.',
-        20: 'Get your shit together m8.',
-        40: "You can't climb the ladder of success with your hands in your pockets.",
-        60: "Keep hustlin' young blood.",
-        80: 'Attayboy!',
-        100: '0361/2680494. Call me.'}
 
     def __init__(self):
         super().__init__()
 
-        self._token_2_rowinds: RawToken2SentenceIndices = None
-        self._vocabulary_statistics: Optional[VocabularyTrainer.VocabularyStatistics] = None
-        self._vocabulary: Dict[str, str] = None
+        self._reference_2_foreign = False  # TODO: make alterable
 
-        self._reference_2_foreign = True
-        self._reverse_response_evaluations: Dict[str, int] = {v: k for k, v in self.RESPONSE_EVALUATIONS.items()}
+        self._sentence_data = self._parse_sentence_data()
+        self._token_2_rowinds = RawToken2SentenceIndices(self._sentence_data)
+        self._vocable_entries: List[VocabularyTrainer.VocableEntry] = self._get_vocable_entries()
 
         self._n_correct_responses = 0
 
     def run(self):
-        self._sentence_data = self._parse_sentence_data()
-        self._token_2_rowinds = RawToken2SentenceIndices(self._sentence_data)
-        self._vocabulary = self._parse_vocabulary()
-        self._vocabulary_statistics = self._load_vocabulary_statistics()
-        self._update_documentation()
         self._display_new_vocabulary()
         self._display_pre_training_instructions()
         self._train()
-        self._save_vocabulary_statistics()
         self._append_session_statistics_to_training_history()
         self._display_pie_chart()
         self._plot_training_history()
+
+    def _get_vocable_entries(self) -> List[VocableEntry]:
+        self.VocableEntry.REFERENCE_TO_FOREIGN = self._reference_2_foreign
+        return list(map(self.VocableEntry, self._database_client.query_vocabulary_data()))
 
     # ---------------
     # INITIALIZATION
     # ---------------
     def _select_language(self) -> str:
-        eligible_languages = list(filter(lambda language_dir: 'vocabulary.txt' in os.listdir(f'{self.BASE_LANGUAGE_DATA_PATH}/{language_dir}'), self.locally_available_languages))
+        eligible_languages = database.MongoDBClient('janek_zangenberg', None, database.Credentials.default()).get_vocabulary_possessing_languages()
         if not eligible_languages:
             self._start_sentence_translation_trainer()
 
@@ -88,51 +105,22 @@ class VocabularyTrainer(Trainer):
         clear_screen()
         return SentenceTranslationTrainer().run()
 
-    @property
-    def voccabulary_statistics_file_path(self):
-        return f'{self.BASE_LANGUAGE_DATA_PATH}/{self.language}/vocabulary_statistics.json'
-
-    def _parse_vocabulary(self) -> Dict[str, str]:
-        with open(self.vocabulary_file_path, 'r') as file:
-            return {target_language_entry: translation.strip('\n') for target_language_entry, translation in [row.split(' - ') for row in file.readlines()]}
-
-    def _load_vocabulary_statistics(self) -> Optional[VocabularyStatistics]:
-        if not os.path.exists(self.voccabulary_statistics_file_path):
-            return None
-
-        with open(self.voccabulary_statistics_file_path) as read_file:
-            return json.load(read_file)
-
-    def _update_documentation(self):
-        # TODO: account for target language entry changes
-
-        INIT = {'s': 0, 'tf': 0, 'lfd': None}  # score, times_faced, last_faced_date
-
-        # create new documentation file if necessary
-        if self._vocabulary_statistics is None:
-            self._vocabulary_statistics = {entry: INIT.copy() for entry in self._vocabulary.keys()}
-
-        for entry in self._vocabulary.keys():
-            if self._vocabulary_statistics.get(entry) is None:
-                self._vocabulary_statistics[entry] = INIT.copy()
-
     def _display_new_vocabulary(self):
         clear_screen()
         display_vocabulary = resolve_input(input('Do you want new vocabulary to be displayed once before training? (y)es/(n)o\n').lower(), ['yes', 'no'])
         if display_vocabulary == 'yes':
-            new_vocabulary = [key for key in self._vocabulary_statistics.keys() if self._vocabulary_statistics[key]['lfd'] is None]
+            new_vocabulary = [entry for entry in self._vocable_entries if entry.last_faced_date is None]
             if not new_vocabulary:
                 return
-            [print('\t', entry, ' = ', self._vocabulary[entry]) for entry in new_vocabulary]
+            [print('\t', ' - '.join([entry.token, entry.translation])) for entry in new_vocabulary]
             print('\n')
             input('Press any key to continue')
 
     def _display_pre_training_instructions(self):
         clear_screen()
-        n_imperfect_entries = len([e for e in self._vocabulary_statistics.values() if e['s'] < self.COMPLETION_SCORE])
 
-        print((f'Vocabulary file comprises {n_imperfect_entries} entries.\n'
-                "Enter: \n\t- 'append' + additional translation(s) in order to append to the ones of the previously faced item.\n"
+        print((f'Found {self._vocable_entries.__len__()} imperfect entries.\n'
+                "Enter: \n\t- 'add' + meaning(s) in order to add to the ones of the previously faced item.\n"
                 "\t\tNote: distinct newly entered translation tokens are to be separated by commas.\n"
                 "\t- 'exit' to terminate the program.\n\n"))
 
@@ -162,53 +150,51 @@ class VocabularyTrainer(Trainer):
             write_file.writelines(vocabulary)
 
     def _train(self):
-        entries = [entry for entry in self._vocabulary.keys() if self._vocabulary_statistics[entry]['s'] < 5 or n_days_ago(self._vocabulary_statistics[entry]['lfd']) >= self.DAYS_TIL_RETENTION_ASSERTION]
-        np.random.shuffle(entries)
+        class Option(ExtendedEnum):
+            Exit = 'exit'
+            AppendMeaning = 'append'
 
-        get_display_token = lambda entry: self._vocabulary[entry] if self._reference_2_foreign else entry
-        get_translation = lambda entry: entry if self._reference_2_foreign else self._vocabulary[entry]
+        np.random.shuffle(self._vocable_entries)
 
         i, display_item = 0, True
-        while i < len(entries):
-            entry = entries[i]
-            display_token, translation = get_display_token(entry), get_translation(entry)
-            print(f'{display_token} = ', end='') if display_item else print('Enter translation: ', end='')
+        while i < len(self._vocable_entries):
+            entry = self._vocable_entries[i]
+            print(f'{entry.display_token} = ', end='') if display_item else print('Enter translation: ', end='')
+
             try:
                 response = input()
             except KeyboardInterrupt:
                 display_item = False
                 continue
-            if response.lower() == 'exit':
+            if response == Option.Exit.value:
                 break
-            elif response.lower().startswith('append') and i:
-                self._append_translation(entries[i - 1], response[len('append'):])
+            elif response == Option.AppendMeaning.value:
+                # TODO
                 display_item = False
                 continue
 
-            response_evaluation = self._evaluate_response(response, translation)
+            response_evaluation = self._get_reponse_evaluation(response, entry.display_translation)
+            self._database_client.update_vocable_entry(entry.token, response_evaluation.value)
 
-            print('\t', self.RESPONSE_EVALUATIONS[response_evaluation].upper(), end=' ')
-            if self.RESPONSE_EVALUATIONS[response_evaluation] != 'perfect':
-                print('| Correct translation: ', translation, end='')
+            print('\t', response_evaluation.name, end=' ')
+            if response_evaluation != self.ResponseEvaluation.Perfect:
+                print('| Correct translation: ', entry.display_translation, end='')
             print('')
-            comprising_sentences = self._get_comprising_sentences(display_token)
+            comprising_sentences = self._get_related_sentences(entry.display_translation)
             if comprising_sentences is not None:
                 [print('\t', s) for s in comprising_sentences]
             print('_______________')
 
-            self._update_documentation_entry(entry, response_evaluation)
-
             self._n_trained_items += 1
-            if self.RESPONSE_EVALUATIONS[response_evaluation] != 'wrong':
-                self._n_correct_responses += 1
+            self._n_correct_responses += response_evaluation.value
 
             if i and not i % 9:
-                print(f'{i} Entries faced, {len(entries) - i} more to go', '\n')
+                print(f'{i} Entries faced, {len(self._vocable_entries) - i} more to go', '\n')
 
             i += 1
             display_item = True
 
-    def _evaluate_response(self, response: str, translation: str) -> int:
+    def _get_reponse_evaluation(self, response: str, translation: str) -> ResponseEvaluation:
         distinct_translations = translation.split(',')
         accent_pruned_translations = list(map(unidecode.unidecode, distinct_translations))
 
@@ -223,33 +209,26 @@ class VocabularyTrainer(Trainer):
             TOLERATED_CHAR_DEVIATIONS = 1
             return any(n_deviations(response, translation) <= TOLERATED_CHAR_DEVIATIONS for translation in distinct_translations)
 
-        distinct_translations = translation.split(',')
-        if response in distinct_translations:
-            evaluation = 'perfect'
-        elif response in accent_pruned_translations:
-            evaluation = 'accent fault'
-        elif tolerable_error():
-            evaluation = 'correct'
-        else:
-            evaluation = 'wrong'
-        return self._reverse_response_evaluations[evaluation]
+        if response in translation.split(','):
+            return self.ResponseEvaluation.Perfect
 
-    def _get_comprising_sentences(self, token: str) -> Optional[List[str]]:
+        elif response in accent_pruned_translations:
+            return self.ResponseEvaluation.AccentError
+
+        elif tolerable_error():
+            return self.ResponseEvaluation.AlmostCorrect
+
+        else:
+            return self.ResponseEvaluation.Wrong
+
+    def _get_related_sentences(self, token: str) -> Optional[List[str]]:
         root = get_article_stripped_token(token)[:self.ROOT_LENGTH]
         sentence_indices = np.asarray(self._token_2_rowinds.get_root_comprising_sentence_indices(root))
         if not len(sentence_indices):
             return None
 
-        random_indices = np.random.randint(0, len(sentence_indices), self.N_SENTENCES_TO_BE_DISPLAYED)
+        random_indices = np.random.randint(0, len(sentence_indices), self.N_RELATED_SENTENCES)
         return self._sentence_data[sentence_indices[random_indices]][:, 1]
-
-    def _update_documentation_entry(self, entry, response_evaluation):
-        self._vocabulary_statistics[entry]['lfd'] = str(datetime.date.today())
-        self._vocabulary_statistics[entry]['tf'] += 1
-        if self._vocabulary_statistics[entry]['s'] == 5 and self.RESPONSE_EVALUATIONS[response_evaluation] != 'perfect':
-            self._vocabulary_statistics[entry]['s'] -= 1
-        else:
-            self._vocabulary_statistics[entry]['s'] += 0.5 if self.RESPONSE_EVALUATIONS[response_evaluation] in ['accent fault', 'correct'] else response_evaluation // 3
 
     # -----------------
     # PROGRAM TERMINATION
@@ -260,7 +239,13 @@ class VocabularyTrainer(Trainer):
 
     @property
     def performance_verdict(self) -> str:
-        return self.PERCENTAGE_CORRESPONDING_VERDICTS[int(self.correctness_percentage) // 20 * 20]
+        return {
+            0: 'You suck.',
+            20: 'Get your shit together m8.',
+            40: "You can't climb the ladder of success with your hands in your pockets.",
+            60: "Keep hustlin' young blood.",
+            80: 'Attayboy!',
+            100: '0361/2680494. Call me.'}[int(self.correctness_percentage) // 20 * 20]
 
     def _display_pie_chart(self):
         if not self._n_trained_items:
@@ -287,10 +272,6 @@ class VocabularyTrainer(Trainer):
         ax.set_title(self.performance_verdict)
         fig.canvas.set_window_title(f'You got {self._n_correct_responses}/{self._n_trained_items} right')
         plt.show()
-
-    def _save_vocabulary_statistics(self):
-        with open(self.voccabulary_statistics_file_path, 'w+') as dump_file:
-            json.dump(self._vocabulary_statistics, dump_file)
 
 
 if __name__ == '__main__':

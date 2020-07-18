@@ -10,7 +10,7 @@ def parse_date_from_string(date: str) -> datetime.date:
     return datetime.datetime.strptime(date, '%Y-%m-%d').date()
 
 
-def n_days_ago(date: str) -> int:
+def day_difference(date: str) -> int:
     return (datetime.date.today() - parse_date_from_string(date)).days
 
 
