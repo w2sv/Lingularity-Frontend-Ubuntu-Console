@@ -34,11 +34,14 @@ class MongoDBClient:
     def user_data_base(self) -> pymongo.collection.Collection:
         return self._cluster[self._user]
 
+    # ------------------
+    # Vocabulary Collection
+    # ------------------
     @property
     def vocabulary_collection(self) -> pymongo.collection.Collection:
-        return self.user_data_base['_vocabulary']
+        return self.user_data_base['vocabulary']
 
-    def insert_vocabulary(self, target_language_token: str, translation: str):
+    def insert_vocable(self, target_language_token: str, translation: str):
         self.vocabulary_collection.update_one(
             filter={'_id': self._language},
             update={'$set': {target_language_token: {
@@ -51,29 +54,67 @@ class MongoDBClient:
             upsert=True
         )
 
-    def update_vocabulary_entry(self, target_language_token: str, correctly_answered: bool):
+    def update_vocable_entry(self, token: str, correctly_answered: bool):
         self.vocabulary_collection.find_one_and_update(
-            filter={'_id': self._language, target_language_token: {'$exists': True}},
+            filter={'_id': self._language, token: {'$exists': True}},
             update={'$inc': {
-                        f'{target_language_token}.tf': 1,
-                        f'{target_language_token}.s': int(correctly_answered)},
-                    '$set': {f'{target_language_token}.lfd': datetag_today()}
+                        f'{token}.tf': 1,
+                        f'{token}.s': int(correctly_answered)},
+                    '$set': {f'{token}.lfd': datetag_today()}
             },
             upsert=False
         )
 
-    @property
-    def usage_frequency_data_collection(self) -> pymongo.collection.Collection:
-        return self.user_data_base['usage_frequency']
+    def alter_vocable_entry(self, current_token: str, new_token: Optional[str], altered_meaning: Optional[str]):
+        vocable_attributes = self.vocabulary_collection.find_one({'_id': self._language})[current_token]
+        new_attributes = {k: v if k != 'translation' else altered_meaning for k, v in vocable_attributes.items()}
+        if current_token == new_token:
+            self.vocabulary_collection.update_one(
+                filter={'_id': self._language},
+                update={'$set': {current_token: new_attributes}}
+            )
+        else:
+            self.vocabulary_collection.find_one_and_update(
+                filter={'_id': self._language},
+                update={'$unset': {current_token: 1}}
+            )
+            self.vocabulary_collection.find_one_and_update(
+                filter={'_id': self._language},
+                update={'$set': {new_token: new_attributes}}
+            )
 
-    def inject_session_synopsis(self, trainer_abbreviation: str, faced_items: int):
-        self.usage_frequency_data_collection.update_one(
-            filter={'_id': datetag_today()},
-            update={'$inc': {f'{self._language}.{trainer_abbreviation}': faced_items}},
+    def query_vocable_attributes(self, vocable: str) -> Dict[str, Union[str, int]]:
+        return self.vocabulary_collection.find_one(self._language)[vocable]
+
+    # ------------------
+    # Training Chronic Collection
+    # ------------------
+    @property
+    def training_chronic_collection(self) -> pymongo.collection.Collection:
+        return self.user_data_base['training_chronic']
+
+    def inject_session_statistics(self, trainer_abbreviation: str, faced_items: int):
+        self.training_chronic_collection.update_one(
+            filter={'_id': self._language},
+            update={'$inc': {f'{datetag_today()}.{trainer_abbreviation}': faced_items}},
             upsert=True
         )
+
+    def query_training_chronic(self) -> Dict[str, Dict[str, int]]:
+        training_chronic = next(iter(self.training_chronic_collection.find({'_id': self._language})))
+        training_chronic.pop('_id')
+        return training_chronic
+
+    # -------------------
+    # Generic
+    # -------------------
+    def drop_all_databases(self):
+        for db in self._cluster.list_database_names():
+            self._cluster.drop_database(db)
 
     
 if __name__ == '__main__':
     client = MongoDBClient(user='janek_zangenberg', language='italian', credentials=Credentials.default())
-    client.inject_session_synopsis('v', 5)
+    # client.drop_all_databases()
+    client.inject_session_statistics('s', 92)
+    print(client.query_training_chronic())

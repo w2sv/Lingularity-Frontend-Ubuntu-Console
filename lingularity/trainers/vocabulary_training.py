@@ -47,7 +47,6 @@ class VocabularyTrainer(Trainer):
         self._reverse_response_evaluations: Dict[str, int] = {v: k for k, v in self.RESPONSE_EVALUATIONS.items()}
 
         self._n_correct_responses = 0
-        self._display_new_vocabulary_absence = False
 
     def run(self):
         self._sentence_data = self._parse_sentence_data()
@@ -59,7 +58,7 @@ class VocabularyTrainer(Trainer):
         self._display_pre_training_instructions()
         self._train()
         self._save_vocabulary_statistics()
-        self._append_2_training_history()
+        self._append_session_statistics_to_training_history()
         self._display_pie_chart()
         self._plot_training_history()
 
@@ -123,7 +122,6 @@ class VocabularyTrainer(Trainer):
         if display_vocabulary == 'yes':
             new_vocabulary = [key for key in self._vocabulary_statistics.keys() if self._vocabulary_statistics[key]['lfd'] is None]
             if not new_vocabulary:
-                self._display_new_vocabulary_absence = True
                 return
             [print('\t', entry, ' = ', self._vocabulary[entry]) for entry in new_vocabulary]
             print('\n')
@@ -132,8 +130,6 @@ class VocabularyTrainer(Trainer):
     def _display_pre_training_instructions(self):
         clear_screen()
         n_imperfect_entries = len([e for e in self._vocabulary_statistics.values() if e['s'] < self.COMPLETION_SCORE])
-        if self._display_new_vocabulary_absence:
-            print("Couldn't find any new _vocabulary.\n")
 
         print((f'Vocabulary file comprises {n_imperfect_entries} entries.\n'
                 "Enter: \n\t- 'append' + additional translation(s) in order to append to the ones of the previously faced item.\n"

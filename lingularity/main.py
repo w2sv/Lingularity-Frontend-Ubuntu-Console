@@ -75,7 +75,7 @@ def add_vocabulary():
         recurse_on_invalid_input(add_vocabulary)
     else:
         sentence_trainer = SentenceTranslationTrainer()
-        sentence_trainer._language = selection
+        sentence_trainer._non_english_language = selection
         while True:
             sentence_trainer._append_2_vocabulary_file()
             try:

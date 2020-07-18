@@ -1,7 +1,7 @@
 import sys
 import os
 import time
-from typing import List
+from typing import List, Optional, Tuple
 from itertools import groupby, chain
 from bisect import insort
 from operator import ge, le
@@ -34,7 +34,7 @@ class SentenceTranslationTrainer(Trainer):
 
 
 	def run(self):
-		if self._language not in self.locally_available_languages:
+		if self._non_english_language not in self.locally_available_languages:
 			self._download_and_process_zip_file()
 
 		self._sentence_data = self._parse_sentence_data()
@@ -46,7 +46,7 @@ class SentenceTranslationTrainer(Trainer):
 		self._train()
 
 	def _download_and_process_zip_file(self):
-		zip_file_link = self._content_retriever.download_zipfile(self._language)
+		zip_file_link = self._content_retriever.download_zipfile(self._non_english_language)
 		self._content_retriever.unzip_file(zip_file_link)
 
 	# ---------------
@@ -145,7 +145,7 @@ class SentenceTranslationTrainer(Trainer):
 		"Enter \n"
 			"\t- 'vocabulary' to append new entry to language specific vocabulary file\n" 
 			"\t- 'exit' to terminate program\n"
-			"\t- 'modify' in order to modify latest vocabulary file entry\n"))
+			"\t- 'alter' in order to alter the most recently added vocable entry\n"))
 
 		lets_go_translation = self._find_lets_go_translation()
 		print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')
@@ -157,7 +157,7 @@ class SentenceTranslationTrainer(Trainer):
 		class Option(ExtendedEnum):
 			Exit = 'exit'
 			AppendVocabulary = 'vocabulary'
-			ModifyVocabulary = 'modify'
+			AlterLatestVocableEntry = 'alter'
 
 		suspend_resolution = False
 		def maintain_resolution_suspension():
@@ -165,7 +165,12 @@ class SentenceTranslationTrainer(Trainer):
 			print(" ")
 			suspend_resolution = True
 
+		def maintain_resolution_suspension_and_erase_lines(n_lines: int):
+			maintain_resolution_suspension()
+			[erase_previous_line() for _ in range(n_lines)]
+
 		np.random.shuffle(self._sentence_data)
+		most_recent_vocable_entry: Optional[str] = None  # 'token - meaning'
 
 		while True:
 			if not suspend_resolution:
@@ -183,19 +188,24 @@ class SentenceTranslationTrainer(Trainer):
 				response = resolve_input(input("pending...").lower(), Option.values())
 				if response is not None:
 					if response == Option.AppendVocabulary.value:
-						self._append_2_vocabulary_file()
-						maintain_resolution_suspension()
-						erase_previous_line()
+						most_recent_vocable_entry, n_printed_lines = self._insert_vocable_into_database()
+						maintain_resolution_suspension_and_erase_lines(n_lines=n_printed_lines+1)
 
-					elif response == Option.ModifyVocabulary.value:
-						self._modify_last_vocabulary_file_entry()
-						maintain_resolution_suspension()
-						[erase_previous_line() for _ in range(3)]
+					elif response == Option.AlterLatestVocableEntry.value:
+						if most_recent_vocable_entry is None:
+							print("You haven't added any vocabulary during the current session")
+							time.sleep(1)
+							maintain_resolution_suspension_and_erase_lines(n_lines=2)
+						else:
+							altered_entry, n_printed_lines = self._modify_latest_vocable_insertion(most_recent_vocable_entry)
+							if altered_entry is not None:
+								most_recent_vocable_entry = altered_entry
+							maintain_resolution_suspension_and_erase_lines(n_lines=n_printed_lines)
 
 					elif response == Option.Exit.value:
 						print('----------------')
 						print("Number of faced sentences: ", self._n_trained_items)
-						self._append_2_training_history()
+						self._insert_session_statistics_into_database()
 						if self._n_trained_items > 5:
 							self._plot_training_history()
 						sys.exit()
@@ -207,28 +217,37 @@ class SentenceTranslationTrainer(Trainer):
 				print(translation, '\n', '_______________')
 				self._n_trained_items += 1
 
-	def _append_2_vocabulary_file(self):
+	def _insert_vocable_into_database(self) -> Tuple[Optional[str], int]:
+		""" Returns:
+				inserted vocable entry, None in case of invalid input
+		 		number of printed lines """
+
 		vocable = input(f'Enter {self.language} word/phrase: ')
 		meanings = input('Enter meaning(s): ')
 
-		with open(self.vocabulary_file_path, 'a+') as vocab_file:
-			if os.path.getsize(self.vocabulary_file_path):
-				vocab_file.write('\n')
-			vocab_file.write(f'{vocable} - {meanings}')
-		[erase_previous_line() for _ in range(2)]
+		if not all([vocable, meanings]):
+			print("Input field left unfilled")
+			time.sleep(1)
+			return None, 3
 
-	def _modify_last_vocabulary_file_entry(self):
-		if not os.path.exists(self.vocabulary_file_path):
-			print('There is no vocabulary to be modified yet')
-			return
-		print('Last _vocabulary file entry:\n\t', end='')
-		with open(self.vocabulary_file_path, 'r+') as vocab_file:
-			line_data = vocab_file.readlines()
-			vocab_file.seek(0)
-			KeyboardController().type(f'{line_data[-1]}')
-			line_data[-1] = input('')
-			vocab_file.writelines(line_data)
-			vocab_file.truncate()
+		self._database_client.insert_vocable(vocable, meanings)
+		return ' - '.join([vocable, meanings]), 2
+
+	def _modify_latest_vocable_insertion(self, latest_appended_vocable_line: str) -> Tuple[Optional[str], int]:
+		""" Returns:
+		 		altered entry: str, None in case of invalid alteration
+		 		n_printed_lines: int """
+
+		old_token = latest_appended_vocable_line.split(' - ')[0]
+		KeyboardController().type(f'{latest_appended_vocable_line}')
+		new_entry = input('')
+		new_split_entry = new_entry.split(' - ')
+		if new_split_entry.__len__() == 1 or not all(new_split_entry):
+			print('Invalid alteration')
+			time.sleep(1)
+			return None, 3
+		self._database_client.alter_vocable_entry(old_token, *new_split_entry)
+		return new_entry, 2
 
 	def _convert_names(self, sentence_pair: List[str]) -> List[str]:
 		if not self.LANGUAGE_CORRESPONDING_NAMES.get(self.language):
