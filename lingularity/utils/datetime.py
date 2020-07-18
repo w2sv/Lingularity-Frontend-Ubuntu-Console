@@ -2,12 +2,16 @@ from typing import Optional
 import datetime
 
 
-def parse_date(date: str) -> datetime.date:
+def datetag_today() -> str:
+    return str(datetime.date.today())
+
+
+def parse_date_from_string(date: str) -> datetime.date:
     return datetime.datetime.strptime(date, '%Y-%m-%d').date()
 
 
 def n_days_ago(date: str) -> int:
-    return (datetime.date.today() - parse_date(date)).days
+    return (datetime.date.today() - parse_date_from_string(date)).days
 
 
 def today_or_yesterday(date: datetime.date) -> Optional[str]:

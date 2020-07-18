@@ -7,3 +7,5 @@
 - enhancement of mode selection screen
 - switch to venv
 - restructure
+- english vocabulary training
+- refactor _vocabulary statistics, possibly _vocabulary file to separate class

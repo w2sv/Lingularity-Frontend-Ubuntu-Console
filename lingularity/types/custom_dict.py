@@ -1,13 +1,13 @@
-from typing import Any, Hashable, Iterable, Union, Dict
+from typing import Any, Hashable, Iterable, Union
 
 
 class CustomDict(dict):
     def __init__(self, *args, **kwargs):
-        args = list(filter(lambda arg: arg is not None, args))
-        super().__init__(*args, **kwargs)
+        super().__init__(*list(filter(lambda arg: arg is not None, args)), **kwargs)
 
-    def append_or_insert(self, key: Hashable, value: Union[Iterable[Any], Any]):
-        """ assuming iterable values """
+    def upsert(self, key: Hashable, value: Union[Iterable[Any], Any]):
+        if len(self):
+            assert hasattr(self[next(iter(self.keys()))], '__iter__')
 
         iterable_value = hasattr(value, '__iter__')
         if key in self:
