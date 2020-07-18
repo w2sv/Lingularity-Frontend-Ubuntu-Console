@@ -14,7 +14,7 @@ def day_difference(date: str) -> int:
     return (datetime.date.today() - parse_date_from_string(date)).days
 
 
-def today_or_yesterday(date: datetime.date) -> Optional[str]:
+def is_today_or_yesterday(date: datetime.date) -> Optional[str]:
     today = datetime.datetime.today().date()
     if date == today:
         return 'today'

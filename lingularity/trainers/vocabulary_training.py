@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from lingularity.trainers import Trainer
 from lingularity.trainers.sentence_translation import SentenceTranslationTrainer
 from lingularity.types.token_maps import RawToken2SentenceIndices
-from lingularity import database
+from lingularity.database import MongoDBClient
 from lingularity.utils.strings import get_article_stripped_token
 from lingularity.utils.output_manipulation import clear_screen
 from lingularity.utils.input_resolution import resolve_input, recurse_on_invalid_input
@@ -56,8 +56,8 @@ class VocabularyTrainer(Trainer):
     N_RELATED_SENTENCES = 2
     ROOT_LENGTH = 4
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, database_client: MongoDBClient):
+        super().__init__(database_client)
 
         self._reference_2_foreign = False  # TODO: make alterable
 
@@ -71,7 +71,7 @@ class VocabularyTrainer(Trainer):
         self._display_new_vocabulary()
         self._display_pre_training_instructions()
         self._train()
-        self._append_session_statistics_to_training_history()
+        self._insert_session_statistics_into_database()
         self._display_pie_chart()
         self._plot_training_history()
 
@@ -83,7 +83,7 @@ class VocabularyTrainer(Trainer):
     # INITIALIZATION
     # ---------------
     def _select_language(self) -> str:
-        eligible_languages = database.MongoDBClient('janek_zangenberg', None, database.Credentials.default()).get_vocabulary_possessing_languages()
+        eligible_languages = self._database_client.get_vocabulary_possessing_languages()
         if not eligible_languages:
             self._start_sentence_translation_trainer()
 
@@ -272,7 +272,3 @@ class VocabularyTrainer(Trainer):
         ax.set_title(self.performance_verdict)
         fig.canvas.set_window_title(f'You got {self._n_correct_responses}/{self._n_trained_items} right')
         plt.show()
-
-
-if __name__ == '__main__':
-    VocabularyTrainer().run()

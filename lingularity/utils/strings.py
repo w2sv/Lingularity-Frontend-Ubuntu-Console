@@ -26,3 +26,7 @@ def get_article_stripped_token(token: str) -> str:
     if len(parts) == 2 and len(parts[0]) < len(parts[1]):
         return parts[1]
     return token
+
+
+def split_string_at_uppercase(string: str) -> List[str]:
+    return re.findall('[A-Z][a-z]*', string)

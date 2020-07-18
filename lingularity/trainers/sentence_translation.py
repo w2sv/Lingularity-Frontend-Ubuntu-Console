@@ -12,6 +12,7 @@ from pynput.keyboard import Controller as KeyboardController
 from lingularity.trainers import Trainer
 from lingularity.webpage_interaction import ContentRetriever
 from lingularity.types.token_maps import Stem2SentenceIndices
+from lingularity.database import MongoDBClient
 from lingularity.utils.enum import ExtendedEnum
 from lingularity.utils.output_manipulation import clear_screen, erase_previous_line
 from lingularity.utils.input_resolution import resolve_input, recurse_on_invalid_input
@@ -27,10 +28,10 @@ class SentenceTranslationTrainer(Trainer):
 		'German': ['Günther', 'Irmgard']
 	}
 
-	def __init__(self):
+	def __init__(self, database_client: MongoDBClient):
 		self._content_retriever = ContentRetriever()
 
-		super().__init__()
+		super().__init__(database_client)
 
 
 	def run(self):
@@ -44,6 +45,10 @@ class SentenceTranslationTrainer(Trainer):
 
 		self._display_pre_training_instructions()
 		self._train()
+
+		self._insert_session_statistics_into_database()
+		if self._n_trained_items > 5:
+			self._plot_training_history()
 
 	def _download_and_process_zip_file(self):
 		zip_file_link = self._content_retriever.download_zipfile(self._non_english_language)
@@ -205,10 +210,7 @@ class SentenceTranslationTrainer(Trainer):
 					elif response == Option.Exit.value:
 						print('----------------')
 						print("Number of faced sentences: ", self._n_trained_items)
-						self._insert_session_statistics_into_database()
-						if self._n_trained_items > 5:
-							self._plot_training_history()
-						sys.exit()
+						return
 			except (KeyboardInterrupt, SyntaxError):
 				pass
 
@@ -266,7 +268,3 @@ class SentenceTranslationTrainer(Trainer):
 			sentence_pair[sentence_ind] = ' '.join(sentence_tokens) + punctuation
 
 		return sentence_pair
-
-
-if __name__ == '__main__':
-	SentenceTranslationTrainer().run()

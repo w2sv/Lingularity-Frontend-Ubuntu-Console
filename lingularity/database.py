@@ -6,35 +6,71 @@ import pymongo
 from lingularity.utils.datetime import datetag_today, day_difference
 
 
-@dataclass(frozen=True)
-class Credentials:
-    host: str
-    user: str
-    password: str
-
-    @classmethod
-    def default(cls):
-        return cls(
-            host='cluster0.zthtl.mongodb.net/janek_zangenberg?retryWrites=true&w=majority',
-            user='sickdude69',
-            password='clusterpassword'
-        )
-
-    def client_endpoint(self, srv_endpoint: bool) -> str:
-        return f'mongodb{"+srv" if srv_endpoint else ""}://{self.user}:{self.password}@{self.host}'
-
-
 class MongoDBClient:
+    @dataclass(frozen=True)
+    class Credentials:
+        host: str
+        user: str
+        password: str
+
+        @classmethod
+        def default(cls):
+            return cls(
+                host='cluster0.zthtl.mongodb.net/janek_zangenberg?retryWrites=true&w=majority',
+                user='sickdude69',
+                password='clusterpassword'
+            )
+
+        def client_endpoint(self, srv_endpoint: bool) -> str:
+            return f'mongodb{"+srv" if srv_endpoint else ""}://{self.user}:{self.password}@{self.host}'
+
     _cluster = None
 
-    def __init__(self, user: str, language: Optional[str], credentials: Credentials):
+    def __init__(self, user: Optional[str], language: Optional[str], credentials: Credentials):
         self._user = user
         self._language = language
         self._cluster = pymongo.MongoClient(credentials.client_endpoint(srv_endpoint=True), serverSelectionTimeoutMS=1_000)
 
+    def set_language(self, language: str):
+        assert self._language is None, 'language ought not to be reassigned'
+        self._language = language
+
+    @property
+    def user_names(self) -> List[str]:
+        return self._cluster.database_names()
+
     @property
     def user_data_base(self) -> pymongo.collection.Collection:
         return self._cluster[self._user]
+
+    # ------------------
+    # General
+    # ------------------
+    @property
+    def general_collection(self) -> pymongo.collection.Collection:
+        return self.user_data_base['general']
+
+    def initialize_user(self, password: str, first_name: str):
+        self.general_collection.insert_one({'_id': 'unique', 'password': password, 'first_name': first_name})
+
+    def update_last_session_statistics(self, trainer: str, faced_items: int):
+        self.general_collection.update_one(
+            filter={'_id': 'unique'},
+            update={'$set': {'last_session': {'trainer': trainer,
+                                              'faced_items': faced_items,
+                                              'date': datetag_today(),
+                                              'language': self._language}}},
+            upsert=True
+        )
+
+    def query_password(self) -> str:
+        return self.general_collection.find_one({'_id': 'unique'})['password']
+
+    def query_first_name(self) -> str:
+        return self.general_collection.find_one({'_id': 'unique'})['first_name']
+
+    def query_last_session_statistics(self) -> Dict[str, Union[str, int]]:
+        return self.general_collection.find_one({'_id': 'unique'})['last_session']
 
     # ------------------
     # Vocabulary Collection
@@ -132,6 +168,5 @@ class MongoDBClient:
 
     
 if __name__ == '__main__':
-    client = MongoDBClient(user='janek_zangenberg', language='Italian', credentials=Credentials.default())
-    # client.drop_all_databases()
-    client.inject_session_statistics('s', 92)
+    client = MongoDBClient(user='janek_zangenberg', language='Italian', credentials=MongoDBClient.Credentials.default())
+    client.update_last_session_statistics('s', 78)

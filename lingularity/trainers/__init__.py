@@ -10,14 +10,14 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 from lingularity.utils.datetime import datetag_today
-from lingularity import database
+from lingularity.database import MongoDBClient
 
 
 class Trainer(ABC):
     BASE_LANGUAGE_DATA_PATH = os.path.join(os.getcwd(), 'language_data')
     plt.rcParams['toolbar'] = 'None'
 
-    def __init__(self):
+    def __init__(self, database_client: MongoDBClient):
         if not os.path.exists(self.BASE_LANGUAGE_DATA_PATH):
             os.mkdir(self.BASE_LANGUAGE_DATA_PATH)
 
@@ -28,8 +28,8 @@ class Trainer(ABC):
 
         self._today = datetag_today()
 
-        self._database_client = database.MongoDBClient('janek_zangenberg', self._non_english_language,
-                                                       database.Credentials.default())
+        self._database_client = database_client
+        self._database_client.set_language(self._non_english_language)
 
     @abstractmethod
     def _select_language(self) -> str:
@@ -141,24 +141,11 @@ class Trainer(ABC):
         except FileNotFoundError:
             return None
 
-    def _append_session_statistics_to_training_history(self):
-        training_history = self._load_training_history()
-        if not training_history:
-            training_history = {}
-
-        if training_history.get(self._today) is not None and training_history[self._today].get(str(self)) is not None:
-            training_history[self._today][str(self)] += self._n_trained_items
-
-        elif training_history.get(self._today) is not None:
-            training_history[self._today][str(self)] = self._n_trained_items
-        else:
-            training_history[self._today] = {str(self): self._n_trained_items}
-
-        with open(self.training_documentation_file_path, 'w+') as write_file:
-            json.dump(training_history, write_file)
-
     def _insert_session_statistics_into_database(self):
-        self._database_client.inject_session_statistics(str(self), self._n_trained_items)
+        update_args = (str(self), self._n_trained_items)
+
+        self._database_client.update_last_session_statistics(*update_args)
+        self._database_client.inject_session_statistics(*update_args)
 
     def _plot_training_history(self):
         plt.style.use('dark_background')
