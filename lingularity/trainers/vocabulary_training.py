@@ -5,13 +5,14 @@ from time import sleep
 import unidecode
 import numpy as np
 import matplotlib.pyplot as plt
+from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.trainers import Trainer
 from lingularity.trainers.sentence_translation import SentenceTranslationTrainer
 from lingularity.types.token_maps import RawToken2SentenceIndices
 from lingularity.database import MongoDBClient
 from lingularity.utils.strings import get_article_stripped_token
-from lingularity.utils.output_manipulation import clear_screen
+from lingularity.utils.output_manipulation import clear_screen, erase_lines
 from lingularity.utils.input_resolution import resolve_input, recurse_on_invalid_input
 from lingularity.utils.enum import ExtendedEnum
 
@@ -75,10 +76,6 @@ class VocabularyTrainer(Trainer):
         self._display_pie_chart()
         self._plot_training_history()
 
-    def _get_vocable_entries(self) -> List[VocableEntry]:
-        self.VocableEntry.REFERENCE_TO_FOREIGN = self._reference_2_foreign
-        return list(map(self.VocableEntry, self._database_client.query_vocabulary_data()))
-
     # ---------------
     # INITIALIZATION
     # ---------------
@@ -86,6 +83,9 @@ class VocabularyTrainer(Trainer):
         eligible_languages = self._database_client.get_vocabulary_possessing_languages()
         if not eligible_languages:
             self._start_sentence_translation_trainer()
+
+        elif eligible_languages.__len__() == 1:
+            return eligible_languages[0]
 
         print('ELIGIBLE LANGUAGES: ')
         for language in sorted(eligible_languages):
@@ -96,32 +96,35 @@ class VocabularyTrainer(Trainer):
             return recurse_on_invalid_input(self._select_language)
         return input_resolution
 
-    @staticmethod
-    def _start_sentence_translation_trainer():
+    def _get_vocable_entries(self) -> List[VocableEntry]:
+        self.VocableEntry.REFERENCE_TO_FOREIGN = self._reference_2_foreign
+        return list(map(self.VocableEntry, self._database_client.query_vocabulary_data()))
+
+    def _start_sentence_translation_trainer(self):
         print('You have to accumulate vocabulary by means of the SentenceTranslation™ Trainer or manual amassment first.')
         sleep(3)
         print('Initiating SentenceTranslation Trainer...')
         sleep(2)
         clear_screen()
-        return SentenceTranslationTrainer().run()
+        return SentenceTranslationTrainer(self._database_client).run()
 
     def _display_new_vocabulary(self):
         clear_screen()
-        display_vocabulary = resolve_input(input('Do you want new vocabulary to be displayed once before training? (y)es/(n)o\n').lower(), ['yes', 'no'])
-        if display_vocabulary == 'yes':
-            new_vocabulary = [entry for entry in self._vocable_entries if entry.last_faced_date is None]
-            if not new_vocabulary:
-                return
-            [print('\t', ' - '.join([entry.token, entry.translation])) for entry in new_vocabulary]
-            print('\n')
-            input('Press any key to continue')
+        new_vocabulary = [entry for entry in self._vocable_entries if entry.last_faced_date is None]
+        if new_vocabulary:
+            display_vocabulary = resolve_input(input('Would you like to see the vocabulary you recently added? (y)es/(n)o\n').lower(), ['yes', 'no'])
+            if display_vocabulary == 'yes':
+                [print('\t', ' - '.join([entry.token, entry.translation])) for entry in new_vocabulary]
+                print('\n')
+                input('Press any key to continue')
 
     def _display_pre_training_instructions(self):
         clear_screen()
 
         print((f'Found {self._vocable_entries.__len__()} imperfect entries.\n'
-                "Enter: \n\t- 'add' + meaning(s) in order to add to the ones of the previously faced item.\n"
+                "Enter: \n\t- '#alter' in order to alter the translation of the previously faced item.\n"
                 "\t\tNote: distinct newly entered translation tokens are to be separated by commas.\n"
+                "\t- '#add' to add a new vocable.\n"
                 "\t- 'exit' to terminate the program.\n\n"))
 
         lets_go_translation = self._find_lets_go_translation()
@@ -130,69 +133,76 @@ class VocabularyTrainer(Trainer):
     # ------------------
     # TRAINING
     # ------------------
-    def _append_translation(self, entry: str, additional_translations: str):
-        additional_translations = additional_translations.rstrip().lstrip()
-
-        # insert whitespaces after commas if not already present
-        tokens = list(additional_translations)
-        for i in range(len(tokens)-1, 1, -1):
-            if tokens[i-1] == ',' and tokens[i] != ' ':
-                tokens.insert(i, ' ')
-        additional_translations = ''.join(tokens)
-
-        with open(self.vocabulary_file_path, 'r') as read_file:
-            vocabulary = read_file.readlines()
-            split_data = [row.split(' - ') for row in vocabulary]
-            corresponding_row_ind = [i for i in range(len(split_data)) if entry in split_data[i][0]][0]
-            vocabulary[corresponding_row_ind] = vocabulary[corresponding_row_ind][:-1] + ', ' + additional_translations + '\n'
-
-        with open(self.vocabulary_file_path, 'w') as write_file:
-            write_file.writelines(vocabulary)
-
     def _train(self):
         class Option(ExtendedEnum):
-            Exit = 'exit'
-            AppendMeaning = 'append'
+            AddMeaning = '#alter'
+            Vocable = '#add'
+            Exit = '#exit'
 
         np.random.shuffle(self._vocable_entries)
 
-        i, display_item = 0, True
-        while i < len(self._vocable_entries):
-            entry = self._vocable_entries[i]
-            print(f'{entry.display_token} = ', end='') if display_item else print('Enter translation: ', end='')
+        previous_entry: Optional[VocabularyTrainer.VocableEntry] = None
+
+        while self._n_trained_items < len(self._vocable_entries):
+            entry = self._vocable_entries[self._n_trained_items]
+            print(f'{entry.display_token} = ', end='')
 
             try:
                 response = input()
             except KeyboardInterrupt:
-                display_item = False
+                print('')
+                erase_lines(1)
                 continue
-            if response == Option.Exit.value:
+            if response == Option.AddMeaning.value:
+                n_printed_lines = self._alter_entry_translation(previous_entry)
+                erase_lines(n_printed_lines)
+                continue
+            elif response == Option.Vocable.value:
+                _, n_printed_lines = self._insert_vocable_into_database()
+                erase_lines(n_printed_lines + 1)
+                continue
+            elif response == Option.Exit.value:
+                erase_lines(1)
                 break
-            elif response == Option.AppendMeaning.value:
-                # TODO
-                display_item = False
-                continue
 
             response_evaluation = self._get_reponse_evaluation(response, entry.display_translation)
             self._database_client.update_vocable_entry(entry.token, response_evaluation.value)
 
-            print('\t', response_evaluation.name, end=' ')
+            if response:
+                print('\t', response_evaluation.name, end=' ')
             if response_evaluation != self.ResponseEvaluation.Perfect:
-                print('| Correct translation: ', entry.display_translation, end='')
+                print(f'{"| " if response else "         "}Correct translation: ', entry.display_translation, end='')
             print('')
-            comprising_sentences = self._get_related_sentences(entry.display_translation)
-            if comprising_sentences is not None:
-                [print('\t', s) for s in comprising_sentences]
+            related_sentences = self._get_related_sentences(entry.display_translation)
+            if related_sentences is not None:
+                if self._names_convertible:
+                    related_sentences = map(self._accommodate_names_of_sentence, related_sentences)
+                [print('\t', s) for s in related_sentences]
             print('_______________')
 
             self._n_trained_items += 1
             self._n_correct_responses += response_evaluation.value
 
-            if i and not i % 9:
-                print(f'{i} Entries faced, {len(self._vocable_entries) - i} more to go', '\n')
+            if not self._n_trained_items % 10 and self._n_trained_items != len(self._vocable_entries):
+                print(f'\t\t{self._n_trained_items} Entries faced, {len(self._vocable_entries) - self._n_trained_items} more to go', '\n')
 
-            i += 1
-            display_item = True
+            previous_entry = entry
+
+    def _alter_entry_translation(self, entry: Optional[VocableEntry]) -> int:
+        """ Returns:
+                number of printed lines"""
+
+        if not entry:
+            return 1
+        KeyboardController().type(entry.translation)
+        extended_translation = input('')
+        if extended_translation:
+            self._database_client.alter_vocable_entry(*[entry.token]*2, extended_translation)
+            return 2
+        else:
+            print('Invalid input')
+            sleep(1)
+            return 2
 
     def _get_reponse_evaluation(self, response: str, translation: str) -> ResponseEvaluation:
         distinct_translations = translation.split(',')

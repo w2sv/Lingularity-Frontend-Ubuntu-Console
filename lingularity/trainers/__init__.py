@@ -1,15 +1,14 @@
-import json
+from typing import List, Optional, Tuple
 import os
 from abc import ABC, abstractmethod
 from functools import cached_property
-from typing import List, Optional, Dict
+import time
 
 import nltk
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-from lingularity.utils.datetime import datetag_today
 from lingularity.database import MongoDBClient
 
 
@@ -17,18 +16,27 @@ class Trainer(ABC):
     BASE_LANGUAGE_DATA_PATH = os.path.join(os.getcwd(), 'language_data')
     plt.rcParams['toolbar'] = 'None'
 
+    DEFAULT_NAMES = ('Tom', 'Mary')
+    LANGUAGE_CORRESPONDING_NAMES = {
+        'Italian': ('Alessandro', 'Christina'),
+        'French': ('Antoine', 'Amelie'),
+        'Spanish': ('Emilio', 'Luciana'),
+        'Hungarian': ('László', 'Zsóka'),
+        'German': ('Günther', 'Irmgard')
+    }
+
     def __init__(self, database_client: MongoDBClient):
         if not os.path.exists(self.BASE_LANGUAGE_DATA_PATH):
             os.mkdir(self.BASE_LANGUAGE_DATA_PATH)
 
+        self._database_client = database_client
         self._non_english_language: str = self._select_language()  # equals reference language in case of english training
         self._train_english: bool = False
         self._sentence_data: np.ndarray = None
         self._n_trained_items: int = 0
 
-        self._today = datetag_today()
+        self._names_convertible = self.LANGUAGE_CORRESPONDING_NAMES.get(self._non_english_language) is not None
 
-        self._database_client = database_client
         self._database_client.set_language(self._non_english_language)
 
     @abstractmethod
@@ -131,15 +139,37 @@ class Trainer(ABC):
                 return self._sentence_data[i][1]
         return None
 
+    def _accommodate_names_of_sentence(self, sentence: str) -> str:
+        """ Assertion of self._convertible name being True to be made before invocation """
+
+        sentence_tokens = sentence[:-1].split(' ')
+        punctuation = sentence[-1]
+
+        for name_ind, name in enumerate(self.DEFAULT_NAMES):
+            try:
+                sentence_tokens[sentence_tokens.index(name)] = self.LANGUAGE_CORRESPONDING_NAMES[self.language][name_ind]
+            except ValueError:
+                pass
+        return ' '.join(sentence_tokens) + punctuation
+
     # -----------------
-    # .Training History
+    # .Database related
     # -----------------
-    def _load_training_history(self) -> Optional[Dict[str, Dict[str, int]]]:
-        try:
-            with open(self.training_documentation_file_path, 'r') as load_file:
-                return json.load(load_file)
-        except FileNotFoundError:
-            return None
+    def _insert_vocable_into_database(self) -> Tuple[Optional[str], int]:
+        """ Returns:
+                inserted vocable entry, None in case of invalid input
+                 number of printed lines """
+
+        vocable = input(f'Enter {self.language} word/phrase: ')
+        meanings = input('Enter meaning(s): ')
+
+        if not all([vocable, meanings]):
+            print("Input field left unfilled")
+            time.sleep(1)
+            return None, 3
+
+        self._database_client.insert_vocable(vocable, meanings)
+        return ' - '.join([vocable, meanings]), 2
 
     def _insert_session_statistics_into_database(self):
         update_args = (str(self), self._n_trained_items)
@@ -162,7 +192,7 @@ class Trainer(ABC):
 
         x_range = np.arange(len(dates))
         ax.plot(x_range, trained_sentences, marker='.', markevery=list(x_range), color='r', label='sentences')
-        ax.plot(x_range, trained_vocabulary, marker='.', markevery=list(x_range), color='b', label='_vocable_entries')
+        ax.plot(x_range, trained_vocabulary, marker='.', markevery=list(x_range), color='b', label='vocable entries')
         ax.set_xticks(x_range)
         ax.set_xticklabels(dates, minor=False, rotation=45)
         ax.set_title(f'{self.language} training history')

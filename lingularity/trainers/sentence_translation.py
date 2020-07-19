@@ -19,15 +19,6 @@ from lingularity.utils.input_resolution import resolve_input, recurse_on_invalid
 
 
 class SentenceTranslationTrainer(Trainer):
-	DEFAULT_NAMES = ('Tom', 'Mary')
-	LANGUAGE_CORRESPONDING_NAMES = {
-		'Italian': ['Alessandro', 'Christina'],
-		'French': ['Antoine', 'Amelie'],
-		'Spanish': ['Emilio', 'Luciana'],
-		'Hungarian': ['László', 'Zsóka'],
-		'German': ['Günther', 'Irmgard']
-	}
-
 	def __init__(self, database_client: MongoDBClient):
 		self._content_retriever = ContentRetriever()
 
@@ -183,8 +174,8 @@ class SentenceTranslationTrainer(Trainer):
 					reference_sentence, translation = self._sentence_data[self._n_trained_items]
 				except (ValueError, IndexError):
 					continue
-				if any(name in reference_sentence for name in self.DEFAULT_NAMES):
-					reference_sentence, translation = self._convert_names([reference_sentence, translation])
+				if any(default_name in reference_sentence for default_name in self.DEFAULT_NAMES) and self._names_convertible:
+					reference_sentence, translation = map(self._accommodate_names_of_sentence, [reference_sentence, translation])
 
 				print(reference_sentence, '\t')
 			else:
@@ -219,22 +210,6 @@ class SentenceTranslationTrainer(Trainer):
 				print(translation, '\n', '_______________')
 				self._n_trained_items += 1
 
-	def _insert_vocable_into_database(self) -> Tuple[Optional[str], int]:
-		""" Returns:
-				inserted vocable entry, None in case of invalid input
-		 		number of printed lines """
-
-		vocable = input(f'Enter {self.language} word/phrase: ')
-		meanings = input('Enter meaning(s): ')
-
-		if not all([vocable, meanings]):
-			print("Input field left unfilled")
-			time.sleep(1)
-			return None, 3
-
-		self._database_client.insert_vocable(vocable, meanings)
-		return ' - '.join([vocable, meanings]), 2
-
 	def _modify_latest_vocable_insertion(self, latest_appended_vocable_line: str) -> Tuple[Optional[str], int]:
 		""" Returns:
 		 		altered entry: str, None in case of invalid alteration
@@ -250,21 +225,3 @@ class SentenceTranslationTrainer(Trainer):
 			return None, 3
 		self._database_client.alter_vocable_entry(old_token, *new_split_entry)
 		return new_entry, 2
-
-	def _convert_names(self, sentence_pair: List[str]) -> List[str]:
-		if not self.LANGUAGE_CORRESPONDING_NAMES.get(self.language):
-			return sentence_pair
-
-		punctuation = sentence_pair[0][-1]
-		for sentence_ind, sentence in enumerate(sentence_pair):
-			sentence_tokens = sentence[:-1].split(' ')
-
-			for name_ind, name in enumerate(self.DEFAULT_NAMES):
-				try:
-					ind = sentence_tokens.index(name)
-					sentence_tokens[ind] = self.LANGUAGE_CORRESPONDING_NAMES[self.language][name_ind]
-				except ValueError:
-					pass
-			sentence_pair[sentence_ind] = ' '.join(sentence_tokens) + punctuation
-
-		return sentence_pair
