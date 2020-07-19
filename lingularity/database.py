@@ -6,6 +6,9 @@ import pymongo
 from lingularity.utils.datetime import datetag_today, day_difference
 
 
+# TODO: type returned dicts
+
+
 class MongoDBClient:
     @dataclass(frozen=True)
     class Credentials:
