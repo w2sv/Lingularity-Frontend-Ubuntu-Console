@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Union
+from typing import Optional
 import os
 import platform
 import time
@@ -10,7 +10,7 @@ from lingularity.trainers.vocabulary_training import VocabularyTrainer
 from lingularity.trainers import Trainer
 from lingularity.database import MongoDBClient
 from lingularity.utils.input_resolution import recurse_on_invalid_input, resolve_input
-from lingularity.utils.output_manipulation import clear_screen, erase_previous_line
+from lingularity.utils.output_manipulation import clear_screen, erase_lines
 from lingularity.utils.datetime import is_today_or_yesterday, parse_date_from_string
 
 
@@ -44,15 +44,15 @@ def login() -> MongoDBClient:
     if user_name in client.user_names:
         password, password_input = client.query_password(), getpass(f'{indentation}Enter password: ')
         while password != password_input:
-            erase_previous_line()
+            erase_lines(1)
             password_input = getpass(f'{indentation}Incorrect, try again: ')
-        [erase_previous_line() for _ in range(2)]
+        erase_lines(2)
 
     else:
         password = getpass(f'{indentation}Create password: ')
         first_name = input(f"{indentation}What's your name? ")
         client.initialize_user(password, first_name)
-        [erase_previous_line() for _ in range(3)]
+        erase_lines(3)
 
     return client
 
@@ -87,7 +87,7 @@ def select_training() -> Optional[str]:
     if training is None:
         print("Couldn't resolve input")
         time.sleep(1)
-        [erase_previous_line() for _ in range(4)]
+        erase_lines(4)
         return select_training()
     elif training == 'add vocabulary':
         return add_vocabulary()
@@ -97,6 +97,7 @@ def select_training() -> Optional[str]:
 
 
 def add_vocabulary():
+    # TODO: reincorporate
     clear_screen()
     languages = [language.lower() for language in os.listdir(Trainer.BASE_LANGUAGE_DATA_PATH)]
     print('EXTENSIBLE VOCABULARY FILES: ')

@@ -1,4 +1,4 @@
-from typing import *
+from typing import Optional, Dict, List, Any
 from dataclasses import dataclass
 
 import pymongo
@@ -37,10 +37,12 @@ class MongoDBClient:
 
     @property
     def user_names(self) -> List[str]:
+        assert self._cluster is not None
         return self._cluster.database_names()
 
     @property
     def user_data_base(self) -> pymongo.collection.Collection:
+        assert self._cluster is not None
         return self._cluster[self._user]
 
     # ------------------
@@ -69,7 +71,7 @@ class MongoDBClient:
     def query_first_name(self) -> str:
         return self.general_collection.find_one({'_id': 'unique'})['first_name']
 
-    def query_last_session_statistics(self) -> Dict[str, Union[str, int]]:
+    def query_last_session_statistics(self) -> Dict[str, Any]:
         return self.general_collection.find_one({'_id': 'unique'})['last_session']
 
     # ------------------
@@ -121,15 +123,15 @@ class MongoDBClient:
                 update={'$set': {new_token: new_attributes}}
             )
 
-    def query_vocable_attributes(self, vocable: str) -> Dict[str, Union[str, int]]:
+    def query_vocable_attributes(self, vocable: str) -> Dict[str, Any]:
         return self.vocabulary_collection.find_one(self._language)[vocable]
 
-    def query_vocabulary_data(self) -> List[Dict[str, Union[str, int, float]]]:
+    def query_vocabulary_data(self) -> List[Dict[str, Any]]:
         result = self.vocabulary_collection.find_one(self._language)
         result.pop('_id')
         return [{k: v} for k, v in result.items()]
 
-    def query_imperfect_vocabulary_entries(self, perfection_score=5, days_before_retention_assertion=50) -> List[Dict[str, Union[str, int]]]:
+    def query_imperfect_vocabulary_entries(self, perfection_score=5, days_before_retention_assertion=50) -> List[Dict[str, Any]]:
         vocabulary_data = self.query_vocabulary_data()
         original_length = vocabulary_data.__len__()
         for i, vocabulary_entry in enumerate(vocabulary_data[::-1]):

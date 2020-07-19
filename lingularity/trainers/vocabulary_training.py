@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Union, Any
 from collections import Counter
 from time import sleep
 
@@ -25,10 +25,10 @@ class VocabularyTrainer(Trainer):
         Perfect = 1
 
     class VocableEntry:
-        Type = Dict[str, Dict[str, Union[float, str, int]]]
-        REFERENCE_TO_FOREIGN = None
+        RawType = Dict[str, Dict[str, Any]]
+        REFERENCE_TO_FOREIGN: Optional[bool] = None
 
-        def __init__(self, entry: Type):
+        def __init__(self, entry: RawType):
             self._entry = entry
 
         @property
@@ -55,7 +55,6 @@ class VocabularyTrainer(Trainer):
             return str(self._entry)
 
     N_RELATED_SENTENCES = 2
-    ROOT_LENGTH = 4
 
     def __init__(self, database_client: MongoDBClient):
         super().__init__(database_client)
@@ -197,7 +196,7 @@ class VocabularyTrainer(Trainer):
         KeyboardController().type(entry.translation)
         extended_translation = input('')
         if extended_translation:
-            self._database_client.alter_vocable_entry(*[entry.token]*2, extended_translation)
+            self._database_client.alter_vocable_entry(*[entry.token]*2, extended_translation)  # type: ignore
             return 2
         else:
             print('Invalid input')
@@ -232,7 +231,9 @@ class VocabularyTrainer(Trainer):
             return self.ResponseEvaluation.Wrong
 
     def _get_related_sentences(self, token: str) -> Optional[List[str]]:
-        root = get_article_stripped_token(token)[:self.ROOT_LENGTH]
+        WORD_ROOT_LENGTH = 4
+
+        root = get_article_stripped_token(token)[:WORD_ROOT_LENGTH]
         sentence_indices = np.asarray(self._token_2_rowinds.get_root_comprising_sentence_indices(root))
         if not len(sentence_indices):
             return None

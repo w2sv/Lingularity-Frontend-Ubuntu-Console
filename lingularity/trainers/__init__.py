@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 from lingularity.database import MongoDBClient
+from lingularity.utils.output_manipulation import BufferPrint
 
 
 class Trainer(ABC):
@@ -30,7 +31,7 @@ class Trainer(ABC):
             os.mkdir(self.BASE_LANGUAGE_DATA_PATH)
 
         self._database_client = database_client
-        self._non_english_language: str = self._select_language()  # equals reference language in case of english training
+        self._non_english_language: str = self._select_language()
         self._train_english: bool = False
         self._sentence_data: np.ndarray = None
         self._n_trained_items: int = 0
@@ -38,6 +39,8 @@ class Trainer(ABC):
         self._names_convertible = self.LANGUAGE_CORRESPONDING_NAMES.get(self._non_english_language) is not None
 
         self._database_client.set_language(self._non_english_language)
+
+        self._buffer_print = BufferPrint()
 
     @abstractmethod
     def _select_language(self) -> str:

@@ -9,4 +9,4 @@ class ExtendedEnum(Enum):
 
     @classmethod
     def names(cls) -> List[str]:
-        return list(map(lambda element: element.name, cls))
+        return list(map(lambda element: element.name, cls))  # type: ignore

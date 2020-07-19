@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 import os
 import warnings
 
@@ -24,7 +24,7 @@ class ContentRetriever:
     PAGE_URL = 'http://www.manythings.org/anki'
 
     def __init__(self):
-        self.languages_2_ziplinks: Dict[str, str] = None
+        self.languages_2_ziplinks: Optional[Dict[str, str]] = None
 
     def get_language_ziplink_dict(self):
         FLAG_URL = 'http://www.manythings.org/img/usa.png'  # initiating every zip link row
@@ -44,6 +44,7 @@ class ContentRetriever:
             self.languages_2_ziplinks = {}
 
     def download_zipfile(self, language: str) -> str:
+        assert self.languages_2_ziplinks is not None
         zip_link = f'{self.PAGE_URL}/{self.languages_2_ziplinks[language]}'
         save_destination_dir = os.path.join(os.path.join(os.getcwd(), 'language_data'), language)
         if not os.path.exists(save_destination_dir):

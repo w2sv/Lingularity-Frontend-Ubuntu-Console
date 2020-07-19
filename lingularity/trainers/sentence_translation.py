@@ -14,7 +14,7 @@ from lingularity.webpage_interaction import ContentRetriever
 from lingularity.types.token_maps import Stem2SentenceIndices
 from lingularity.database import MongoDBClient
 from lingularity.utils.enum import ExtendedEnum
-from lingularity.utils.output_manipulation import clear_screen, erase_previous_line
+from lingularity.utils.output_manipulation import clear_screen, erase_lines
 from lingularity.utils.input_resolution import resolve_input, recurse_on_invalid_input
 
 
@@ -163,10 +163,12 @@ class SentenceTranslationTrainer(Trainer):
 
 		def maintain_resolution_suspension_and_erase_lines(n_lines: int):
 			maintain_resolution_suspension()
-			[erase_previous_line() for _ in range(n_lines)]
+			erase_lines(n_lines)
 
 		np.random.shuffle(self._sentence_data)
 		most_recent_vocable_entry: Optional[str] = None  # 'token - meaning'
+
+		INDENTATION = '\t' * 2
 
 		while True:
 			if not suspend_resolution:
@@ -177,11 +179,11 @@ class SentenceTranslationTrainer(Trainer):
 				if any(default_name in reference_sentence for default_name in self.DEFAULT_NAMES) and self._names_convertible:
 					reference_sentence, translation = map(self._accommodate_names_of_sentence, [reference_sentence, translation])
 
-				print(reference_sentence, '\t')
+				self._buffer_print(INDENTATION, reference_sentence, '\t')
 			else:
 				suspend_resolution = False
 			try:
-				response = resolve_input(input("pending...").lower(), Option.values())
+				response = resolve_input(input("\t\tpending... ").lower(), Option.values())
 				if response is not None:
 					if response == Option.AppendVocabulary.value:
 						most_recent_vocable_entry, n_printed_lines = self._insert_vocable_into_database()
@@ -199,16 +201,20 @@ class SentenceTranslationTrainer(Trainer):
 							maintain_resolution_suspension_and_erase_lines(n_lines=n_printed_lines)
 
 					elif response == Option.Exit.value:
-						print('----------------')
+						print('\n----------------')
 						print("Number of faced sentences: ", self._n_trained_items)
 						return
 			except (KeyboardInterrupt, SyntaxError):
 				pass
 
-			erase_previous_line()
+			erase_lines(1)
 			if not suspend_resolution:
-				print(translation, '\n', '_______________')
+				self._buffer_print(INDENTATION, translation, '\n', INDENTATION, '_______________')
 				self._n_trained_items += 1
+
+				if self._n_trained_items >= 5:
+					self._buffer_print.partially_redo_buffered_output(n_lines_to_be_removed=2)
+
 
 	def _modify_latest_vocable_insertion(self, latest_appended_vocable_line: str) -> Tuple[Optional[str], int]:
 		""" Returns:
@@ -225,3 +231,7 @@ class SentenceTranslationTrainer(Trainer):
 			return None, 3
 		self._database_client.alter_vocable_entry(old_token, *new_split_entry)
 		return new_entry, 2
+
+
+if __name__ == '__main__':
+	SentenceTranslationTrainer(MongoDBClient('janek', None, MongoDBClient.Credentials.default()))
