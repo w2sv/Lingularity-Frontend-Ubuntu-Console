@@ -63,7 +63,7 @@ class VocabularyTrainer(Trainer):
         self._reference_2_foreign = False  # TODO: make alterable
 
         self._sentence_data = self._parse_sentence_data()
-        self._token_2_rowinds = RawToken2SentenceIndices(self._sentence_data)
+        self._token_2_rowinds = RawToken2SentenceIndices(self._sentence_data, language=self.language)
         self._vocable_entries: List[VocabularyTrainer.VocableEntry] = self._get_vocable_entries()
 
         self._n_correct_responses = 0
@@ -122,10 +122,10 @@ class VocabularyTrainer(Trainer):
         clear_screen()
 
         print((f'Found {self._vocable_entries.__len__()} imperfect entries.\n'
-                "Enter: \n\t- '#alter' in order to alter the translation of the previously faced item.\n"
-                "\t\tNote: distinct newly entered translation tokens are to be separated by commas.\n"
+                "Enter: \n\t- '#alter' in order to alter the translation(s) of the previously faced item.\n"
+                "\t\tNote: distinct translations are to be separated by commas.\n"
                 "\t- '#add' to add a new vocable.\n"
-                "\t- 'exit' to terminate the program.\n\n"))
+                "\t- '#exit' to terminate the program.\n\n"))
 
         lets_go_translation = self._find_lets_go_translation()
         print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')

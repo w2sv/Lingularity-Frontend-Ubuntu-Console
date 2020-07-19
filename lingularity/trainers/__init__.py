@@ -79,23 +79,9 @@ class Trainer(ABC):
     def language_dir_path(self):
         return f'{self.BASE_LANGUAGE_DATA_PATH}/{self.language}'
 
-    # ----------------
-    # .Sub
-    # ----------------
-    def _language_dir_sub_path(self, sub_path: str) -> str:
-        return f'{self.language_dir_path}/{sub_path}'
-
     @property
-    def sentence_file_path(self):
-        return self._language_dir_sub_path('sentence_data.txt')
-
-    @property
-    def vocabulary_file_path(self):
-        return self._language_dir_sub_path('vocabulary.txt')
-
-    @property
-    def training_documentation_file_path(self):
-        return self._language_dir_sub_path('training_documentation.json')
+    def sentence_file_path(self) -> str:
+        return f'{self.language_dir_path}/sentence_data.txt'
 
     # ----------------
     # Methods

@@ -79,12 +79,12 @@ class RawToken2SentenceIndices(Token2Indices):
                 excluding numbers
             values: lists of sentence indices in which occurring """
 
-    def __init__(self, sentence_data: np.ndarray):
+    def __init__(self, sentence_data: np.ndarray, language: Optional[str] = None):
         super().__init__()
 
         self._sentence_data = sentence_data
 
-        print('Mapping tokens...')
+        print(f'Mapping {language + " " if language else ""}tokens...')
         for i, sentence in enumerate(tqdm(self._sentence_data[:, 1])):
             # split, discard impertinent characters, lower all
             tokens = (token.lower() for token in get_meaningful_tokens(sentence))

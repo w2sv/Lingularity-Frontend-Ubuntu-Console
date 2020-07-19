@@ -3,6 +3,7 @@ import os
 import platform
 import time
 from subprocess import Popen
+from getpass import getpass
 
 from lingularity.trainers.sentence_translation import SentenceTranslationTrainer
 from lingularity.trainers.vocabulary_training import VocabularyTrainer
@@ -41,14 +42,14 @@ def login() -> MongoDBClient:
     user_name = input(f'{indentation}Enter user name: ')
     client = MongoDBClient(user_name, None, MongoDBClient.Credentials.default())
     if user_name in client.user_names:
-        password, password_input = client.query_password(), input(f'{indentation}Enter password: ')
+        password, password_input = client.query_password(), getpass(f'{indentation}Enter password: ')
         while password != password_input:
             erase_previous_line()
-            password_input = input(f'{indentation}Incorrect, try again: ')
+            password_input = getpass(f'{indentation}Incorrect, try again: ')
         [erase_previous_line() for _ in range(2)]
 
     else:
-        password = input(f'{indentation}Create password: ')
+        password = getpass(f'{indentation}Create password: ')
         first_name = input(f"{indentation}What's your name? ")
         client.initialize_user(password, first_name)
         [erase_previous_line() for _ in range(3)]
