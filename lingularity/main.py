@@ -1,8 +1,6 @@
 from typing import Optional
 import os
-import platform
 import time
-from subprocess import Popen
 from getpass import getpass
 
 from lingularity.trainers.sentence_translation import SentenceTranslationTrainer
@@ -18,12 +16,6 @@ TRAINERS = {
     'sentence translation': SentenceTranslationTrainer,
     'vocabulary trainer': VocabularyTrainer
 }
-
-
-def initialize_terminal():
-    if platform.system() == 'Windows':
-        Popen(f'{os.getcwd()}/shell/windows.cmd', cwd=os.getcwd())
-    clear_screen()
 
 
 def display_starting_screen():
@@ -120,7 +112,7 @@ def add_vocabulary():
 
 
 def complete_initialization():
-    initialize_terminal()
+    clear_screen()
     display_starting_screen()
     user_client = login()
     extended_starting_screen()
