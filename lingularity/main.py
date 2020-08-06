@@ -11,7 +11,7 @@ from lingularity.utils.input_resolution import recurse_on_invalid_input, resolve
 from lingularity.utils.output_manipulation import clear_screen, erase_lines
 from lingularity.utils.datetime import is_today_or_yesterday, parse_date_from_string
 
-#
+
 TRAINERS = {
     'sentence translation': SentenceTranslationTrainer,
     'vocabulary trainer': VocabularyTrainer
