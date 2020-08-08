@@ -50,6 +50,10 @@ class MongoDBClient:
         return self._cluster.database_names()
 
     @property
+    def mail_addresses(self) -> List[str]:
+        return []
+
+    @property
     def user_data_base(self) -> pymongo.collection.Collection:
         assert self._cluster is not None
         return self._cluster[self._user]
