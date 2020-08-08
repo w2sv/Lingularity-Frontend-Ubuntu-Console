@@ -65,16 +65,19 @@ class MongoDBClient:
     def general_collection(self) -> pymongo.collection.Collection:
         return self.user_data_base['general']
 
-    def initialize_user(self, password: str, first_name: str):
-        self.general_collection.insert_one({'_id': 'unique', 'password': password, 'first_name': first_name})
+    def initialize_user(self, mail_address: str, username: str, password: str):
+        self.general_collection.insert_one({'_id': 'unique',
+                                            'mailAddress': mail_address,
+                                            'username': username,
+                                            'password': password})
 
     def update_last_session_statistics(self, trainer: str, faced_items: int):
         self.general_collection.update_one(
             filter={'_id': 'unique'},
-            update={'$set': {'last_session': {'trainer': trainer,
-                                              'faced_items': faced_items,
-                                              'date': datetag_today(),
-                                              'language': self._language}}},
+            update={'$set': {'lastSession': {'trainer': trainer,
+                                             'facedItems': faced_items,
+                                             'date': datetag_today(),
+                                             'language': self._language}}},
             upsert=True
         )
 
@@ -84,11 +87,8 @@ class MongoDBClient:
     def query_password(self) -> str:
         return self.general_collection.find_one({'_id': 'unique'})['password']
 
-    def query_first_name(self) -> str:
-        return self.general_collection.find_one({'_id': 'unique'})['first_name']
-
     def query_last_session_statistics(self) -> Dict[str, Any]:
-        return self.general_collection.find_one({'_id': 'unique'})['last_session']
+        return self.general_collection.find_one({'_id': 'unique'})['lastSession']
 
     # ------------------
     # Vocabulary Collection

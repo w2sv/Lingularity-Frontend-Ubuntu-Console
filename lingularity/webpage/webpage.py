@@ -10,39 +10,38 @@ mongo_client = MongoDBClient(user=None, language=None, credentials=MongoDBClient
 
 @app.route('/')
 def index():
-    return render_template('front_page.html')
+    return render_template('front-page.html')
 
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     global mongo_client
-    html_link = 'login_page.html'
+    html_file_path = 'login-page.html'
 
     if request.method == 'GET':
-        return render_template(html_link)
+        return render_template(html_file_path)
     else:
         user, password = map(request.form.get, ['usr', 'pwd'])
         if user in mongo_client.user_names:
             mongo_client.set_user(user)
             if mongo_client.query_password() == password:
                 # TODO
-                print('Successfully logged in')
                 pass
             else:
-                return render_template(html_link, error_code=2)
+                return render_template(html_file_path, error_code=2)
         else:
-            return render_template(html_link, error_code=1)
+            return render_template(html_file_path, error_code=1)
 
-        return render_template('sign_up_page.html')
+        return render_template(html_file_path)
 
 
 @app.route('/sign-up', methods=['POST', 'GET'])
 def sign_up():
     global mongo_client
-    html_link = 'sign_up_page.html'
+    html_file_path = 'sign-up-page.html'
 
     if request.method == 'GET':
-        return render_template(html_link)
+        return render_template(html_file_path)
     else:
         error_code: Optional[int] = None
         mailadress, username, password = map(request.form.get, ['email', 'usr', 'pwd'])
@@ -58,10 +57,10 @@ def sign_up():
             error_code = 4
 
         if error_code is not None:
-            return render_template(html_link, error_code=error_code)
+            return render_template(html_file_path, error_code=error_code)
         else:
             mongo_client.initialize_user(mailadress, username, password)
-            return render_template(html_link)
+            return render_template(html_file_path)
 
 
 if __name__ == '__main__':
