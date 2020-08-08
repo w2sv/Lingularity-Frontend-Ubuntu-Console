@@ -37,6 +37,12 @@ class MongoDBClient:
     def set_language(self, language: str):
         assert self._language is None, 'language ought not to be reassigned'
         self._language = language
+        return self
+
+    def set_user(self, user: str):
+        assert self._user is None, 'user ought not to be reassigned'
+        self._user = user
+        return self
 
     @property
     def user_names(self) -> List[str]:
@@ -67,6 +73,9 @@ class MongoDBClient:
                                               'language': self._language}}},
             upsert=True
         )
+
+    def user_name_password_combination_existent(self, username: str, password: str) -> bool:
+        return username in self.user_names and self._cluster[username]['general']
 
     def query_password(self) -> str:
         return self.general_collection.find_one({'_id': 'unique'})['password']

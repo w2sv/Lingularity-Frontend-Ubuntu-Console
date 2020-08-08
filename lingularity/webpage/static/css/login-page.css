@@ -60,3 +60,9 @@ h1{
   background: #2ecc71;
 }
 
+.error_message{
+    text-align: center;
+    color: red;
+    font-size: 20px;
+}
+

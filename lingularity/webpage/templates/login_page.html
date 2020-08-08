@@ -9,9 +9,15 @@
     <body>
         <form class="box" action="" method="post">
             <h1>Login</h1>
-            <input type="text" name="" placeholder="Username">
-            <input type="password" name="" placeholder="Password">
+            <input type="text" name="usr" placeholder="Username">
+            <input type="password" name="pwd" placeholder="Password">
             <input type="submit" name="" value="Login">
+
+            {% if error_code==1 %}
+                <p class="error_message">Username doesn't exist</p>
+            {% elif error_code==2 %}
+                <p class="error_message">Password incorrect</p>
+            {% endif %}
         </form>
     </body>
 </html>
