@@ -7,7 +7,7 @@ from tqdm import tqdm
 import numpy as np
 import nltk
 
-from lingularity.types.custom_dict import CustomDict
+from lingularity.backend.types.custom_dict import CustomDict
 from lingularity.utils.statistics import get_outliers
 from lingularity.utils.strings import get_meaningful_tokens
 

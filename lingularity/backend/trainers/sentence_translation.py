@@ -9,10 +9,10 @@ from operator import ge, le
 import numpy as np
 from pynput.keyboard import Controller as KeyboardController
 
-from lingularity.trainers import Trainer
-from lingularity.webpage_interaction import ContentRetriever
-from lingularity.types.token_maps import Stem2SentenceIndices
-from lingularity.database import MongoDBClient
+from lingularity.backend.trainers import Trainer
+from lingularity.backend.webpage_interaction import ContentRetriever
+from lingularity.backend.types.token_maps import Stem2SentenceIndices
+from lingularity.database.__init__ import MongoDBClient
 from lingularity.utils.enum import ExtendedEnum
 from lingularity.utils.output_manipulation import clear_screen, erase_lines
 from lingularity.utils.input_resolution import resolve_input, recurse_on_invalid_input

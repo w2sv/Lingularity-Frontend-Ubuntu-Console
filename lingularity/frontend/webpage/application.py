@@ -2,7 +2,7 @@ from typing import *
 
 from flask import Flask, render_template, request
 
-from lingularity.database import MongoDBClient
+from lingularity.database.__init__ import MongoDBClient
 
 app = Flask(__name__)
 mongo_client = MongoDBClient(user=None, language=None, credentials=MongoDBClient.Credentials.default())

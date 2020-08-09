@@ -1,0 +1,6 @@
+name: lingularity
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - flask=1.1.2

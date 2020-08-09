@@ -9,7 +9,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-from lingularity.database import MongoDBClient
+from lingularity.database.__init__ import MongoDBClient
 from lingularity.utils.output_manipulation import BufferPrint
 
 

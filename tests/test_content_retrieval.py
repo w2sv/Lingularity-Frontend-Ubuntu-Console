@@ -1,4 +1,4 @@
-from lingularity.webpage_interaction import ContentRetriever
+from lingularity.backend.webpage_interaction import ContentRetriever
 
 
 def test_zip_download_link_parsing():

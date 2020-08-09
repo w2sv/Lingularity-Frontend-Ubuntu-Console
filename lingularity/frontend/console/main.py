@@ -3,10 +3,10 @@ import os
 import time
 from getpass import getpass
 
-from lingularity.trainers.sentence_translation import SentenceTranslationTrainer
-from lingularity.trainers.vocabulary_training import VocabularyTrainer
-from lingularity.trainers import Trainer
-from lingularity.database import MongoDBClient
+from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainer
+from lingularity.backend.trainers import VocabularyTrainer
+from lingularity.backend.trainers import Trainer
+from lingularity.database.__init__ import MongoDBClient
 from lingularity.utils.input_resolution import recurse_on_invalid_input, resolve_input
 from lingularity.utils.output_manipulation import clear_screen, erase_lines
 from lingularity.utils.datetime import is_today_or_yesterday, parse_date_from_string
