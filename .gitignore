@@ -1,8 +1,13 @@
 __pycache__
 /dist/
-/language_data/
 /SentenceTranslation.spec
-/oldstuff/
-/env/
 /.idea/
 /.mypy_cache/
+
+/language_data/
+/oldstuff/
+
+# Envs
+/env/
+/console-env/
+/webpage-env/
