@@ -7,8 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pynput.keyboard import Controller as KeyboardController
 
-from lingularity.backend.trainers import Trainer
-from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainer
+from lingularity.backend.trainers import TrainerBackend
+from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend
 from lingularity.backend.types.token_maps import RawToken2SentenceIndices
 from lingularity.database.__init__ import MongoDBClient
 from lingularity.utils.strings import get_article_stripped_token
@@ -17,7 +17,7 @@ from lingularity.utils.input_resolution import resolve_input, recurse_on_invalid
 from lingularity.utils.enum import ExtendedEnum
 
 
-class VocabularyTrainer(Trainer):
+class VocabularyTrainerBackend(TrainerBackend):
     class ResponseEvaluation(ExtendedEnum):
         Wrong = 0
         AccentError = 0.5
@@ -63,7 +63,7 @@ class VocabularyTrainer(Trainer):
 
         self._sentence_data = self._parse_sentence_data()
         self._token_2_rowinds = RawToken2SentenceIndices(self._sentence_data, language=self.language)
-        self._vocable_entries: List[VocabularyTrainer.VocableEntry] = self._get_vocable_entries()
+        self._vocable_entries: List[VocabularyTrainerBackend.VocableEntry] = self._get_vocable_entries()
 
         self._n_correct_responses = 0
 
@@ -71,7 +71,7 @@ class VocabularyTrainer(Trainer):
         self._display_new_vocabulary()
         self._display_pre_training_instructions()
         self._train()
-        self._insert_session_statistics_into_database()
+        self.insert_session_statistics_into_database()
         self._display_pie_chart()
         self._plot_training_history()
 
@@ -100,12 +100,12 @@ class VocabularyTrainer(Trainer):
         return list(map(self.VocableEntry, self.mongodb_client.query_vocabulary_data()))
 
     def _start_sentence_translation_trainer(self):
-        print('You have to accumulate vocabulary by means of the SentenceTranslation™ Trainer or manual amassment first.')
+        print('You have to accumulate vocabulary by means of the SentenceTranslation™ TrainerBackend or manual amassment first.')
         sleep(3)
-        print('Initiating SentenceTranslation Trainer...')
+        print('Initiating SentenceTranslation TrainerBackend...')
         sleep(2)
         clear_screen()
-        return SentenceTranslationTrainer(self.mongodb_client).run()
+        return SentenceTranslationTrainerBackend(self.mongodb_client).run()
 
     def _display_new_vocabulary(self):
         clear_screen()
@@ -126,7 +126,7 @@ class VocabularyTrainer(Trainer):
                 "\t- '#add' to add a new vocable.\n"
                 "\t- '#exit' to terminate the program.\n\n"))
 
-        lets_go_translation = self._find_lets_go_translation()
+        lets_go_translation = self.query_lets_go_translation()
         print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')
 
     # ------------------
@@ -140,7 +140,7 @@ class VocabularyTrainer(Trainer):
 
         np.random.shuffle(self._vocable_entries)
 
-        previous_entry: Optional[VocabularyTrainer.VocableEntry] = None
+        previous_entry: Optional[VocabularyTrainerBackend.VocableEntry] = None
 
         while self._n_trained_items < len(self._vocable_entries):
             entry = self._vocable_entries[self._n_trained_items]

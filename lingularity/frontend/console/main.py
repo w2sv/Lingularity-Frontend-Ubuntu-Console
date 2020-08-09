@@ -3,9 +3,7 @@ import os
 import time
 from getpass import getpass
 
-from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainer
-from lingularity.backend.trainers.vocabulary_training import VocabularyTrainer
-from lingularity.backend.trainers import Trainer
+from lingularity.frontend.console.trainers import SentenceTranslationTrainerConsoleFrontend, VocableTrainerConsoleFrontend
 from lingularity.database import MongoDBClient
 from lingularity.utils.input_resolution import recurse_on_invalid_input, resolve_input
 from lingularity.utils.output_manipulation import clear_screen, erase_lines
@@ -13,8 +11,8 @@ from lingularity.utils.datetime import is_today_or_yesterday, parse_date_from_st
 
 
 TRAINERS = {
-    'sentence translation': SentenceTranslationTrainer,
-    'vocabulary trainer': VocabularyTrainer
+    'sentence translation': SentenceTranslationTrainerConsoleFrontend,
+    'vocabulary trainer': VocableTrainerConsoleFrontend
 }
 
 
@@ -49,13 +47,10 @@ def login() -> MongoDBClient:
     return client
 
 
-def extended_starting_screen():
+def extended_starting_screen(username: str):
     print("         Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
     print("Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,")
     print("  e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
-
-
-def user_welcome(username: str):
     print('\t' * 6, f"What's up {username}?")
 
 
@@ -81,24 +76,24 @@ def select_training() -> Optional[str]:
         time.sleep(1)
         erase_lines(4)
         return select_training()
-    elif training == 'add vocabulary':
-        return add_vocabulary()
+    """elif training == 'add vocabulary':
+        return add_vocabulary()"""
 
     clear_screen()
     return training
 
 
-def add_vocabulary():
+"""def add_vocabulary():
     # TODO: reincorporate
     clear_screen()
-    languages = [language.lower() for language in os.listdir(Trainer.BASE_LANGUAGE_DATA_PATH)]
+    languages = [language.lower() for language in os.listdir(TrainerBackend.BASE_LANGUAGE_DATA_PATH)]
     print('EXTENSIBLE VOCABULARY FILES: ')
     [print(language) for language in languages]
     selection = resolve_input(input('\nSelect language: ').lower(), languages)
     if selection is None:
         recurse_on_invalid_input(add_vocabulary)
     else:
-        sentence_trainer = SentenceTranslationTrainer()
+        sentence_trainer = SentenceTranslationTrainerBackend()
         sentence_trainer._non_english_language = selection
         while True:
             sentence_trainer._append_2_vocabulary_file()
@@ -108,21 +103,22 @@ def add_vocabulary():
                     return complete_initialization()
                 erase_previous_line()
             except SyntaxError:
-                pass
+                pass"""
 
 
 def complete_initialization():
     clear_screen()
     display_starting_screen()
     mongo_client = login()
-    extended_starting_screen()
-    user_welcome(username=mongo_client.user_name)
+    extended_starting_screen(username=mongo_client.user_name)
     try:
         display_last_session_statistics(client=mongo_client)
     except KeyError:
         pass
-    TRAINERS[select_training()](database_client=mongo_client).run()
 
+    trainer_frontend = TRAINERS[select_training()]()
+    trainer_frontend.relay_database_client(mongo_client)
+    trainer_frontend.run()
 
 if __name__ == '__main__':
     complete_initialization()

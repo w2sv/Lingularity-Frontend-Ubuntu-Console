@@ -9,7 +9,7 @@ import numpy as np
 from lingularity.database import MongoDBClient
 
 
-class Trainer(ABC):
+class TrainerBackend(ABC):
     BASE_LANGUAGE_DATA_PATH = os.path.join(os.getcwd(), 'language_data')
 
     DEFAULT_NAMES = ('Tom', 'Mary')
@@ -21,28 +21,24 @@ class Trainer(ABC):
         'German': ('Günther', 'Irmgard')
     }
 
-    def __init__(self, database_client: MongoDBClient):
+    def __init__(self, non_english_language: str, train_english: bool):
         if not os.path.exists(self.BASE_LANGUAGE_DATA_PATH):
             os.mkdir(self.BASE_LANGUAGE_DATA_PATH)
 
-        self.mongodb_client = database_client
-        self._non_english_language: str = self._select_language()
-        self._train_english: bool = False
-        self._sentence_data: np.ndarray = None
-        self._n_trained_items: int = 0
-
+        self._non_english_language = non_english_language
+        self._train_english = train_english
         self._names_convertible = self.LANGUAGE_CORRESPONDING_NAMES.get(self._non_english_language) is not None
 
-        self.mongodb_client.set_language(self._non_english_language)
-
-    @abstractmethod
-    def _select_language(self) -> str:
-        # TODO: make return language, train_english
-        pass
+        self.mongodb_client: Optional[MongoDBClient] = None
+        self._sentence_data: np.ndarray = None
 
     @property
     def locally_available_languages(self) -> List[str]:
         return os.listdir(self.BASE_LANGUAGE_DATA_PATH)
+
+    def adopt_database_client(self, client: MongoDBClient):
+        client.set_language(self._non_english_language)
+        self.mongodb_client = client
 
     @property
     def train_english(self):
@@ -101,7 +97,7 @@ class Trainer(ABC):
 
         return np.asarray(split_data)
 
-    def _find_lets_go_translation(self) -> Optional[str]:
+    def query_lets_go_translation(self) -> Optional[str]:
         lets_go_occurrence_range = ((sentence_pair[0], i) for i, sentence_pair in
                                     enumerate(self._sentence_data[:int(len(self._sentence_data) * 0.3)]))
         for content, i in lets_go_occurrence_range:
@@ -125,8 +121,8 @@ class Trainer(ABC):
     # -----------------
     # .Database related
     # -----------------
-    def _insert_session_statistics_into_database(self):
-        update_args = (str(self), self._n_trained_items)
+    def insert_session_statistics_into_database(self, n_trained_items: int):
+        update_args = (str(self), n_trained_items)
 
         self.mongodb_client.update_last_session_statistics(*update_args)
         self.mongodb_client.inject_session_statistics(*update_args)
