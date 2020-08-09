@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Union, Any
+from typing import List, Dict, Optional, Any
 from collections import Counter
 from time import sleep
 
@@ -79,7 +79,7 @@ class VocabularyTrainer(Trainer):
     # INITIALIZATION
     # ---------------
     def _select_language(self) -> str:
-        eligible_languages = self._database_client.get_vocabulary_possessing_languages()
+        eligible_languages = self.mongodb_client.get_vocabulary_possessing_languages()
         if not eligible_languages:
             self._start_sentence_translation_trainer()
 
@@ -97,7 +97,7 @@ class VocabularyTrainer(Trainer):
 
     def _get_vocable_entries(self) -> List[VocableEntry]:
         self.VocableEntry.REFERENCE_TO_FOREIGN = self._reference_2_foreign
-        return list(map(self.VocableEntry, self._database_client.query_vocabulary_data()))
+        return list(map(self.VocableEntry, self.mongodb_client.query_vocabulary_data()))
 
     def _start_sentence_translation_trainer(self):
         print('You have to accumulate vocabulary by means of the SentenceTranslation™ Trainer or manual amassment first.')
@@ -105,7 +105,7 @@ class VocabularyTrainer(Trainer):
         print('Initiating SentenceTranslation Trainer...')
         sleep(2)
         clear_screen()
-        return SentenceTranslationTrainer(self._database_client).run()
+        return SentenceTranslationTrainer(self.mongodb_client).run()
 
     def _display_new_vocabulary(self):
         clear_screen()
@@ -165,7 +165,7 @@ class VocabularyTrainer(Trainer):
                 break
 
             response_evaluation = self._get_reponse_evaluation(response, entry.display_translation)
-            self._database_client.update_vocable_entry(entry.token, response_evaluation.value)
+            self.mongodb_client.update_vocable_entry(entry.token, response_evaluation.value)
 
             if response:
                 print('\t', response_evaluation.name, end=' ')
@@ -196,7 +196,7 @@ class VocabularyTrainer(Trainer):
         KeyboardController().type(entry.translation)
         extended_translation = input('')
         if extended_translation:
-            self._database_client.alter_vocable_entry(*[entry.token]*2, extended_translation)  # type: ignore
+            self.mongodb_client.alter_vocable_entry(*[entry.token] * 2, extended_translation)  # type: ignore
             return 2
         else:
             print('Invalid input')

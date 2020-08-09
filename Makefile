@@ -15,3 +15,4 @@ install-webpage-env:
 	cat base-environment.yml <(echo) ./lingularity/frontend/webpage/environment-extension.yml > webpage-environment.yml
 	conda env create -f webpage-environment.yml --prefix ./webpage-env
 	rm webpage-environment.yml
+

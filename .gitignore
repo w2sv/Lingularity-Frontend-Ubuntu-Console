@@ -1,9 +1,11 @@
+# Generic
 __pycache__
 /dist/
 /SentenceTranslation.spec
 /.idea/
 /.mypy_cache/
 
+# Data
 /language_data/
 /oldstuff/
 

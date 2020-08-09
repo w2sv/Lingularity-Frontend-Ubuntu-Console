@@ -4,9 +4,9 @@ import time
 from getpass import getpass
 
 from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainer
-from lingularity.backend.trainers import VocabularyTrainer
+from lingularity.backend.trainers.vocabulary_training import VocabularyTrainer
 from lingularity.backend.trainers import Trainer
-from lingularity.database.__init__ import MongoDBClient
+from lingularity.database import MongoDBClient
 from lingularity.utils.input_resolution import recurse_on_invalid_input, resolve_input
 from lingularity.utils.output_manipulation import clear_screen, erase_lines
 from lingularity.utils.datetime import is_today_or_yesterday, parse_date_from_string
@@ -55,8 +55,8 @@ def extended_starting_screen():
     print("  e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
 
 
-def user_welcome(client: MongoDBClient):
-    print('\t' * 6, f"What's up {client.query_first_name()}?")
+def user_welcome(username: str):
+    print('\t' * 6, f"What's up {username}?")
 
 
 def display_last_session_statistics(client: MongoDBClient):
@@ -114,14 +114,14 @@ def add_vocabulary():
 def complete_initialization():
     clear_screen()
     display_starting_screen()
-    user_client = login()
+    mongo_client = login()
     extended_starting_screen()
-    user_welcome(client=user_client)
+    user_welcome(username=mongo_client.user_name)
     try:
-        display_last_session_statistics(client=user_client)
+        display_last_session_statistics(client=mongo_client)
     except KeyError:
         pass
-    TRAINERS[select_training()](database_client=user_client).run()
+    TRAINERS[select_training()](database_client=mongo_client).run()
 
 
 if __name__ == '__main__':

@@ -10,9 +10,9 @@ import numpy as np
 from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.backend.trainers import Trainer
-from lingularity.backend.webpage_interaction import ContentRetriever
+from lingularity.backend.sentence_data_fetcher import SentenceDataFetcher
 from lingularity.backend.types.token_maps import Stem2SentenceIndices
-from lingularity.database.__init__ import MongoDBClient
+from lingularity.database import MongoDBClient
 from lingularity.utils.enum import ExtendedEnum
 from lingularity.utils.output_manipulation import clear_screen, erase_lines
 from lingularity.utils.input_resolution import resolve_input, recurse_on_invalid_input
@@ -20,7 +20,7 @@ from lingularity.utils.input_resolution import resolve_input, recurse_on_invalid
 
 class SentenceTranslationTrainer(Trainer):
 	def __init__(self, database_client: MongoDBClient):
-		self._content_retriever = ContentRetriever()
+		self._content_retriever = SentenceDataFetcher()
 
 		super().__init__(database_client)
 
@@ -41,20 +41,16 @@ class SentenceTranslationTrainer(Trainer):
 		if self._n_trained_items > 5:
 			self._plot_training_history()
 
-	def _download_and_process_zip_file(self):
-		zip_file_link = self._content_retriever.download_zipfile(self._non_english_language)
-		self._content_retriever.unzip_file(zip_file_link)
-
 	# ---------------
 	# INITIALIZATION
 	# ---------------
 	def _select_language(self) -> str:
-		if self._content_retriever.languages_2_ziplinks is None:
+		if self._content_retriever.language_2_ziplink is None:
 			print('Trying to connect to webpage...')
 			self._content_retriever.get_language_ziplink_dict()
-		assert self._content_retriever.languages_2_ziplinks is not None
-		sucessfully_retrieved = bool(len(self._content_retriever.languages_2_ziplinks))
-		eligible_languages = list(self._content_retriever.languages_2_ziplinks.keys()) if sucessfully_retrieved else os.listdir(self.BASE_LANGUAGE_DATA_PATH)
+		assert self._content_retriever.language_2_ziplink is not None
+		sucessfully_retrieved = bool(len(self._content_retriever.language_2_ziplink))
+		eligible_languages = list(self._content_retriever.language_2_ziplink.keys()) if sucessfully_retrieved else os.listdir(self.BASE_LANGUAGE_DATA_PATH)
 		if 'English' not in eligible_languages:
 			insort(eligible_languages, 'English')
 
@@ -229,9 +225,5 @@ class SentenceTranslationTrainer(Trainer):
 			print('Invalid alteration')
 			time.sleep(1)
 			return None, 3
-		self._database_client.alter_vocable_entry(old_token, *new_split_entry)
+		self.mongodb_client.alter_vocable_entry(old_token, *new_split_entry)
 		return new_entry, 2
-
-
-if __name__ == '__main__':
-	SentenceTranslationTrainer(MongoDBClient('janek', None, MongoDBClient.Credentials.default()))
