@@ -66,5 +66,5 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 
 	def convert_names_if_possible(self, reference_sentence: str, translation: str) -> Tuple[str, str]:
 		if any(default_name in reference_sentence for default_name in self.DEFAULT_NAMES) and self._names_convertible:
-			return map(self._accommodate_names_of_sentence, [reference_sentence, translation])
+			return tuple(map(self._accommodate_names_of_sentence, [reference_sentence, translation]))  # type: ignore
 		return reference_sentence, translation

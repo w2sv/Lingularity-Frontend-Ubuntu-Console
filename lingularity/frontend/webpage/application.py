@@ -7,7 +7,7 @@ from lingularity.utils.credential_validation import invalid_password, invalid_ma
 
 
 app = Flask(__name__)
-mongo_client = MongoDBClient(user=None, language=None)
+mongo_client = MongoDBClient()
 
 
 @app.route('/')

@@ -16,12 +16,14 @@ class TrainerConsoleFrontend(ABC):
     SELECTION_QUERY_OFFSET = '\n\t'
 
     def __init__(self):
-        self._backend: Optional[Type[TrainerBackend]] = None
+        self._backend: Optional[TrainerBackend] = None
         self._n_trained_items: int = 0
 
         self._buffer_print = BufferPrint()
 
     def relay_database_client_to_backend(self, client: MongoDBClient):
+        assert self._backend is not None, 'backend not initialized'
+
         self._backend.adopt_database_client(client)
 
     @abstractmethod
@@ -73,6 +75,7 @@ class TrainerConsoleFrontend(ABC):
                 inserted vocable entry, None in case of invalid input
                  number of printed lines """
 
+        assert self._backend is not None and self._backend.mongodb_client is not None
         vocable = input(f'Enter {self._backend.language} word/phrase: ')
         meanings = input('Enter meaning(s): ')
 

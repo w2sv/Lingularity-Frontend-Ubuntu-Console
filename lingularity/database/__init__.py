@@ -27,9 +27,7 @@ class MongoDBClient:
         def client_endpoint(self, srv_endpoint: bool) -> str:
             return f'mongodb{"+srv" if srv_endpoint else ""}://{self.user}:{self.password}@{self.host}'
 
-    _cluster: Optional[pymongo.MongoClient] = None
-
-    def __init__(self, user: Optional[str], language: Optional[str]):
+    def __init__(self, user: Optional[str] = None, language: Optional[str] = None):
         self._user = user
         self._language = language
         self._cluster = pymongo.MongoClient(self.Credentials.default().client_endpoint(srv_endpoint=True), serverSelectionTimeoutMS=1_000)
@@ -38,17 +36,17 @@ class MongoDBClient:
     # Properties
     # -------------------
     @property
-    def user(self) -> str:
+    def user(self) -> Optional[str]:
         return self._user
 
     @user.setter
     def user(self, value: str):
-        if self._language is not None:
+        if self._user is not None:
             raise AttributeError('user ought not to be reassigned')
         self._user = value
 
     @property
-    def language(self) -> str:
+    def language(self) -> Optional[str]:
         return self._language
 
     @language.setter
@@ -71,11 +69,11 @@ class MongoDBClient:
     def usernames(self) -> List[str]:
         """ equals databases """
 
-        assert self._cluster is not None
         return self._cluster.list_database_names()
 
     @property
     def user_data_base(self) -> pymongo.collection.Collection:
+        assert self._cluster is not None, ''
         return self._cluster[self._user]
 
     # -------------------

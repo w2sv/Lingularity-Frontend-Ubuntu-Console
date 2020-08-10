@@ -1,6 +1,6 @@
 from typing import List, Optional
 import os
-from abc import ABC, abstractmethod
+from abc import ABC
 from functools import cached_property
 
 import nltk
@@ -10,7 +10,7 @@ from lingularity.database import MongoDBClient
 
 
 class TrainerBackend(ABC):
-    BASE_LANGUAGE_DATA_PATH = os.path.join(os.getcwd(), 'language_data')
+    BASE_LANGUAGE_DATA_PATH = f'{os.getcwd()}/language_data'
 
     DEFAULT_NAMES = ('Tom', 'Mary')
     LANGUAGE_CORRESPONDING_NAMES = {
@@ -122,6 +122,8 @@ class TrainerBackend(ABC):
     # .Database related
     # -----------------
     def insert_session_statistics_into_database(self, n_trained_items: int):
+        assert self.mongodb_client is not None
+
         update_args = (str(self), n_trained_items)
 
         self.mongodb_client.update_last_session_statistics(*update_args)

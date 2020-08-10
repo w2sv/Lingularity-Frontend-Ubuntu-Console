@@ -3,20 +3,15 @@ import os
 import time
 from getpass import getpass
 from functools import partial
+import requests
+import sys
+import cursor
 
-from lingularity.frontend.console.trainers import SentenceTranslationTrainerConsoleFrontend, VocableTrainerConsoleFrontend
 from lingularity.database import MongoDBClient
 from lingularity.utils.input_resolution import recurse_on_unresolvable_input, recurse_on_invalid_input, resolve_input
 from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print, centered_input_indentation, DEFAULT_VERTICAL_VIEW_OFFSET
 from lingularity.utils.datetime import is_today_or_yesterday, parse_date_from_string
 from lingularity.utils.signup_credential_validation import invalid_mailadress, invalid_password, invalid_username
-
-
-TRAINERS = {
-    'sentence translation': SentenceTranslationTrainerConsoleFrontend,
-    'vocabulary trainer': VocableTrainerConsoleFrontend
-}
-
 
 def display_starting_screen():
     clear_screen()
@@ -27,18 +22,35 @@ def display_starting_screen():
     centered_print(DEFAULT_VERTICAL_VIEW_OFFSET * 2, banner, '\n' * 2)
     centered_print("W2SV", '\n')
 
+try:
+    from lingularity.frontend.console.trainers import SentenceTranslationTrainerConsoleFrontend, VocableTrainerConsoleFrontend
+except requests.exceptions.ConnectionError:
+    display_starting_screen()
+    centered_print(
+        '\nLingularity relies on an internet connection in order to retrieve and store data. Please establish one and restart the program.\n\n')
+    cursor.hide()
+    time.sleep(5)
+    cursor.show()
+    sys.exit(0)
+
+
+TRAINERS = {
+    'sentence translation': SentenceTranslationTrainerConsoleFrontend,
+    'vocabulary trainer': VocableTrainerConsoleFrontend
+}
+
 
 def authenticate() -> MongoDBClient:
     """ Returns:
             user instantiated client """
 
+    client = MongoDBClient()
     indentation = centered_input_indentation('Enter user name: ')
 
     username = input(f'{indentation}Enter user name: ')
     if invalid_username(username):
         return recurse_on_invalid_input(authenticate, 'Empty username is not allowed', 2)
 
-    client = MongoDBClient(user=None, language=None)
     if username in client.usernames:
         client.user = username
         password, password_input = client.query_password(), getpass(f'{indentation}Enter password: ')
@@ -56,8 +68,7 @@ def authenticate() -> MongoDBClient:
 
 def sign_up(user: str, client: MongoDBClient, indentation: str, email_address: Optional[str] = None):
     args = list(locals().values())
-    _recurse_on_invalid_input = partial(recurse_on_invalid_input,
-                                        func=sign_up)
+    _recurse_on_invalid_input = partial(recurse_on_invalid_input, func=sign_up)  # type: ignore
 
     centered_print('Create a new account\n')
 
