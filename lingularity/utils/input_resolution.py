@@ -1,7 +1,8 @@
 from typing import Iterable, Optional, Callable, List, Any
 import time
+import cursor
 
-from lingularity.utils.output_manipulation import clear_screen, erase_lines
+from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print
 
 
 def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
@@ -11,20 +12,23 @@ def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
 
 def recurse_on_unresolvable_input(func: Callable, *args, **kwargs):
     print("Couldn't resolve input")
+    cursor.hide()
     time.sleep(1)
     clear_screen()
+    cursor.show()
     return func(*args, **kwargs)
 
 
 def recurse_on_invalid_input(func: Callable,
                              message: str,
                              n_deletion_lines: int,
-                             args: Optional[List[Any]] = None,
-                             indentation: Optional[str] = None):
+                             args: Optional[List[Any]] = None):
     if args is None:
         args = []
 
-    print(f'{indentation if indentation is not None else ""}{message}')
+    centered_print(message.upper())
+    cursor.hide()
     time.sleep(1.5)
+    cursor.show()
     erase_lines(n_deletion_lines)
     return func(*args)

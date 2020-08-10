@@ -24,7 +24,7 @@ def display_starting_screen():
     time.sleep(0.1)
 
     banner = open(f'{os.path.dirname(os.path.abspath(__file__))}/resources/banner.txt', 'r').read()
-    centered_print('\n' * 2, banner, '\n' * 2)
+    centered_print('\n' * 4, banner, '\n' * 2)
     centered_print("W2SV", '\n')
     centered_print("by Janek Zangenberg ", '\n' * 2)
 
@@ -37,7 +37,7 @@ def authenticate() -> MongoDBClient:
 
     username = input(f'{indentation}Enter user name: ')
     if invalid_username(username):
-        return recurse_on_invalid_input(authenticate, f'{indentation}Empty username is not allowed', 2)
+        return recurse_on_invalid_input(authenticate, 'Empty username is not allowed', 2)
 
     client = MongoDBClient(user=None, language=None)
     if username in client.usernames:
@@ -55,9 +55,9 @@ def authenticate() -> MongoDBClient:
     return client
 
 def sign_up(user: str, client: MongoDBClient, indentation: str, email_address: Optional[str] = None):
+    args = list(locals().values())
     _recurse_on_invalid_input = partial(recurse_on_invalid_input,
-                                        func=sign_up,
-                                        indentation=indentation)
+                                        func=sign_up)
 
     centered_print('Create a new account\n')
 
@@ -67,13 +67,13 @@ def sign_up(user: str, client: MongoDBClient, indentation: str, email_address: O
     else:
         email_address = input(f'{indentation}{email_query}')
         if invalid_mailadress(email_address):
-            return _recurse_on_invalid_input(message='Invalid email address', n_deletion_lines=4, args=[indentation, client])
+            return _recurse_on_invalid_input(message='Invalid email address', n_deletion_lines=4, args=args)
         """elif client.mail_address_taken(mail_address):
             return _recurse_on_invalid_input(message='Email address taken')"""
 
     password = getpass(f'{indentation}Create password: ')
     if invalid_password(password):
-        return _recurse_on_invalid_input(message='Password must contain at least 5 characters', n_deletion_lines=5, args=[indentation, client, email_address])
+        return _recurse_on_invalid_input(message='Password must contain at least 5 characters', n_deletion_lines=5, args=args[:-1] + [email_address])
 
     client.user = user
     client.initialize_user(email_address, password)
