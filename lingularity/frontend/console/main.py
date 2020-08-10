@@ -15,7 +15,7 @@ from lingularity.utils.signup_credential_validation import invalid_mailadress, i
 
 def display_starting_screen():
     clear_screen()
-    os.system('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz')
+    os.system('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz && wmctrl -r :ACTIVE: -N "Lingularity - Acquire Languages the Litboy Way"')
     time.sleep(0.1)
 
     banner = open(f'{os.path.dirname(os.path.abspath(__file__))}/resources/banner.txt', 'r').read()
@@ -92,9 +92,9 @@ def sign_up(user: str, client: MongoDBClient, indentation: str, email_address: O
 
 
 def extended_starting_screen(username: str):
-    centered_print("         Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
+    centered_print("Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
     centered_print("Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,")
-    centered_print("  e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
+    centered_print("e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
     centered_print(f"What's up {username}?", '\n' * 2)
 
 

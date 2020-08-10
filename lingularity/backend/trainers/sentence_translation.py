@@ -5,7 +5,7 @@ from operator import ge, le
 
 import numpy as np
 
-from lingularity.backend.trainers import TrainerBackend
+from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.sentence_data_fetcher import SentenceDataFetcher
 from lingularity.backend.types.token_maps import Stem2SentenceIndices
 from lingularity.utils.enum import ExtendedEnum

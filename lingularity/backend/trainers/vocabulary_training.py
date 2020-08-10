@@ -7,10 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pynput.keyboard import Controller as KeyboardController
 
-from lingularity.backend.trainers import TrainerBackend
-from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend
+from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.types.token_maps import RawToken2SentenceIndices
-from lingularity.database.__init__ import MongoDBClient
+from lingularity.database import MongoDBClient
 from lingularity.utils.strings import get_article_stripped_token
 from lingularity.utils.output_manipulation import clear_screen, erase_lines
 from lingularity.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
