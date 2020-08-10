@@ -26,7 +26,6 @@ def display_starting_screen():
     banner = open(f'{os.path.dirname(os.path.abspath(__file__))}/resources/banner.txt', 'r').read()
     centered_print(DEFAULT_VERTICAL_VIEW_OFFSET * 2, banner, '\n' * 2)
     centered_print("W2SV", '\n')
-    centered_print("by Janek Zangenberg ", '\n' * 2)
 
 
 def authenticate() -> MongoDBClient:

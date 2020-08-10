@@ -129,7 +129,10 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             if not suspend_resolution:
                 try:
                     reference_sentence, translation = self._backend.get_sentence_pair()
-                except (ValueError, IndexError):
+                except (ValueError, IndexError, StopIteration) as e:
+                    if type(e) is StopIteration:
+                        print('Sentence data file depleted')
+                        return
                     continue
 
 
