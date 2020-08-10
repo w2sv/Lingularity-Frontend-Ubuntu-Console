@@ -45,7 +45,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         selection, train_english = resolve_input(input('\nSelect language: \n').title(), eligible_languages), False
         if selection is None:
-            return recurse_on_unresolvable_input(self._select_language)
+            return recurse_on_unresolvable_input(self._select_language, deletion_lines=-1)
 
         elif selection == 'English':
             eligible_languages.remove('English')
@@ -79,7 +79,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         mode_selection = resolve_input(input('\nEnter desired mode: ').lower(), Backend.TrainingMode.values())
 
         if mode_selection is None:
-            return recurse_on_unresolvable_input(self._select_mode)
+            return recurse_on_unresolvable_input(self._select_mode, deletion_lines=-1)
         return mode_selection
 
     def _display_pre_training_instructions(self):

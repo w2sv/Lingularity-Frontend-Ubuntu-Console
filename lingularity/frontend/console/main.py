@@ -44,7 +44,8 @@ def authenticate() -> MongoDBClient:
         client.user = username
         password, password_input = client.query_password(), getpass(f'{indentation}Enter password: ')
         while password != password_input:
-            erase_lines(1)
+            print('')
+            erase_lines(2)
             password_input = getpass(f'{indentation}Incorrect, try again: ')
         erase_lines(2)
 
@@ -103,14 +104,11 @@ def display_last_session_statistics(client: MongoDBClient):
 def select_training() -> Optional[str]:
     in_between_indentation = '\t' * 2
     input_message = f"What would you like to do?: {in_between_indentation}Translate (S)entences{in_between_indentation}Train (V)ocabulary{in_between_indentation}or (A)dd Vocabulary\n"
-    indentation = centered_input_indentation(input_message)
-    training = resolve_input(input(indentation + input_message).lower(), list(TRAINERS.keys()) + ['add vocabulary'])
+    centered_print(input_message, ' ', end='')
+    training = resolve_input(input().lower(), list(TRAINERS.keys()) + ['add vocabulary'])
 
     if training is None:
-        print("Couldn't resolve input")
-        time.sleep(1)
-        erase_lines(4)
-        return select_training()
+        recurse_on_unresolvable_input(select_training, 4)
     """elif training == 'add vocabulary':
         return add_vocabulary()"""
 

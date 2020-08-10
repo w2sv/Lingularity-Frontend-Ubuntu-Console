@@ -47,8 +47,8 @@ def _get_indentation(line_length: int) -> str:
     return " " * ((terminal_columns - line_length) // 2)
 
 
-def centered_print(*output: str):
-    for output_element in output:
+def centered_print(*output: str, end='\n'):
+    for i, output_element in enumerate(output):
         if '\n' in output_element:
             if set(output_element).__len__() == 1:
                 print(output_element, end='')
@@ -61,7 +61,7 @@ def centered_print(*output: str):
                     print(l)
 
         else:
-            print(_get_indentation(len(output_element)) + output_element)
+            print(_get_indentation(len(output_element)) + output_element, end=end if i == len(output) - 1 else '\n')
 
 
 def centered_input_indentation(input_message: str) -> str:

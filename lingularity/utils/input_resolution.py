@@ -10,11 +10,11 @@ def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
     return options_starting_on_input[0] if len(options_starting_on_input) == 1 else None
 
 
-def recurse_on_unresolvable_input(func: Callable, *args, **kwargs):
+def recurse_on_unresolvable_input(func: Callable, deletion_lines, *args, **kwargs):
     print("Couldn't resolve input")
     cursor.hide()
     time.sleep(1)
-    clear_screen()
+    clear_screen() if deletion_lines == -1 else erase_lines(deletion_lines)
     cursor.show()
     return func(*args, **kwargs)
 

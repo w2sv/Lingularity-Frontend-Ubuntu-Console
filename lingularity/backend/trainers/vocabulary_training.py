@@ -92,7 +92,7 @@ class VocabularyTrainerBackend(TrainerBackend):
         language_selection = input('\nEnter desired language:\n').title()
         input_resolution = resolve_input(language_selection, eligible_languages)
         if input_resolution is None:
-            return recurse_on_unresolvable_input(self._select_language)
+            return recurse_on_unresolvable_input(self._select_language, deletion_lines=-1)
         return input_resolution
 
     def _get_vocable_entries(self) -> List[VocableEntry]:
