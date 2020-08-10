@@ -19,7 +19,7 @@ class MongoDBClient:
         @classmethod
         def default(cls):
             return cls(
-                host='cluster0.zthtl.mongodb.net/janek_zangenberg?retryWrites=true&w=majority',
+                host='cluster0.zthtl.mongodb.net/admin?retryWrites=true&w=majority',
                 user='sickdude69',
                 password='clusterpassword'
             )
@@ -62,7 +62,10 @@ class MongoDBClient:
     # --------------------
     @property
     def mail_addresses(self) -> Iterator[str]:
-        return (self._cluster[user_name]['general_collection'].find_one(filter={'_id': 'unique'})['mailAddress'] for user_name in self.usernames)
+        return (self._cluster[user_name]['general'].find_one(filter={'_id': 'unique'})['emailAddress'] for user_name in self.usernames)
+
+    def mail_address_taken(self, mail_address: str) -> bool:
+        return mail_address in self.mail_addresses
 
     @property
     def usernames(self) -> List[str]:
@@ -92,7 +95,7 @@ class MongoDBClient:
     @property
     def general_collection(self) -> pymongo.collection.Collection:#
         """ {_id: 'unique',
-             maiLAddress: mail_address,
+             emaiLAddress: email_address,
              password: password,
              lastSession: {trainer: trainer,
                            nFacedItems: n_faced_items,
@@ -101,9 +104,10 @@ class MongoDBClient:
 
         return self.user_data_base['general']
 
-    def initialize_user(self, mail_address: str, password: str):
+    def initialize_user(self, email_address: str, password: str):
+        print(email_address, password)
         self.general_collection.insert_one({'_id': 'unique',
-                                            'mailAddress': mail_address,
+                                            'emailAddress': email_address,
                                             'password': password})
 
     def update_last_session_statistics(self, trainer: str, faced_items: int):

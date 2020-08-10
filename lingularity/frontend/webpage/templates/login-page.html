@@ -3,13 +3,13 @@
     <head>
         <meta charset="UTF-8">
         <title>Lingularity - Login</title>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login-page.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/authenticate-page.css') }}">
     </head>
 
     <body>
         <form class="box" action="" method="post">
             <h1>Login</h1>
-            <input type="text" name="usr" placeholder="Username">
+            <input type="text" autocomplete="false" name="usr" placeholder="Username">
             <input type="password" name="pwd" placeholder="Password">
             <input type="submit" name="" value="Login">
 

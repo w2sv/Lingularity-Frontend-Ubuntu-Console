@@ -2,10 +2,12 @@ from typing import *
 
 from flask import Flask, render_template, request
 
-from lingularity.database.__init__ import MongoDBClient
+from lingularity.database import MongoDBClient
+from lingularity.utils.credential_validation import invalid_password, invalid_mailadress, invalid_username
+
 
 app = Flask(__name__)
-mongo_client = MongoDBClient(user=None, language=None, credentials=MongoDBClient.Credentials.default())
+mongo_client = MongoDBClient(user=None, language=None)
 
 
 @app.route('/')
@@ -13,10 +15,10 @@ def index():
     return render_template('front-page.html')
 
 
-@app.route('/login', methods=['POST', 'GET'])
+@app.route('/authenticate', methods=['POST', 'GET'])
 def login():
     global mongo_client
-    html_file_path = 'login-page.html'
+    html_file_path = 'authenticate-page.html'
 
     if request.method == 'GET':
         return render_template(html_file_path)
@@ -46,20 +48,20 @@ def sign_up():
         error_code: Optional[int] = None
         mailadress, username, password = map(request.form.get, ['email', 'usr', 'pwd'])
 
-        if '@' not in mailadress or mailadress.strip().__len__() < 3:
+        if invalid_mailadress(mailadress):
             error_code = 1
         elif mailadress in mongo_client.mail_addresses:
             # TODO
             error_code = 2
-        elif not len(username.strip()):
+        elif invalid_username(username):
             error_code = 3
-        elif len(password) < 5:
+        elif invalid_password(password):
             error_code = 4
 
         if error_code is not None:
             return render_template(html_file_path, error_code=error_code)
         else:
-            mongo_client.initialize_user(mailadress, username, password)
+            mongo_client.initialize_user(mailadress, password)
             return render_template(html_file_path)
 
 

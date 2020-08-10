@@ -6,9 +6,8 @@ from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
-from lingularity.database import MongoDBClient
-from lingularity.utils.output_manipulation import clear_screen, erase_lines
-from lingularity.utils.input_resolution import resolve_input, recurse_on_invalid_input
+from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print
+from lingularity.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.utils.enum import ExtendedEnum
 
 
@@ -40,13 +39,13 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         clear_screen()
         eligible_languages = Backend.get_eligible_languages()
 
-        print('Eligible languages: '.upper())
+        print('Eligible languages: '.upper(), '\n')
         for _, values in groupby(eligible_languages, lambda x: x[0]):
             print(', '.join(list(values)))
 
         selection, train_english = resolve_input(input('\nSelect language: \n').title(), eligible_languages), False
         if selection is None:
-            return recurse_on_invalid_input(self._select_language)
+            return recurse_on_unresolvable_input(self._select_language)
 
         elif selection == 'English':
             eligible_languages.remove('English')
@@ -73,23 +72,21 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         clear_screen()
 
-        print('TRAINING MODES\n')
+        centered_print('TRAINING MODES\n')
         for i in range(3):
-            print(f'{Backend.TrainingMode.values()[i].title()}: ')
-            print('\t', explanations[i])
-        print('\nEnter desired mode:\t')
-        mode_selection = resolve_input(input().lower(), Backend.TrainingMode.values())
+            centered_print(f'{Backend.TrainingMode.values()[i].title()}: ')
+            centered_print('\t', explanations[i])
+        mode_selection = resolve_input(input('\nEnter desired mode: ').lower(), Backend.TrainingMode.values())
 
         if mode_selection is None:
-            return recurse_on_invalid_input(self._select_mode)
+            return recurse_on_unresolvable_input(self._select_mode)
         return mode_selection
 
     def _display_pre_training_instructions(self):
         clear_screen()
 
         print((f"Database comprises {self._backend.sentence_data_magnitude:,d} sentences.\n"
-        "Hit\n "
-        "\t- Enter to advance to next sentence\n"
+        "Hit Enter to advance to next sentence\n"
         "Enter \n"
             "\t- 'vocabulary' to append new entry to language specific vocabulary file\n" 
             "\t- 'exit' to terminate program\n"

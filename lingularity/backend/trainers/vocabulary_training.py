@@ -13,7 +13,7 @@ from lingularity.backend.types.token_maps import RawToken2SentenceIndices
 from lingularity.database.__init__ import MongoDBClient
 from lingularity.utils.strings import get_article_stripped_token
 from lingularity.utils.output_manipulation import clear_screen, erase_lines
-from lingularity.utils.input_resolution import resolve_input, recurse_on_invalid_input
+from lingularity.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.utils.enum import ExtendedEnum
 
 
@@ -92,7 +92,7 @@ class VocabularyTrainerBackend(TrainerBackend):
         language_selection = input('\nEnter desired language:\n').title()
         input_resolution = resolve_input(language_selection, eligible_languages)
         if input_resolution is None:
-            return recurse_on_invalid_input(self._select_language)
+            return recurse_on_unresolvable_input(self._select_language)
         return input_resolution
 
     def _get_vocable_entries(self) -> List[VocableEntry]:

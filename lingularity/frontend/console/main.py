@@ -2,12 +2,14 @@ from typing import Optional
 import os
 import time
 from getpass import getpass
+from functools import partial
 
 from lingularity.frontend.console.trainers import SentenceTranslationTrainerConsoleFrontend, VocableTrainerConsoleFrontend
 from lingularity.database import MongoDBClient
-from lingularity.utils.input_resolution import recurse_on_invalid_input, resolve_input
-from lingularity.utils.output_manipulation import clear_screen, erase_lines
+from lingularity.utils.input_resolution import recurse_on_unresolvable_input, recurse_on_invalid_input, resolve_input
+from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print, centered_input_indentation
 from lingularity.utils.datetime import is_today_or_yesterday, parse_date_from_string
+from lingularity.utils.signup_credential_validation import invalid_mailadress, invalid_password, invalid_username
 
 
 TRAINERS = {
@@ -18,20 +20,28 @@ TRAINERS = {
 
 def display_starting_screen():
     clear_screen()
+    os.system('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz')
+    time.sleep(0.1)
+
     banner = open(f'{os.path.dirname(os.path.abspath(__file__))}/resources/banner.txt', 'r').read()
-    print(banner)
-    print("							W2SV", '\n' * 1)
-    print("					         by Janek Zangenberg ", '\n' * 2)
+    centered_print('\n' * 2, banner, '\n' * 2)
+    centered_print("W2SV", '\n')
+    centered_print("by Janek Zangenberg ", '\n' * 2)
 
 
-def login() -> MongoDBClient:
+def authenticate() -> MongoDBClient:
     """ Returns:
             user instantiated client """
 
-    indentation = '				         '
+    indentation = centered_input_indentation('Enter user name: ')
+
     username = input(f'{indentation}Enter user name: ')
-    client = MongoDBClient(username, None)
+    if invalid_username(username):
+        return recurse_on_invalid_input(authenticate, f'{indentation}Empty username is not allowed', 2)
+
+    client = MongoDBClient(user=None, language=None)
     if username in client.usernames:
+        client.user = username
         password, password_input = client.query_password(), getpass(f'{indentation}Enter password: ')
         while password != password_input:
             erase_lines(1)
@@ -39,19 +49,42 @@ def login() -> MongoDBClient:
         erase_lines(2)
 
     else:
-        mail_address = input('Enter Emailaddress: ')
-        password = getpass(f'{indentation}Create password: ')
-        client.initialize_user(mail_address, password)
-        erase_lines(3)
+        erase_lines(1)
+        sign_up(username, client, indentation)
 
     return client
 
+def sign_up(user: str, client: MongoDBClient, indentation: str, email_address: Optional[str] = None):
+    _recurse_on_invalid_input = partial(recurse_on_invalid_input,
+                                        func=sign_up,
+                                        indentation=indentation)
+
+    centered_print('Create a new account\n')
+
+    email_query = 'Enter email address: '
+    if email_address is not None:
+        print(f'{indentation}{email_query}{email_address}')
+    else:
+        email_address = input(f'{indentation}{email_query}')
+        if invalid_mailadress(email_address):
+            return _recurse_on_invalid_input(message='Invalid email address', n_deletion_lines=4, args=[indentation, client])
+        """elif client.mail_address_taken(mail_address):
+            return _recurse_on_invalid_input(message='Email address taken')"""
+
+    password = getpass(f'{indentation}Create password: ')
+    if invalid_password(password):
+        return _recurse_on_invalid_input(message='Password must contain at least 5 characters', n_deletion_lines=5, args=[indentation, client, email_address])
+
+    client.user = user
+    client.initialize_user(email_address, password)
+    erase_lines(4)
+
 
 def extended_starting_screen(username: str):
-    print("         Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
-    print("Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,")
-    print("  e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
-    print('\t' * 6, f"What's up {username}?")
+    centered_print("         Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
+    centered_print("Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,")
+    centered_print("  e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
+    centered_print(f"What's up {username}?", '\n' * 2)
 
 
 def display_last_session_statistics(client: MongoDBClient):
@@ -68,9 +101,11 @@ def display_last_session_statistics(client: MongoDBClient):
 
 
 def select_training() -> Optional[str]:
-    indentation = '\t' * 2
-    print("\nWhat would you like to do?: ", end='')
-    training = resolve_input(input(f"{indentation}Translate (S)entences{indentation}Train (V)ocabulary{indentation}or (A)dd Vocabulary\n").lower(), list(TRAINERS.keys()) + ['add vocabulary'])
+    in_between_indentation = '\t' * 2
+    input_message = f"What would you like to do?: {in_between_indentation}Translate (S)entences{in_between_indentation}Train (V)ocabulary{in_between_indentation}or (A)dd Vocabulary\n"
+    indentation = centered_input_indentation(input_message)
+    training = resolve_input(input(indentation + input_message).lower(), list(TRAINERS.keys()) + ['add vocabulary'])
+
     if training is None:
         print("Couldn't resolve input")
         time.sleep(1)
@@ -91,7 +126,7 @@ def select_training() -> Optional[str]:
     [print(language) for language in languages]
     selection = resolve_input(input('\nSelect language: ').lower(), languages)
     if selection is None:
-        recurse_on_invalid_input(add_vocabulary)
+        return recurse_on_unresolvable_input(add_vocabulary)
     else:
         sentence_trainer = SentenceTranslationTrainerBackend()
         sentence_trainer._non_english_language = selection
@@ -109,7 +144,7 @@ def select_training() -> Optional[str]:
 def complete_initialization():
     clear_screen()
     display_starting_screen()
-    mongo_client = login()
+    mongo_client = authenticate()
     extended_starting_screen(username=mongo_client.user)
     try:
         display_last_session_statistics(client=mongo_client)
