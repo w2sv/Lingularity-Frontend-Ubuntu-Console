@@ -42,7 +42,7 @@ class BufferPrint:
             print(line)
 
 
-def _get_indentation(line_length: int) -> str:
+def get_indentation(line_length: int) -> str:
     terminal_columns = int(shutil.get_terminal_size().columns)
     return " " * ((terminal_columns - line_length) // 2)
 
@@ -54,17 +54,17 @@ def centered_print(*output: str, end='\n'):
                 print(output_element, end='')
             else:
                 distinct_lines = output_element.split('\n')
-                indentation = _get_indentation(line_length=max((len(line) for line in distinct_lines)))
+                indentation = get_indentation(line_length=max((len(line) for line in distinct_lines)))
 
                 indented_output_block = map(lambda line: indentation + line, distinct_lines)
                 for l in indented_output_block:
                     print(l)
 
         else:
-            print(_get_indentation(len(output_element)) + output_element, end=end if i == len(output) - 1 else '\n')
+            print(get_indentation(len(output_element)) + output_element, end=end if i == len(output) - 1 else '\n')
 
 
 def centered_input_indentation(input_message: str) -> str:
     INPUT_SPACE_LENGTH = 8
 
-    return _get_indentation(len(input_message + ' ' * INPUT_SPACE_LENGTH))
+    return get_indentation(len(input_message + ' ' * INPUT_SPACE_LENGTH))

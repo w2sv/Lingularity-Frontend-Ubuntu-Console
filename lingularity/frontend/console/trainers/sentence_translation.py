@@ -3,10 +3,11 @@ from typing import Optional, Tuple
 from itertools import groupby
 
 from pynput.keyboard import Controller as KeyboardController
+import numpy as np
 
 from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
-from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print
+from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print, get_indentation
 from lingularity.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.utils.enum import ExtendedEnum
 
@@ -71,15 +72,18 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             'just hit me with dem sentences brah')
 
         clear_screen()
+        indentation = get_indentation(line_length=len(explanations[np.argmax([len(ex) for ex in explanations])]))
 
-        centered_print('TRAINING MODES\n')
+        centered_print('\n' * 2, 'TRAINING MODES\n')
         for i in range(3):
-            centered_print(f'{Backend.TrainingMode.values()[i].title()}: ')
-            centered_print('\t', explanations[i])
+            print(f'{indentation}{Backend.TrainingMode.values()[i].title()}:')
+            print(f'{indentation}\t{explanations[i]}\n')
+
         mode_selection = resolve_input(input('\nEnter desired mode: ').lower(), Backend.TrainingMode.values())
 
         if mode_selection is None:
             return recurse_on_unresolvable_input(self._select_mode, deletion_lines=-1)
+        print()
         return mode_selection
 
     def _display_pre_training_instructions(self):
