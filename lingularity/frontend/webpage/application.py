@@ -3,7 +3,7 @@ from typing import *
 from flask import Flask, render_template, request
 
 from lingularity.database import MongoDBClient
-from lingularity.utils.credential_validation import invalid_password, invalid_mailadress, invalid_username
+from lingularity.utils.signup_credential_validation import invalid_password, invalid_mailadress, invalid_username
 
 
 app = Flask(__name__)
@@ -18,7 +18,7 @@ def index():
 @app.route('/authenticate', methods=['POST', 'GET'])
 def login():
     global mongo_client
-    html_file_path = 'authenticate-page.html'
+    html_file_path = 'login-page.html'
 
     if request.method == 'GET':
         return render_template(html_file_path)

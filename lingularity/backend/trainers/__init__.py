@@ -1,3 +1,3 @@
 from .base import TrainerBackend
 from .sentence_translation import SentenceTranslationTrainerBackend
-from .vocabulary_training import VocabularyTrainerBackend
+from .vocabulary_trainer import VocabularyTrainerBackend

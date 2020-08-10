@@ -98,6 +98,8 @@ class TrainerBackend(ABC):
         return np.asarray(split_data)
 
     def query_lets_go_translation(self) -> Optional[str]:
+        # TODO: fix preamptive shuffling based bug
+
         lets_go_occurrence_range = ((sentence_pair[0], i) for i, sentence_pair in
                                     enumerate(self._sentence_data[:int(len(self._sentence_data) * 0.3)]))
         for content, i in lets_go_occurrence_range:
