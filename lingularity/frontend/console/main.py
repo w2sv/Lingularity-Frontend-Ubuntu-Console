@@ -7,7 +7,7 @@ from functools import partial
 from lingularity.frontend.console.trainers import SentenceTranslationTrainerConsoleFrontend, VocableTrainerConsoleFrontend
 from lingularity.database import MongoDBClient
 from lingularity.utils.input_resolution import recurse_on_unresolvable_input, recurse_on_invalid_input, resolve_input
-from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print, centered_input_indentation
+from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print, centered_input_indentation, DEFAULT_VERTICAL_VIEW_OFFSET
 from lingularity.utils.datetime import is_today_or_yesterday, parse_date_from_string
 from lingularity.utils.signup_credential_validation import invalid_mailadress, invalid_password, invalid_username
 
@@ -24,7 +24,7 @@ def display_starting_screen():
     time.sleep(0.1)
 
     banner = open(f'{os.path.dirname(os.path.abspath(__file__))}/resources/banner.txt', 'r').read()
-    centered_print('\n' * 4, banner, '\n' * 2)
+    centered_print(DEFAULT_VERTICAL_VIEW_OFFSET * 2, banner, '\n' * 2)
     centered_print("W2SV", '\n')
     centered_print("by Janek Zangenberg ", '\n' * 2)
 

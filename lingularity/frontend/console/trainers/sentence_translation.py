@@ -3,11 +3,11 @@ from typing import Optional, Tuple
 from itertools import groupby
 
 from pynput.keyboard import Controller as KeyboardController
-import numpy as np
 
 from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
-from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print, get_indentation
+from lingularity.utils.output_manipulation import (clear_screen, erase_lines, centered_print,
+                                                   get_max_line_length_based_indentation, DEFAULT_VERTICAL_VIEW_OFFSET)
 from lingularity.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.utils.enum import ExtendedEnum
 
@@ -40,11 +40,14 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         clear_screen()
         eligible_languages = Backend.get_eligible_languages()
 
-        print('Eligible languages: '.upper(), '\n')
-        for _, values in groupby(eligible_languages, lambda x: x[0]):
-            print(', '.join(list(values)))
+        centered_print(f'{DEFAULT_VERTICAL_VIEW_OFFSET}Eligible languages:\n'.upper())
+        starting_letter_grouped_languages = [', '.join(list(v)) for _, v in groupby(eligible_languages, lambda x: x[0])]
+        indentation = get_max_line_length_based_indentation(starting_letter_grouped_languages)
 
-        selection, train_english = resolve_input(input('\nSelect language: \n').title(), eligible_languages), False
+        for language_group in starting_letter_grouped_languages:
+            print(indentation, language_group)
+
+        selection, train_english = resolve_input(input(f'{self.SELECTION_QUERY_OFFSET}Select language: ').title(), eligible_languages), False
         if selection is None:
             return recurse_on_unresolvable_input(self._select_language, deletion_lines=-1)
 
@@ -53,7 +56,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             reference_language_validity = False
 
             while not reference_language_validity:
-                reference_language = resolve_input(input('Enter desired reference language: \n').title(), eligible_languages)
+                reference_language = resolve_input(input('Enter desired reference language: \n\n').title(), eligible_languages)
                 if reference_language is None:
                     print("Couldn't resolve input")
                     time.sleep(1)
@@ -72,14 +75,14 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             'just hit me with dem sentences brah')
 
         clear_screen()
-        indentation = get_indentation(line_length=len(explanations[np.argmax([len(ex) for ex in explanations])]))
+        indentation = get_max_line_length_based_indentation(explanations)
 
-        centered_print('\n' * 2, 'TRAINING MODES\n')
+        centered_print(f'{DEFAULT_VERTICAL_VIEW_OFFSET}TRAINING MODES\n')
         for i in range(3):
             print(f'{indentation}{Backend.TrainingMode.values()[i].title()}:')
             print(f'{indentation}\t{explanations[i]}\n')
 
-        mode_selection = resolve_input(input('\nEnter desired mode: ').lower(), Backend.TrainingMode.values())
+        mode_selection = resolve_input(input(f'{self.SELECTION_QUERY_OFFSET}Enter desired mode: ').lower(), Backend.TrainingMode.values())
 
         if mode_selection is None:
             return recurse_on_unresolvable_input(self._select_mode, deletion_lines=-1)
@@ -89,7 +92,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     def _display_pre_training_instructions(self):
         clear_screen()
 
-        print((f"Database comprises {self._backend.sentence_data_magnitude:,d} sentences.\n"
+        print((f"{DEFAULT_VERTICAL_VIEW_OFFSET * 2}Database comprises {self._backend.sentence_data_magnitude:,d} sentences.\n"
         "Hit Enter to advance to next sentence\n"
         "Enter \n"
             "\t- 'vocabulary' to append new entry to language specific vocabulary file\n" 

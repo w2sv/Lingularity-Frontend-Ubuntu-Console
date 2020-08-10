@@ -13,6 +13,7 @@ from lingularity.utils.output_manipulation import BufferPrint
 
 class TrainerConsoleFrontend(ABC):
     plt.rcParams['toolbar'] = 'None'
+    SELECTION_QUERY_OFFSET = '\n\t'
 
     def __init__(self):
         self._backend: Optional[Type[TrainerBackend]] = None

@@ -1,10 +1,14 @@
-from typing import Deque
+from typing import Deque, Sequence
 import os
 import sys
 import platform
 from builtins import print as _print
 from collections import deque
 import shutil
+
+import numpy as np
+
+DEFAULT_VERTICAL_VIEW_OFFSET = '\n' * 2
 
 
 def clear_screen():
@@ -42,9 +46,13 @@ class BufferPrint:
             print(line)
 
 
-def get_indentation(line_length: int) -> str:
+def _get_indentation(line_length: int) -> str:
     terminal_columns = int(shutil.get_terminal_size().columns)
     return " " * ((terminal_columns - line_length) // 2)
+
+
+def get_max_line_length_based_indentation(output_block: Sequence[str]) -> str:
+    return _get_indentation(len(output_block[np.argmax([len(l) for l in output_block])]))
 
 
 def centered_print(*output: str, end='\n'):
@@ -54,17 +62,17 @@ def centered_print(*output: str, end='\n'):
                 print(output_element, end='')
             else:
                 distinct_lines = output_element.split('\n')
-                indentation = get_indentation(line_length=max((len(line) for line in distinct_lines)))
+                indentation = _get_indentation(line_length=max((len(line) for line in distinct_lines)))
 
                 indented_output_block = map(lambda line: indentation + line, distinct_lines)
                 for l in indented_output_block:
                     print(l)
 
         else:
-            print(get_indentation(len(output_element)) + output_element, end=end if i == len(output) - 1 else '\n')
+            print(_get_indentation(len(output_element)) + output_element, end=end if i == len(output) - 1 else '\n')
 
 
 def centered_input_indentation(input_message: str) -> str:
     INPUT_SPACE_LENGTH = 8
 
-    return get_indentation(len(input_message + ' ' * INPUT_SPACE_LENGTH))
+    return _get_indentation(len(input_message + ' ' * INPUT_SPACE_LENGTH))
