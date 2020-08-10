@@ -4,7 +4,7 @@ from itertools import groupby
 
 from pynput.keyboard import Controller as KeyboardController
 
-from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend
+from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
 from lingularity.database import MongoDBClient
 from lingularity.utils.output_manipulation import clear_screen, erase_lines
@@ -16,12 +16,12 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     def __init__(self):
         super().__init__()
 
-    def start(self):
         non_english_language, train_english = self._select_language()
         training_mode = self._select_mode()
 
-        self._backend = SentenceTranslationTrainerBackend(non_english_language, train_english, training_mode)
+        self._backend = Backend(non_english_language, train_english, training_mode)
 
+    def run(self):
         self._display_pre_training_instructions()
         self._run_training()
 
@@ -38,7 +38,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                 train_english: bool """
 
         clear_screen()
-        eligible_languages = self._backend.get_eligible_languages()
+        eligible_languages = Backend.get_eligible_languages()
 
         print('Eligible languages: '.upper())
         for _, values in groupby(eligible_languages, lambda x: x[0]):
@@ -75,10 +75,10 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         print('TRAINING MODES\n')
         for i in range(3):
-            print(f'{self._backend.TrainingMode.values()[i].title()}: ')
+            print(f'{Backend.TrainingMode.values()[i].title()}: ')
             print('\t', explanations[i])
         print('\nEnter desired mode:\t')
-        mode_selection = resolve_input(input().lower(), self._backend.TrainingMode.values())
+        mode_selection = resolve_input(input().lower(), Backend.TrainingMode.values())
 
         if mode_selection is None:
             return recurse_on_invalid_input(self._select_mode)

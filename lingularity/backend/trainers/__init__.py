@@ -37,7 +37,7 @@ class TrainerBackend(ABC):
         return os.listdir(self.BASE_LANGUAGE_DATA_PATH)
 
     def adopt_database_client(self, client: MongoDBClient):
-        client.set_language(self._non_english_language)
+        client.language = self._non_english_language
         self.mongodb_client = client
 
     @property

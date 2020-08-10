@@ -18,7 +18,7 @@ TRAINERS = {
 
 def display_starting_screen():
     clear_screen()
-    banner = open(os.path.join(os.getcwd(), 'resources/banner.txt'), 'r').read()
+    banner = open(f'{os.path.dirname(os.path.abspath(__file__))}/resources/banner.txt', 'r').read()
     print(banner)
     print("							W2SV", '\n' * 1)
     print("					         by Janek Zangenberg ", '\n' * 2)
@@ -29,9 +29,9 @@ def login() -> MongoDBClient:
             user instantiated client """
 
     indentation = '				         '
-    user_name = input(f'{indentation}Enter user name: ')
-    client = MongoDBClient(user_name, None, MongoDBClient.Credentials.default())
-    if user_name in client.user_names:
+    username = input(f'{indentation}Enter user name: ')
+    client = MongoDBClient(username, None)
+    if username in client.usernames:
         password, password_input = client.query_password(), getpass(f'{indentation}Enter password: ')
         while password != password_input:
             erase_lines(1)
@@ -39,9 +39,9 @@ def login() -> MongoDBClient:
         erase_lines(2)
 
     else:
+        mail_address = input('Enter Emailaddress: ')
         password = getpass(f'{indentation}Create password: ')
-        first_name = input(f"{indentation}What's your name? ")
-        client.initialize_user(password, first_name)
+        client.initialize_user(mail_address, password)
         erase_lines(3)
 
     return client
@@ -110,14 +110,14 @@ def complete_initialization():
     clear_screen()
     display_starting_screen()
     mongo_client = login()
-    extended_starting_screen(username=mongo_client.user_name)
+    extended_starting_screen(username=mongo_client.user)
     try:
         display_last_session_statistics(client=mongo_client)
     except KeyError:
         pass
 
     trainer_frontend = TRAINERS[select_training()]()
-    trainer_frontend.relay_database_client(mongo_client)
+    trainer_frontend.relay_database_client_to_backend(mongo_client)
     trainer_frontend.run()
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Iterator
 from dataclasses import dataclass
 
 import pymongo
@@ -27,62 +27,94 @@ class MongoDBClient:
         def client_endpoint(self, srv_endpoint: bool) -> str:
             return f'mongodb{"+srv" if srv_endpoint else ""}://{self.user}:{self.password}@{self.host}'
 
-    _cluster = None
+    _cluster: Optional[pymongo.MongoClient] = None
 
-    def __init__(self, user: Optional[str], language: Optional[str], credentials: Credentials):
+    def __init__(self, user: Optional[str], language: Optional[str]):
         self._user = user
         self._language = language
-        self._cluster = pymongo.MongoClient(credentials.client_endpoint(srv_endpoint=True), serverSelectionTimeoutMS=1_000)
+        self._cluster = pymongo.MongoClient(self.Credentials.default().client_endpoint(srv_endpoint=True), serverSelectionTimeoutMS=1_000)
 
-    def set_language(self, language: str):
-        assert self._language is None, 'language ought not to be reassigned'
-        self._language = language
-        return self
+    # -------------------
+    # Properties
+    # -------------------
+    @property
+    def user(self) -> str:
+        return self._user
 
-    def set_user(self, user: str):
-        assert self._user is None, 'user ought not to be reassigned'
-        self._user = user
-        return self
+    @user.setter
+    def user(self, value: str):
+        if self._language is not None:
+            raise AttributeError('user ought not to be reassigned')
+        self._user = value
 
     @property
-    def user_names(self) -> List[str]:
+    def language(self) -> str:
+        return self._language
+
+    @language.setter
+    def language(self, value: str):
+        if self._language is not None:
+            raise AttributeError('language ought not to be reassigned')
+        self._language = value
+
+    # --------------------
+    # .DataBaseRelated
+    # --------------------
+    @property
+    def mail_addresses(self) -> Iterator[str]:
+        return (self._cluster[user_name]['general_collection'].find_one(filter={'_id': 'unique'})['mailAddress'] for user_name in self.usernames)
+
+    @property
+    def usernames(self) -> List[str]:
+        """ equals databases """
+
         assert self._cluster is not None
-        return self._cluster.database_names()
-
-    @property
-    def mail_addresses(self) -> List[str]:
-        return []
+        return self._cluster.list_database_names()
 
     @property
     def user_data_base(self) -> pymongo.collection.Collection:
-        assert self._cluster is not None
         return self._cluster[self._user]
 
+    # -------------------
+    # Generic
+    # -------------------
+    def drop_all_databases(self):
+        for db in self._cluster.list_database_names():
+            self._cluster.drop_database(db)
+
     # ------------------
-    # General
+    # Collections
+    # ------------------
+
+    # ------------------
+    # .General
     # ------------------
     @property
-    def general_collection(self) -> pymongo.collection.Collection:
+    def general_collection(self) -> pymongo.collection.Collection:#
+        """ {_id: 'unique',
+             maiLAddress: mail_address,
+             password: password,
+             lastSession: {trainer: trainer,
+                           nFacedItems: n_faced_items,
+                           date: date,
+                           language: language}} """
+
         return self.user_data_base['general']
 
-    def initialize_user(self, mail_address: str, username: str, password: str):
+    def initialize_user(self, mail_address: str, password: str):
         self.general_collection.insert_one({'_id': 'unique',
                                             'mailAddress': mail_address,
-                                            'username': username,
                                             'password': password})
 
     def update_last_session_statistics(self, trainer: str, faced_items: int):
         self.general_collection.update_one(
             filter={'_id': 'unique'},
             update={'$set': {'lastSession': {'trainer': trainer,
-                                             'facedItems': faced_items,
+                                             'nFacedItems': faced_items,
                                              'date': datetag_today(),
                                              'language': self._language}}},
             upsert=True
         )
-
-    def user_name_password_combination_existent(self, username: str, password: str) -> bool:
-        return username in self.user_names and self._cluster[username]['general']
 
     def query_password(self) -> str:
         return self.general_collection.find_one({'_id': 'unique'})['password']
@@ -91,17 +123,23 @@ class MongoDBClient:
         return self.general_collection.find_one({'_id': 'unique'})['lastSession']
 
     # ------------------
-    # Vocabulary Collection
+    # .Vocabulary
     # ------------------
     @property
     def vocabulary_collection(self) -> pymongo.collection.Collection:
+        """ {'_id': language,
+             $target_language_token: {translation: translation
+                                      tf: times_faced
+                                      s: score
+                                      lfd: last_faced_date}} """
+
         return self.user_data_base['vocabulary']
 
     def insert_vocable(self, target_language_token: str, translation: str):
         self.vocabulary_collection.update_one(
             filter={'_id': self._language},
             update={'$set': {target_language_token: {
-                         'translation': translation,
+                         't': translation,
                          'tf': 0,
                          's': 0,
                          'lfd': None}
@@ -159,16 +197,19 @@ class MongoDBClient:
         return list(self.vocabulary_collection.find().distinct('_id'))
 
     # ------------------
-    # Training Chronic Collection
+    # .Training Chronic
     # ------------------
     @property
     def training_chronic_collection(self) -> pymongo.collection.Collection:
+        """ {_id: language,
+             $date: {$trainer_abbreviation: n_faced_items}} """
+
         return self.user_data_base['training_chronic']
 
-    def inject_session_statistics(self, trainer_abbreviation: str, faced_items: int):
+    def inject_session_statistics(self, trainer_abbreviation: str, n_faced_items: int):
         self.training_chronic_collection.update_one(
             filter={'_id': self._language},
-            update={'$inc': {f'{datetag_today()}.{trainer_abbreviation}': faced_items}},
+            update={'$inc': {f'{datetag_today()}.{trainer_abbreviation}': n_faced_items}},
             upsert=True
         )
 
@@ -177,14 +218,7 @@ class MongoDBClient:
         training_chronic.pop('_id')
         return training_chronic
 
-    # -------------------
-    # Generic
-    # -------------------
-    def drop_all_databases(self):
-        for db in self._cluster.list_database_names():
-            self._cluster.drop_database(db)
-
     
 if __name__ == '__main__':
-    client = MongoDBClient(user='janek_zangenberg', language='Italian', credentials=MongoDBClient.Credentials.default())
+    client = MongoDBClient(user='janek_zangenberg', language='Italian')
     client.update_last_session_statistics('s', 78)

@@ -22,7 +22,7 @@ def login():
         return render_template(html_file_path)
     else:
         user, password = map(request.form.get, ['usr', 'pwd'])
-        if user in mongo_client.user_names:
+        if user in mongo_client.usernames:
             mongo_client.set_user(user)
             if mongo_client.query_password() == password:
                 # TODO

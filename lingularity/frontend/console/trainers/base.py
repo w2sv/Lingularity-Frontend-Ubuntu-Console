@@ -20,7 +20,7 @@ class TrainerConsoleFrontend(ABC):
 
         self._buffer_print = BufferPrint()
 
-    def relay_database_client(self, client: MongoDBClient):
+    def relay_database_client_to_backend(self, client: MongoDBClient):
         self._backend.adopt_database_client(client)
 
     @abstractmethod

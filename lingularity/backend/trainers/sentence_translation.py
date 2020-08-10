@@ -8,7 +8,6 @@ import numpy as np
 from lingularity.backend.trainers import TrainerBackend
 from lingularity.backend.sentence_data_fetcher import SentenceDataFetcher
 from lingularity.backend.types.token_maps import Stem2SentenceIndices
-from lingularity.database import MongoDBClient
 from lingularity.utils.enum import ExtendedEnum
 
 
