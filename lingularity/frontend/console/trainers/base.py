@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Type
+from typing import Optional, Tuple
 from abc import ABC, abstractmethod
 import time
 

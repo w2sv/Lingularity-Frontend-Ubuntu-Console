@@ -103,7 +103,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._lets_go_output()
 
     # -----------------
-    # TRAINING LOOP
+    # Training
     # -----------------
     def _run_training(self):
         class Option(ExtendedEnum):
@@ -128,11 +128,12 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         while True:
             if not suspend_resolution:
                 try:
-                    reference_sentence, translation = self._backend.convert_names_if_possible(*self._backend.get_training_item())
-                except (ValueError, IndexError, StopIteration) as e:
-                    if type(e) is StopIteration:
+                    sentence_pair = self._backend.get_training_item()
+                    if sentence_pair is None:
                         print('Sentence data file depleted')
                         return
+                    reference_sentence, translation = self._backend.convert_names_if_possible(*sentence_pair)
+                except (ValueError, IndexError):
                     continue
 
 

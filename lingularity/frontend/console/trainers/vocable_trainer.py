@@ -26,14 +26,6 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         self._backend = VocableTrainerBackend(non_english_language, train_english, mongodb_client)
 
-    def run(self):
-        self._display_new_vocabulary()
-        self._display_pre_training_instructions()
-        self._run_training()
-        self._backend.insert_session_statistics_into_database(self._n_trained_items)
-        self._display_pie_chart()
-        self._plot_training_history()
-
     def _select_language(self) -> Tuple[str, bool]:
         if not (eligible_languages:= self._temp_mongodb_client.get_vocabulary_possessing_languages()):
             self._start_sentence_translation_trainer()
@@ -58,6 +50,20 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         clear_screen()
         return SentenceTranslationTrainerConsoleFrontend(self._backend.mongodb_client).run()
 
+    # -----------------
+    # Run
+    # -----------------
+    def run(self):
+        self._display_new_vocabulary()
+        self._display_pre_training_instructions()
+        self._run_training()
+        self._backend.insert_session_statistics_into_database(self._n_trained_items)
+        self._display_pie_chart()
+        self._plot_training_history()
+
+    # -----------------
+    # Pre training
+    # -----------------
     def _display_new_vocabulary(self):
         clear_screen()
         new_vocabulary = self._backend.get_new_vocable_entries()
@@ -80,7 +86,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._lets_go_output()
 
     # ------------------
-    # TRAINING
+    # Training
     # ------------------
     def _run_training(self):
         class Option(ExtendedEnum):
@@ -90,8 +96,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         previous_entry: Optional[VocableEntry] = None
 
-        while self._n_trained_items < self._backend.n_imperfect_vocable_entries:
-            entry = self._backend.get_training_item()
+        while (entry := self._backend.get_training_item()) is not None:
             print(f'{entry.display_token} = ', end='')
 
             try:
@@ -152,6 +157,9 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             sleep(1)
             return 2
 
+    # -----------------
+    # Post training
+    # -----------------
     @property
     def correctness_percentage(self) -> float:
         return self._n_correct_responses / self._n_trained_items * 100

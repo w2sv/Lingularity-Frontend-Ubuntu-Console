@@ -85,12 +85,12 @@ class VocableTrainerBackend(TrainerBackend):
 
         self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._vocable_entries)
 
-    # ---------------
-    # Initialization
-    # ---------------
     def _get_vocable_entries(self) -> List[VocableEntry]:
         return list(starmap(VocableEntry, zip(self.mongodb_client.query_vocabulary_data(), repeat(self._train_english))))
 
+    # ---------------
+    # Pre training
+    # ---------------
     @property
     def n_imperfect_vocable_entries(self) -> int:
         return len(self._vocable_entries)

@@ -120,13 +120,17 @@ class TrainerBackend(ABC):
                 return unshuffled_sentence_data[i][1]
         return None
 
-    def get_training_item(self) -> Any:
+    def get_training_item(self) -> Optional[Any]:
         """
-            Throws:
-                StopIteration on depleted iterator """
+            Returns:
+                 None in case of depleted iterator """
+
         assert self._item_iterator is not None
 
-        return next(self._item_iterator)
+        try:
+            return next(self._item_iterator)
+        except StopIteration:
+            return None
 
     def accommodate_names(self, sentence: str) -> str:
         """ Assertion of self._convertible name being True to be made before invocation """

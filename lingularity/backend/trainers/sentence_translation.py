@@ -1,4 +1,4 @@
-from typing import List, Tuple, Iterator, Optional
+from typing import List, Tuple, Iterator
 from itertools import chain
 from bisect import insort
 from operator import ge, le
@@ -33,8 +33,13 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 		insort(_eligible_languages, 'English')
 		return _eligible_languages
 
+	def convert_names_if_possible(self, reference_sentence: str, translation: str) -> Tuple[str, str]:
+		if self.names_convertible and any(default_name in reference_sentence for default_name in self.DEFAULT_NAMES):
+			return tuple(map(self.accommodate_names, [reference_sentence, translation]))  # type: ignore
+		return reference_sentence, translation
+
 	# -----------------
-	# .MODE
+	# .Mode
 	# -----------------
 	class TrainingMode(ExtendedEnum):
 		VocabularyAcquisition = 'vocabulary acquisition'
@@ -58,8 +63,3 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 			indices = get_limit_corresponding_sentence_indices(50, 'min')
 		print('Getting corresponding sentences...')
 		return sentence_data[indices]
-
-	def convert_names_if_possible(self, reference_sentence: str, translation: str) -> Tuple[str, str]:
-		if self.names_convertible and any(default_name in reference_sentence for default_name in self.DEFAULT_NAMES):
-			return tuple(map(self.accommodate_names, [reference_sentence, translation]))  # type: ignore
-		return reference_sentence, translation
