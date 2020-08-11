@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Iterator, Optional
 from itertools import chain
 from bisect import insort
 from operator import ge, le
@@ -21,14 +21,11 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 		if self._non_english_language not in self.locally_available_languages:
 			self._sentence_data_fetcher.fetch_sentence_data_file(self._non_english_language)
 
-		self._sentence_data = self._parse_sentence_data()
-		self._filter_sentence_data_mode_accordingly(training_mode)
-		np.random.shuffle(self._sentence_data)
-		self._item_iterator = iter(self._sentence_data)
+		sentence_data, self.lets_go_translation = self._process_sentence_data_file()
 
-	@property
-	def sentence_data_magnitude(self) -> int:
-		return len(self._sentence_data)
+		filtered_sentence_data = self._filter_sentence_data_mode_accordingly(sentence_data, training_mode)
+		self.sentence_data_magnitude = len(filtered_sentence_data)
+		self._item_iterator: Iterator[Tuple[str, str]] = self._get_item_iterator(filtered_sentence_data)
 
 	@staticmethod
 	def get_eligible_languages() -> List[str]:
@@ -44,11 +41,11 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 		Lowkey = 'lowkey'
 		Random = 'random'
 
-	def _filter_sentence_data_mode_accordingly(self, mode: str):
+	def _filter_sentence_data_mode_accordingly(self, sentence_data: np.ndarray, mode: str) -> np.ndarray:
 		if mode == self.TrainingMode.Random.value:
-			return
+			return sentence_data
 
-		stems_2_indices = Stem2SentenceIndices.from_sentence_data(self._sentence_data, self.stemmer)
+		stems_2_indices = Stem2SentenceIndices.from_sentence_data(sentence_data, self.stemmer)
 
 		def get_limit_corresponding_sentence_indices(occurrence_limit: int, filter_mode: str) -> List[int]:
 			assert filter_mode in ['max', 'min']
@@ -60,7 +57,7 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 		else:
 			indices = get_limit_corresponding_sentence_indices(50, 'min')
 		print('Getting corresponding sentences...')
-		self._sentence_data = self._sentence_data[indices]
+		return sentence_data[indices]
 
 	def convert_names_if_possible(self, reference_sentence: str, translation: str) -> Tuple[str, str]:
 		if self.names_convertible and any(default_name in reference_sentence for default_name in self.DEFAULT_NAMES):

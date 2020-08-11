@@ -75,7 +75,7 @@ class Token2Indices(CustomDict, ABC):
 
 class RawToken2SentenceIndices(Token2Indices):
     """ dict with
-            keys: distinct lowercase delimiter split punctuation stripped foreign language vocable_entries tokens
+            keys: distinct lowercase delimiter split punctuation stripped foreign language _vocable_entries tokens
                 excluding numbers
             values: lists of sentence indices in which occurring """
 

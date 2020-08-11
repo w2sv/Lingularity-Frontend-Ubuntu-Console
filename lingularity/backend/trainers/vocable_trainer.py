@@ -1,5 +1,6 @@
 from typing import List, Dict, Optional, Any, Iterator
 from collections import Counter
+from itertools import repeat, starmap
 
 import unidecode
 import numpy as np
@@ -11,69 +12,91 @@ from lingularity.utils.strings import get_article_stripped_token
 from lingularity.utils.enum import ExtendedEnum
 
 
-class VocabularyTrainerBackend(TrainerBackend):
+class VocableEntry:
+    """ wrapper for vocable entry dictionary of structure
+            {foreign_token: {tf: int},
+                            {lfd: str},
+                            {s: float},
+                            {t: str}}
 
-    class VocableEntry:
-        RawType = Dict[str, Dict[str, Any]]
-        REFERENCE_TO_FOREIGN: Optional[bool] = None
+        returned by mongodb, facilitating access to attributes, as well as
+        providing additional convenience functionality """
 
-        def __init__(self, entry: RawType):
-            self._entry = entry
+    RawType = Dict[str, Dict[str, Any]]
 
-        @property
-        def token(self) -> str:
-            return next(iter(self._entry.keys()))
+    def __init__(self, entry: RawType, reference_to_foreign: bool):
+        self._entry = entry
+        self._reference_to_foreign = reference_to_foreign
 
-        @property
-        def display_token(self) -> str:
-            return self.translation if not self.REFERENCE_TO_FOREIGN else self.token
+    # -----------------
+    # Token
+    # -----------------
+    @property
+    def token(self) -> str:
+        return next(iter(self._entry.keys()))
 
-        @property
-        def translation(self) -> str:
-            return self._entry[self.token]['t']
+    @property
+    def display_token(self) -> str:
+        return self.translation if not self._reference_to_foreign else self.token
 
-        @property
-        def display_translation(self) -> str:
-            return self.translation if self.REFERENCE_TO_FOREIGN else self.token
+    # -----------------
+    # Translation
+    # -----------------
+    @property
+    def translation(self) -> str:
+        return self._entry[self.token]['t']
 
-        @property
-        def last_faced_date(self) -> Optional[str]:
-            return self._entry[self.token]['lfd']
+    @property
+    def display_translation(self) -> str:
+        return self.translation if self._reference_to_foreign else self.token
 
-        @property
-        def is_new(self) -> bool:
-            return self.last_faced_date is None
+    # -----------------
+    # Additional properties
+    # -----------------
+    @property
+    def last_faced_date(self) -> Optional[str]:
+        return self._entry[self.token]['lfd']
 
-        @property
-        def line_repr(self) -> str:
-            return ' - '.join([self.token, self.translation])
+    @property
+    def is_new(self) -> bool:
+        return self.last_faced_date is None
 
-        def __str__(self):
-            return str(self._entry)
+    @property
+    def line_repr(self) -> str:
+        """ i.e. f'{token} - {translation}' """
 
+        return ' - '.join([self.token, self.translation])
+
+    # -----------------
+    # Dunder(s)
+    # -----------------
+    def __str__(self):
+        return str(self._entry)
+
+
+class VocableTrainerBackend(TrainerBackend):
     def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
         super().__init__(non_english_language, train_english, mongodb_client)
 
-        self._sentence_data = self._parse_sentence_data()
-        self._token_2_rowinds = RawToken2SentenceIndices(self._sentence_data, language=self.language)
-        self.vocable_entries: List[VocabularyTrainerBackend.VocableEntry] = self._get_vocable_entries()
+        self._sentence_data, self.lets_go_translation = self._process_sentence_data_file()
 
-        np.random.shuffle(self.vocable_entries)
-        self._item_iterator: Iterator[VocabularyTrainerBackend.VocableEntry] = iter(self.vocable_entries)
+        self._token_2_rowinds = RawToken2SentenceIndices(self._sentence_data, language=self.language)
+        self._vocable_entries: List[VocableEntry] = self._get_vocable_entries()
+
+        self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._vocable_entries)
 
     # ---------------
     # Initialization
     # ---------------
     def _get_vocable_entries(self) -> List[VocableEntry]:
-        self.VocableEntry.REFERENCE_TO_FOREIGN = self._train_english
-        return list(map(self.VocableEntry, self.mongodb_client.query_vocabulary_data()))
+        return list(starmap(VocableEntry, zip(self.mongodb_client.query_vocabulary_data(), repeat(self._train_english))))
 
     @property
     def n_imperfect_vocable_entries(self) -> int:
-        return len(self.vocable_entries)
+        return len(self._vocable_entries)
 
     def get_new_vocable_entries(self) -> List[VocableEntry]:
-        return list(filter(lambda entry: entry.is_new, self.vocable_entries))
+        return list(filter(lambda entry: entry.is_new, self._vocable_entries))
 
     # ---------------
     # Evaluation

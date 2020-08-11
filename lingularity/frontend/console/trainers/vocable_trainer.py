@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.frontend.console.trainers import TrainerConsoleFrontend, SentenceTranslationTrainerConsoleFrontend
-from lingularity.backend.trainers.vocabulary_trainer import VocabularyTrainerBackend
+from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend, VocableEntry
 from lingularity.database import MongoDBClient
 from lingularity.utils.output_manipulation import clear_screen, erase_lines
 from lingularity.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
@@ -24,7 +24,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         non_english_language, train_english = self._select_language()
         del self._temp_mongodb_client
 
-        self._backend = VocabularyTrainerBackend(non_english_language, train_english, mongodb_client)
+        self._backend = VocableTrainerBackend(non_english_language, train_english, mongodb_client)
 
     def run(self):
         self._display_new_vocabulary()
@@ -56,7 +56,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         print('Initiating SentenceTranslation TrainerBackend...')
         sleep(2)
         clear_screen()
-        return SentenceTranslationTrainerConsoleFrontend.with_database_client(self._backend.mongodb_client).run()
+        return SentenceTranslationTrainerConsoleFrontend(self._backend.mongodb_client).run()
 
     def _display_new_vocabulary(self):
         clear_screen()
@@ -77,10 +77,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 "\t- '#add' to add a new vocable.\n"
                 "\t- '#exit' to terminate the program.\n\n"))
 
-        if (lets_go_translation := self._backend.query_lets_go_translation()) is not None:
-            print(lets_go_translation, '\n')
-        else:
-            print("Let's go!", '\n')
+        self._lets_go_output()
 
     # ------------------
     # TRAINING
@@ -91,7 +88,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             Vocable = '#add'
             Exit = '#exit'
 
-        previous_entry: Optional[VocabularyTrainerBackend.VocableEntry] = None
+        previous_entry: Optional[VocableEntry] = None
 
         while self._n_trained_items < self._backend.n_imperfect_vocable_entries:
             entry = self._backend.get_training_item()
@@ -139,7 +136,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
             previous_entry = entry
 
-    def _alter_entry_translation(self, entry: Optional[VocabularyTrainerBackend.VocableEntry]) -> int:
+    def _alter_entry_translation(self, entry: Optional[VocableEntry]) -> int:
         """ Returns:
                 number of printed lines"""
 

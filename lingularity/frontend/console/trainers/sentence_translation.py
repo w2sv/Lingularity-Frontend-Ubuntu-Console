@@ -100,8 +100,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             "\t- 'exit' to terminate program\n"
             "\t- 'alter' in order to alter the most recently added vocable entry\n"))
 
-        lets_go_translation = self._backend.query_lets_go_translation()
-        print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')
+        self._lets_go_output()
 
     # -----------------
     # TRAINING LOOP

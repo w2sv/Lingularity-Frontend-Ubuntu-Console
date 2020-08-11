@@ -42,6 +42,12 @@ class TrainerConsoleFrontend(ABC):
     def _display_pre_training_instructions(self):
         pass
 
+    def _lets_go_output(self):
+        if self._backend.lets_go_translation is not None:
+            print(self._backend.lets_go_translation, '\n')
+        else:
+            print("Let's go!", '\n')
+
     def _plot_training_history(self):
         plt.style.use('dark_background')
 
@@ -72,7 +78,7 @@ class TrainerConsoleFrontend(ABC):
     # -----------------
     def _insert_vocable_into_database(self) -> Tuple[Optional[str], int]:
         """ Returns:
-                inserted vocable entry, None in case of invalid input
+                inserted vocable entry line repr, None in case of invalid input
                  number of printed lines """
 
         assert self._backend is not None and self._backend.mongodb_client is not None

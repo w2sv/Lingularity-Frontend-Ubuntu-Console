@@ -1,4 +1,4 @@
-from typing import List, Optional, Iterator, Any
+from typing import List, Optional, Iterator, Any, Sequence, Tuple
 import os
 from abc import ABC
 from functools import cached_property
@@ -31,9 +31,14 @@ class TrainerBackend(ABC):
 
         mongodb_client.language = non_english_language
         self.mongodb_client = mongodb_client
-        self._sentence_data: np.ndarray = None
 
         self._item_iterator: Optional[Iterator[Any]] = None
+        self.lets_go_translation: Optional[str] = None
+
+    @staticmethod
+    def _get_item_iterator(item_list: Sequence[Any]) -> Iterator[Any]:
+        np.random.shuffle(item_list)
+        return iter(item_list)
 
     @property
     def locally_available_languages(self) -> List[str]:
@@ -84,6 +89,10 @@ class TrainerBackend(ABC):
     # ----------------
     # Methods
     # ----------------
+    def _process_sentence_data_file(self) -> Tuple[np.ndarray, Optional[str]]:
+        sentence_data = self._parse_sentence_data()
+        return sentence_data, self._query_lets_go_translation(sentence_data)
+
     def _parse_sentence_data(self) -> np.ndarray:
         data = open(self.sentence_file_path, 'r', encoding='utf-8').readlines()
         split_data = [i.split('\t') for i in data]
@@ -103,14 +112,12 @@ class TrainerBackend(ABC):
 
         return np.asarray(split_data)
 
-    def query_lets_go_translation(self) -> Optional[str]:
-        # TODO: fix preamptive shuffling based bug
-
-        lets_go_occurrence_range = ((sentence_pair[0], i) for i, sentence_pair in
-                                    enumerate(self._sentence_data[:int(len(self._sentence_data) * 0.3)]))
-        for content, i in lets_go_occurrence_range:
+    @staticmethod
+    def _query_lets_go_translation(unshuffled_sentence_data: np.ndarray) -> Optional[str]:
+        for content, i in ((sentence_pair[0], i) for i, sentence_pair in
+                                    enumerate(unshuffled_sentence_data[:int(len(unshuffled_sentence_data) * 0.3)])):
             if content == "Let's go!":
-                return self._sentence_data[i][1]
+                return unshuffled_sentence_data[i][1]
         return None
 
     def get_training_item(self) -> Any:
