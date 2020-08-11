@@ -7,13 +7,13 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 from lingularity.backend.trainers import TrainerBackend
-from lingularity.database import MongoDBClient
 from lingularity.utils.output_manipulation import BufferPrint
+from lingularity.utils.input_resolution import resolve_input
 
 
 class TrainerConsoleFrontend(ABC):
     plt.rcParams['toolbar'] = 'None'
-    SELECTION_QUERY_OFFSET = '\n\t'
+    SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'
 
     def __init__(self):
         self._backend: Optional[TrainerBackend] = None
@@ -21,21 +21,18 @@ class TrainerConsoleFrontend(ABC):
 
         self._buffer_print = BufferPrint()
 
-    def relay_database_client_to_backend(self, client: MongoDBClient):
-        assert self._backend is not None, 'backend not initialized'
-
-        self._backend.adopt_database_client(client)
-
+    # -----------------
+    # Driver
+    # -----------------
     @abstractmethod
     def run(self):
         pass
 
+    # -----------------
+    # Pre Training
+    # -----------------
     @abstractmethod
     def _select_language(self) -> Tuple[str, bool]:
-        pass
-
-    @abstractmethod
-    def _run_training(self):
         pass
 
     @abstractmethod
@@ -48,6 +45,37 @@ class TrainerConsoleFrontend(ABC):
         else:
             print("Let's go!", '\n')
 
+    # -----------------
+    # Training
+    # -----------------
+    @abstractmethod
+    def _run_training(self):
+        pass
+
+    def insert_vocable_into_database(self) -> Tuple[Optional[str], int]:
+        """ Returns:
+                inserted vocable entry line repr, None in case of invalid input
+                 number of printed lines """
+
+        assert self._backend is not None
+        vocable = input(f'Enter {self._backend.language} word/phrase: ')
+
+        if resolve_input(vocable, ['#exit']) == '#exit':
+            raise SystemExit
+
+        meanings = input('Enter meaning(s): ')
+
+        if not all([vocable, meanings]):
+            print("Input field left unfilled")
+            time.sleep(1)
+            return None, 3
+
+        self._backend.mongodb_client.insert_vocable(vocable, meanings)
+        return ' - '.join([vocable, meanings]), 2
+
+    # -----------------
+    # Post Training
+    # -----------------
     def _plot_training_history(self):
         plt.style.use('dark_background')
 
@@ -74,27 +102,7 @@ class TrainerConsoleFrontend(ABC):
         plt.show()
 
     # -----------------
-    # .Database related
-    # -----------------
-    def _insert_vocable_into_database(self) -> Tuple[Optional[str], int]:
-        """ Returns:
-                inserted vocable entry line repr, None in case of invalid input
-                 number of printed lines """
-
-        assert self._backend is not None and self._backend.mongodb_client is not None
-        vocable = input(f'Enter {self._backend.language} word/phrase: ')
-        meanings = input('Enter meaning(s): ')
-
-        if not all([vocable, meanings]):
-            print("Input field left unfilled")
-            time.sleep(1)
-            return None, 3
-
-        self._backend.mongodb_client.insert_vocable(vocable, meanings)
-        return ' - '.join([vocable, meanings]), 2
-
-    # -----------------
-    # Dunders
+    # Dunder(s)
     # -----------------
     def __str__(self):
         return self.__class__.__name__[0].lower()

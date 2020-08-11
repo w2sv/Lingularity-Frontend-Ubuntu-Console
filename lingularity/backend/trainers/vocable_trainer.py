@@ -75,15 +75,16 @@ class VocableEntry:
 
 
 class VocableTrainerBackend(TrainerBackend):
-    def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
+    def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient, vocable_expansion_mode=False):
         super().__init__(non_english_language, train_english, mongodb_client)
 
-        self._sentence_data, self.lets_go_translation = self._process_sentence_data_file()
+        if not vocable_expansion_mode:
+            self._sentence_data, self.lets_go_translation = self._process_sentence_data_file()
 
-        self._token_2_rowinds = RawToken2SentenceIndices(self._sentence_data, language=self.language)
-        self._vocable_entries: List[VocableEntry] = self._get_vocable_entries()
+            self._token_2_rowinds = RawToken2SentenceIndices(self._sentence_data, language=self.language)
+            self._vocable_entries: List[VocableEntry] = self._get_vocable_entries()
 
-        self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._vocable_entries)
+            self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._vocable_entries)
 
     def _get_vocable_entries(self) -> List[VocableEntry]:
         return list(starmap(VocableEntry, zip(self.mongodb_client.query_vocabulary_data(), repeat(self._train_english))))

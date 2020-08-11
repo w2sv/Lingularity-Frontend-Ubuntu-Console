@@ -13,6 +13,7 @@ from lingularity.utils.output_manipulation import clear_screen, erase_lines, cen
 from lingularity.utils.datetime import is_today_or_yesterday, parse_date_from_string
 from lingularity.utils.signup_credential_validation import invalid_mailadress, invalid_password, invalid_username
 
+
 def display_starting_screen():
     clear_screen()
     os.system('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz && wmctrl -r :ACTIVE: -N "Lingularity - Acquire Languages the Litboy Way"')
@@ -23,7 +24,8 @@ def display_starting_screen():
     centered_print("W2SV", '\n')
 
 try:
-    from lingularity.frontend.console.trainers import SentenceTranslationTrainerConsoleFrontend, VocableTrainerConsoleFrontend
+    from lingularity.frontend.console.trainers import (SentenceTranslationTrainerConsoleFrontend,
+                                                       VocableTrainerConsoleFrontend, TrainerConsoleFrontend)
 except requests.exceptions.ConnectionError:
     display_starting_screen()
     centered_print(
@@ -32,12 +34,6 @@ except requests.exceptions.ConnectionError:
     time.sleep(5)
     cursor.show()
     sys.exit(0)
-
-
-TRAINERS = {
-    'sentence translation': SentenceTranslationTrainerConsoleFrontend,
-    'vocabulary trainer': VocableTrainerConsoleFrontend
-}
 
 
 def authenticate() -> MongoDBClient:
@@ -115,7 +111,7 @@ def select_training() -> Optional[str]:
     in_between_indentation = '\t' * 2
     input_message = f"What would you like to do?: {in_between_indentation}Translate (S)entences{in_between_indentation}Train (V)ocabulary{in_between_indentation}or (A)dd Vocabulary\n"
     centered_print(input_message, ' ', end='')
-    training = resolve_input(input().lower(), list(TRAINERS.keys()) + ['add vocabulary'])
+    training = resolve_input(input().lower(), list(ELIGIBLE_ACTIONS.keys()))
 
     if training is None:
         recurse_on_unresolvable_input(select_training, 4)
@@ -126,43 +122,42 @@ def select_training() -> Optional[str]:
     return training
 
 
-"""def add_vocabulary():
-    # TODO: reincorporate
+def add_vocabulary(mongodb_client: MongoDBClient):
     clear_screen()
-    languages = [language.lower() for language in os.listdir(TrainerBackend.BASE_LANGUAGE_DATA_PATH)]
-    print('EXTENSIBLE VOCABULARY FILES: ')
-    [print(language) for language in languages]
-    selection = resolve_input(input('\nSelect language: ').lower(), languages)
-    if selection is None:
-        return recurse_on_unresolvable_input(add_vocabulary)
-    else:
-        sentence_trainer = SentenceTranslationTrainerBackend()
-        sentence_trainer._non_english_language = selection
-        while True:
-            sentence_trainer._append_2_vocabulary_file()
-            try:
-                procedure_resolution = resolve_input(input("Press Enter to continue adding, otherwise enter 'exit'\t"), ['exit', 'ZUNGENUNMUTSERLABUNG'])
-                if procedure_resolution == 'exit':
-                    return complete_initialization()
-                erase_previous_line()
-            except SyntaxError:
-                pass"""
+
+    vocable_trainer_frontend = VocableTrainerConsoleFrontend(mongodb_client, vocable_expansion_mode=True)
+
+    while True:
+        try:
+            appended_line, lines_to_be_deleted = vocable_trainer_frontend.insert_vocable_into_database()
+            erase_lines(lines_to_be_deleted)
+            print(f'Added {appended_line}')
+        except (SyntaxError, SystemExit) as e:
+            if type(e) is SystemExit:
+                return complete_initialization()
+            pass
+
+
+ELIGIBLE_ACTIONS = {
+    'sentence translation': SentenceTranslationTrainerConsoleFrontend,
+    'vocabulary trainer': VocableTrainerConsoleFrontend,
+    'add vocabulary': add_vocabulary
+}
 
 
 def complete_initialization():
-    """clear_screen()
+    clear_screen()
     display_starting_screen()
     mongo_client = authenticate()
     extended_starting_screen(username=mongo_client.user)
     try:
         display_last_session_statistics(client=mongo_client)
     except KeyError:
-        pass"""
+        pass
 
-    mongo_client = MongoDBClient('janek', None)
-
-    trainer_frontend = TRAINERS[select_training()](mongo_client)
-    trainer_frontend.run()
+    action_executor = ELIGIBLE_ACTIONS[select_training()](mongo_client)
+    if issubclass(action_executor.__class__, TrainerConsoleFrontend):
+        action_executor.run()
 
 if __name__ == '__main__':
     complete_initialization()

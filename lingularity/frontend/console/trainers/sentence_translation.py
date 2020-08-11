@@ -48,7 +48,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         for language_group in starting_letter_grouped_languages:
             print(indentation, language_group)
 
-        selection, train_english = resolve_input(input(f'{self.SELECTION_QUERY_OFFSET}Select language: ').title(), eligible_languages), False
+        selection, train_english = resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Select language: ').title(), eligible_languages), False
         if selection is None:
             return recurse_on_unresolvable_input(self._select_language, deletion_lines=-1)
 
@@ -83,7 +83,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             print(f'{indentation}{Backend.TrainingMode.values()[i].title()}:')
             print(f'{indentation}\t{explanations[i]}\n')
 
-        mode_selection = resolve_input(input(f'{self.SELECTION_QUERY_OFFSET}Enter desired mode: ').lower(), Backend.TrainingMode.values())
+        mode_selection = resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: ').lower(), Backend.TrainingMode.values())
 
         if mode_selection is None:
             return recurse_on_unresolvable_input(self._select_mode, deletion_lines=-1)
@@ -144,7 +144,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                 response = resolve_input(input("\t\tpending... ").lower(), Option.values())
                 if response is not None:
                     if response == Option.AppendVocabulary.value:
-                        most_recent_vocable_entry, n_printed_lines = self._insert_vocable_into_database()
+                        most_recent_vocable_entry, n_printed_lines = self.insert_vocable_into_database()
                         maintain_resolution_suspension_and_erase_lines(n_lines=n_printed_lines+1)
 
                     elif response == Option.AlterLatestVocableEntry.value:

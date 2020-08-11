@@ -15,7 +15,7 @@ from lingularity.utils.enum import ExtendedEnum
 class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     N_RELATED_SENTENCES_2_BE_DISPLAYED = 2
 
-    def __init__(self, mongodb_client: MongoDBClient):
+    def __init__(self, mongodb_client: MongoDBClient, vocable_expansion_mode=False):
         super().__init__()
 
         self._n_correct_responses = 0
@@ -24,7 +24,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         non_english_language, train_english = self._select_language()
         del self._temp_mongodb_client
 
-        self._backend = VocableTrainerBackend(non_english_language, train_english, mongodb_client)
+        self._backend = VocableTrainerBackend(non_english_language, train_english, mongodb_client, vocable_expansion_mode)
 
     def _select_language(self) -> Tuple[str, bool]:
         if not (eligible_languages:= self._temp_mongodb_client.get_vocabulary_possessing_languages()):
@@ -110,7 +110,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 erase_lines(n_printed_lines)
                 continue
             elif response == Option.Vocable.value:
-                _, n_printed_lines = self._insert_vocable_into_database()
+                _, n_printed_lines = self.insert_vocable_into_database()
                 erase_lines(n_printed_lines + 1)
                 continue
             elif response == Option.Exit.value:
