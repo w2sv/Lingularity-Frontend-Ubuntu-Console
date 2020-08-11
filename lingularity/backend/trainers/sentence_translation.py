@@ -6,6 +6,7 @@ from operator import ge, le
 import numpy as np
 
 from lingularity.backend.trainers.base import TrainerBackend
+from lingularity.database import MongoDBClient
 from lingularity.backend.sentence_data_fetcher import SentenceDataFetcher
 from lingularity.backend.types.token_maps import Stem2SentenceIndices
 from lingularity.utils.enum import ExtendedEnum
@@ -14,8 +15,8 @@ from lingularity.utils.enum import ExtendedEnum
 class SentenceTranslationTrainerBackend(TrainerBackend):
 	_sentence_data_fetcher = SentenceDataFetcher()
 
-	def __init__(self, non_english_language: str, train_english: bool, training_mode: str):
-		super().__init__(non_english_language, train_english)
+	def __init__(self, non_english_language: str, train_english: bool, training_mode: str, mongodb_client: MongoDBClient):
+		super().__init__(non_english_language, train_english, mongodb_client)
 
 		if self._non_english_language not in self.locally_available_languages:
 			self._sentence_data_fetcher.fetch_sentence_data_file(self._non_english_language)
@@ -23,7 +24,7 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 		self._sentence_data = self._parse_sentence_data()
 		self._filter_sentence_data_mode_accordingly(training_mode)
 		np.random.shuffle(self._sentence_data)
-		self._sentence_data_iterator = iter(self._sentence_data)
+		self._item_iterator = iter(self._sentence_data)
 
 	@property
 	def sentence_data_magnitude(self) -> int:
@@ -61,10 +62,7 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 		print('Getting corresponding sentences...')
 		self._sentence_data = self._sentence_data[indices]
 
-	def get_sentence_pair(self) -> Tuple[str, str]:
-		return next(self._sentence_data_iterator)
-
 	def convert_names_if_possible(self, reference_sentence: str, translation: str) -> Tuple[str, str]:
-		if any(default_name in reference_sentence for default_name in self.DEFAULT_NAMES) and self._names_convertible:
-			return tuple(map(self._accommodate_names_of_sentence, [reference_sentence, translation]))  # type: ignore
+		if self.names_convertible and any(default_name in reference_sentence for default_name in self.DEFAULT_NAMES):
+			return tuple(map(self.accommodate_names, [reference_sentence, translation]))  # type: ignore
 		return reference_sentence, translation

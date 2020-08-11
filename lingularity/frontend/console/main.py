@@ -150,17 +150,18 @@ def select_training() -> Optional[str]:
 
 
 def complete_initialization():
-    clear_screen()
+    """clear_screen()
     display_starting_screen()
     mongo_client = authenticate()
     extended_starting_screen(username=mongo_client.user)
     try:
         display_last_session_statistics(client=mongo_client)
     except KeyError:
-        pass
+        pass"""
 
-    trainer_frontend = TRAINERS[select_training()]()
-    trainer_frontend.relay_database_client_to_backend(mongo_client)
+    mongo_client = MongoDBClient('janek', None)
+
+    trainer_frontend = TRAINERS[select_training()](mongo_client)
     trainer_frontend.run()
 
 if __name__ == '__main__':

@@ -5,6 +5,7 @@ from itertools import groupby
 from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend
+from lingularity.database import MongoDBClient
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
 from lingularity.utils.output_manipulation import (clear_screen, erase_lines, centered_print,
                                                    get_max_line_length_based_indentation, DEFAULT_VERTICAL_VIEW_OFFSET)
@@ -13,13 +14,13 @@ from lingularity.utils.enum import ExtendedEnum
 
 
 class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
-    def __init__(self):
+    def __init__(self, mongodb_client: MongoDBClient):
         super().__init__()
 
         non_english_language, train_english = self._select_language()
         training_mode = self._select_mode()
 
-        self._backend = Backend(non_english_language, train_english, training_mode)
+        self._backend = Backend(non_english_language, train_english, training_mode, mongodb_client)
 
     def run(self):
         self._display_pre_training_instructions()
@@ -128,7 +129,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         while True:
             if not suspend_resolution:
                 try:
-                    reference_sentence, translation = self._backend.convert_names_if_possible(*self._backend.get_sentence_pair())
+                    reference_sentence, translation = self._backend.convert_names_if_possible(*self._backend.get_training_item())
                 except (ValueError, IndexError, StopIteration) as e:
                     if type(e) is StopIteration:
                         print('Sentence data file depleted')
@@ -185,5 +186,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             print('Invalid alteration')
             time.sleep(1)
             return None, 3
+
+        assert self._backend is not None
         self._backend.mongodb_client.alter_vocable_entry(old_token, *new_split_entry)
         return new_entry, 2

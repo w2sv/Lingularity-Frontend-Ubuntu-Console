@@ -1,12 +1,12 @@
 from typing import *
 from time import sleep
 
-import numpy as np
 import matplotlib.pyplot as plt
 from pynput.keyboard import Controller as KeyboardController
 
-from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
+from lingularity.frontend.console.trainers import TrainerConsoleFrontend, SentenceTranslationTrainerConsoleFrontend
 from lingularity.backend.trainers.vocabulary_trainer import VocabularyTrainerBackend
+from lingularity.database import MongoDBClient
 from lingularity.utils.output_manipulation import clear_screen, erase_lines
 from lingularity.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.utils.enum import ExtendedEnum
@@ -15,11 +15,16 @@ from lingularity.utils.enum import ExtendedEnum
 class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     N_RELATED_SENTENCES_2_BE_DISPLAYED = 2
 
-    def __init__(self):
+    def __init__(self, mongodb_client: MongoDBClient):
         super().__init__()
 
+        self._n_correct_responses = 0
+
+        self._temp_mongodb_client = mongodb_client
         non_english_language, train_english = self._select_language()
-        self._backend = VocabularyTrainerBackend(non_english_language, train_english)
+        del self._temp_mongodb_client
+
+        self._backend = VocabularyTrainerBackend(non_english_language, train_english, mongodb_client)
 
     def run(self):
         self._display_new_vocabulary()
@@ -30,12 +35,11 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._plot_training_history()
 
     def _select_language(self) -> Tuple[str, bool]:
-        eligible_languages = self._backend.get_vocabulary_possessing_languages()
-        if not eligible_languages:
+        if not (eligible_languages:= self._temp_mongodb_client.get_vocabulary_possessing_languages()):
             self._start_sentence_translation_trainer()
 
         elif eligible_languages.__len__() == 1:
-            return eligible_languages[0]
+            return eligible_languages[0], False
 
         print('ELIGIBLE LANGUAGES: ')
         for language in sorted(eligible_languages):
@@ -44,7 +48,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         language_selection = resolve_input(input('\nEnter desired language:\n').title(), eligible_languages)
         if language_selection is None:
             return recurse_on_unresolvable_input(self._select_language, deletion_lines=-1)
-        return language_selection, True  # TODO
+        return language_selection, False  # TODO
 
     def _start_sentence_translation_trainer(self):
         print('You have to accumulate vocabulary by means of the SentenceTranslation™ TrainerBackend or manual amassment first.')
@@ -52,29 +56,31 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         print('Initiating SentenceTranslation TrainerBackend...')
         sleep(2)
         clear_screen()
-        return SentenceTranslationTrainerBackend(self.mongodb_client).run()
+        return SentenceTranslationTrainerConsoleFrontend.with_database_client(self._backend.mongodb_client).run()
 
     def _display_new_vocabulary(self):
         clear_screen()
-        new_vocabulary = [entry for entry in self._vocable_entries if entry.last_faced_date is None]
+        new_vocabulary = self._backend.get_new_vocable_entries()
         if new_vocabulary:
             display_vocabulary = resolve_input(input('Would you like to see the vocabulary you recently added? (y)es/(n)o\n').lower(), ['yes', 'no'])
             if display_vocabulary == 'yes':
-                [print('\t', ' - '.join([entry.token, entry.translation])) for entry in new_vocabulary]
+                [print('\t', entry.line_repr) for entry in new_vocabulary]
                 print('\n')
                 input('Press any key to continue')
 
     def _display_pre_training_instructions(self):
         clear_screen()
 
-        print((f'Found {self._vocable_entries.__len__()} imperfect entries.\n'
+        print((f'Found {self._backend.n_imperfect_vocable_entries} imperfect entries.\n'
                 "Enter: \n\t- '#alter' in order to alter the translation(s) of the previously faced item.\n"
                 "\t\tNote: distinct translations are to be separated by commas.\n"
                 "\t- '#add' to add a new vocable.\n"
                 "\t- '#exit' to terminate the program.\n\n"))
 
-        lets_go_translation = self._backend.query_lets_go_translation()
-        print(lets_go_translation, '\n') if lets_go_translation is not None else print("Let's go!", '\n')
+        if (lets_go_translation := self._backend.query_lets_go_translation()) is not None:
+            print(lets_go_translation, '\n')
+        else:
+            print("Let's go!", '\n')
 
     # ------------------
     # TRAINING
@@ -87,8 +93,8 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         previous_entry: Optional[VocabularyTrainerBackend.VocableEntry] = None
 
-        while self._n_trained_items < len(self._vocable_entries):
-            entry = self._vocable_entries[self._n_trained_items]
+        while self._n_trained_items < self._backend.n_imperfect_vocable_entries:
+            entry = self._backend.get_training_item()
             print(f'{entry.display_token} = ', end='')
 
             try:
@@ -109,30 +115,31 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 erase_lines(1)
                 break
 
-            response_evaluation = self._get_reponse_evaluation(response, entry.display_translation)
-            self.mongodb_client.update_vocable_entry(entry.token, response_evaluation.value)
+            response_evaluation = self._backend.get_response_evaluation(response, entry.display_translation)
+            self._backend.mongodb_client.update_vocable_entry(entry.token, response_evaluation.value)
 
             if response:
                 print('\t', response_evaluation.name, end=' ')
-            if response_evaluation != self.ResponseEvaluation.Perfect:
+            if response_evaluation != self._backend.ResponseEvaluation.Perfect:
                 print(f'{"| " if response else "         "}Correct translation: ', entry.display_translation, end='')
             print('')
-            related_sentences = self._get_related_sentences(entry.display_translation)
+
+            related_sentences = self._backend.get_related_sentences(entry.display_translation, n=self.N_RELATED_SENTENCES_2_BE_DISPLAYED)
             if related_sentences is not None:
-                if self._names_convertible:
-                    related_sentences = map(self._accommodate_names_of_sentence, related_sentences)
+                if self._backend.names_convertible:
+                    related_sentences = map(self._backend.accommodate_names, related_sentences)
                 [print('\t', s) for s in related_sentences]
             print('_______________')
 
             self._n_trained_items += 1
             self._n_correct_responses += response_evaluation.value
 
-            if not self._n_trained_items % 10 and self._n_trained_items != len(self._vocable_entries):
-                print(f'\t\t{self._n_trained_items} Entries faced, {len(self._vocable_entries) - self._n_trained_items} more to go', '\n')
+            if not self._n_trained_items % 10 and self._n_trained_items != self._backend.n_imperfect_vocable_entries:
+                print(f'\t\t{self._n_trained_items} Entries faced, {self._backend.n_imperfect_vocable_entries - self._n_trained_items} more to go', '\n')
 
             previous_entry = entry
 
-    def _alter_entry_translation(self, entry: Optional[VocableEntry]) -> int:
+    def _alter_entry_translation(self, entry: Optional[VocabularyTrainerBackend.VocableEntry]) -> int:
         """ Returns:
                 number of printed lines"""
 
@@ -141,16 +148,31 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         KeyboardController().type(entry.translation)
         extended_translation = input('')
         if extended_translation:
-            self.mongodb_client.alter_vocable_entry(*[entry.token] * 2, extended_translation)  # type: ignore
+            self._backend.mongodb_client.alter_vocable_entry(*[entry.token] * 2, extended_translation)  # type: ignore
             return 2
         else:
             print('Invalid input')
             sleep(1)
             return 2
 
+    @property
+    def correctness_percentage(self) -> float:
+        return self._n_correct_responses / self._n_trained_items * 100
+
+    @property
+    def performance_verdict(self) -> str:
+        return {
+            0: 'You suck.',
+            20: 'Get your shit together m8.',
+            40: "You can't climb the ladder of success with your hands in your pockets.",
+            60: "Keep hustlin' young blood.",
+            80: 'Attayboy!',
+            100: '0361/2680494. Call me.'}[int(self.correctness_percentage) // 20 * 20]
+
     def _display_pie_chart(self):
         if not self._n_trained_items:
             return
+
         correct_percentage = (self._n_correct_responses / self._n_trained_items) * 100
         incorrect_percentage = 100 - correct_percentage
 

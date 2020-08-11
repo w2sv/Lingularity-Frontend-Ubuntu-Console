@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Iterator, Any
 import os
 from abc import ABC
 from functools import cached_property
@@ -21,16 +21,19 @@ class TrainerBackend(ABC):
         'German': ('Günther', 'Irmgard')
     }
 
-    def __init__(self, non_english_language: str, train_english: bool):
+    def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
         if not os.path.exists(self.BASE_LANGUAGE_DATA_PATH):
             os.mkdir(self.BASE_LANGUAGE_DATA_PATH)
 
         self._non_english_language = non_english_language
         self._train_english = train_english
-        self._names_convertible = self.LANGUAGE_CORRESPONDING_NAMES.get(self._non_english_language) is not None
+        self.names_convertible = self.LANGUAGE_CORRESPONDING_NAMES.get(self._non_english_language) is not None
 
-        self.mongodb_client: Optional[MongoDBClient] = None
+        mongodb_client.language = non_english_language
+        self.mongodb_client = mongodb_client
         self._sentence_data: np.ndarray = None
+
+        self._item_iterator: Optional[Iterator[Any]] = None
 
     @property
     def locally_available_languages(self) -> List[str]:
@@ -58,11 +61,14 @@ class TrainerBackend(ABC):
     def language(self):
         return self._non_english_language if not self._train_english else 'English'
 
-    @cached_property  # TODO: ascertain proper working
+    @cached_property
     def stemmer(self) -> Optional[nltk.stem.SnowballStemmer]:
         assert self.language is not None, 'Stemmer to be initially called after language setting'
-        lowered_language = self.language.lower()
-        return None if lowered_language not in nltk.stem.SnowballStemmer.languages else nltk.stem.SnowballStemmer(lowered_language)
+
+        if (lowered_language := self.language.lower()) in nltk.stem.SnowballStemmer.languages:
+            return nltk.stem.SnowballStemmer(lowered_language)
+        else:
+            return None
 
     # ----------------
     # Paths
@@ -107,7 +113,15 @@ class TrainerBackend(ABC):
                 return self._sentence_data[i][1]
         return None
 
-    def _accommodate_names_of_sentence(self, sentence: str) -> str:
+    def get_training_item(self) -> Any:
+        """
+            Throws:
+                StopIteration on depleted iterator """
+        assert self._item_iterator is not None
+
+        return next(self._item_iterator)
+
+    def accommodate_names(self, sentence: str) -> str:
         """ Assertion of self._convertible name being True to be made before invocation """
 
         sentence_tokens = sentence[:-1].split(' ')
@@ -130,9 +144,3 @@ class TrainerBackend(ABC):
 
         self.mongodb_client.update_last_session_statistics(*update_args)
         self.mongodb_client.inject_session_statistics(*update_args)
-
-    # -----------------
-    # Dunders
-    # -----------------
-    def __str__(self):
-        return self.__class__.__name__[0].lower()
