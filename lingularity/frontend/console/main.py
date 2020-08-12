@@ -114,6 +114,9 @@ def extended_starting_screen(username: str):
 
 def display_last_session_statistics(client: MongoDBClient):
     last_session_metrics = client.query_last_session_statistics()
+    if last_session_metrics is None:
+        return
+
     last_session_items = 'vocables' if last_session_metrics['trainer'] == 'v' else 'sentences'
 
     if (toy := today_or_yesterday(string_date_2_datetime_type(last_session_metrics['date']))) is not None:
@@ -122,7 +125,7 @@ def display_last_session_statistics(client: MongoDBClient):
         parsed_date = string_date_2_datetime_type(last_session_metrics['date'])
         date_repr = f'the {parsed_date.day}th of {parsed_date.strftime("%B")} {parsed_date.year}'
 
-    print('\t'*3, f"You {'already' if date_repr == 'today' else ''} faced {last_session_metrics['faced_items']} {last_session_metrics['language']} {last_session_items} during your last session {date_repr}{'!' if date_repr == 'today' else ''}\n")
+    centered_print(f"You faced {last_session_metrics['nFacedItems']} {last_session_metrics['language']} {last_session_items} during your last session {date_repr}\n\n")
 
 
 def select_action() -> Optional[str]:
@@ -173,10 +176,7 @@ def complete_initialization():
         mongodb_client = authenticate(mongodb_client)
 
     extended_starting_screen(username=mongodb_client.user)
-    try:
-        display_last_session_statistics(client=mongodb_client)
-    except KeyError:
-        pass
+    display_last_session_statistics(client=mongodb_client)
 
     action_selection: str = select_action()
     action_executor = ELIGIBLE_ACTIONS[action_selection]

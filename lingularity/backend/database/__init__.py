@@ -121,8 +121,11 @@ class MongoDBClient:
     def query_password(self) -> str:
         return self.general_collection.find_one({'_id': 'unique'})['password']
 
-    def query_last_session_statistics(self) -> Dict[str, Any]:
-        return self.general_collection.find_one({'_id': 'unique'})['lastSession']
+    def query_last_session_statistics(self) -> Optional[Dict[str, Any]]:
+        try:
+            return self.general_collection.find_one({'_id': 'unique'})['lastSession']
+        except TypeError:
+            return None
 
     # ------------------
     # .Vocabulary

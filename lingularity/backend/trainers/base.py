@@ -182,7 +182,10 @@ class TrainerBackend(ABC):
     def insert_session_statistics_into_database(self, n_trained_items: int):
         assert self.mongodb_client is not None
 
-        update_args = (str(self), n_trained_items)
+        update_args = (self.__str__(), n_trained_items)
 
         self.mongodb_client.update_last_session_statistics(*update_args)
         self.mongodb_client.inject_session_statistics(*update_args)
+
+    def __str__(self):
+        return self.__class__.__name__[0].lower()
