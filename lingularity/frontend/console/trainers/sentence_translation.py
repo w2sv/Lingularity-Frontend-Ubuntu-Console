@@ -151,6 +151,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         most_recent_vocable_entry_line_repr: Optional[str] = None  # 'token - meaning'
         previous_tts_audio_file_path: Optional[str] = None
 
+        # TODO: debug indentation
         INDENTATION = ' ' * 16
 
         while True:

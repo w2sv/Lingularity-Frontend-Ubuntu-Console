@@ -142,6 +142,7 @@ class TrainerBackend(ABC):
     def accommodate_names(self, sentence: str) -> str:
         """ Assertion of self._convertible name being True to be made before invocation """
 
+        # TODO: handle 's
         sentence_tokens = sentence[:-1].split(' ')
         punctuation = sentence[-1]
 
