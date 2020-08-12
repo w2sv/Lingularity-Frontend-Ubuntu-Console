@@ -37,17 +37,17 @@ except requests.exceptions.ConnectionError:
     sys.exit(0)
 
 
-def authenticate() -> Tuple[MongoDBClient, bool]:
+def assign_client_user_from_existing_login(mongodb_client) -> bool:
+    if (logged_in_user := get_logged_in_user()) is not None and logged_in_user in mongodb_client.usernames:
+        mongodb_client.user = logged_in_user
+        return True
+    return False
+
+
+def authenticate(mongodb_client) -> MongoDBClient:
     """ Returns:
             user instantiated mongodb client
             new_login: bool """
-
-
-    client = MongoDBClient()
-
-    if (logged_in_user := get_logged_in_user())  is not None and logged_in_user in client.usernames:
-        client.user = logged_in_user
-        return client, False
 
     INDENTATION = centered_input_indentation('Enter user name: ')
 
@@ -55,9 +55,9 @@ def authenticate() -> Tuple[MongoDBClient, bool]:
     if invalid_username(username):
         return recurse_on_invalid_input(authenticate, 'Empty username is not allowed', 2)
 
-    if username in client.usernames:
-        client.user = username
-        password, password_input = client.query_password(), getpass(f'{INDENTATION}Enter password: ')
+    if username in mongodb_client.usernames:
+        mongodb_client.user = username
+        password, password_input = mongodb_client.query_password(), getpass(f'{INDENTATION}Enter password: ')
         while password != password_input:
             print('')
             erase_lines(2)
@@ -66,12 +66,12 @@ def authenticate() -> Tuple[MongoDBClient, bool]:
 
     else:
         erase_lines(1)
-        sign_up(username, client, INDENTATION)
+        sign_up(username, mongodb_client, INDENTATION)
 
     write_fernet_key_if_not_existent()
     store_user_login(username)
 
-    return client, True
+    return mongodb_client
 
 
 def sign_up(user: str, client: MongoDBClient, indentation: str, email_address: Optional[str] = None):
@@ -125,9 +125,9 @@ def display_last_session_statistics(client: MongoDBClient):
     print('\t'*3, f"You {'already' if date_repr == 'today' else ''} faced {last_session_metrics['faced_items']} {last_session_metrics['language']} {last_session_items} during your last session {date_repr}{'!' if date_repr == 'today' else ''}\n")
 
 
-def select_action(new_login: bool) -> Optional[str]:
+def select_action() -> Optional[str]:
     in_between_indentation = ' ' * 6
-    input_message = f"What would you like to do?: {in_between_indentation}Translate (S)entences{in_between_indentation}Train (V)ocabulary{in_between_indentation}(A)dd Vocabulary{in_between_indentation}{'(C)hange Account' if not new_login else ''}\n"
+    input_message = f"What would you like to do?: {in_between_indentation}Translate (S)entences{in_between_indentation}Train (V)ocabulary{in_between_indentation}(A)dd Vocabulary{in_between_indentation}(C)hange Account\n"
     centered_print(input_message, ' ', end='')
     training = resolve_input(input().lower(), list(ELIGIBLE_ACTIONS.keys()))
 
@@ -157,31 +157,34 @@ def add_vocabulary(mongodb_client: MongoDBClient):
 ELIGIBLE_ACTIONS: Dict[str, Union[type, Callable]] = {
     'sentence translation': SentenceTranslationTrainerConsoleFrontend,
     'vocabulary trainer': VocableTrainerConsoleFrontend,
-    'add vocabulary': add_vocabulary
+    'add vocabulary': add_vocabulary,
+    'change account': change_account
 }
 
 
 def complete_initialization():
+    mongodb_client = MongoDBClient()
+    client_user_set = assign_client_user_from_existing_login(mongodb_client)
+
     clear_screen()
     display_starting_screen()
-    mongo_client, new_login = authenticate()
 
-    extended_starting_screen(username=mongo_client.user)
+    if not client_user_set:
+        mongodb_client = authenticate(mongodb_client)
+
+    extended_starting_screen(username=mongodb_client.user)
     try:
-        display_last_session_statistics(client=mongo_client)
+        display_last_session_statistics(client=mongodb_client)
     except KeyError:
         pass
 
-    if not new_login:
-        ELIGIBLE_ACTIONS.update({'change account': change_account})
-
-    action_selection: str = select_action(new_login)
+    action_selection: str = select_action()
     action_executor = ELIGIBLE_ACTIONS[action_selection]
 
     if isinstance(action_executor, type):
-        return action_executor(mongo_client).run()
+        return action_executor(mongodb_client).run()
     else:
-        args = [mongo_client] if action_executor is add_vocabulary else []
+        args = [mongodb_client] if action_executor is add_vocabulary else []
         return action_executor(*args)
 
 

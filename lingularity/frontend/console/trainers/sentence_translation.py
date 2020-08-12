@@ -137,7 +137,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             maintain_resolution_suspension()
             erase_lines(n_lines)
 
-        most_recent_vocable_entry: Optional[str] = None  # 'token - meaning'
+        most_recent_vocable_entry_line_repr: Optional[str] = None  # 'token - meaning'
         previous_tts_audio_file_path: Optional[str] = None
 
         INDENTATION = '\t' * 2
@@ -164,18 +164,18 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                 # Option execution:
                 if (response := resolve_input(input().lower(), Options.values())) is not None:
                     if response == Options.AppendVocabulary.value:
-                        most_recent_vocable_entry, n_printed_lines = self.insert_vocable_into_database()
+                        most_recent_vocable_entry_line_repr, n_printed_lines = self.insert_vocable_into_database()
                         maintain_resolution_suspension_and_erase_lines(n_lines=n_printed_lines+1)
 
                     elif response == Options.AlterLatestVocableEntry.value:
-                        if most_recent_vocable_entry is None:
+                        if most_recent_vocable_entry_line_repr is None:
                             print("You haven't added any vocabulary during the current session")
                             time.sleep(1)
                             maintain_resolution_suspension_and_erase_lines(n_lines=2)
                         else:
-                            altered_entry, n_printed_lines = self._modify_latest_vocable_insertion(most_recent_vocable_entry)
+                            altered_entry, n_printed_lines = self._modify_latest_vocable_insertion(most_recent_vocable_entry_line_repr)
                             if altered_entry is not None:
-                                most_recent_vocable_entry = altered_entry
+                                most_recent_vocable_entry_line_repr = altered_entry
                             maintain_resolution_suspension_and_erase_lines(n_lines=n_printed_lines)
 
                     elif response == Options.DisableTTS.value and self._backend.tts_available:
