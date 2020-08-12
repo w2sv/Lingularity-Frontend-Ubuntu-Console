@@ -16,25 +16,25 @@ def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
         return None
 
 
-def recurse_on_unresolvable_input(func: Callable, deletion_lines, *args, **kwargs):
+def recurse_on_unresolvable_input(func: Callable, deletion_lines, *func_args, **func_kwargs):
     print("Couldn't resolve input")
     cursor.hide()
     time.sleep(1)
     clear_screen() if deletion_lines == -1 else erase_lines(deletion_lines)
     cursor.show()
-    return func(*args, **kwargs)
+    return func(*func_args, **func_kwargs)
 
 
 def recurse_on_invalid_input(func: Callable,
                              message: str,
                              n_deletion_lines: int,
-                             args: Optional[List[Any]] = None):
-    if args is None:
-        args = []
+                             func_args: Optional[List[Any]] = None):
+    if func_args is None:
+        func_args = []
 
     centered_print(message.upper())
     cursor.hide()
     time.sleep(1.5)
     cursor.show()
     erase_lines(n_deletion_lines)
-    return func(*args)
+    return func(*func_args)

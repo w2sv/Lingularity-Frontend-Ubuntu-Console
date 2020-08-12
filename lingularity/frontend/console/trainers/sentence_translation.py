@@ -4,6 +4,7 @@ from itertools import groupby
 import os
 
 from pynput.keyboard import Controller as KeyboardController
+import cursor
 
 from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend
 from lingularity.backend.database import MongoDBClient
@@ -20,6 +21,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         non_english_language, train_english = self._select_language()
         training_mode = self._select_mode()
+        cursor.hide()
 
         self._backend = Backend(non_english_language, train_english, training_mode, mongodb_client)
 
@@ -77,7 +79,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         if mode_selection is None:
             return recurse_on_unresolvable_input(self._select_mode, deletion_lines=-1)
-        print()
+        print('\n', end='')
+
         return mode_selection
 
     # -----------------
@@ -95,20 +98,26 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     def _display_pre_training_instructions(self):
         clear_screen()
+        centered_print(f"{DEFAULT_VERTICAL_VIEW_OFFSET * 2}Database comprises {self._backend.sentence_data_magnitude:,d} sentences.\n\n")
 
-        output = (f"{DEFAULT_VERTICAL_VIEW_OFFSET * 2}Database comprises {self._backend.sentence_data_magnitude:,d} sentences.\n"
-        "Hit Enter to advance to next sentence\n"
-        "Enter \n"
-            "\t- 'vocabulary' to append new entry to language specific vocabulary file\n" 
-            "\t- 'exit' to terminate program\n"
-            "\t- 'alter' in order to alter the most recently added vocable entry\n"
-            "\t- 'disable' to disable speech output\n"
+        instructions = (
+            "Hit Enter to advance to next sentence",
+            "Enter",
+            "\t- 'vocabulary' to append new entry to language specific vocabulary file",
+            "\t- 'exit' to terminate program",
+            "\t- 'alter' in order to alter the most recently added vocable entry",
+            "\t- 'disable' to disable speech output",
             "\t- 'enable' to enable speech output")
 
         if not self._backend.tts_available:
-            output = '\n'.join(output.split('\n')[:-2])
+            instructions = instructions[:-2]
 
-        print(output, '\n')
+        indentation = get_max_line_length_based_indentation(instructions)
+
+        for line in instructions:
+            print(indentation, line)
+
+        print('\n' * 2, end='')
         self._output_lets_go()
 
 
@@ -142,7 +151,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         most_recent_vocable_entry_line_repr: Optional[str] = None  # 'token - meaning'
         previous_tts_audio_file_path: Optional[str] = None
 
-        INDENTATION = '\t' * 2
+        INDENTATION = ' ' * 16
 
         while True:
             if not suspend_translation_output:
@@ -159,12 +168,12 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             else:
                 suspend_translation_output = False
             try:
-                print("\t\tpending... ")
+                print(f"{INDENTATION}pending... ")
                 if self._tts_available_and_enabled:
                     audio_file_path = self._backend.download_tts_audio(translation)
 
                 # Option execution:
-                if (response := resolve_input(input().lower(), Options.values())) is not None:
+                if (response := resolve_input(input('$').lower(), Options.values())) is not None:
                     if response == Options.AppendVocabulary.value:
                         most_recent_vocable_entry_line_repr, n_printed_lines = self.insert_vocable_into_database()
                         maintain_resolution_suspension_and_erase_lines(n_lines=n_printed_lines+1)
@@ -191,6 +200,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                         self._backend.clear_tts_audio_file_dir()
                         print('\n----------------')
                         print("Number of faced sentences: ", self._n_trained_items)
+                        cursor.show()
                         return
 
             except (KeyboardInterrupt, SyntaxError):
@@ -212,6 +222,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     self._buffer_print.partially_redo_buffered_output(n_lines_to_be_removed=2)
 
                 if not self._tts_available_and_enabled:
+                    # TODO: let sleep duration be proportional to translation length
                     time.sleep(1.2)
 
     def _modify_latest_vocable_insertion(self, latest_appended_vocable_line: str) -> Tuple[Optional[str], int]:

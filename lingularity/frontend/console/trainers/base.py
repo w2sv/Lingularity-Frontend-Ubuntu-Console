@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 from lingularity.backend.trainers import TrainerBackend
-from lingularity.utils.output_manipulation import BufferPrint
+from lingularity.utils.output_manipulation import BufferPrint, centered_print
 from lingularity.utils.input_resolution import resolve_input
 
 
@@ -41,9 +41,10 @@ class TrainerConsoleFrontend(ABC):
 
     def _output_lets_go(self):
         if self._backend.lets_go_translation is not None:
-            print(self._backend.lets_go_translation, '\n')
+            output = self._backend.lets_go_translation
         else:
-            print("Let's go!", '\n')
+            output = "Let's go!"
+        centered_print(output, '\n' * 2)
 
     # -----------------
     # Training
