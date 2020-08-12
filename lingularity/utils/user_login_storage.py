@@ -21,15 +21,15 @@ def write_fernet_key_if_not_existent():
         write_fernet_key()
 
 
-def _load_fernet_key() -> str:
+def _load_fernet_key() -> bytes:
     return open(_FERNET_KEY_FILE_PATH, "rb").read()
 
 
-def encrypt(message: str,) -> str:
+def encrypt(message: str,) -> bytes:
     return Fernet(key=_load_fernet_key()).encrypt(message.encode())
 
 
-def decrypt(encrypted_message: str) -> str:
+def decrypt(encrypted_message: bytes) -> str:
     return Fernet(key=_load_fernet_key()).decrypt(encrypted_message).decode('ascii')
 
 

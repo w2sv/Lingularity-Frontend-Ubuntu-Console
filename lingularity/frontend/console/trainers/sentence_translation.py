@@ -117,6 +117,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     @property
     def _tts_available_and_enabled(self) -> bool:
+        assert self._backend is not None
+
         return self._backend.tts_available and not self._tts_disabled
 
     def _run_training(self):

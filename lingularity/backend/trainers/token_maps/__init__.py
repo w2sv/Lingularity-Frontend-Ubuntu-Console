@@ -77,12 +77,12 @@ class Token2Indices(CustomDict, ABC):
         return chain.from_iterable(itemgetter(*occurrence_outliers)(self.occurrences_2_tokens))
 
     def pop_positive_occurrence_outliers(self, iqr_coefficient: float = 0.2):
-        occurrence_outliers = get_outliers(list(self.occurrences_2_tokens.keys()), positive=True, iqr_coeff=iqr_coefficient)
+        occurrence_outliers = get_outliers(list(self.occurrences_2_tokens.keys()), positive=True, iqr_coefficient=iqr_coefficient)
         corresponding_tokens = self._get_occurrence_outlier_corresponding_tokens(occurrence_outliers)
         [self.pop(outlier_token) for outlier_token in corresponding_tokens]
 
     def get_negative_occurrence_outliers(self, iqr_coefficient: float = 0):  # -> Token2IndicesBase
-        occurrence_outliers = get_outliers(list(self.occurrences_2_tokens.keys()), positive=False, iqr_coeff=iqr_coefficient)
+        occurrence_outliers = get_outliers(list(self.occurrences_2_tokens.keys()), positive=False, iqr_coefficient=iqr_coefficient)
         corresponding_tokens = self._get_occurrence_outlier_corresponding_tokens(occurrence_outliers)
         return {token: self[token] for token in corresponding_tokens}
 
