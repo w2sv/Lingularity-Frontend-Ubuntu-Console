@@ -6,9 +6,9 @@ from operator import ge, le
 import numpy as np
 
 from lingularity.backend.trainers.base import TrainerBackend
-from lingularity.database import MongoDBClient
+from lingularity.backend.database import MongoDBClient
 from lingularity.backend.sentence_data_fetcher import SentenceDataFetcher
-from lingularity.backend.types.token_maps import Stem2SentenceIndices
+from lingularity.backend.trainers.token_maps import Stem2SentenceIndices
 from lingularity.utils.enum import ExtendedEnum
 
 
@@ -34,7 +34,7 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 		return _eligible_languages
 
 	def convert_names_if_possible(self, reference_sentence: str, translation: str) -> Tuple[str, str]:
-		if self.names_convertible and any(default_name in reference_sentence for default_name in self.DEFAULT_NAMES):
+		if self.names_convertible and any(default_name in reference_sentence for default_name in self._DEFAULT_NAMES):
 			return tuple(map(self.accommodate_names, [reference_sentence, translation]))  # type: ignore
 		return reference_sentence, translation
 

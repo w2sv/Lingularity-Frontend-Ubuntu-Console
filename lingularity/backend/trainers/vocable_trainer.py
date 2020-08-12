@@ -6,8 +6,8 @@ import unidecode
 import numpy as np
 
 from lingularity.backend.trainers.base import TrainerBackend
-from lingularity.database import MongoDBClient
-from lingularity.backend.types.token_maps import RawToken2SentenceIndices
+from lingularity.backend.database import MongoDBClient
+from lingularity.backend.trainers.token_maps import RawToken2SentenceIndices
 from lingularity.utils.strings import get_article_stripped_token
 from lingularity.utils.enum import ExtendedEnum
 

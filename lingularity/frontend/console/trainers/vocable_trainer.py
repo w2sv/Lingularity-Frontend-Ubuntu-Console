@@ -6,7 +6,7 @@ from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.frontend.console.trainers import TrainerConsoleFrontend, SentenceTranslationTrainerConsoleFrontend
 from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend, VocableEntry
-from lingularity.database import MongoDBClient
+from lingularity.backend.database import MongoDBClient
 from lingularity.utils.output_manipulation import clear_screen, erase_lines
 from lingularity.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.utils.enum import ExtendedEnum
@@ -83,7 +83,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 "\t- '#add' to add a new vocable.\n"
                 "\t- '#exit' to terminate the program.\n\n"))
 
-        self._lets_go_output()
+        self._output_lets_go()
 
     # ------------------
     # Training

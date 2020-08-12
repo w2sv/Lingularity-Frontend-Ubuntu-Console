@@ -2,7 +2,7 @@ from typing import *
 
 from flask import Flask, render_template, request
 
-from lingularity.database import MongoDBClient
+from lingularity.backend.database import MongoDBClient
 from lingularity.utils.signup_credential_validation import invalid_password, invalid_mailadress, invalid_username
 
 

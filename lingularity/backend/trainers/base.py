@@ -6,19 +6,20 @@ import time
 
 import nltk
 import numpy as np
-from gtts import gTTS
+import gtts
 import vlc
 from mutagen.mp3 import MP3
 
-from lingularity.database import MongoDBClient
-from lingularity.utils.datetime import get_timestamp
+from lingularity.backend.database import MongoDBClient
+from lingularity.utils.time import get_timestamp
 
 
 class TrainerBackend(ABC):
-    BASE_LANGUAGE_DATA_PATH = f'{os.getcwd()}/language_data'
+    _BASE_LANGUAGE_DATA_PATH = f'{os.getcwd()}/language_data'
+    _TTS_AUDIO_FILE_PATH = f'{os.getcwd()}/tts_audio_files'
 
-    DEFAULT_NAMES = ('Tom', 'Mary')
-    LANGUAGE_CORRESPONDING_NAMES = {
+    _DEFAULT_NAMES = ('Tom', 'Mary')
+    _LANGUAGE_2_NAMES = {
         'Italian': ('Alessandro', 'Christina'),
         'French': ('Antoine', 'Amelie'),
         'Spanish': ('Emilio', 'Luciana'),
@@ -27,12 +28,14 @@ class TrainerBackend(ABC):
     }
 
     def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
-        if not os.path.exists(self.BASE_LANGUAGE_DATA_PATH):
-            os.mkdir(self.BASE_LANGUAGE_DATA_PATH)
+        if not os.path.exists(self._BASE_LANGUAGE_DATA_PATH):
+            os.mkdir(self._BASE_LANGUAGE_DATA_PATH)
 
         self._non_english_language = non_english_language
         self._train_english = train_english
-        self.names_convertible = self.LANGUAGE_CORRESPONDING_NAMES.get(self._non_english_language) is not None
+        self.names_convertible: bool = self._LANGUAGE_2_NAMES.get(self._non_english_language) is not None
+        self._tts_language_abbreviation: Optional[str] = {v: k for k, v in gtts.lang.tts_langs().items()}.get(self._non_english_language)
+        self.tts_available: bool = self._tts_language_abbreviation is not None
 
         mongodb_client.language = non_english_language
         self.mongodb_client = mongodb_client
@@ -47,11 +50,7 @@ class TrainerBackend(ABC):
 
     @property
     def locally_available_languages(self) -> List[str]:
-        return os.listdir(self.BASE_LANGUAGE_DATA_PATH)
-
-    def adopt_database_client(self, client: MongoDBClient):
-        client.language = self._non_english_language
-        self.mongodb_client = client
+        return os.listdir(self._BASE_LANGUAGE_DATA_PATH)
 
     @property
     def train_english(self):
@@ -85,7 +84,7 @@ class TrainerBackend(ABC):
     # ----------------
     @property
     def language_dir_path(self):
-        return f'{self.BASE_LANGUAGE_DATA_PATH}/{self.language}'
+        return f'{self._BASE_LANGUAGE_DATA_PATH}/{self.language}'
 
     @property
     def sentence_file_path(self) -> str:
@@ -143,25 +142,33 @@ class TrainerBackend(ABC):
         sentence_tokens = sentence[:-1].split(' ')
         punctuation = sentence[-1]
 
-        for name_ind, name in enumerate(self.DEFAULT_NAMES):
+        for name_ind, name in enumerate(self._DEFAULT_NAMES):
             try:
-                sentence_tokens[sentence_tokens.index(name)] = self.LANGUAGE_CORRESPONDING_NAMES[self.language][name_ind]
+                sentence_tokens[sentence_tokens.index(name)] = self._LANGUAGE_2_NAMES[self.language][name_ind]
             except ValueError:
                 pass
         return ' '.join(sentence_tokens) + punctuation
 
-    def synthesize_ttf_file(self, text: str) -> str:
-        audio_file_path = f'{os.getcwd()}/tts_audio{get_timestamp()}.mp3'
+    def synthesize_tts_file(self, text: str) -> str:
+        audio_file_path = f'{self._TTS_AUDIO_FILE_PATH}/{get_timestamp()}.mp3'
 
-        gTTS(text, lang=self._non_english_language[:2]).save(audio_file_path)
+        gtts.gTTS(text, lang=self._tts_language_abbreviation).save(audio_file_path)
         return audio_file_path
 
     @staticmethod
     def play_audio_file(audio_file_path: str, suspend_program_for_duration=False):
-        player = vlc.MediaPlayer(audio_file_path)
-        player.play()
+        vlc.MediaPlayer(audio_file_path).play()
+
         if suspend_program_for_duration:
-            time.sleep(MP3(audio_file_path).info.length)
+            duration = MP3(audio_file_path).info.length - 0.2
+            start_time = time.time()
+            while time.time() - start_time < duration:
+                # TODO: let function break on enter stroke by employing threading
+                pass
+
+    def clear_tts_audio_file_dir(self):
+        for audio_file in os.listdir(self._TTS_AUDIO_FILE_PATH):
+            os.remove(f'{self._TTS_AUDIO_FILE_PATH}/{audio_file}')
 
     # -----------------
     # .Database related

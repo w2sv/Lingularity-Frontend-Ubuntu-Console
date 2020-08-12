@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import pymongo
 
-from lingularity.utils.datetime import datetag_today, day_difference
+from lingularity.utils.date import datetag_today, n_days_ago
 
 
 # TODO: type returned dicts
@@ -56,7 +56,7 @@ class MongoDBClient:
         self._language = value
 
     # --------------------
-    # .DataBaseRelated
+    # .Database-related
     # --------------------
     @property
     def mail_addresses(self) -> Iterator[str]:
@@ -191,7 +191,7 @@ class MongoDBClient:
         vocabulary_data = self.query_vocabulary_data()
         original_length = vocabulary_data.__len__()
         for i, vocabulary_entry in enumerate(vocabulary_data[::-1]):
-            if vocabulary_entry['s'] >= perfection_score and day_difference(vocabulary_entry['lfd']) < days_before_retention_assertion:
+            if vocabulary_entry['s'] >= perfection_score and n_days_ago(vocabulary_entry['lfd']) < days_before_retention_assertion:
                 vocabulary_data.pop(original_length - i - 1)
         return vocabulary_data
 

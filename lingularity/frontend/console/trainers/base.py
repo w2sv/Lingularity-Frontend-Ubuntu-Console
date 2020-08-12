@@ -39,7 +39,7 @@ class TrainerConsoleFrontend(ABC):
     def _display_pre_training_instructions(self):
         pass
 
-    def _lets_go_output(self):
+    def _output_lets_go(self):
         if self._backend.lets_go_translation is not None:
             print(self._backend.lets_go_translation, '\n')
         else:

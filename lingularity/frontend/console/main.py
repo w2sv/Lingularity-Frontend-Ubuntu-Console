@@ -7,10 +7,10 @@ import requests
 import sys
 import cursor
 
-from lingularity.database import MongoDBClient
+from lingularity.backend.database import MongoDBClient
 from lingularity.utils.input_resolution import recurse_on_unresolvable_input, recurse_on_invalid_input, resolve_input
 from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print, centered_input_indentation, DEFAULT_VERTICAL_VIEW_OFFSET
-from lingularity.utils.datetime import is_today_or_yesterday, parse_date_from_string
+from lingularity.utils.date import today_or_yesterday, string_date_2_datetime_type
 from lingularity.utils.signup_credential_validation import invalid_mailadress, invalid_password, invalid_username
 from lingularity.utils.user_login_storage import get_logged_in_user, write_fernet_key_if_not_existent, store_user_login, USER_ENCRYPTION_FILE_PATH
 
@@ -116,10 +116,10 @@ def display_last_session_statistics(client: MongoDBClient):
     last_session_metrics = client.query_last_session_statistics()
     last_session_items = 'vocables' if last_session_metrics['trainer'] == 'v' else 'sentences'
 
-    if (today_or_yesterday := is_today_or_yesterday(parse_date_from_string(last_session_metrics['date']))) is not None:
-        date_repr = today_or_yesterday
+    if (toy := today_or_yesterday(string_date_2_datetime_type(last_session_metrics['date']))) is not None:
+        date_repr = toy
     else:
-        parsed_date = parse_date_from_string(last_session_metrics['date'])
+        parsed_date = string_date_2_datetime_type(last_session_metrics['date'])
         date_repr = f'the {parsed_date.day}th of {parsed_date.strftime("%B")} {parsed_date.year}'
 
     print('\t'*3, f"You {'already' if date_repr == 'today' else ''} faced {last_session_metrics['faced_items']} {last_session_metrics['language']} {last_session_items} during your last session {date_repr}{'!' if date_repr == 'today' else ''}\n")

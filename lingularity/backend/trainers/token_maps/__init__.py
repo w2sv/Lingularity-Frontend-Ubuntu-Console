@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
-from typing import List, Tuple, Dict, Optional, Iterator
+from abc import ABC
+from typing import List, Tuple, Dict, Optional, Iterator, Any, Hashable, Iterable, Union
 from operator import itemgetter
 from itertools import chain, groupby
 
@@ -7,13 +7,27 @@ from tqdm import tqdm
 import numpy as np
 import nltk
 
-from lingularity.backend.types.custom_dict import CustomDict
 from lingularity.utils.statistics import get_outliers
 from lingularity.utils.strings import get_meaningful_tokens
 
 
 # TODO: include upper case tokens in proper noun query
 #       distinct characters property
+
+
+class CustomDict(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*list(filter(lambda arg: arg is not None, args)), **kwargs)
+
+    def upsert(self, key: Hashable, value: Union[Iterable[Any], Any]):
+        if len(self):
+            assert hasattr(self[next(iter(self.keys()))], '__iter__')
+
+        iterable_value = hasattr(value, '__iter__')
+        if key in self:
+            self[key].append(value) if not iterable_value else self[key].extend(value)
+        else:
+            self[key] = [value] if not iterable_value else value
 
 
 class Token2Indices(CustomDict, ABC):
@@ -75,7 +89,7 @@ class Token2Indices(CustomDict, ABC):
 
 class RawToken2SentenceIndices(Token2Indices):
     """ dict with
-            keys: distinct lowercase delimiter split punctuation stripped foreign language _vocable_entries tokens
+            keys: distinct lowercase delimiter-split, punctuation-stripped foreign language _vocable_entries tokens
                 excluding numbers
             values: lists of sentence indices in which occurring """
 
