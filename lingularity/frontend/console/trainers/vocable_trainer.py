@@ -161,6 +161,13 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # Post training
     # -----------------
     @property
+    def n_correct_responses(self) -> float:
+        if int(self._n_correct_responses) == self._n_correct_responses:
+            return int(self._n_correct_responses)
+        else:
+            return self._n_correct_responses
+
+    @property
     def correctness_percentage(self) -> float:
         return self._n_correct_responses / self._n_trained_items * 100
 
@@ -178,7 +185,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         if not self._n_trained_items:
             return
 
-        correct_percentage = (self._n_correct_responses / self._n_trained_items) * 100
+        correct_percentage = (self.n_correct_responses / self._n_trained_items) * 100
         incorrect_percentage = 100 - correct_percentage
 
         labels = ['Correct', 'Incorrect']
@@ -198,5 +205,5 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         ax.pie(sizes, labels=labels, shadow=True, startangle=120, autopct='%1.1f%%', explode=explode, colors=colors)
         ax.axis('equal')
         ax.set_title(self.performance_verdict)
-        fig.canvas.set_window_title(f'You got {self._n_correct_responses}/{self._n_trained_items} right')
+        fig.canvas.set_window_title(f'You got {self.n_correct_responses}/{self._n_trained_items} right')
         plt.show()

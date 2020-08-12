@@ -8,8 +8,13 @@ __pycache__
 # Data
 /language_data/
 /oldstuff/
+*.mp3
 
 # Envs
 /env/
 /console-env/
 /webpage-env/
+
+# Keys
+.fernet_key
+.logged_in_user

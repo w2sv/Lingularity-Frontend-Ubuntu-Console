@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple, Dict, Union, Callable
 import os
 import time
 from getpass import getpass
@@ -12,6 +12,7 @@ from lingularity.utils.input_resolution import recurse_on_unresolvable_input, re
 from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print, centered_input_indentation, DEFAULT_VERTICAL_VIEW_OFFSET
 from lingularity.utils.datetime import is_today_or_yesterday, parse_date_from_string
 from lingularity.utils.signup_credential_validation import invalid_mailadress, invalid_password, invalid_username
+from lingularity.utils.user_login_storage import get_logged_in_user, write_fernet_key_if_not_existent, store_user_login, USER_ENCRYPTION_FILE_PATH
 
 
 def display_starting_screen():
@@ -36,31 +37,42 @@ except requests.exceptions.ConnectionError:
     sys.exit(0)
 
 
-def authenticate() -> MongoDBClient:
+def authenticate() -> Tuple[MongoDBClient, bool]:
     """ Returns:
-            user instantiated client """
+            user instantiated mongodb client
+            new_login: bool """
+
 
     client = MongoDBClient()
-    indentation = centered_input_indentation('Enter user name: ')
 
-    username = input(f'{indentation}Enter user name: ')
+    if (logged_in_user := get_logged_in_user())  is not None and logged_in_user in client.usernames:
+        client.user = logged_in_user
+        return client, False
+
+    INDENTATION = centered_input_indentation('Enter user name: ')
+
+    username = input(f'{INDENTATION}Enter user name: ')
     if invalid_username(username):
         return recurse_on_invalid_input(authenticate, 'Empty username is not allowed', 2)
 
     if username in client.usernames:
         client.user = username
-        password, password_input = client.query_password(), getpass(f'{indentation}Enter password: ')
+        password, password_input = client.query_password(), getpass(f'{INDENTATION}Enter password: ')
         while password != password_input:
             print('')
             erase_lines(2)
-            password_input = getpass(f'{indentation}Incorrect, try again: ')
+            password_input = getpass(f'{INDENTATION}Incorrect, try again: ')
         erase_lines(2)
 
     else:
         erase_lines(1)
-        sign_up(username, client, indentation)
+        sign_up(username, client, INDENTATION)
 
-    return client
+    write_fernet_key_if_not_existent()
+    store_user_login(username)
+
+    return client, True
+
 
 def sign_up(user: str, client: MongoDBClient, indentation: str, email_address: Optional[str] = None):
     args = list(locals().values())
@@ -87,6 +99,12 @@ def sign_up(user: str, client: MongoDBClient, indentation: str, email_address: O
     erase_lines(4)
 
 
+def change_account():
+    os.remove(USER_ENCRYPTION_FILE_PATH)
+    del ELIGIBLE_ACTIONS['change account']
+    return complete_initialization()
+
+
 def extended_starting_screen(username: str):
     centered_print("Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
     centered_print("Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,")
@@ -107,16 +125,14 @@ def display_last_session_statistics(client: MongoDBClient):
     print('\t'*3, f"You {'already' if date_repr == 'today' else ''} faced {last_session_metrics['faced_items']} {last_session_metrics['language']} {last_session_items} during your last session {date_repr}{'!' if date_repr == 'today' else ''}\n")
 
 
-def select_training() -> Optional[str]:
-    in_between_indentation = '\t' * 2
-    input_message = f"What would you like to do?: {in_between_indentation}Translate (S)entences{in_between_indentation}Train (V)ocabulary{in_between_indentation}or (A)dd Vocabulary\n"
+def select_action(new_login: bool) -> Optional[str]:
+    in_between_indentation = ' ' * 6
+    input_message = f"What would you like to do?: {in_between_indentation}Translate (S)entences{in_between_indentation}Train (V)ocabulary{in_between_indentation}(A)dd Vocabulary{in_between_indentation}{'(C)hange Account' if not new_login else ''}\n"
     centered_print(input_message, ' ', end='')
     training = resolve_input(input().lower(), list(ELIGIBLE_ACTIONS.keys()))
 
     if training is None:
-        recurse_on_unresolvable_input(select_training, 4)
-    """elif training == 'add vocabulary':
-        return add_vocabulary()"""
+        recurse_on_unresolvable_input(select_action, 4)
 
     clear_screen()
     return training
@@ -138,7 +154,7 @@ def add_vocabulary(mongodb_client: MongoDBClient):
             pass
 
 
-ELIGIBLE_ACTIONS = {
+ELIGIBLE_ACTIONS: Dict[str, Union[type, Callable]] = {
     'sentence translation': SentenceTranslationTrainerConsoleFrontend,
     'vocabulary trainer': VocableTrainerConsoleFrontend,
     'add vocabulary': add_vocabulary
@@ -148,16 +164,26 @@ ELIGIBLE_ACTIONS = {
 def complete_initialization():
     clear_screen()
     display_starting_screen()
-    mongo_client = authenticate()
+    mongo_client, new_login = authenticate()
+
     extended_starting_screen(username=mongo_client.user)
     try:
         display_last_session_statistics(client=mongo_client)
     except KeyError:
         pass
 
-    action_executor = ELIGIBLE_ACTIONS[select_training()](mongo_client)
-    if issubclass(action_executor.__class__, TrainerConsoleFrontend):
-        action_executor.run()
+    if not new_login:
+        ELIGIBLE_ACTIONS.update({'change account': change_account})
+
+    action_selection: str = select_action(new_login)
+    action_executor = ELIGIBLE_ACTIONS[action_selection]
+
+    if isinstance(action_executor, type):
+        return action_executor(mongo_client).run()
+    else:
+        args = [mongo_client] if action_executor is add_vocabulary else []
+        return action_executor(*args)
+
 
 if __name__ == '__main__':
     complete_initialization()

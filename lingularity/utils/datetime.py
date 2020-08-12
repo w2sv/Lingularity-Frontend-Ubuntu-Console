@@ -1,5 +1,7 @@
 from typing import Optional
 import datetime
+import time
+import calendar
 
 
 def datetag_today() -> str:
@@ -22,3 +24,7 @@ def is_today_or_yesterday(date: datetime.date) -> Optional[str]:
         return 'yesterday'
     else:
         return None
+
+
+def get_timestamp() -> str:
+    return str(calendar.timegm(time.gmtime()))

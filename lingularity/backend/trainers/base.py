@@ -2,11 +2,16 @@ from typing import List, Optional, Iterator, Any, Sequence, Tuple
 import os
 from abc import ABC
 from functools import cached_property
+import time
 
 import nltk
 import numpy as np
+from gtts import gTTS
+import vlc
+from mutagen.mp3 import MP3
 
 from lingularity.database import MongoDBClient
+from lingularity.utils.datetime import get_timestamp
 
 
 class TrainerBackend(ABC):
@@ -144,6 +149,19 @@ class TrainerBackend(ABC):
             except ValueError:
                 pass
         return ' '.join(sentence_tokens) + punctuation
+
+    def synthesize_ttf_file(self, text: str) -> str:
+        audio_file_path = f'{os.getcwd()}/tts_audio{get_timestamp()}.mp3'
+
+        gTTS(text, lang=self._non_english_language[:2]).save(audio_file_path)
+        return audio_file_path
+
+    @staticmethod
+    def play_audio_file(audio_file_path: str, suspend_program_for_duration=False):
+        player = vlc.MediaPlayer(audio_file_path)
+        player.play()
+        if suspend_program_for_duration:
+            time.sleep(MP3(audio_file_path).info.length)
 
     # -----------------
     # .Database related

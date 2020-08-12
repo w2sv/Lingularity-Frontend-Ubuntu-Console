@@ -1,6 +1,7 @@
 import time
 from typing import Optional, Tuple
 from itertools import groupby
+import os
 
 from pynput.keyboard import Controller as KeyboardController
 
@@ -122,6 +123,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             erase_lines(n_lines)
 
         most_recent_vocable_entry: Optional[str] = None  # 'token - meaning'
+        previous_ttf_audio_file_path: Optional[str] = None
 
         INDENTATION = '\t' * 2
 
@@ -141,7 +143,9 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             else:
                 suspend_resolution = False
             try:
-                response = resolve_input(input("\t\tpending... ").lower(), Option.values())
+                print("\t\tpending... ")
+                audio_file_path = self._backend.synthesize_ttf_file(translation)
+                response = resolve_input(input().lower(), Option.values())
                 if response is not None:
                     if response == Option.AppendVocabulary.value:
                         most_recent_vocable_entry, n_printed_lines = self.insert_vocable_into_database()
@@ -165,9 +169,14 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             except (KeyboardInterrupt, SyntaxError):
                 pass
 
-            erase_lines(1)
+            erase_lines(2)
             if not suspend_resolution:
+                if previous_ttf_audio_file_path is not None:
+                    os.remove(previous_ttf_audio_file_path)
                 self._buffer_print(INDENTATION, translation, '\n', INDENTATION, '_______________')
+                self._backend.play_audio_file(audio_file_path, suspend_program_for_duration=True)
+                previous_ttf_audio_file_path = audio_file_path
+
                 self._n_trained_items += 1
 
                 if self._n_trained_items >= 5:
