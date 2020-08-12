@@ -43,11 +43,6 @@ class TrainerBackend(ABC):
         self._item_iterator: Optional[Iterator[Any]] = None
         self.lets_go_translation: Optional[str] = None
 
-    @staticmethod
-    def _get_item_iterator(item_list: Sequence[Any]) -> Iterator[Any]:
-        np.random.shuffle(item_list)
-        return iter(item_list)
-
     @property
     def locally_available_languages(self) -> List[str]:
         return os.listdir(self._BASE_LANGUAGE_DATA_PATH)
@@ -70,6 +65,11 @@ class TrainerBackend(ABC):
     def language(self):
         return self._non_english_language if not self._train_english else 'English'
 
+    @staticmethod
+    def _get_item_iterator(item_list: Sequence[Any]) -> Iterator[Any]:
+        np.random.shuffle(item_list)
+        return iter(item_list)
+
     @cached_property
     def stemmer(self) -> Optional[nltk.stem.SnowballStemmer]:
         assert self.language is not None, 'Stemmer to be initially called after language setting'
@@ -91,7 +91,7 @@ class TrainerBackend(ABC):
         return f'{self.language_dir_path}/sentence_data.txt'
 
     # ----------------
-    # Methods
+    # Pre Training
     # ----------------
     def _process_sentence_data_file(self) -> Tuple[np.ndarray, Optional[str]]:
         sentence_data = self._parse_sentence_data()
@@ -124,6 +124,9 @@ class TrainerBackend(ABC):
                 return unshuffled_sentence_data[i][1]
         return None
 
+    # -----------------
+    # Training
+    # -----------------
     def get_training_item(self) -> Optional[Any]:
         """
             Returns:
@@ -149,7 +152,10 @@ class TrainerBackend(ABC):
                 pass
         return ' '.join(sentence_tokens) + punctuation
 
-    def synthesize_tts_file(self, text: str) -> str:
+    # -----------------
+    # .TTS
+    # -----------------
+    def download_tts_audio(self, text: str) -> str:
         audio_file_path = f'{self._TTS_AUDIO_FILE_PATH}/{get_timestamp()}.mp3'
 
         gtts.gTTS(text, lang=self._tts_language_abbreviation).save(audio_file_path)
@@ -171,7 +177,7 @@ class TrainerBackend(ABC):
             os.remove(f'{self._TTS_AUDIO_FILE_PATH}/{audio_file}')
 
     # -----------------
-    # .Database related
+    # Post training
     # -----------------
     def insert_session_statistics_into_database(self, n_trained_items: int):
         assert self.mongodb_client is not None

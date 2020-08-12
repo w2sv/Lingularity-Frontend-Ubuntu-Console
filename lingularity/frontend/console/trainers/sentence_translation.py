@@ -25,16 +25,6 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         self._tts_disabled = False
 
-    def run(self):
-        self._display_pre_training_instructions()
-        self._run_training()
-
-        self._backend.insert_session_statistics_into_database(self._n_trained_items)
-        self._plot_training_history()
-
-    # ---------------
-    # INITIALIZATION
-    # ---------------
     def _select_language(self) -> Tuple[str, bool]:
         """
             Returns:
@@ -69,9 +59,6 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     train_english, reference_language_validity = [True]*2
         return selection, train_english
 
-    # -----------------
-    # .MODE
-    # -----------------
     def _select_mode(self) -> str:
         explanations = (
             'show me sentences possessing an increased probability of containing rather infrequently used vocabulary',
@@ -93,6 +80,19 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         print()
         return mode_selection
 
+    # -----------------
+    # Driver
+    # -----------------
+    def run(self):
+        self._display_pre_training_instructions()
+        self._run_training()
+
+        self._backend.insert_session_statistics_into_database(self._n_trained_items)
+        self._plot_training_history()
+
+    # -----------------
+    # Pre training
+    # -----------------
     def _display_pre_training_instructions(self):
         clear_screen()
 
@@ -159,7 +159,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             try:
                 print("\t\tpending... ")
                 if self._tts_available_and_enabled:
-                    audio_file_path = self._backend.synthesize_tts_file(translation)
+                    audio_file_path = self._backend.download_tts_audio(translation)
 
                 # Option execution:
                 if (response := resolve_input(input().lower(), Options.values())) is not None:
@@ -183,7 +183,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
                     elif response == Options.EnableTTS.value and self._backend.tts_available and self._tts_disabled:
                         self._tts_disabled = False
-                        audio_file_path = self._backend.synthesize_tts_file(translation)
+                        audio_file_path = self._backend.download_tts_audio(translation)
 
                     elif response == Options.Exit.value:
                         self._backend.clear_tts_audio_file_dir()
