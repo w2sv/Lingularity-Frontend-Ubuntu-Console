@@ -7,7 +7,13 @@ from lingularity.utils.output_manipulation import clear_screen, erase_lines, cen
 
 def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
     options_starting_on_input = list(filter(lambda option: option.startswith(_input), options))
-    return options_starting_on_input[0] if len(options_starting_on_input) == 1 else None
+
+    if len(options_starting_on_input) == 1:
+        return options_starting_on_input[0]
+    elif _input in options_starting_on_input:
+        return _input
+    else:
+        return None
 
 
 def recurse_on_unresolvable_input(func: Callable, deletion_lines, *args, **kwargs):
