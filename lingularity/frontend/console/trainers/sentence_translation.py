@@ -210,7 +210,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     self._buffer_print.partially_redo_buffered_output(n_lines_to_be_removed=2)
 
                 if not self._tts_available_and_enabled:
-                    time.sleep(0.8)
+                    time.sleep(1.2)
 
     def _modify_latest_vocable_insertion(self, latest_appended_vocable_line: str) -> Tuple[Optional[str], int]:
         """ Returns:

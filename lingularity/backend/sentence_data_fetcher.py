@@ -46,7 +46,7 @@ class SentenceDataFetcher:
             Returns:
                 absolute zip file save destination path """
 
-        print('Downloading language data...')
+        print('Downloading sentence data...')
         zip_link = f'{self.PAGE_URL}/{self.language_2_ziplink[language]}'
         save_destination_dir = f'{self.BASE_SAVE_DESTINATION_DIR_PATH}/{language}'
         if not os.path.exists(save_destination_dir):
