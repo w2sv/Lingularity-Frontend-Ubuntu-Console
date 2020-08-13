@@ -98,30 +98,38 @@ class TrainerBackend(ABC):
         return sentence_data, self._query_lets_go_translation(sentence_data)
 
     def _read_in_sentence_data(self) -> np.ndarray:
+        """
+            Strips newly downloaded data off reference appendices and overrides data file
+
+            Returns:
+                ndarray of List[reference_language_sentence, target_language_sentence] """
+
         print('Reading in sentence data...')
 
-        import time
-
-        t1 = time.time()
         raw_data = open(self.sentence_file_path, 'r', encoding='utf-8').readlines()
 
         # remove reference appendices from source file if newly downloaded and write to file
+        reference_appendix_stripped_data = self._get_reference_appendix_stripped_sentence_data(raw_data)
+
+        # split at tab, strip newlines; invert vertical sentence order in case of english training
+        for i, row in enumerate(reference_appendix_stripped_data):
+            split_line = row.split('\t')
+            reference_appendix_stripped_data[i] = [split_line[0], split_line[1].strip('\n')]
+
+            if self._train_english:
+                reference_appendix_stripped_data[i] = reversed(reference_appendix_stripped_data[i])
+
+        return np.asarray(reference_appendix_stripped_data)
+
+    def _get_reference_appendix_stripped_sentence_data(self, raw_data: List[str]) -> List[str]:
         if len(raw_data[0].split('\t')) > 2:
-            reference_appendix_stripped_sentence_data = ['\t'.join(row.split('\t')[:2]) + '\n' for row in raw_data]
+            reference_appendix_stripped_data = ['\t'.join(row.split('\t')[:2]) + '\n' for row in raw_data]
 
             with open(self.sentence_file_path, 'w', encoding='utf-8') as write_file:
-                write_file.writelines(reference_appendix_stripped_sentence_data)
-
-            raw_data = reference_appendix_stripped_sentence_data
-
-        for i, row in enumerate(raw_data):
-            split_line = row.split('\t')
-            raw_data[i] = [split_line[0], split_line[1].strip('\n')]
-            if self._train_english:
-                raw_data[i] = reversed(raw_data[i])
-        print(f'took {time.time() - t1}s')
-        time.sleep(5)
-        return np.asarray(raw_data)
+                write_file.writelines(reference_appendix_stripped_data)
+            return reference_appendix_stripped_data
+        else:
+            return raw_data
 
     @staticmethod
     def _query_lets_go_translation(unshuffled_sentence_data: np.ndarray) -> Optional[str]:
