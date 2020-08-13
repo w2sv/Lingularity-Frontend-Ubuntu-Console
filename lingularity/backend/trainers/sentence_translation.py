@@ -7,7 +7,7 @@ import numpy as np
 
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.fetchers import SentenceDataFetcher
+from lingularity.backend.data_fetching.sentence_data import SentenceDataFetcher
 from lingularity.backend.trainers.token_maps import Stem2SentenceIndices
 from lingularity.utils.enum import ExtendedEnum
 
@@ -33,10 +33,19 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 		insort(_eligible_languages, 'English')
 		return _eligible_languages
 
-	def convert_names_if_possible(self, reference_sentence: str, translation: str) -> Tuple[str, str]:
-		if self.names_convertible and any(default_name in reference_sentence for default_name in self._DEFAULT_NAMES):
-			return tuple(map(self.accommodate_names, [reference_sentence, translation]))  # type: ignore
-		return reference_sentence, translation
+	def convert_sentences_forenames_if_feasible(self, sentences: List[str]) -> Tuple[str, str]:
+		"""
+			Args:
+				sentences: [reference_language_sentence, translation]
+			Returns:
+				converted sentences if forenames convertible and convertible names present in reference_language_sentence,
+				otherwise original sentences """
+
+		reference_language_sentence, translation = sentences
+		if self.names_convertible and any(default_name in reference_language_sentence for default_name in self._DEFAULT_NAMES):
+			reference_language_sentence, picked_names = self._convert_sentence_forenames(reference_language_sentence)
+			translation, _ = self._convert_sentence_forenames(translation, picked_names)
+		return reference_language_sentence, translation
 
 	# -----------------
 	# .Mode

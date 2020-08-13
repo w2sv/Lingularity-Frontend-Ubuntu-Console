@@ -161,7 +161,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     if sentence_pair is None:
                         print('Sentence data file depleted')
                         return
-                    reference_sentence, translation = self._backend.convert_names_if_possible(*sentence_pair)
+                    reference_sentence, translation = self._backend.convert_sentences_forenames_if_feasible(sentence_pair)
                 except (ValueError, IndexError):
                     continue
 

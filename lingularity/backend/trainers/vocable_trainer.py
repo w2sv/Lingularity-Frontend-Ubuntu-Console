@@ -100,7 +100,11 @@ class VocableTrainerBackend(TrainerBackend):
         return list(filter(lambda entry: entry.is_new, self._vocable_entries))
 
     # ---------------
-    # Evaluation
+    # Training
+    # ---------------
+
+    # ---------------
+    # .Evaluation
     # ---------------
     class ResponseEvaluation(ExtendedEnum):
         Wrong = 0
@@ -133,7 +137,7 @@ class VocableTrainerBackend(TrainerBackend):
             return self.ResponseEvaluation.Wrong
 
     # ------------------
-    # Sentence Query
+    # .related sentences
     # ------------------
     def get_related_sentences(self, token: str, n: int) -> Optional[List[str]]:
         WORD_ROOT_LENGTH = 4
@@ -145,3 +149,15 @@ class VocableTrainerBackend(TrainerBackend):
 
         random_indices = np.random.randint(0, len(sentence_indices), n)
         return self._sentence_data[sentence_indices[random_indices]][:, 1]
+
+    def convert_sentences_forenames_if_feasible(self, sentences: List[str]) -> List[str]:
+        """
+            Args:
+                sentences: vocable related sentences
+            Returns:
+                List of sentences of either converted names in case of containment of convertible names
+                    or original one if not """
+
+        if self.names_convertible:
+            sentences, _ = zip(*map(self._convert_sentence_forenames, sentences))
+        return sentences

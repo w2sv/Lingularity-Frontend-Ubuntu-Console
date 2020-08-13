@@ -1,8 +1,9 @@
 from typing import List, Optional, Iterator, Any, Sequence, Tuple
 import os
-from abc import ABC
+from abc import ABC, abstractmethod
 from functools import cached_property
 import time
+import random
 
 import nltk
 import numpy as np
@@ -11,6 +12,7 @@ import vlc
 from mutagen.mp3 import MP3
 
 from lingularity.backend.database import MongoDBClient
+from lingularity.backend.data_fetching.language_typical_forenames import fetch_typical_forenames
 from lingularity.utils.time import get_timestamp
 
 
@@ -19,13 +21,6 @@ class TrainerBackend(ABC):
     _TTS_AUDIO_FILE_PATH = f'{os.getcwd()}/tts_audio_files'
 
     _DEFAULT_NAMES = ('Tom', 'Mary')
-    _LANGUAGE_2_NAMES = {
-        'Italian': ('Alessandro', 'Christina'),
-        'French': ('Antoine', 'Amelie'),
-        'Spanish': ('Emilio', 'Luciana'),
-        'Hungarian': ('László', 'Zsóka'),
-        'German': ('Günther', 'Irmgard')
-    }
 
     def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
         if not os.path.exists(self._BASE_LANGUAGE_DATA_PATH):
@@ -33,7 +28,10 @@ class TrainerBackend(ABC):
 
         self._non_english_language = non_english_language
         self._train_english = train_english
-        self.names_convertible: bool = self._LANGUAGE_2_NAMES.get(self._non_english_language) is not None
+
+        self._language_typical_forenames: Optional[List[Tuple[str]]] = fetch_typical_forenames(non_english_language)
+        self.names_convertible: bool = self._language_typical_forenames is not None
+
         self._tts_language_abbreviation: Optional[str] = {v: k for k, v in gtts.lang.tts_langs().items()}.get(self._non_english_language)
         self.tts_available: bool = self._tts_language_abbreviation is not None
 
@@ -154,8 +152,12 @@ class TrainerBackend(ABC):
         except StopIteration:
             return None
 
-    def accommodate_names(self, sentence: str) -> str:
-        """ Assertion of self._convertible name being True to be made before invocation """
+    @abstractmethod
+    def convert_sentences_forenames_if_feasible(self, sentences: List[str]) -> Sequence[str]:
+        pass
+
+    def _convert_sentence_forenames(self, sentence: str, names: Optional[Tuple[Optional[str]]]=None) -> Tuple[str, Tuple[Optional[str]]]:
+        """ Assertion of self.names_convertible being True to be made before invocation """
 
         # break up sentence into distinct tokens
         sentence_tokens = sentence[:-1].split(' ')
@@ -169,9 +171,11 @@ class TrainerBackend(ABC):
                 post_apostrophe_components_with_index.append((apostrophe_split_token[1], i))
 
         # replace default name with language and gender-corresponding one if existent
-        for name_ind, name in enumerate(self._DEFAULT_NAMES):
+        picked_names = [None, None]
+        for gender_index, name in enumerate(self._DEFAULT_NAMES):
             try:
-                sentence_tokens[sentence_tokens.index(name)] = self._LANGUAGE_2_NAMES[self.language][name_ind]
+                picked_names[gender_index] = random.choice(self._language_typical_forenames[gender_index]) if not names else names[gender_index]
+                sentence_tokens[sentence_tokens.index(name)] = picked_names[gender_index]
             except ValueError:
                 pass
 
@@ -180,7 +184,7 @@ class TrainerBackend(ABC):
             sentence_tokens[corresponding_sentence_token_index] += f"'{post_apostrophe_token}"
 
         # fuse tokens to string, append sentence closing punctuation
-        return ' '.join(sentence_tokens) + sentence[-1]
+        return ' '.join(sentence_tokens) + sentence[-1], picked_names
 
     # -----------------
     # .TTS

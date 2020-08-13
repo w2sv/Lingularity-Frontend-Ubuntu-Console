@@ -2,13 +2,20 @@ from typing import Dict, List
 import os
 import warnings
 
-import requests
-from bs4 import BeautifulSoup
+import urllib.request
 import zipfile
 
-from .patching import patched_urllib
+from lingularity.backend.data_fetching.utils.page_source_reading import read_page_source
 
 warnings.filterwarnings('ignore')
+
+
+class AppUrlOpener(urllib.request.FancyURLopener):
+    version = 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.69 Safari/537.36'
+
+
+urllib._urlopener = AppUrlOpener()  # type: ignore
+patched_urllib = urllib
 
 
 # TODO: debug telugu download
@@ -25,12 +32,7 @@ class SentenceDataFetcher:
     def _get_language_2_ziplink_dict() -> Dict[str, str]:
         FLAG_URL = 'http://www.manythings.org/img/usa.png'  # initiating every zip link row
 
-        response = requests.get(SentenceDataFetcher.PAGE_URL, headers={'User-Agent': 'XY'})  # specific header for erroneous response 406 resolution
-        response_code = int(''.join(filter(lambda c: c.isdigit(), str(response))))
-        if response_code != 200:
-            raise ConnectionError('Erroneous webpage response')
-
-        page_content = str(BeautifulSoup(response.text, "html.parser"))
+        page_content = read_page_source(SentenceDataFetcher.PAGE_URL)
         download_link_rows = page_content[page_content.find(FLAG_URL):page_content.rfind(FLAG_URL)].split('\n')
         relevant_columns = (row.split('\t')[1:][0] for row in download_link_rows[:-1])
         return {row[:row.find(' ')]: row[row.find('"') + 1:row.rfind('"')] for row in relevant_columns}

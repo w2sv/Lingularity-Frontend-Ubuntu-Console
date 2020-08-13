@@ -126,11 +126,9 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 print(f'{"| " if response else "         "}Correct translation: ', entry.display_translation, end='')
             print('')
 
-            related_sentences = self._backend.get_related_sentences(entry.display_translation, n=self.N_RELATED_SENTENCES_2_BE_DISPLAYED)
-            if related_sentences is not None:
-                if self._backend.names_convertible:
-                    related_sentences = map(self._backend.accommodate_names, related_sentences)
-                [print('\t', s) for s in related_sentences]
+            if (related_sentences := self._backend.get_related_sentences(entry.display_translation, n=self.N_RELATED_SENTENCES_2_BE_DISPLAYED)) is not None:
+                forename_converted_names = self._backend.convert_sentences_forenames_if_feasible(related_sentences)
+                [print('\t', s) for s in forename_converted_names]
             print('_______________')
 
             self._n_trained_items += 1
