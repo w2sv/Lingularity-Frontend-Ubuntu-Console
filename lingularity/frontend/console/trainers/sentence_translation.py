@@ -165,7 +165,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                 except (ValueError, IndexError):
                     continue
 
-                self._buffer_print(INDENTATION, reference_sentence, '\t')
+                self._buffer_print(f'{INDENTATION}{reference_sentence}')
             else:
                 suspend_translation_output = False
             try:
@@ -209,7 +209,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
             erase_lines(2)
             if not suspend_translation_output:
-                self._buffer_print(INDENTATION, translation, '\n', INDENTATION, '_______________')
+                self._buffer_print(f'{INDENTATION}{translation}')
+                self._buffer_print(f'{INDENTATION}_______________')
 
                 if self._tts_available_and_enabled:
                     if previous_tts_audio_file_path is not None:
@@ -220,7 +221,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                 self._n_trained_items += 1
 
                 if self._n_trained_items >= 5:
-                    self._buffer_print.partially_redo_buffered_output(n_lines_to_be_removed=2)
+                    self._buffer_print.partially_redo_buffered_output(n_lines_to_be_removed=3)
 
                 if not self._tts_available_and_enabled:
                     # TODO: let sleep duration be proportional to translation length

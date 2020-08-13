@@ -29,8 +29,9 @@ class BufferPrint:
         self._buffer: Deque[str] = deque()
 
     @property
-    def n_comprised_lines(self) -> int:
+    def n_buffered_lines(self) -> int:
         # TODO: add resilience regarding lines exceeding terminal length
+
         return self._buffer.__len__() + sum(map(lambda line: line.count('\n'), self._buffer))
 
     def __call__(self, *args, **kwargs):
@@ -38,7 +39,7 @@ class BufferPrint:
         _print(*args, **kwargs)
 
     def partially_redo_buffered_output(self, n_lines_to_be_removed: int):
-        erase_lines(self.n_comprised_lines)
+        erase_lines(self.n_buffered_lines)
         for _ in range(n_lines_to_be_removed):
             self._buffer.popleft()
 
