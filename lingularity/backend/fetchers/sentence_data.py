@@ -2,22 +2,16 @@ from typing import Dict, List
 import os
 import warnings
 
-import urllib.request
 import requests
 from bs4 import BeautifulSoup
 import zipfile
+
+from .patching import patched_urllib
 
 warnings.filterwarnings('ignore')
 
 
 # TODO: debug telugu download
-
-
-class AppUrlOpener(urllib.request.FancyURLopener):
-    version = 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.69 Safari/537.36'
-
-
-urllib._urlopener = AppUrlOpener()  # type: ignore
 
 
 class SentenceDataFetcher:
@@ -53,7 +47,7 @@ class SentenceDataFetcher:
             os.makedirs(save_destination_dir)
 
         save_destination_link = os.path.join(save_destination_dir, f'{language}.zip')
-        urllib._urlopener.retrieve(zip_link, save_destination_link)  # type: ignore
+        patched_urllib._urlopener.retrieve(zip_link, save_destination_link)  # type: ignore
         return save_destination_link
 
     @staticmethod

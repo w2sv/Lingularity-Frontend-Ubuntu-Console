@@ -1,4 +1,4 @@
-from lingularity.backend.sentence_data_fetcher import SentenceDataFetcher
+from lingularity.backend.fetchers import SentenceDataFetcher
 
 
 def test_zip_download_link_parsing():

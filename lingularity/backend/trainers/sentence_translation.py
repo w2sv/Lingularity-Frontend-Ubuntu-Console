@@ -7,7 +7,7 @@ import numpy as np
 
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.sentence_data_fetcher import SentenceDataFetcher
+from lingularity.backend.fetchers import SentenceDataFetcher
 from lingularity.backend.trainers.token_maps import Stem2SentenceIndices
 from lingularity.utils.enum import ExtendedEnum
 
