@@ -19,27 +19,25 @@ def fetch_language_corresponding_countries(language: str) -> Tuple[str]:
     page_content = str(BeautifulSoup(response.text, "html.parser"))
     rows = page_content.split('\n')
 
-    try:
-        for i, row in enumerate(rows):
-            if 'Official language' in row:
+    for i, row in enumerate(rows):
+        if 'Official language' in row:
+            try:
                 match = re.findall(r'Flag_of.*.svg', row)[0]
                 flag_of_identifiers = set(filter(lambda identifier: identifier.startswith('Flag_of'), match.split('/')))
-                countries = list(map(lambda flag_of_identifier: flag_of_identifier[len('Flag_of_'):flag_of_identifier.find('.')], flag_of_identifiers))
-                print(countries)
-                break
-    except IndexError:
-        for i, row in enumerate(rows):
-            if '<ul class="NavContent" style="list-style: none none; margin-left: 0; text-align: left; font-size: 105%; margin-top: 0; margin-bottom: 0; line-height: inherit;"' in row:
-                index = i
+                return list(map(lambda flag_of_identifier: flag_of_identifier[len('Flag_of_'):flag_of_identifier.find('.')], flag_of_identifiers))
+            except IndexError:
+                pass
 
-                while 'title' in (country_possessing_row := rows[index]):
-                    country = country_possessing_row[country_possessing_row[:-1].rfind('>')+1:country_possessing_row.rfind('<')]
-                    if not len(country.strip()):
-                        title_starting_row = country_possessing_row[country_possessing_row.find('title') + len('title'):]
-                        country = title_starting_row[title_starting_row.find('>') + 1:title_starting_row.find('<')]
-                    print(country)
-                    index += 1
-                break
+        elif '<ul class="NavContent" style="list-style: none none; margin-left: 0; text-align: left; font-size: 105%; margin-top: 0; margin-bottom: 0; line-height: inherit;"' in row:
+            countries = []
+            while 'title' in (country_possessing_row := rows[i]):
+                country = country_possessing_row[country_possessing_row[:-1].rfind('>')+1:country_possessing_row.rfind('<')]
+                if not len(country.strip()):
+                    title_starting_row = country_possessing_row[country_possessing_row.find('title') + len('title'):]
+                    country = title_starting_row[title_starting_row.find('>') + 1:title_starting_row.find('<')]
+                countries.append(country)
+                i += 1
+            return countries
 
 
 
@@ -67,6 +65,7 @@ def fetch_typical_forenames(language: str) -> List[Tuple[str]]:
     return [tuple(scrape_names(row_index)) for row_index in name_block_initiating_row_indices]
 
 if __name__ == '__main__':
-    fetch_language_corresponding_countries('Italian')
+    countries = fetch_language_corresponding_countries('German')
+    print(countries)
 
     # fetch_typical_forenames('Italian')
