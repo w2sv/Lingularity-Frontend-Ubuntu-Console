@@ -98,6 +98,8 @@ class TrainerBackend(ABC):
         return sentence_data, self._query_lets_go_translation(sentence_data)
 
     def _parse_sentence_data(self) -> np.ndarray:
+        print('Reading in sentence data...')
+
         data = open(self.sentence_file_path, 'r', encoding='utf-8').readlines()
         split_data = [i.split('\t') for i in data]
 
@@ -142,16 +144,30 @@ class TrainerBackend(ABC):
     def accommodate_names(self, sentence: str) -> str:
         """ Assertion of self._convertible name being True to be made before invocation """
 
-        # TODO: handle 's
+        # break up sentence into distinct tokens
         sentence_tokens = sentence[:-1].split(' ')
-        punctuation = sentence[-1]
 
+        # strip tokens off post-apostrophe-appendixes and store the latter with corresponding
+        # token index
+        post_apostrophe_components_with_index: List[Tuple[str, int]] = []
+        for i, token in enumerate(sentence_tokens):
+            if len((apostrophe_split_token := token.split("'"))) == 2:
+                sentence_tokens[i] = apostrophe_split_token[0]
+                post_apostrophe_components_with_index.append((apostrophe_split_token[1], i))
+
+        # replace default name with language and gender-corresponding one if existent
         for name_ind, name in enumerate(self._DEFAULT_NAMES):
             try:
                 sentence_tokens[sentence_tokens.index(name)] = self._LANGUAGE_2_NAMES[self.language][name_ind]
             except ValueError:
                 pass
-        return ' '.join(sentence_tokens) + punctuation
+
+        # add post-apostrophe-appendixes back to corresponding tokens
+        for post_apostrophe_token, corresponding_sentence_token_index in post_apostrophe_components_with_index:
+            sentence_tokens[corresponding_sentence_token_index] += f"'{post_apostrophe_token}"
+
+        # fuse tokens to string, append sentence closing punctuation
+        return ' '.join(sentence_tokens) + sentence[-1]
 
     # -----------------
     # .TTS
