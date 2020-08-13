@@ -110,12 +110,13 @@ class TrainerBackend(ABC):
         reference_appendix_stripped_data = self._get_reference_appendix_stripped_sentence_data(raw_data)
 
         # split at tab, strip newlines; invert vertical sentence order in case of english training
+        tab_split_data: List[List[str]] = []
         for i, row in enumerate(reference_appendix_stripped_data):
             split_line = row.split('\t')
-            reference_appendix_stripped_data[i] = [split_line[0], split_line[1].strip('\n')]
+            tab_split_data.append([split_line[0], split_line[1].strip('\n')])
 
             if self._train_english:
-                reference_appendix_stripped_data[i] = reversed(reference_appendix_stripped_data[i])
+                tab_split_data = list(reversed(tab_split_data[i]))
 
         return np.asarray(reference_appendix_stripped_data)
 

@@ -35,7 +35,8 @@ def fetch_typical_forenames(language: str) -> Optional[List[Tuple[str]]]:
         forenames = [tuple(scrape_names(row_index)) for row_index in name_block_initiating_row_indices]
         if all(len(name_tuple) for name_tuple in forenames):
             print(f'Employing names originating from {country}')
-            return forenames
+            return forenames  # type: ignore
+    return None
 
 
 def _fetch_countries_language_officially_employed_in(language: str) -> Optional[List[str]]:
@@ -66,6 +67,7 @@ def _fetch_countries_language_officially_employed_in(language: str) -> Optional[
                 countries.append(country)
                 i += 1
             return _correct_corrupted_country_names(countries)
+    return None
 
 
 def _correct_corrupted_country_names(country_list: List[str]) -> List[str]:
