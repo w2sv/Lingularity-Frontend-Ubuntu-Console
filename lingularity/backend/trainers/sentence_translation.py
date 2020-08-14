@@ -42,7 +42,7 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 				otherwise original sentences """
 
 		reference_language_sentence, translation = sentences
-		if self.names_convertible and any(default_name in reference_language_sentence for default_name in self._DEFAULT_NAMES):
+		if self.names_convertible and any(default_name in reference_language_sentence for default_name in self._DEFAULT_SENTENCE_DATA_FORENAMES):
 			reference_language_sentence, picked_names = self._convert_sentence_forenames(reference_language_sentence)
 			translation, _ = self._convert_sentence_forenames(translation, picked_names)
 		return reference_language_sentence, translation

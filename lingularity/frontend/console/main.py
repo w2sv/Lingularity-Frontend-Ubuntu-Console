@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Dict, Union, Callable
+from typing import Optional, Dict, Union, Callable, Any
 import os
 import time
 from getpass import getpass
@@ -6,8 +6,10 @@ from functools import partial
 import requests
 import sys
 import cursor
+import random
 
 from lingularity.backend.database import MongoDBClient
+from lingularity.backend.ops import google
 from lingularity.utils.input_resolution import recurse_on_unresolvable_input, recurse_on_invalid_input, resolve_input
 from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print, centered_input_indentation, DEFAULT_VERTICAL_VIEW_OFFSET
 from lingularity.utils.date import today_or_yesterday, string_date_2_datetime_type
@@ -105,15 +107,25 @@ def change_account():
     return complete_initialization()
 
 
-def extended_starting_screen(username: str):
+def extended_starting_screen(username: str, latest_trained_language: Optional[str]):
+    # TODO: abort delay caused by translation query by either querying before first print or
+    #       adding translation to (last session statistics)
+
+    CONSECUTIVE_VERTICAL_SPACE = '\n' * 2
+
     centered_print("Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
     centered_print("Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,")
     centered_print("e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
-    centered_print(f"What's up {username}?", '\n' * 2)
+
+    constitution_query = random.choice(list(map(lambda question_corpus: question_corpus + f' {username.title()}?', [f"What's up", f"How are you"])))
+    if (google_language_abbreviation := google.get_language_abbreviation(latest_trained_language)) is not None:
+        constitution_query_translation = google.translate(constitution_query, src='en', dest=google_language_abbreviation)
+        centered_print(constitution_query_translation, CONSECUTIVE_VERTICAL_SPACE)
+    else:
+        centered_print(constitution_query, CONSECUTIVE_VERTICAL_SPACE)
 
 
-def display_last_session_statistics(client: MongoDBClient):
-    last_session_metrics = client.query_last_session_statistics()
+def display_last_session_statistics(last_session_metrics: Dict[str, Any]):
     if last_session_metrics is None:
         return
 
@@ -175,8 +187,11 @@ def complete_initialization():
     if not client_user_set:
         mongodb_client = authenticate(mongodb_client)
 
-    extended_starting_screen(username=mongodb_client.user)
-    display_last_session_statistics(client=mongodb_client)
+    if (last_session_metrics := mongodb_client.query_last_session_statistics()) is not None:
+        extended_starting_screen(username=mongodb_client.user, latest_trained_language=last_session_metrics['language'])
+        display_last_session_statistics(last_session_metrics=last_session_metrics)
+    else:
+        extended_starting_screen(username=mongodb_client.user, latest_trained_language=None)
 
     action_selection: str = select_action()
     action_executor = ELIGIBLE_ACTIONS[action_selection]

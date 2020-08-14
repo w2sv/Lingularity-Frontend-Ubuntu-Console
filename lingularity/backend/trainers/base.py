@@ -13,6 +13,7 @@ from mutagen.mp3 import MP3
 
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.data_fetching.language_typical_forenames import fetch_typical_forenames
+from lingularity.backend.ops import google
 from lingularity.utils.time import get_timestamp
 
 
@@ -20,7 +21,7 @@ class TrainerBackend(ABC):
     _BASE_LANGUAGE_DATA_PATH = f'{os.getcwd()}/language_data'
     _TTS_AUDIO_FILE_PATH = f'{os.getcwd()}/tts_audio_files'
 
-    _DEFAULT_NAMES = ('Tom', 'Mary')
+    _DEFAULT_SENTENCE_DATA_FORENAMES = ('Tom', 'Mary')
 
     def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
         if not os.path.exists(self._BASE_LANGUAGE_DATA_PATH):
@@ -32,8 +33,8 @@ class TrainerBackend(ABC):
         self._language_typical_forenames: Optional[List[Tuple[str]]] = fetch_typical_forenames(non_english_language)
         self.names_convertible: bool = self._language_typical_forenames is not None
 
-        self._tts_language_abbreviation: Optional[str] = {v: k for k, v in gtts.lang.tts_langs().items()}.get(self._non_english_language)
-        self.tts_available: bool = self._tts_language_abbreviation is not None
+        self._google_ops_language_abbreviation: Optional[str] = google.get_language_abbreviation(self._non_english_language)
+        self.tts_available: bool = self._google_ops_language_abbreviation is not None
 
         mongodb_client.language = non_english_language
         self.mongodb_client = mongodb_client
@@ -93,7 +94,7 @@ class TrainerBackend(ABC):
     # ----------------
     def _process_sentence_data_file(self) -> Tuple[np.ndarray, Optional[str]]:
         sentence_data = self._read_in_sentence_data()
-        return sentence_data, self._query_lets_go_translation(sentence_data)
+        return sentence_data, self._query_sentence_data_for_translation("Let's go!", sentence_data, 0.3)
 
     def _read_in_sentence_data(self) -> np.ndarray:
         """
@@ -133,11 +134,10 @@ class TrainerBackend(ABC):
             return raw_data
 
     @staticmethod
-    def _query_lets_go_translation(unshuffled_sentence_data: np.ndarray) -> Optional[str]:
-        for content, i in ((sentence_pair[0], i) for i, sentence_pair in
-                                    enumerate(unshuffled_sentence_data[:int(len(unshuffled_sentence_data) * 0.3)])):
-            if content == "Let's go!":
-                return unshuffled_sentence_data[i][1]
+    def _query_sentence_data_for_translation(english_entry: str, sentence_data: np.ndarray, sentence_file_length_percentage: float = 1.0) -> Optional[str]:
+        for content, i in ((sentence_pair[0], i) for i, sentence_pair in enumerate(sentence_data[:int(len(sentence_data) * sentence_file_length_percentage)])):
+            if content == english_entry:
+                return sentence_data[i][1]
         return None
 
     # -----------------
@@ -175,7 +175,7 @@ class TrainerBackend(ABC):
 
         # replace default name with language and gender-corresponding one if existent
         picked_names: List[Optional[str]] = [None, None]
-        for gender_index, default_name in enumerate(self._DEFAULT_NAMES):
+        for gender_index, default_name in enumerate(self._DEFAULT_SENTENCE_DATA_FORENAMES):
             try:
                 tokens_replacement_index = sentence_tokens.index(default_name)  # throws ValueError in case of no default name being present
 
@@ -206,7 +206,7 @@ class TrainerBackend(ABC):
     def download_tts_audio(self, text: str) -> str:
         audio_file_path = f'{self._TTS_AUDIO_FILE_PATH}/{get_timestamp()}.mp3'
 
-        gtts.gTTS(text, lang=self._tts_language_abbreviation).save(audio_file_path)
+        gtts.gTTS(text, lang=self._google_ops_language_abbreviation).save(audio_file_path)
         return audio_file_path
 
     @staticmethod
