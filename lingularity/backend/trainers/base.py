@@ -210,11 +210,13 @@ class TrainerBackend(ABC):
         return audio_file_path
 
     @staticmethod
-    def play_audio_file(audio_file_path: str, suspend_program_for_duration=False):
-        vlc.MediaPlayer(audio_file_path).play()
+    def play_audio_file(audio_file_path: str, playback_rate=1.0, suspend_program_for_duration=False):
+        player = vlc.MediaPlayer(audio_file_path)
+        player.set_rate(playback_rate)
+        player.play()
 
         if suspend_program_for_duration:
-            duration = MP3(audio_file_path).info.length - 0.2
+            duration = MP3(audio_file_path).info.length / playback_rate - 0.2
             start_time = time.time()
             while time.time() - start_time < duration:
                 # TODO: let function break on enter stroke by employing threading
