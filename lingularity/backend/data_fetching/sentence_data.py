@@ -32,7 +32,7 @@ class SentenceDataFetcher:
     def _get_language_2_ziplink_dict() -> Dict[str, str]:
         FLAG_URL = 'http://www.manythings.org/img/usa.png'  # initiating every zip link row
 
-        page_content = read_page_source(SentenceDataFetcher.PAGE_URL)
+        page_content = read_page_source(SentenceDataFetcher.PAGE_URL).text
         download_link_rows = page_content[page_content.find(FLAG_URL):page_content.rfind(FLAG_URL)].split('\n')
         relevant_columns = (row.split('\t')[1:][0] for row in download_link_rows[:-1])
         return {row[:row.find(' ')]: row[row.find('"') + 1:row.rfind('"')] for row in relevant_columns}

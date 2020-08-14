@@ -30,6 +30,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._playback_speed = self._get_playback_speed()
 
     def _get_playback_speed(self) -> Optional[float]:
+        assert self._backend is not None
+
         if not self._backend.tts_available:
             return None
         else:
@@ -245,7 +247,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     # TODO: let sleep duration be proportional to translation length
                     time.sleep(1.2)
 
-    def _set_different_playback_speed(self) -> Optional[float]:
+    def _set_different_playback_speed(self):
         valid_playback_speed = lambda playback_speed: 0.1 < playback_speed < 5
 
         print('Playback speed:\n\t', end='')

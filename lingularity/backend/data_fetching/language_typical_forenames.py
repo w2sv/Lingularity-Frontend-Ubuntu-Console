@@ -13,12 +13,13 @@ def fetch_typical_forenames(language: str) -> Optional[List[Tuple[str]]]:
     PAGE_URL = 'http://en.wikipedia.org/wiki/List_of_most_popular_given_names'
 
     countries_language_officially_employed_in = _fetch_countries_language_officially_employed_in(language)
+
     if countries_language_officially_employed_in is None:
         return None
 
     shuffle(countries_language_officially_employed_in)
 
-    page_source_rows = read_page_source(PAGE_URL).split('\n')
+    page_source_rows = read_page_source(PAGE_URL).text.split('\n')
 
     for country in countries_language_officially_employed_in:
         name_block_initiating_row_indices = [i for i, row in enumerate(page_source_rows) if row.endswith(f'</a></sup></td>') and country in row]
@@ -46,7 +47,7 @@ def _fetch_countries_language_officially_employed_in(language: str) -> Optional[
 
     page_url = f'http://en.wikipedia.org/wiki/{language}_language'
 
-    page_source_rows = read_page_source(page_url).split('\n')
+    page_source_rows = str(read_page_source(page_url)).split('\n')
 
     for i, row in enumerate(page_source_rows):
         if 'Official language' in row:
@@ -72,6 +73,7 @@ def _fetch_countries_language_officially_employed_in(language: str) -> Optional[
 
 def _correct_corrupted_country_names(country_list: List[str]) -> List[str]:
     repr_2_actual = {'Mainland China': 'China',
+                     'the_People%27s_Republic_of_China': 'China',
                      'the_Philippines': 'Philippines',
                      'the_Czech_Republic': 'Czech_Republic'}
 

@@ -118,14 +118,14 @@ def extended_starting_screen(username: str, latest_trained_language: Optional[st
     centered_print("e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
 
     constitution_query = random.choice(list(map(lambda question_corpus: question_corpus + f' {username.title()}?', [f"What's up", f"How are you"])))
-    if (google_language_abbreviation := google.get_language_abbreviation(latest_trained_language)) is not None:
+    if latest_trained_language is not None and (google_language_abbreviation := google.get_language_abbreviation(latest_trained_language)) is not None:
         constitution_query_translation = google.translate(constitution_query, src='en', dest=google_language_abbreviation)
         centered_print(constitution_query_translation, CONSECUTIVE_VERTICAL_SPACE)
     else:
         centered_print(constitution_query, CONSECUTIVE_VERTICAL_SPACE)
 
 
-def display_last_session_statistics(last_session_metrics: Dict[str, Any]):
+def display_last_session_statistics(last_session_metrics: Optional[Dict[str, Any]]):
     if last_session_metrics is None:
         return
 

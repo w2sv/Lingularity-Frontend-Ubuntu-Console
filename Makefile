@@ -2,7 +2,7 @@ SHELL=/bin/bash
 
 test:
 	mypy lingularity/
-	python -m pytest tests/
+	python -m pytest -vv tests/
 
 _install-base-dependencies:
 	bash install_dependencies.sh
