@@ -27,7 +27,17 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._backend = Backend(non_english_language, train_english, training_mode, mongodb_client)
 
         self._tts_disabled = False
-        self._playback_speed = 1.0
+        self._playback_speed = self._get_playback_speed()
+
+    def _get_playback_speed(self) -> Optional[float]:
+        if not self._backend.tts_available:
+            return None
+        else:
+            if (preset_playback_speed := self._backend.mongodb_client.query_playback_speed()) is not None:
+                return preset_playback_speed
+            else:
+                return 1.0
+
 
     def _select_language(self) -> Tuple[str, bool]:
         """
@@ -113,7 +123,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             "\t- 'change' to change playback speed")
 
         if not self._backend.tts_available:
-            instructions = instructions[:-2]
+            instructions = instructions[:-3]
 
         indentation = get_max_line_length_based_indentation(instructions)
 
@@ -155,7 +165,6 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         most_recent_vocable_entry_line_repr: Optional[str] = None  # 'token - meaning'
         previous_tts_audio_file_path: Optional[str] = None
 
-        # TODO: debug indentation
         INDENTATION = ' ' * 16
 
         while True:
@@ -194,23 +203,24 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                                 most_recent_vocable_entry_line_repr = altered_entry
                             maintain_resolution_suspension_and_erase_lines(n_lines=n_printed_lines)
 
-                    elif response == Options.DisableTTS.value and self._backend.tts_available:
-                        self._tts_disabled = True
-
-                    elif response == Options.EnableTTS.value and self._backend.tts_available and self._tts_disabled:
-                        self._tts_disabled = False
-                        audio_file_path = self._backend.download_tts_audio(translation)
-
-                    elif response == Options.ChangePlaybackSpeed.value:
-                        self._altered_playback_speed = self._get_altered_playback_speed()
-                        maintain_resolution_suspension_and_erase_lines(n_lines=3)
-
                     elif response == Options.Exit.value:
                         self._backend.clear_tts_audio_file_dir()
                         print('\n----------------')
                         print("Number of faced sentences: ", self._n_trained_items)
                         cursor.show()
                         return
+
+                    if self._backend.tts_available:
+                        if response == Options.DisableTTS.value:
+                            self._tts_disabled = True
+
+                        elif response == Options.EnableTTS.value and self._tts_disabled:
+                            self._tts_disabled = False
+                            audio_file_path = self._backend.download_tts_audio(translation)
+
+                        elif response == Options.ChangePlaybackSpeed.value:
+                            self._set_different_playback_speed()
+                            maintain_resolution_suspension_and_erase_lines(n_lines=3)
 
             except (KeyboardInterrupt, SyntaxError):
                 pass
@@ -235,21 +245,22 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     # TODO: let sleep duration be proportional to translation length
                     time.sleep(1.2)
 
-    def _get_altered_playback_speed(self) -> Optional[float]:
+    def _set_different_playback_speed(self) -> Optional[float]:
         valid_playback_speed = lambda playback_speed: 0.1 < playback_speed < 5
 
         print('Playback speed:\n\t', end='')
         KeyboardController().type(str(self._playback_speed))
         cursor.show()
 
-        _recurse = partial(recurse_on_invalid_input, func=self._get_altered_playback_speed, message='Invalid input', n_deletion_lines=3)
+        _recurse = partial(recurse_on_invalid_input, func=self._set_different_playback_speed, message='Invalid input', n_deletion_lines=3)
 
         try:
             altered_playback_speed = float(input())
             cursor.hide()
             if not valid_playback_speed(altered_playback_speed):
                 return _recurse()
-            return altered_playback_speed
+            self._playback_speed = altered_playback_speed
+            self._backend.mongodb_client.insert_playback_speed(self._playback_speed)
         except ValueError:
             return _recurse()
 

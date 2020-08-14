@@ -4,9 +4,7 @@ from dataclasses import dataclass
 import pymongo
 
 from lingularity.utils.date import datetag_today, n_days_ago
-
-
-# TODO: type returned dicts
+from .document_types import LastSessionStatistics, VocableAttributes
 
 
 class MongoDBClient:
@@ -91,7 +89,7 @@ class MongoDBClient:
     # .General
     # ------------------
     @property
-    def general_collection(self) -> pymongo.collection.Collection:#
+    def general_collection(self) -> pymongo.collection.Collection:
         """ {_id: 'unique',
              emaiLAddress: email_address,
              password: password,
@@ -121,7 +119,7 @@ class MongoDBClient:
     def query_password(self) -> str:
         return self.general_collection.find_one({'_id': 'unique'})['password']
 
-    def query_last_session_statistics(self) -> Optional[Dict[str, Any]]:
+    def query_last_session_statistics(self) -> Optional[LastSessionStatistics]:
         try:
             return self.general_collection.find_one({'_id': 'unique'})['lastSession']
         except TypeError:
@@ -133,7 +131,7 @@ class MongoDBClient:
     @property
     def vocabulary_collection(self) -> pymongo.collection.Collection:
         """ {'_id': language,
-             $target_language_token: {translation: translation
+             $target_language_token: {t: translation
                                       tf: times_faced
                                       s: score
                                       lfd: last_faced_date}} """
@@ -182,7 +180,7 @@ class MongoDBClient:
                 update={'$set': {new_token: new_attributes}}
             )
 
-    def query_vocable_attributes(self, vocable: str) -> Dict[str, Any]:
+    def query_vocable_attributes(self, vocable: str) -> VocableAttributes:
         return self.vocabulary_collection.find_one(self._language)[vocable]
 
     def query_vocabulary_data(self) -> List[Dict[str, Any]]:
@@ -223,7 +221,26 @@ class MongoDBClient:
         training_chronic.pop('_id')
         return training_chronic
 
-    
+    # ------------------
+    # .Training Chronic
+    # ------------------
+    @property
+    def language_related_collection(self) -> pymongo.collection.Collection:
+        """ {_id: $language,
+            playbackSpeed: $playback_speed} """
+
+        return self.user_data_base['language_related']
+
+    def insert_playback_speed(self, playback_speed: float):
+        self.language_related_collection.update_one(filter={'_id': self._language},
+                                                    update={'$set': {'playbackSpeed': playback_speed}},
+                                                    upsert=True)
+
+    def query_playback_speed(self) -> Optional[float]:
+        try:
+            return self.language_related_collection.find_one(filter={'_id': self._language})['playbackSpeed']
+        except (AttributeError, KeyError, TypeError):
+            return None
+
 if __name__ == '__main__':
     client = MongoDBClient(user='janek_zangenberg', language='Italian')
-    client.update_last_session_statistics('s', 78)
