@@ -177,6 +177,8 @@ class TrainerBackend(ABC):
         picked_names: List[Optional[str]] = [None, None]
         for gender_index, default_name in enumerate(self._DEFAULT_NAMES):
             try:
+                tokens_replacement_index = sentence_tokens.index(default_name)  # throws ValueError in case of no default name being present
+
                 if names is None:
                     assert self._language_typical_forenames is not None
 
@@ -186,7 +188,7 @@ class TrainerBackend(ABC):
 
                     employed_name = names[gender_index]  # type: ignore
 
-                sentence_tokens[sentence_tokens.index(default_name)] = employed_name
+                sentence_tokens[tokens_replacement_index] = employed_name
                 picked_names[gender_index] = employed_name
             except ValueError:
                 pass
