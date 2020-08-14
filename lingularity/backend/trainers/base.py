@@ -100,7 +100,10 @@ class TrainerBackend(ABC):
             Strips newly downloaded data off reference appendices and overrides data file
 
             Returns:
-                ndarray of List[reference_language_sentence, target_language_sentence] """
+                ndarray of List[reference_language_sentence, target_language_sentence]
+                    with if not self._train_english:
+                        reference_language_sentence == English
+                    and vice-versa """
 
         print('Reading in sentence data...')
 
@@ -112,13 +115,12 @@ class TrainerBackend(ABC):
         # split at tab, strip newlines; invert vertical sentence order in case of english training
         tab_split_data: List[List[str]] = []
         for i, row in enumerate(reference_appendix_stripped_data):
-            split_line = row.split('\t')
-            tab_split_data.append([split_line[0], split_line[1].strip('\n')])
+            tab_split_data.append(row.strip('\n').split('\t'))
 
             if self._train_english:
-                tab_split_data = list(reversed(tab_split_data[i]))
+                tab_split_data[i] = list(reversed(tab_split_data[i]))
 
-        return np.asarray(reference_appendix_stripped_data)
+        return np.asarray(tab_split_data)
 
     def _get_reference_appendix_stripped_sentence_data(self, raw_data: List[str]) -> List[str]:
         if len(raw_data[0].split('\t')) > 2:
@@ -157,7 +159,7 @@ class TrainerBackend(ABC):
     def convert_sentences_forenames_if_feasible(self, sentences: List[str]) -> Sequence[str]:
         pass
 
-    def _convert_sentence_forenames(self, sentence: str, names: Optional[Tuple[Optional[str]]]=None) -> Tuple[str, Tuple[Optional[str]]]:
+    def _convert_sentence_forenames(self, sentence: str, names: Optional[List[Optional[str]]]=None) -> Tuple[str, List[Optional[str]]]:
         """ Assertion of self.names_convertible being True to be made before invocation """
 
         # break up sentence into distinct tokens
@@ -172,11 +174,20 @@ class TrainerBackend(ABC):
                 post_apostrophe_components_with_index.append((apostrophe_split_token[1], i))
 
         # replace default name with language and gender-corresponding one if existent
-        picked_names = [None, None]
-        for gender_index, name in enumerate(self._DEFAULT_NAMES):
+        picked_names: List[Optional[str]] = [None, None]
+        for gender_index, default_name in enumerate(self._DEFAULT_NAMES):
             try:
-                picked_names[gender_index] = random.choice(self._language_typical_forenames[gender_index]) if not names else names[gender_index]
-                sentence_tokens[sentence_tokens.index(name)] = picked_names[gender_index]
+                if names is None:
+                    assert self._language_typical_forenames is not None
+
+                    employed_name = random.choice(self._language_typical_forenames[gender_index])
+                else:
+                    assert names[gender_index] is not None
+
+                    employed_name = names[gender_index]  # type: ignore
+
+                sentence_tokens[sentence_tokens.index(default_name)] = employed_name
+                picked_names[gender_index] = employed_name
             except ValueError:
                 pass
 

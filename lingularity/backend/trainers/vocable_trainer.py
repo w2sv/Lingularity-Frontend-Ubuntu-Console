@@ -159,5 +159,6 @@ class VocableTrainerBackend(TrainerBackend):
                     or original one if not """
 
         if self.names_convertible:
-            sentences, _ = zip(*map(self._convert_sentence_forenames, sentences))
+            converted_sentences, _ = zip(*map(self._convert_sentence_forenames, sentences))
+            return list(converted_sentences)
         return sentences
