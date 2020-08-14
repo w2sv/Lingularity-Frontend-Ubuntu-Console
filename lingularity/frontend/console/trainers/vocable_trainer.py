@@ -7,7 +7,8 @@ from pynput.keyboard import Controller as KeyboardController
 from lingularity.frontend.console.trainers import TrainerConsoleFrontend, SentenceTranslationTrainerConsoleFrontend
 from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend, VocableEntry
 from lingularity.backend.database import MongoDBClient
-from lingularity.utils.output_manipulation import clear_screen, erase_lines
+from lingularity.utils.output_manipulation import (clear_screen, erase_lines, DEFAULT_VERTICAL_VIEW_OFFSET,
+                                                   centered_print, get_max_line_length_based_indentation)
 from lingularity.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.utils.enum import ExtendedEnum
 
@@ -33,19 +34,23 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         elif eligible_languages.__len__() == 1:
             return eligible_languages[0], False
 
-        print('ELIGIBLE LANGUAGES: ')
-        for language in sorted(eligible_languages):
-            print(language)
+        centered_print(DEFAULT_VERTICAL_VIEW_OFFSET, 'ELIGIBLE LANGUAGES', DEFAULT_VERTICAL_VIEW_OFFSET)
 
-        language_selection = resolve_input(input('\nEnter desired language:\n').title(), eligible_languages)
+        indentation = get_max_line_length_based_indentation(eligible_languages)
+        for language in sorted(eligible_languages):
+            print(indentation, language)
+
+        input_query_message = 'Enter desired language: '
+        language_selection = resolve_input(input(f'\n{indentation[:-int(len(input_query_message) * 3/4)]}{input_query_message}').title(), eligible_languages)
         if language_selection is None:
             return recurse_on_unresolvable_input(self._select_language, deletion_lines=-1)
+        print('\n' * 2, end='')
         return language_selection, False  # TODO
 
     def _start_sentence_translation_trainer(self):
-        print('You have to accumulate vocabulary by means of the SentenceTranslation™ TrainerBackend or manual amassment first.')
+        centered_print('You have to accumulate vocabulary by means of the SentenceTranslation™ TrainerBackend or manual amassment first.')
         sleep(3)
-        print('Initiating SentenceTranslation TrainerBackend...')
+        centered_print('Initiating SentenceTranslation TrainerBackend...')
         sleep(2)
         clear_screen()
         return SentenceTranslationTrainerConsoleFrontend(self._backend.mongodb_client).run()
@@ -68,7 +73,10 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         clear_screen()
         new_vocabulary = self._backend.get_new_vocable_entries()
         if new_vocabulary:
-            display_vocabulary = resolve_input(input('Would you like to see the vocabulary you recently added? (y)es/(n)o\n').lower(), ['yes', 'no'])
+            print(DEFAULT_VERTICAL_VIEW_OFFSET)
+            centered_print('Would you like to see the vocabulary you recently added? (y)es/(n)o')
+            centered_print(' ', end='')
+            display_vocabulary = resolve_input(input().lower(), ['yes', 'no'])
             if display_vocabulary == 'yes':
                 [print('\t', entry.line_repr) for entry in new_vocabulary]
                 print('\n')
@@ -77,11 +85,18 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     def _display_pre_training_instructions(self):
         clear_screen()
 
-        print((f'Found {self._backend.n_imperfect_vocable_entries} imperfect entries.\n'
-                "Enter: \n\t- '#alter' in order to alter the translation(s) of the previously faced item.\n"
-                "\t\tNote: distinct translations are to be separated by commas.\n"
-                "\t- '#add' to add a new vocable.\n"
-                "\t- '#exit' to terminate the program.\n\n"))
+        print(DEFAULT_VERTICAL_VIEW_OFFSET * 2)
+        centered_print(f'Found {self._backend.n_imperfect_vocable_entries} imperfect entries.\n\n')
+        between_instruction_indentation = ' ' * 2
+        INSTRUCTIONS = ("Enter:",
+                        f"{between_instruction_indentation}- '#alter' in order to alter the translation(s) of the previously faced item.",
+                        f"{between_instruction_indentation * 4}Note: distinct translations are to be separated by commas.",
+                        f"{between_instruction_indentation}- '#add' to add a new vocable.",
+                        f"{between_instruction_indentation}- '#exit' to terminate the program.\n\n")
+
+        indentation = get_max_line_length_based_indentation(INSTRUCTIONS)
+        for instruction_row in INSTRUCTIONS:
+            print(f'{indentation}{instruction_row}')
 
         self._output_lets_go()
 
@@ -128,7 +143,8 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
             if (related_sentences := self._backend.get_related_sentences(entry.display_translation, n=self.N_RELATED_SENTENCES_2_BE_DISPLAYED)) is not None:
                 forename_converted_names = self._backend.convert_sentences_forenames_if_feasible(related_sentences)
-                [print('\t', s) for s in forename_converted_names]
+                indentation = get_max_line_length_based_indentation(forename_converted_names)
+                [print(indentation, s) for s in forename_converted_names]
             print('_______________')
 
             self._n_trained_items += 1

@@ -56,7 +56,7 @@ class TrainerConsoleFrontend(ABC):
     def insert_vocable_into_database(self) -> Tuple[Optional[str], int]:
         """ Returns:
                 inserted vocable entry line repr, None in case of invalid input
-                 number of printed lines """
+                number of printed lines """
 
         assert self._backend is not None
         vocable = input(f'Enter {self._backend.language} word/phrase: ')

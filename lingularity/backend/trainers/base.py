@@ -23,18 +23,19 @@ class TrainerBackend(ABC):
 
     _DEFAULT_SENTENCE_DATA_FORENAMES = ('Tom', 'Mary')
 
-    def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
+    def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient, vocable_expansion_mode=False):
         if not os.path.exists(self._BASE_LANGUAGE_DATA_PATH):
             os.mkdir(self._BASE_LANGUAGE_DATA_PATH)
 
         self._non_english_language = non_english_language
         self._train_english = train_english
 
-        self._language_typical_forenames: Optional[List[Tuple[str]]] = fetch_typical_forenames(non_english_language)
-        self.names_convertible: bool = self._language_typical_forenames is not None
+        if not vocable_expansion_mode:
+            self._language_typical_forenames: Optional[List[Tuple[str]]] = fetch_typical_forenames(non_english_language)
+            self.names_convertible: bool = self._language_typical_forenames is not None
 
-        self._google_ops_language_abbreviation: Optional[str] = google.get_language_abbreviation(self._non_english_language)
-        self.tts_available: bool = self._google_ops_language_abbreviation is not None
+            self._google_ops_language_abbreviation: Optional[str] = google.get_language_abbreviation(self._non_english_language)
+            self.tts_available: bool = self._google_ops_language_abbreviation is not None
 
         mongodb_client.language = non_english_language
         self.mongodb_client = mongodb_client

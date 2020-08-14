@@ -73,7 +73,7 @@ def centered_print(*output: str, end='\n'):
             print(_get_indentation(len(output_element)) + output_element, end=end if i == len(output) - 1 else '\n')
 
 
-def centered_input_indentation(input_message: str) -> str:
+def get_centered_input_query_indentation(input_message: str) -> str:
     INPUT_SPACE_LENGTH = 8
 
     return _get_indentation(len(input_message + ' ' * INPUT_SPACE_LENGTH))

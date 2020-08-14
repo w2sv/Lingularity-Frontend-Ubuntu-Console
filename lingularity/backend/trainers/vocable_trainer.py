@@ -76,7 +76,7 @@ class VocableEntry:
 
 class VocableTrainerBackend(TrainerBackend):
     def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient, vocable_expansion_mode=False):
-        super().__init__(non_english_language, train_english, mongodb_client)
+        super().__init__(non_english_language, train_english, mongodb_client, vocable_expansion_mode)
 
         if not vocable_expansion_mode:
             self._sentence_data, self.lets_go_translation = self._process_sentence_data_file()
