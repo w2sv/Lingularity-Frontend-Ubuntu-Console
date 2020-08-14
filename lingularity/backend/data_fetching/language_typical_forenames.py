@@ -19,7 +19,7 @@ def fetch_typical_forenames(language: str) -> Optional[List[Tuple[str]]]:
 
     shuffle(countries_language_officially_employed_in)
 
-    page_source_rows = read_page_source(PAGE_URL).text.split('\n')
+    page_source_rows = str(read_page_source(PAGE_URL)).split('\n')
 
     for country in countries_language_officially_employed_in:
         name_block_initiating_row_indices = [i for i, row in enumerate(page_source_rows) if row.endswith(f'</a></sup></td>') and country in row]
