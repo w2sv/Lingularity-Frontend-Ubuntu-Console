@@ -12,6 +12,7 @@ from lingularity.utils.output_manipulation import (clear_screen, erase_lines, DE
                                                    centered_print, get_max_line_length_based_indentation)
 from lingularity.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.utils.enum import ExtendedEnum
+from lingularity.utils.matplotlib import center_matplotlib_windows
 
 
 class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
@@ -232,4 +233,5 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         ax.axis('equal')
         ax.set_title(self.performance_verdict)
         fig.canvas.set_window_title(f'You got {self.n_correct_responses}/{self._n_trained_items} right')
+        center_matplotlib_windows()
         plt.show()
