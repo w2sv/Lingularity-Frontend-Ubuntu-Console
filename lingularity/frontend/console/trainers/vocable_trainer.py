@@ -3,6 +3,7 @@ from time import sleep
 
 import matplotlib.pyplot as plt
 from pynput.keyboard import Controller as KeyboardController
+import cursor
 
 from lingularity.frontend.console.trainers import TrainerConsoleFrontend, SentenceTranslationTrainerConsoleFrontend
 from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend, VocableEntry
@@ -25,7 +26,10 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         non_english_language, train_english = self._select_language()
         del self._temp_mongodb_client
 
+        cursor.hide()
+
         self._backend = VocableTrainerBackend(non_english_language, train_english, mongodb_client, vocable_expansion_mode)
+        cursor.show()
 
     def _select_language(self) -> Tuple[str, bool]:
         if not (eligible_languages:= self._temp_mongodb_client.get_vocabulary_possessing_languages()):
@@ -104,6 +108,8 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # Training
     # ------------------
     def _run_training(self):
+        INDENTATION = '\t' * 2
+
         class Option(ExtendedEnum):
             AddMeaning = '#alter'
             Vocable = '#add'
@@ -112,39 +118,44 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         previous_entry: Optional[VocableEntry] = None
 
         while (entry := self._backend.get_training_item()) is not None:
-            print(f'{entry.display_token} = ', end='')
+            translation_query_output = f'{INDENTATION + entry.display_token} = '
+            print(translation_query_output, end='')
 
             try:
+                cursor.show()
                 response = input()
+                cursor.hide()
             except KeyboardInterrupt:
                 print('')
                 erase_lines(1)
                 continue
             if response == Option.AddMeaning.value:
+                cursor.show()
                 n_printed_lines = self._alter_entry_translation(previous_entry)
+                cursor.hide()
                 erase_lines(n_printed_lines)
                 continue
             elif response == Option.Vocable.value:
+                cursor.show()
                 _, n_printed_lines = self.insert_vocable_into_database()
+                cursor.hide()
                 erase_lines(n_printed_lines + 1)
                 continue
             elif response == Option.Exit.value:
-                erase_lines(1)
+                print('')
+                erase_lines(2)
                 break
 
             response_evaluation = self._backend.get_response_evaluation(response, entry.display_translation)
             self._backend.mongodb_client.update_vocable_entry(entry.token, response_evaluation.value)
 
-            if response:
-                print('\t', response_evaluation.name, end=' ')
-            if response_evaluation != self._backend.ResponseEvaluation.Perfect:
-                print(f'{"| " if response else "         "}Correct translation: ', entry.display_translation, end='')
             print('')
+            erase_lines(2)
+            print(f'{translation_query_output}{response} | {response_evaluation.name.upper()} {f"| Correct translation: {entry.display_translation}" if response_evaluation.name != "Perfect" else ""}\n')
 
             if (related_sentence_pairs := self._backend.get_related_sentence_pairs(entry.display_translation, n=self.N_RELATED_SENTENCES_2_BE_DISPLAYED)) is not None:
                 forename_converted_sentence_pairs = [reversed(self._backend.convert_sentences_forenames_if_feasible(sentence_pair)) for sentence_pair in related_sentence_pairs]
                 joined_sentence_pairs = [' - '.join(sentence_pair) for sentence_pair in forename_converted_sentence_pairs]
-                # indentation = get_max_line_length_based_indentation(joined_sentence_pairs)
                 [centered_print(joined_sentence_pair) for joined_sentence_pair in joined_sentence_pairs]
 
             self._n_trained_items += 1
@@ -153,7 +164,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             if not self._n_trained_items % 10 and self._n_trained_items != self._backend.n_imperfect_vocable_entries:
                 centered_print(f'\n\n{self._n_trained_items} Entries faced, {self._backend.n_imperfect_vocable_entries - self._n_trained_items} more to go\n\n')
             else:
-                print('_______________')
+                centered_print('\n-----------------------\n')
             previous_entry = entry
 
     def _alter_entry_translation(self, entry: Optional[VocableEntry]) -> int:
