@@ -151,7 +151,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             self._n_correct_responses += response_evaluation.value
 
             if not self._n_trained_items % 10 and self._n_trained_items != self._backend.n_imperfect_vocable_entries:
-                print(f'\t\t{self._n_trained_items} Entries faced, {self._backend.n_imperfect_vocable_entries - self._n_trained_items} more to go', '\n')
+                centered_print(f'{self._n_trained_items} Entries faced, {self._backend.n_imperfect_vocable_entries - self._n_trained_items} more to go', '\n')
 
             previous_entry = entry
 

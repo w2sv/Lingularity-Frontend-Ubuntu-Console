@@ -35,6 +35,8 @@ class TrainerBackend(ABC):
             self._language_typical_forenames, corresponding_country = scrape_language_typical_forenames(non_english_language)
             self.names_convertible: bool = self._language_typical_forenames is not None
             if self.names_convertible and (language_demonyms := scrape_demonyms(country_name=corresponding_country)) is not None:
+                # TODO: check whether demonym equals adjective
+
                 print(f'Employing {language_demonyms[0]} names.')
 
             self._google_ops_language_abbreviation: Optional[str] = google.get_language_abbreviation(self._non_english_language)
@@ -139,6 +141,13 @@ class TrainerBackend(ABC):
 
     @staticmethod
     def _query_sentence_data_for_translation(english_entry: str, sentence_data: np.ndarray, sentence_file_length_percentage: float = 1.0) -> Optional[str]:
+        """
+            Args:
+                 english_entry: complete phrase whose translation ought to be queried
+                 sentence_data: tab-split
+                 sentence_file_length_percentage: percentage of sentence_data file length after exceeding which
+                    the query process will be stopped for performance optimization purposes """
+
         for content, i in ((sentence_pair[0], i) for i, sentence_pair in enumerate(sentence_data[:int(len(sentence_data) * sentence_file_length_percentage)])):
             if content == english_entry:
                 return sentence_data[i][1]
@@ -164,7 +173,22 @@ class TrainerBackend(ABC):
         pass
 
     def _convert_sentence_forenames(self, sentence: str, names: Optional[List[Optional[str]]]=None) -> Tuple[str, List[Optional[str]]]:
-        """ Assertion of self.names_convertible being True to be made before invocation """
+        """ Note: Assertion of self.names_convertible being True to be made before invocation
+
+            Args:
+                sentence: comprising default english names to be converted
+                names: list of already selected forenames of order [male_forename, female_forename], which,
+                            in case of presence, the correspondingly gendered default forename(s) will be
+                            replaced by in order to align the converted names of the reference sentence with
+                            the ones of the inherent translation sentence
+
+            Picks gender corresponding forenames randomly from self._language_typical_forenames
+            Doesn't demand passed sentence to forcibly contain a convertible name. In that case the original sentence
+                will be returned
+
+            Returns:
+                converted sentence: str
+                selected names: List[Optional[str]] """
 
         # break up sentence into distinct tokens
         sentence_tokens = sentence[:-1].split(' ')
@@ -234,8 +258,6 @@ class TrainerBackend(ABC):
     # Post training
     # -----------------
     def insert_session_statistics_into_database(self, n_trained_items: int):
-        assert self.mongodb_client is not None
-
         update_args = (self.__str__(), n_trained_items)
 
         self.mongodb_client.update_last_session_statistics(*update_args)

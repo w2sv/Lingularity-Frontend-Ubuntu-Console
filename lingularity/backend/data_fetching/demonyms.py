@@ -1,4 +1,5 @@
 from typing import List, Optional
+import logging
 
 from bs4 import BeautifulSoup
 
@@ -30,4 +31,6 @@ def scrape_demonyms(country_name: str) -> Optional[List[str]]:
                 first_demonym_fetched = True
             elif first_demonym_fetched and is_demonym(element):
                 demonyms.append(element)
+
+    logging.info(f'demonyms: {demonyms}')
     return demonyms if len(demonyms) else None
