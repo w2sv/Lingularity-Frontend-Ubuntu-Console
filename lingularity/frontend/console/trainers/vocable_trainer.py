@@ -141,18 +141,19 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 print(f'{"| " if response else "         "}Correct translation: ', entry.display_translation, end='')
             print('')
 
-            if (related_sentences := self._backend.get_related_sentences(entry.display_translation, n=self.N_RELATED_SENTENCES_2_BE_DISPLAYED)) is not None:
-                forename_converted_names = self._backend.convert_sentences_forenames_if_feasible(related_sentences)
-                indentation = get_max_line_length_based_indentation(forename_converted_names)
-                [print(indentation, s) for s in forename_converted_names]
-            print('_______________')
+            if (related_sentence_pairs := self._backend.get_related_sentence_pairs(entry.display_translation, n=self.N_RELATED_SENTENCES_2_BE_DISPLAYED)) is not None:
+                forename_converted_sentence_pairs = [reversed(self._backend.convert_sentences_forenames_if_feasible(sentence_pair)) for sentence_pair in related_sentence_pairs]
+                joined_sentence_pairs = [' - '.join(sentence_pair) for sentence_pair in forename_converted_sentence_pairs]
+                # indentation = get_max_line_length_based_indentation(joined_sentence_pairs)
+                [centered_print(joined_sentence_pair) for joined_sentence_pair in joined_sentence_pairs]
 
             self._n_trained_items += 1
             self._n_correct_responses += response_evaluation.value
 
             if not self._n_trained_items % 10 and self._n_trained_items != self._backend.n_imperfect_vocable_entries:
-                centered_print(f'{self._n_trained_items} Entries faced, {self._backend.n_imperfect_vocable_entries - self._n_trained_items} more to go', '\n')
-
+                centered_print(f'\n\n{self._n_trained_items} Entries faced, {self._backend.n_imperfect_vocable_entries - self._n_trained_items} more to go\n\n')
+            else:
+                print('_______________')
             previous_entry = entry
 
     def _alter_entry_translation(self, entry: Optional[VocableEntry]) -> int:

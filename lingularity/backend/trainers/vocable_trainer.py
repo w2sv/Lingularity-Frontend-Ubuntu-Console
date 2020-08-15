@@ -138,8 +138,9 @@ class VocableTrainerBackend(TrainerBackend):
 
     # ------------------
     # .related sentences
-    # ------------------
-    def get_related_sentences(self, token: str, n: int) -> Optional[List[str]]:
+    # ------------------                               assert self.mongodb_client is not None
+
+    def get_related_sentence_pairs(self, token: str, n: int) -> Optional[List[List[str]]]:
         WORD_ROOT_LENGTH = 4
 
         root = get_article_stripped_token(token)[:WORD_ROOT_LENGTH]
@@ -148,17 +149,4 @@ class VocableTrainerBackend(TrainerBackend):
             return None
 
         random_indices = np.random.randint(0, len(sentence_indices), n)
-        return self._sentence_data[sentence_indices[random_indices]][:, 1]
-
-    def convert_sentences_forenames_if_feasible(self, sentences: List[str]) -> List[str]:
-        """
-            Args:
-                sentences: vocable related sentences
-            Returns:
-                List of sentences of either converted names in case of containment of convertible names
-                    or original one if not """
-
-        if self.names_convertible:
-            converted_sentences, _ = zip(*map(self._convert_sentence_forenames, sentences))
-            return list(converted_sentences)
-        return sentences
+        return self._sentence_data[sentence_indices[random_indices]]

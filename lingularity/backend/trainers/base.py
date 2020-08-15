@@ -168,9 +168,20 @@ class TrainerBackend(ABC):
         except StopIteration:
             return None
 
-    @abstractmethod
-    def convert_sentences_forenames_if_feasible(self, sentences: List[str]) -> Sequence[str]:
-        pass
+    def convert_sentences_forenames_if_feasible(self, sentences: List[str]) -> Tuple[str, str]:
+        """
+            Args:
+                sentences: [reference_language_sentence, translation]
+            Returns:
+                converted sentences if forenames convertible and convertible names present in reference_language_sentence,
+                otherwise original sentences """
+
+        reference_language_sentence, translation = sentences
+        if self.names_convertible and any(
+                default_name in reference_language_sentence for default_name in self._DEFAULT_SENTENCE_DATA_FORENAMES):
+            reference_language_sentence, picked_names = self._convert_sentence_forenames(reference_language_sentence)
+            translation, _ = self._convert_sentence_forenames(translation, picked_names)
+        return reference_language_sentence, translation
 
     def _convert_sentence_forenames(self, sentence: str, names: Optional[List[Optional[str]]]=None) -> Tuple[str, List[Optional[str]]]:
         """ Note: Assertion of self.names_convertible being True to be made before invocation
