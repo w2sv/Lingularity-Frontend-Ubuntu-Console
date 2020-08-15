@@ -8,7 +8,9 @@ from .utils.page_source_reading import read_page_source
 def scrape_demonyms(country_name: str) -> Optional[List[str]]:
     """
         Args:
-            country_name: uppercase """
+            country_name: uppercase
+        Returns:
+            None in case of irretrievability, otherwise list of demonyms (predominantly 2 at max)"""
 
     page_url = f'http://en.wikipedia.org/wiki/{country_name}'
 

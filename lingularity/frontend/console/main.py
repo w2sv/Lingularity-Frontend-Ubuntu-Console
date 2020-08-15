@@ -5,8 +5,10 @@ from getpass import getpass
 from functools import partial
 import requests
 import sys
-import cursor
 import random
+import logging
+
+import cursor
 
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.ops import google
@@ -37,6 +39,9 @@ except requests.exceptions.ConnectionError:
     time.sleep(5)
     cursor.show()
     sys.exit(0)
+
+
+logging.basicConfig(filename='logging.txt', level=logging.INFO)
 
 
 def assign_client_user_from_existing_login(mongodb_client) -> bool:

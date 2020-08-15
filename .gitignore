@@ -18,3 +18,6 @@ __pycache__
 # Keys
 .fernet_key
 .logged_in_user
+
+# Logs
+logging.txt

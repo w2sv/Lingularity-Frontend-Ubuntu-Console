@@ -118,10 +118,10 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             "Hit Enter to advance to next sentence",
             "Enter",
             "\t- 'add' to add a vocable",
-            "\t- 'alter' in order to alter the most recently added vocable entry",
-            "\t- 'exit' to terminate program",
-            "\t- 'disable' to disable speech output",
+            "\t- 'alter' to alter the most recently added vocable entry",
+            "\t- 'exit' to terminate program\n",
             "\t- 'enable' to enable speech output",
+            "\t- 'disable' to disable speech output",
             "\t- 'change' to change playback speed")
 
         if not self._backend.tts_available:
@@ -134,7 +134,6 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         print('\n' * 2, end='')
         self._output_lets_go()
-
 
     # -----------------
     # Training
