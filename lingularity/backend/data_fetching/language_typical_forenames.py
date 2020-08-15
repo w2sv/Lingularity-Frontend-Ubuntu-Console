@@ -1,55 +1,80 @@
-from typing import Iterator, Optional, List, Tuple
+from typing import Optional, List, Tuple
 import re
 from random import shuffle
 
 from lingularity.backend.data_fetching.utils.page_source_reading import read_page_source
 
 
-def fetch_typical_forenames(language: str) -> Optional[List[Tuple[str]]]:
+POPULAR_FORENAMES_PAGE_URL = 'http://en.wikipedia.org/wiki/List_of_most_popular_given_names'
+
+
+def scrape_language_typical_forenames(language: str) -> Tuple[Optional[List[List[str]]], Optional[str]]:
     """
         Args:
-            language: uppercase """
+            language: uppercase
+        Returns:
+            [male_forenames: List[str], female_forenames: List[str]], corresponding valid random country: str """
 
-    PAGE_URL = 'http://en.wikipedia.org/wiki/List_of_most_popular_given_names'
+    ERROR_CASE_RETURN_VALUE = (None, None)
 
-    countries_language_officially_employed_in = _fetch_countries_language_officially_employed_in(language)
+    if (countries_language_employed_in := _scrape_countries_language_employed_in(language)) is None:
+        return ERROR_CASE_RETURN_VALUE
 
-    if countries_language_officially_employed_in is None:
+    shuffle(countries_language_employed_in)
+    page_source: List[str] = str(read_page_source(POPULAR_FORENAMES_PAGE_URL)).split('\n')
+
+    for country in countries_language_employed_in:
+        if (forename_lists := _scrape_popular_forenames(country, popular_forenames_page_source=page_source)) is not None and all(forename_lists):
+            return forename_lists, country
+    return ERROR_CASE_RETURN_VALUE
+
+
+def _scrape_popular_forenames(country: str, popular_forenames_page_source: Optional[List[str]] = None) -> Optional[List[List[str]]]:
+    """
+        Returns:
+            None in case of irretrievability of both popular male and female forenames, otherwise
+            [male_forenames: List[str], female_forenames: List[str]] """
+
+    if popular_forenames_page_source is None:
+        popular_forenames_page_source = str(read_page_source(POPULAR_FORENAMES_PAGE_URL)).split('\n')
+
+    # get forename block initiating row indices
+    forename_block_initiating_row_indices: List[int] = []
+    for i, row in enumerate(popular_forenames_page_source):
+        if row.endswith(f'</a></sup></td>') and country in row:
+            forename_block_initiating_row_indices.append(i)
+            if len(forename_block_initiating_row_indices) == 2:
+                break
+
+    # exit in case of incapability to retrieve both male and female forename blocks
+    if len(forename_block_initiating_row_indices) != 2:
         return None
 
-    shuffle(countries_language_officially_employed_in)
+    def scrape_forenames(forename_block_initiating_row_index: int) -> List[str]:
+        assert popular_forenames_page_source is not None
 
-    page_source_rows = str(read_page_source(PAGE_URL)).split('\n')
+        forename_possessing_row_index = forename_block_initiating_row_index + 1
+        EXIT_ELEMENTS = ['sup class="reference"', '</td></tr>']
+        forenames = []
 
-    for country in countries_language_officially_employed_in:
-        name_block_initiating_row_indices = [i for i, row in enumerate(page_source_rows) if row.endswith(f'</a></sup></td>') and country in row]
-        if len(name_block_initiating_row_indices) != 2:
-            continue
+        while all(exit_element not in (row := popular_forenames_page_source[forename_possessing_row_index]) for exit_element in EXIT_ELEMENTS):
+            truncated_row = row[5:] if 'href' in row else row[3:]  # <td><a href... -> a href...
+            forenames.append(truncated_row[truncated_row.find('>') + 1:truncated_row.find('<')].split('/')[0])
+            forename_possessing_row_index += 1
+        return forenames
 
-        def scrape_names(name_block_initiating_row_index: int) -> Iterator[str]:
-            row_index = name_block_initiating_row_index + 1
-            while 'sup class="reference"' not in (row := page_source_rows[row_index]) and '</td></tr>' not in row:
-                initial_brackets_omitting_row = row[5:] if 'href' in row else row[3:]  # <td><a href... -> a href...
-                yield initial_brackets_omitting_row[initial_brackets_omitting_row.find('>')+1:initial_brackets_omitting_row.find('<')].split('/')[0]
-                row_index += 1
-
-        forenames = [tuple(scrape_names(row_index)) for row_index in name_block_initiating_row_indices]
-        if all(len(name_tuple) for name_tuple in forenames):
-            print(f'Employing names originating from {country}')
-            return forenames  # type: ignore
-    return None
+    return list(map(scrape_forenames, forename_block_initiating_row_indices))
 
 
-def _fetch_countries_language_officially_employed_in(language: str) -> Optional[List[str]]:
+def _scrape_countries_language_employed_in(language: str) -> Optional[List[str]]:
     """
         Args:
             language: uppercase """
 
-    page_url = f'http://en.wikipedia.org/wiki/{language}_language'
+    language_page_url = f'http://en.wikipedia.org/wiki/{language}_language'
 
-    page_source_rows = str(read_page_source(page_url)).split('\n')
-
-    for i, row in enumerate(page_source_rows):
+    page_source: List[str] = str(read_page_source(language_page_url)).split('\n')
+    for i, row in enumerate(page_source):
         if 'Official language' in row:
             try:
                 match = re.findall(r'Flag_of.*.svg', row)[0]
@@ -60,7 +85,7 @@ def _fetch_countries_language_officially_employed_in(language: str) -> Optional[
 
         elif '<ul class="NavContent" style="list-style: none none; margin-left: 0; text-align: left; font-size: 105%; margin-top: 0; margin-bottom: 0; line-height: inherit;"' in row:
             countries = []
-            while 'title' in (country_possessing_row := page_source_rows[i]):
+            while 'title' in (country_possessing_row := page_source[i]):
                 country = country_possessing_row[country_possessing_row[:-1].rfind('>')+1:country_possessing_row.rfind('<')]
                 if not len(country.strip()):
                     title_starting_row = country_possessing_row[country_possessing_row.find('title') + len('title'):]
@@ -87,5 +112,5 @@ if __name__ == '__main__':
     from time import time
 
     t1 = time()
-    print(fetch_typical_forenames('Czech'))
+    print(_scrape_popular_forenames('Korea'))
     print(f'took {time() - t1}s')

@@ -12,7 +12,8 @@ import vlc
 from mutagen.mp3 import MP3
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.data_fetching.language_typical_forenames import fetch_typical_forenames
+from lingularity.backend.data_fetching.language_typical_forenames import scrape_language_typical_forenames
+from lingularity.backend.data_fetching.demonyms import scrape_demonyms
 from lingularity.backend.ops import google
 from lingularity.utils.time import get_timestamp
 
@@ -31,8 +32,10 @@ class TrainerBackend(ABC):
         self._train_english = train_english
 
         if not vocable_expansion_mode:
-            self._language_typical_forenames: Optional[List[Tuple[str]]] = fetch_typical_forenames(non_english_language)
+            self._language_typical_forenames, corresponding_country = scrape_language_typical_forenames(non_english_language)
             self.names_convertible: bool = self._language_typical_forenames is not None
+            if self.names_convertible and (language_demonyms := scrape_demonyms(country_name=corresponding_country)) is not None:
+                print(f'Employing {language_demonyms[0]} names.')
 
             self._google_ops_language_abbreviation: Optional[str] = google.get_language_abbreviation(self._non_english_language)
             self.tts_available: bool = self._google_ops_language_abbreviation is not None

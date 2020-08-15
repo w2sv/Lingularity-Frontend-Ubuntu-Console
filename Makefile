@@ -1,8 +1,16 @@
 SHELL=/bin/bash
 
-test:
+# ----------Testing----------
+
+mypy:
 	mypy lingularity/
+
+pytest:
 	python -m pytest -vv tests/
+
+test: mypy pytest
+
+# ----------Installation--------------
 
 _install-base-dependencies:
 	bash install_dependencies.sh
