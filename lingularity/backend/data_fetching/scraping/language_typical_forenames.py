@@ -3,10 +3,10 @@ import re
 from random import shuffle
 import logging
 
-from lingularity.backend.data_fetching.utils.page_source_reading import read_page_source
+from .utils import read_page_source
 
 
-POPULAR_FORENAMES_PAGE_URL = 'http://en.wikipedia.org/wiki/List_of_most_popular_given_names'
+_POPULAR_FORENAMES_PAGE_URL = 'http://en.wikipedia.org/wiki/List_of_most_popular_given_names'
 
 
 def scrape_language_typical_forenames(language: str) -> Tuple[Optional[List[List[str]]], Optional[str]]:
@@ -26,7 +26,7 @@ def scrape_language_typical_forenames(language: str) -> Tuple[Optional[List[List
     logging.info(f'countries_language_employed_in: {countries_language_employed_in}')
 
     shuffle(countries_language_employed_in)
-    page_source: List[str] = str(read_page_source(POPULAR_FORENAMES_PAGE_URL)).split('\n')
+    page_source: List[str] = str(read_page_source(_POPULAR_FORENAMES_PAGE_URL)).split('\n')
 
     for country in countries_language_employed_in:
         if (forename_lists := _scrape_popular_forenames(country, popular_forenames_page_source=page_source)) is not None and all(forename_lists):
@@ -87,7 +87,7 @@ def _scrape_popular_forenames(country: str, popular_forenames_page_source: Optio
     # TODO: debug Pakistan
 
     if popular_forenames_page_source is None:
-        popular_forenames_page_source = str(read_page_source(POPULAR_FORENAMES_PAGE_URL)).split('\n')
+        popular_forenames_page_source = str(read_page_source(_POPULAR_FORENAMES_PAGE_URL)).split('\n')
 
     # get forename block initiating row indices
     forename_block_initiating_row_indices: List[int] = []

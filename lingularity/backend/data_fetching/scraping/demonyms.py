@@ -3,7 +3,7 @@ import logging
 
 from bs4 import BeautifulSoup
 
-from .utils.page_source_reading import read_page_source
+from .utils import read_page_source
 
 
 def scrape_demonyms(country_name: str) -> Optional[List[str]]:

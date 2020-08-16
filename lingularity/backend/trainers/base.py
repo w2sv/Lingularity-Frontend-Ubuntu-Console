@@ -1,6 +1,6 @@
 from typing import List, Optional, Iterator, Any, Sequence, Tuple
 import os
-from abc import ABC, abstractmethod
+from abc import ABC
 from functools import cached_property
 import time
 import random
@@ -12,8 +12,8 @@ import vlc
 from mutagen.mp3 import MP3
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.data_fetching.language_typical_forenames import scrape_language_typical_forenames
-from lingularity.backend.data_fetching.demonyms import scrape_demonyms
+from lingularity.backend.data_fetching.scraping.language_typical_forenames import scrape_language_typical_forenames
+from lingularity.backend.data_fetching.scraping.demonyms import scrape_demonyms
 from lingularity.backend.ops import google
 from lingularity.utils.time import get_timestamp
 
@@ -33,8 +33,8 @@ class TrainerBackend(ABC):
 
         if not vocable_expansion_mode:
             self._language_typical_forenames, corresponding_country = scrape_language_typical_forenames(non_english_language)
-            self.names_convertible: bool = self._language_typical_forenames is not None
-            if self.names_convertible and (language_demonyms := scrape_demonyms(country_name=corresponding_country)) is not None:
+            self.names_convertible: bool = all(variable is not None for variable in [self._language_typical_forenames, corresponding_country])
+            if self.names_convertible and (language_demonyms := scrape_demonyms(country_name=corresponding_country)) is not None:  # type: ignore
                 # TODO: check whether demonym equals adjective
 
                 print(f'Employing {language_demonyms[0]} names.')

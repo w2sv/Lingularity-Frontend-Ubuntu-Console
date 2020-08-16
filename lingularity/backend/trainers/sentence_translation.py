@@ -7,19 +7,18 @@ import numpy as np
 
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.data_fetching.sentence_data import SentenceDataFetcher
+from lingularity.backend.data_fetching.downloading.sentence_data import fetch_sentence_data_file, language_2_ziplink
 from lingularity.backend.trainers.token_maps import Stem2SentenceIndices
 from lingularity.utils.enum import ExtendedEnum
 
 
 class SentenceTranslationTrainerBackend(TrainerBackend):
-	_sentence_data_fetcher = SentenceDataFetcher()
-
 	def __init__(self, non_english_language: str, train_english: bool, training_mode: str, mongodb_client: MongoDBClient):
 		super().__init__(non_english_language, train_english, mongodb_client)
 
 		if self._non_english_language not in self.locally_available_languages:
-			self._sentence_data_fetcher.fetch_sentence_data_file(self._non_english_language)
+			print('Downloading sentence data...')
+			fetch_sentence_data_file(self._non_english_language)
 
 		sentence_data, self.lets_go_translation = self._process_sentence_data_file()
 
@@ -29,7 +28,9 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 
 	@staticmethod
 	def get_eligible_languages() -> List[str]:
-		_eligible_languages = list(SentenceTranslationTrainerBackend._sentence_data_fetcher.language_2_ziplink.keys())
+		assert language_2_ziplink is not None
+
+		_eligible_languages = list(language_2_ziplink.keys())
 		insort(_eligible_languages, 'English')
 		return _eligible_languages
 

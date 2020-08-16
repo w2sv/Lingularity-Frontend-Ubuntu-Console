@@ -2,9 +2,9 @@ import pytest
 from itertools import chain
 from collections import Counter
 
-from lingularity.backend.data_fetching.sentence_data import SentenceDataFetcher
-from lingularity.backend.data_fetching.demonyms import scrape_demonyms
-from lingularity.backend.data_fetching.language_typical_forenames import _scrape_countries_language_employed_in, _scrape_popular_forenames
+from lingularity.backend.data_fetching.scraping.sentence_data import SentenceDataFetcher
+from lingularity.backend.data_fetching.scraping.demonyms import scrape_demonyms
+from lingularity.backend.data_fetching.scraping.language_typical_forenames import _scrape_countries_language_employed_in, _scrape_popular_forenames
 
 
 def test_zip_download_link_parsing():
