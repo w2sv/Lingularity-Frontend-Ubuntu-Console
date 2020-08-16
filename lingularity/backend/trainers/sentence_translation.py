@@ -9,7 +9,7 @@ from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.data_fetching.downloading.sentence_data import fetch_sentence_data_file, language_2_ziplink
 from lingularity.backend.trainers.token_maps import Stem2SentenceIndices
-from lingularity.utils.enum import ExtendedEnum
+from lingularity.backend.utils.enum import ExtendedEnum
 
 
 class SentenceTranslationTrainerBackend(TrainerBackend):

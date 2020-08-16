@@ -13,7 +13,7 @@ from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
 from lingularity.frontend.console.utils.output_manipulation import (clear_screen, erase_lines, centered_print,
                                                                     get_max_line_length_based_indentation, DEFAULT_VERTICAL_VIEW_OFFSET)
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input, recurse_on_invalid_input
-from lingularity.utils.enum import ExtendedEnum
+from lingularity.backend.utils.enum import ExtendedEnum
 
 
 class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
