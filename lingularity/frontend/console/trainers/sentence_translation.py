@@ -10,9 +10,9 @@ import cursor
 from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend
 from lingularity.backend.database import MongoDBClient
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
-from lingularity.utils.output_manipulation import (clear_screen, erase_lines, centered_print,
-                                                   get_max_line_length_based_indentation, DEFAULT_VERTICAL_VIEW_OFFSET)
-from lingularity.utils.input_resolution import resolve_input, recurse_on_unresolvable_input, recurse_on_invalid_input
+from lingularity.frontend.console.utils.output_manipulation import (clear_screen, erase_lines, centered_print,
+                                                                    get_max_line_length_based_indentation, DEFAULT_VERTICAL_VIEW_OFFSET)
+from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input, recurse_on_invalid_input
 from lingularity.utils.enum import ExtendedEnum
 
 

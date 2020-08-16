@@ -15,7 +15,7 @@ from lingularity.backend.database import MongoDBClient
 from lingularity.backend.data_fetching.scraping.language_typical_forenames import scrape_language_typical_forenames
 from lingularity.backend.data_fetching.scraping.demonyms import scrape_demonyms
 from lingularity.backend.ops import google
-from lingularity.utils.time import get_timestamp
+from lingularity.backend.utils.time import get_timestamp
 
 
 class TrainerBackend(ABC):

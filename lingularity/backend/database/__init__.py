@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import pymongo
 
-from lingularity.utils.date import datetag_today, n_days_ago
+from lingularity.frontend.console.utils.date import datetag_today, n_days_ago
 from .document_types import LastSessionStatistics, VocableAttributes
 
 

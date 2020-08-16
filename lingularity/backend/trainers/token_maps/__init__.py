@@ -7,8 +7,8 @@ from tqdm import tqdm
 import numpy as np
 import nltk
 
-from lingularity.utils.statistics import get_outliers
-from lingularity.utils.strings import get_meaningful_tokens
+from lingularity.backend.utils.statistics import get_outliers
+from lingularity.backend.utils.strings import get_meaningful_tokens
 
 
 # TODO: include upper case tokens in proper noun query

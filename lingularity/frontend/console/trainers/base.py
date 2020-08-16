@@ -7,9 +7,9 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 from lingularity.backend.trainers import TrainerBackend
-from lingularity.utils.output_manipulation import BufferPrint, centered_print
-from lingularity.utils.input_resolution import resolve_input
-from lingularity.utils.matplotlib import center_matplotlib_windows
+from lingularity.frontend.console.utils.output_manipulation import BufferPrint, centered_print
+from lingularity.frontend.console.utils.input_resolution import resolve_input
+from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
 
 
 class TrainerConsoleFrontend(ABC):

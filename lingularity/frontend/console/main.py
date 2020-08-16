@@ -12,11 +12,11 @@ import cursor
 
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.ops import google
-from lingularity.utils.input_resolution import recurse_on_unresolvable_input, recurse_on_invalid_input, resolve_input
-from lingularity.utils.output_manipulation import clear_screen, erase_lines, centered_print, get_centered_input_query_indentation, DEFAULT_VERTICAL_VIEW_OFFSET
-from lingularity.utils.date import today_or_yesterday, string_date_2_datetime_type
-from lingularity.utils.signup_credential_validation import invalid_mailadress, invalid_password, invalid_username
-from lingularity.utils.user_login_storage import get_logged_in_user, write_fernet_key_if_not_existent, store_user_login, USER_ENCRYPTION_FILE_PATH
+from lingularity.frontend.console.utils.input_resolution import recurse_on_unresolvable_input, recurse_on_invalid_input, resolve_input
+from lingularity.frontend.console.utils.output_manipulation import clear_screen, erase_lines, centered_print, get_centered_input_query_indentation, DEFAULT_VERTICAL_VIEW_OFFSET
+from lingularity.frontend.console.utils.date import today_or_yesterday, string_date_2_datetime_type
+from lingularity.frontend.console.utils.signup_credential_validation import invalid_mailadress, invalid_password, invalid_username
+from lingularity.frontend.console.utils.user_login_storage import get_logged_in_user, write_fernet_key_if_not_existent, store_user_login, USER_ENCRYPTION_FILE_PATH
 
 
 def display_starting_screen():
