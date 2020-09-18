@@ -18,3 +18,5 @@ dependencies:
     - mutagen
     - vlc
     - cryptography
+    - gTTS
+    - googletrans
