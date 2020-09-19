@@ -5,7 +5,7 @@ channels:
 dependencies:
   - python=3.8
   - pip=20.0.2
-  - pytest
+  - pytest=6.0.2
   - mypy=0.770
   - numpy=1.18.1
   - requests=2.23.0
@@ -15,8 +15,8 @@ dependencies:
   - pip:
     - bs4==0.0.1
     - dnspython==1.16.0
-    - mutagen
-    - vlc
-    - cryptography
-    - gTTS
-    - googletrans
+    - mutagen==1.45.1
+    - python-vlc==3.0.11115
+    - cryptography==3.1
+    - gTTS==2.1.1
+    - googletrans==3.0.0
