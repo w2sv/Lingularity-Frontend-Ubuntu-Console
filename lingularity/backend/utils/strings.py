@@ -4,12 +4,11 @@ import re
 
 def get_meaningful_tokens(sentence: str) -> List[str]:
     """ splitting at relevant delimiters, stripping off semantically irrelevant characters """
-    sentence = sentence.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^`{|}~»«'))
-    return re.split("[' ’\u2009\u202f\xa0\xa2-]", sentence)
+    return re.split("[' ’-]", strip_unicode(sentence.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^`{|}~»«'))))
 
 
 def strip_unicode(token: str) -> str:
-    return token.translate(str.maketrans('', '', "\u2009\u202f\xa0\xa2"))
+    return token.translate(str.maketrans('', '', "\u2009\u202f\xa0\xa2\u200b"))
 
 
 def lower_case_sentence_beginnings(sentence: str) -> str:

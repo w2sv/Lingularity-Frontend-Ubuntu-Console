@@ -6,6 +6,7 @@ from itertools import chain, groupby
 from tqdm import tqdm
 import numpy as np
 import nltk
+import spacy
 
 from lingularity.backend.utils.statistics import get_outliers
 from lingularity.backend.utils.strings import get_meaningful_tokens
@@ -89,16 +90,16 @@ class Token2Indices(CustomDict, ABC):
 
 class RawToken2SentenceIndices(Token2Indices):
     """ dict with
-            keys: distinct lowercase delimiter-split, punctuation-stripped foreign language _vocable_entries tokens
+            keys: distinct lowercase delimiter-split, punctuation-stripped foreign language tokens
                 excluding numbers
             values: lists of sentence indices in which occurring """
 
-    def __init__(self, sentence_data: np.ndarray, language: Optional[str] = None):
+    def __init__(self, sentence_data: np.ndarray):
         super().__init__()
 
         self._sentence_data = sentence_data
 
-        print(f'Mapping {language + " " if language else ""}tokens...')
+        print('Mapping tokens...')
         for i, sentence in enumerate(tqdm(self._sentence_data[:, 1])):
             # split, discard impertinent characters, lower all
             tokens = (token.lower() for token in get_meaningful_tokens(sentence))
@@ -109,6 +110,10 @@ class RawToken2SentenceIndices(Token2Indices):
 
 
 class Stem2SentenceIndices(Token2Indices):
+    @classmethod
+    def from_sentence_data(cls, sentence_data: np.ndarray, stemmer: Optional[nltk.stem.SnowballStemmer]):
+        return cls(RawToken2SentenceIndices(sentence_data), stemmer)
+
     def __init__(self, raw_token_map: RawToken2SentenceIndices, stemmer: Optional[nltk.stem.SnowballStemmer]):
         super().__init__()
 
@@ -125,10 +130,6 @@ class Stem2SentenceIndices(Token2Indices):
             if self._stemmer is not None:
                 token = self._stemmer.stem(token)
             self.upsert(token, indices)
-
-    @classmethod
-    def from_sentence_data(cls, sentence_data: np.ndarray, stemmer: Optional[nltk.stem.SnowballStemmer]):
-        return cls(RawToken2SentenceIndices(sentence_data), stemmer)
 
     def __getattr__(self, attr):
         """ forwarding _sentence_data calls """
@@ -156,3 +157,8 @@ class Stem2SentenceIndices(Token2Indices):
         """ returns lowercase names """
 
         return list(np.asarray(list(filter(lambda item: item[0] in map(lambda token: token.lower(), get_meaningful_tokens(self._sentence_data[item[1]][1])), list(namecandidate_2_sentenceind.items()))))[:, 0])
+
+
+class Lemma2SentenceIndices(Token2Indices):
+    def __init__(self, raw_token_map: RawToken2SentenceIndices, language: str):
+        pass

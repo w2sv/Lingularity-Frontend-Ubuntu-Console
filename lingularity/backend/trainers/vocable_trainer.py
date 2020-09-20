@@ -80,10 +80,8 @@ class VocableTrainerBackend(TrainerBackend):
 
         if not vocable_expansion_mode:
             self._sentence_data, self.lets_go_translation = self._process_sentence_data_file()
-
-            self._token_2_rowinds = RawToken2SentenceIndices(self._sentence_data, language=self.language)
+            self._token_2_rowinds = RawToken2SentenceIndices(self._sentence_data)
             self._vocable_entries: List[VocableEntry] = self._get_vocable_entries()
-
             self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._vocable_entries)
 
     def _get_vocable_entries(self) -> List[VocableEntry]:
@@ -138,8 +136,7 @@ class VocableTrainerBackend(TrainerBackend):
 
     # ------------------
     # .related sentences
-    # ------------------                               assert self.mongodb_client is not None
-
+    # ------------------
     def get_related_sentence_pairs(self, token: str, n: int) -> Optional[List[List[str]]]:
         WORD_ROOT_LENGTH = 4
 
