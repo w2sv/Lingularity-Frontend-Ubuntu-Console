@@ -11,7 +11,6 @@ import logging
 import cursor
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.ops import google
 from lingularity.frontend.console.utils.input_resolution import recurse_on_unresolvable_input, recurse_on_invalid_input, resolve_input
 from lingularity.frontend.console.utils.output_manipulation import clear_screen, erase_lines, centered_print, get_centered_input_query_indentation, DEFAULT_VERTICAL_VIEW_OFFSET
 from lingularity.frontend.console.utils.date import today_or_yesterday, string_date_2_datetime_type
@@ -31,7 +30,8 @@ def display_starting_screen():
 try:
     from lingularity.frontend.console.trainers import (SentenceTranslationTrainerConsoleFrontend,
                                                        VocableTrainerConsoleFrontend, TrainerConsoleFrontend)
-except requests.exceptions.ConnectionError:
+    from lingularity.backend.ops import google
+except (RuntimeError, requests.exceptions.ConnectionError):
     display_starting_screen()
     centered_print(
         '\nLingularity relies on an internet connection in order to retrieve and store data. Please establish one and restart the program.\n\n')
@@ -113,9 +113,6 @@ def change_account():
 
 
 def extended_starting_screen(username: str, latest_trained_language: Optional[str]):
-    # TODO: abort delay caused by translation query by either querying before first print or
-    #       adding translation to (last session statistics)
-
     CONSECUTIVE_VERTICAL_SPACE = '\n' * 2
 
     centered_print("Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
@@ -152,7 +149,7 @@ def select_action() -> Optional[str]:
     training = resolve_input(input().lower(), list(ELIGIBLE_ACTIONS.keys()))
 
     if training is None:
-        recurse_on_unresolvable_input(select_action, 4)
+        return recurse_on_unresolvable_input(select_action, 4)
 
     clear_screen()
     return training
