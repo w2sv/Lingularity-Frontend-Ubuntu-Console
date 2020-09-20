@@ -1,11 +1,9 @@
-from typing import List, Optional, Iterator, Any, Sequence, Tuple
+from typing import List, Optional, Iterator, Any, Sequence, Tuple, Dict
 import os
 from abc import ABC
-from functools import cached_property
 import time
 import random
 
-import nltk
 import numpy as np
 import gtts
 import vlc
@@ -16,6 +14,8 @@ from lingularity.backend.data_fetching.scraping.language_typical_forenames impor
 from lingularity.backend.data_fetching.scraping.demonyms import scrape_demonyms
 from lingularity.backend.ops import google
 from lingularity.backend.utils.time import get_timestamp
+from lingularity.backend.trainers.token_maps import (UnnormalizedToken2SentenceIndices, Stem2SentenceIndices,
+                                                     Lemma2SentenceIndices, Token2SentenceIndicesMap)
 
 
 class TrainerBackend(ABC):
@@ -75,14 +75,17 @@ class TrainerBackend(ABC):
         np.random.shuffle(item_list)
         return iter(item_list)
 
-    @cached_property
-    def stemmer(self) -> Optional[nltk.stem.SnowballStemmer]:
-        assert self.language is not None, 'Stemmer to be initially called after language setting'
+    def _get_token_2_sentence_indices_map(self, sentence_data: np.ndarray) -> Token2SentenceIndicesMap:
+        lowercase_language = self.language.lower()
 
-        if (lowered_language := self.language.lower()) in nltk.stem.SnowballStemmer.languages:
-            return nltk.stem.SnowballStemmer(lowered_language)
+        if Lemma2SentenceIndices.exists(lowercase_language):
+            return Lemma2SentenceIndices.from_file(lowercase_language)
         else:
-            return None
+            for cls in [Lemma2SentenceIndices, Stem2SentenceIndices]:
+                if cls.is_available(lowercase_language):
+                    return cls(sentence_data, lowercase_language)
+
+        return UnnormalizedToken2SentenceIndices(sentence_data, discard_proper_nouns=True)
 
     # ----------------
     # Paths

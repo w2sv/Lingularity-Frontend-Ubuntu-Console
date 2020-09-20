@@ -7,7 +7,6 @@ import numpy as np
 
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.trainers.token_maps import RawToken2SentenceIndices
 from lingularity.backend.utils.strings import get_article_stripped_token
 from lingularity.backend.utils.enum import ExtendedEnum
 
@@ -80,7 +79,7 @@ class VocableTrainerBackend(TrainerBackend):
 
         if not vocable_expansion_mode:
             self._sentence_data, self.lets_go_translation = self._process_sentence_data_file()
-            self._token_2_rowinds = RawToken2SentenceIndices(self._sentence_data)
+            self._token_2_sentence_indices = self._get_token_2_sentence_indices_map(self._sentence_data)
             self._vocable_entries: List[VocableEntry] = self._get_vocable_entries()
             self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._vocable_entries)
 
@@ -138,12 +137,9 @@ class VocableTrainerBackend(TrainerBackend):
     # .related sentences
     # ------------------
     def get_related_sentence_pairs(self, token: str, n: int) -> Optional[List[List[str]]]:
-        WORD_ROOT_LENGTH = 4
-
-        root = get_article_stripped_token(token)[:WORD_ROOT_LENGTH]
-        sentence_indices = np.asarray(self._token_2_rowinds.get_root_comprising_sentence_indices(root))
-        if not len(sentence_indices):
+        if (sentence_indices := self._token_2_sentence_indices.get_comprising_sentence_indices(article_stripped_token=get_article_stripped_token(token))) is None:
             return None
 
-        random_indices = np.random.randint(0, len(sentence_indices), n)
-        return self._sentence_data[sentence_indices[random_indices]]
+        sentence_indices = np.asarray(sentence_indices)
+        np.random.shuffle(sentence_indices)
+        return self._sentence_data[sentence_indices[:n]]

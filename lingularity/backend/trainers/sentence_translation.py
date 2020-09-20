@@ -8,7 +8,6 @@ import numpy as np
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.data_fetching.downloading.sentence_data import fetch_sentence_data_file, language_2_ziplink
-from lingularity.backend.trainers.token_maps import Stem2SentenceIndices
 from lingularity.backend.utils.enum import ExtendedEnum
 
 
@@ -46,12 +45,12 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 		if mode == self.TrainingMode.Random.value:
 			return sentence_data
 
-		stems_2_indices = Stem2SentenceIndices.from_sentence_data(sentence_data, self.stemmer)
+		token_2_sentence_indices = self._get_token_2_sentence_indices_map(sentence_data)
 
 		def get_limit_corresponding_sentence_indices(occurrence_limit: int, filter_mode: str) -> List[int]:
 			assert filter_mode in ['max', 'min']
 			operator = ge if filter_mode == 'min' else le
-			return list(chain.from_iterable((indices for indices in stems_2_indices.values() if operator(len(indices), occurrence_limit))))
+			return list(chain.from_iterable((indices for indices in token_2_sentence_indices.values() if operator(len(indices), occurrence_limit))))
 
 		if mode == self.TrainingMode.VocabularyAcquisition.value:
 			indices = get_limit_corresponding_sentence_indices(20, 'max')
