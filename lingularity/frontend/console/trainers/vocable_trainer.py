@@ -16,8 +16,6 @@ from lingularity.frontend.console.utils.matplotlib import center_matplotlib_wind
 
 
 class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
-    N_RELATED_SENTENCES_2_BE_DISPLAYED = 2
-
     def __init__(self, mongodb_client: MongoDBClient, vocable_expansion_mode=False):
         super().__init__()
 
@@ -148,13 +146,14 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 break
 
             response_evaluation = self._backend.get_response_evaluation(response, entry.display_translation)
-            self._backend.mongodb_client.update_vocable_entry(entry.token, response_evaluation.value)
+            entry.update_score(response_evaluation.value)
+            self._backend.mongodb_client.update_vocable_entry(entry.token, entry.score)
 
             print('')
             erase_lines(2)
-            print(f'{translation_query_output}{response} | {response_evaluation.name.upper()} {f"| Correct translation: {entry.display_translation}" if response_evaluation.name != "Perfect" else ""}\n')
+            print(f'{translation_query_output}{response} | {response_evaluation.name.upper()} {f"| Correct translation: {entry.display_translation}" if response_evaluation.name != "Perfect" else ""}{f" | New Score: {entry.score if entry.score % 1 != 0 else int(entry.score)}" if entry.score < 5 else "| Entry Perfected"}\n')
 
-            if (related_sentence_pairs := self._backend.get_related_sentence_pairs(entry.display_translation, n=self.N_RELATED_SENTENCES_2_BE_DISPLAYED)) is not None:
+            if (related_sentence_pairs := self._backend.get_related_sentence_pairs(entry.display_translation, n=2)) is not None:
                 forename_converted_sentence_pairs = [reversed(self._backend.convert_sentences_forenames_if_feasible(sentence_pair)) for sentence_pair in related_sentence_pairs]
                 joined_sentence_pairs = [' - '.join(sentence_pair) for sentence_pair in forename_converted_sentence_pairs]
                 [centered_print(joined_sentence_pair) for joined_sentence_pair in joined_sentence_pairs]

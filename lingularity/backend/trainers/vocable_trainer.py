@@ -9,6 +9,7 @@ from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.utils.strings import get_article_stripped_token
 from lingularity.backend.utils.enum import ExtendedEnum
+from lingularity.frontend.console.utils.date import n_days_ago
 
 
 class VocableEntry:
@@ -57,6 +58,17 @@ class VocableEntry:
         return self._entry[self.token]['lfd']
 
     @property
+    def score(self) -> float:
+        return self._entry[self.token]['s']
+
+    @score.setter
+    def score(self, value):
+        self._entry[self.token]['s'] = value
+
+    def update_score(self, increment: float):
+        self.score += increment
+
+    @property
     def is_new(self) -> bool:
         return self.last_faced_date is None
 
@@ -65,6 +77,10 @@ class VocableEntry:
         """ i.e. f'{token} - {translation}' """
 
         return ' - '.join([self.token, self.translation])
+
+    @property
+    def is_perfected(self) -> bool:
+        return self.score >= 5 and n_days_ago(self.last_faced_date) < 50
 
     # -----------------
     # Dunder(s)
@@ -80,11 +96,12 @@ class VocableTrainerBackend(TrainerBackend):
         if not vocable_expansion_mode:
             self._sentence_data, self.lets_go_translation = self._process_sentence_data_file()
             self._token_2_sentence_indices = self._get_token_2_sentence_indices_map(self._sentence_data)
-            self._vocable_entries: List[VocableEntry] = self._get_vocable_entries()
+            self._vocable_entries: List[VocableEntry] = self._get_imperfect_vocable_entries()
             self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._vocable_entries)
 
-    def _get_vocable_entries(self) -> List[VocableEntry]:
-        return list(starmap(VocableEntry, zip(self.mongodb_client.query_vocabulary_data(), repeat(self._train_english))))
+    def _get_imperfect_vocable_entries(self) -> List[VocableEntry]:
+        entire_vocabulary = starmap(VocableEntry, zip(self.mongodb_client.query_vocabulary_data(), repeat(self._train_english)))
+        return list(filter(lambda vocable_entry: not vocable_entry.is_perfected, entire_vocabulary))
 
     # ---------------
     # Pre training
@@ -104,10 +121,10 @@ class VocableTrainerBackend(TrainerBackend):
     # .Evaluation
     # ---------------
     class ResponseEvaluation(ExtendedEnum):
-        Wrong = 0
-        AccentError = 0.5
+        Wrong = 0.0
         AlmostCorrect = 0.5
-        Perfect = 1
+        AccentError = 0.75
+        Perfect = 1.0
 
     def get_response_evaluation(self, response: str, translation: str) -> ResponseEvaluation:
         distinct_translations = translation.split(',')

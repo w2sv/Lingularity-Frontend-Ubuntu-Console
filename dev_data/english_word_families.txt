@@ -73002,7 +73002,7 @@ perfect
 	imperfection
 	imperfections
 	imperfectly
-	perfected
+	is_perfected
 	perfecting
 	perfection
 	perfectionism

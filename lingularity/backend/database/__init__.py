@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import pymongo
 
-from lingularity.frontend.console.utils.date import datetag_today, n_days_ago
+from lingularity.frontend.console.utils.date import datetag_today
 from .document_types import LastSessionStatistics, VocableAttributes
 
 
@@ -151,14 +151,12 @@ class MongoDBClient:
             upsert=True
         )
 
-    def update_vocable_entry(self, token: str, score_increment: float):
+    def update_vocable_entry(self, token: str, new_score: float):
         self.vocabulary_collection.find_one_and_update(
             filter={'_id': self._language, token: {'$exists': True}},
-            update={'$inc': {
-                        f'{token}.tf': 1,
-                        f'{token}.s': score_increment},
-                    '$set': {f'{token}.lfd': datetag_today()}
-            },
+            update={'$inc': {f'{token}.tf': 1},
+                    '$set': {f'{token}.lfd': datetag_today(),
+                             f'{token}.s': new_score}},
             upsert=False
         )
 
@@ -187,14 +185,6 @@ class MongoDBClient:
         result = self.vocabulary_collection.find_one(self._language)
         result.pop('_id')
         return [{k: v} for k, v in result.items()]
-
-    def query_imperfect_vocabulary_entries(self, perfection_score=5, days_before_retention_assertion=50) -> List[Dict[str, Any]]:
-        vocabulary_data = self.query_vocabulary_data()
-        original_length = vocabulary_data.__len__()
-        for i, vocabulary_entry in enumerate(vocabulary_data[::-1]):
-            if vocabulary_entry['s'] >= perfection_score and n_days_ago(vocabulary_entry['lfd']) < days_before_retention_assertion:
-                vocabulary_data.pop(original_length - i - 1)
-        return vocabulary_data
 
     def get_vocabulary_possessing_languages(self) -> List[str]:
         return list(self.vocabulary_collection.find().distinct('_id'))
