@@ -2,17 +2,17 @@ import pytest
 from itertools import chain
 from collections import Counter
 
-from lingularity.backend.data_fetching.scraping.sentence_data import SentenceDataFetcher
+from lingularity.backend.data_fetching.scraping.sentence_data_download_links import scrape_language_2_downloadlink_dict
 from lingularity.backend.data_fetching.scraping.demonyms import scrape_demonyms
 from lingularity.backend.data_fetching.scraping.language_typical_forenames import _scrape_countries_language_employed_in, _scrape_popular_forenames
 
 
 def test_zip_download_link_parsing():
-    content_retriever = SentenceDataFetcher()
-    assert all(k.endswith('.zip') for k in content_retriever.language_2_ziplink.values())
+    language_2_downloadlink = scrape_language_2_downloadlink_dict()
+    assert all(k.endswith('.zip') for k in language_2_downloadlink.values())
 
     # check if number of languages has changed
-    if (n_languages := len(content_retriever.language_2_ziplink)) != 79:
+    if (n_languages := len(language_2_downloadlink)) != 79:
         print(f'# of available languages has changed: {n_languages}')
 
 

@@ -1,7 +1,7 @@
 import os
 import pickle
 from abc import abstractmethod
-from typing import Optional, List
+from typing import Optional, List, Set, Any, Iterable, Iterator
 
 from tqdm import tqdm
 import numpy as np
@@ -10,6 +10,7 @@ import spacy
 
 from lingularity.backend.trainers.token_maps.base import Token2SentenceIndicesMap
 from lingularity.backend.trainers.token_maps.unnormalized import UnnormalizedToken2SentenceIndices
+from lingularity.backend.utils.strings import get_article_stripped_token
 
 
 class NormalizedTokenMap(Token2SentenceIndicesMap):
@@ -39,14 +40,15 @@ class Stem2SentenceIndices(NormalizedTokenMap):
         super().__init__(sentence_data)
 
         self._stemmer: Optional[nltk.stem.SnowballStemmer] = nltk.stem.SnowballStemmer(language)
-        assert self._stemmer is not None, 'stemming feasibility to be asserted before instantiation'
+        assert self._stemmer is not None
 
         print('Stemming...')
         for token, indices in self._unnormalized_token_map.items():
             self.upsert(self._stemmer.stem(token), indices)
 
-    def get_comprising_sentence_indices(self, article_stripped_token: str) -> Optional[List[int]]:
-        return self.get(self._stemmer.stem(article_stripped_token))
+    def get_comprising_sentence_indices(self, entry: str) -> Optional[List[int]]:
+        assert self._stemmer is not None
+        return self.get(self._stemmer.stem(get_article_stripped_token(entry)))
 
 
 class Lemma2SentenceIndices(NormalizedTokenMap):
@@ -93,6 +95,7 @@ class Lemma2SentenceIndices(NormalizedTokenMap):
         self._pickle(language)
 
     def _lemmatize(self, token: str) -> str:
+        assert self.model is not None
         return self.model(token)[0].lemma_
 
     @staticmethod
@@ -112,5 +115,39 @@ class Lemma2SentenceIndices(NormalizedTokenMap):
     # ------------------
     # Query
     # ------------------
-    def get_comprising_sentence_indices(self, article_stripped_token: str) -> Optional[List[int]]:
-        return self.get(self._lemmatize(article_stripped_token))
+    def get_comprising_sentence_indices(self, entry: str) -> Optional[List[int]]:
+        REMOVE_POS_TYPES = {'DET', 'PROPN', 'SYM'}
+        POS_VALUES = {'NOUN': 5, 'VERB': 5,
+                      'NUM': 4,
+                      'AUX': 3, 'ADP': 3, 'PRON': 3,
+                      'DET': 1, 'PROPN': 1, 'SYM': 1}
+
+        def none_stripped(iterable):
+            return list(filter(lambda el: el is not None, iterable))
+
+        def intersection(nested_iterables: Iterable[Iterable[Any]]) -> Set[Any]:
+            return set.intersection(*map(set, nested_iterables))
+
+        def sentence_indices_iterator(_tokens) -> Iterator[List[int]]:
+            return none_stripped((self.get(t.lemma_) for t in _tokens))
+
+        tokens = self.model(entry)
+
+        # remove tokens of REMOVE_POS_TYPE if tokens not solely comprised of them
+        if (pos_set := set((token.pos_ for token in tokens))).intersection(REMOVE_POS_TYPES) != len(pos_set):
+            tokens = list(filter(lambda token: token.pos_ not in REMOVE_POS_TYPES, tokens))
+
+        if not (sentence_indices_list := list(sentence_indices_iterator(tokens))).__len__():
+            return None
+
+        elif (sentence_indices_list_intersection := intersection(sentence_indices_list)).__len__():
+            return list(sentence_indices_list_intersection)
+
+        else:
+            pos_value_sorted_sentence_indices = set(sentence_indices_iterator(sorted(tokens, key=lambda t: POS_VALUES.get(t.pos_))))
+            while len(pos_value_sorted_sentence_indices) > 1:
+                pos_value_sorted_sentence_indices.pop()
+                if (remaining_sentence_indices_list_intersection := intersection(
+                        pos_value_sorted_sentence_indices)).__len__():
+                    return list(remaining_sentence_indices_list_intersection)
+            return pos_value_sorted_sentence_indices.pop()

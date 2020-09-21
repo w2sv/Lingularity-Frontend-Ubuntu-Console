@@ -22,5 +22,5 @@ class Token2SentenceIndicesMap(ABC, UpsertDict):
         super().__init__()
 
     @abstractmethod
-    def get_comprising_sentence_indices(self, article_stripped_token: str) -> Optional[List[int]]:
+    def get_comprising_sentence_indices(self, entry: str) -> Optional[List[int]]:
         pass

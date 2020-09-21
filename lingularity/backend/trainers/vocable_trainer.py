@@ -80,7 +80,10 @@ class VocableEntry:
 
     @property
     def is_perfected(self) -> bool:
-        return self.score >= 5 and n_days_ago(self.last_faced_date) < 50
+        if self.last_faced_date is None:
+            return False
+        else:
+            return self.score >= 5 and n_days_ago(self.last_faced_date) < 50
 
     # -----------------
     # Dunder(s)
@@ -153,10 +156,10 @@ class VocableTrainerBackend(TrainerBackend):
     # ------------------
     # .related sentences
     # ------------------
-    def get_related_sentence_pairs(self, token: str, n: int) -> Optional[List[List[str]]]:
-        if (sentence_indices := self._token_2_sentence_indices.get_comprising_sentence_indices(article_stripped_token=get_article_stripped_token(token))) is None:
+    def get_related_sentence_pairs(self, entry: str, n: int) -> Optional[List[List[str]]]:
+        if (sentence_indices := self._token_2_sentence_indices.get_comprising_sentence_indices(entry=entry)) is None:
             return None
 
         sentence_indices = np.asarray(sentence_indices)
         np.random.shuffle(sentence_indices)
-        return self._sentence_data[sentence_indices[:n]]
+        return self._sentence_data[sentence_indices[:n]]  # type: ignore

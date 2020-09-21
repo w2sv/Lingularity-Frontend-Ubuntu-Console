@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 
 from lingularity.backend.trainers.token_maps.base import Token2SentenceIndicesMap
-from lingularity.backend.utils.strings import get_meaningful_tokens
+from lingularity.backend.utils.strings import get_meaningful_tokens, get_article_stripped_token
 
 
 class UnnormalizedToken2SentenceIndices(Token2SentenceIndicesMap):
@@ -55,6 +55,6 @@ class UnnormalizedToken2SentenceIndices(Token2SentenceIndicesMap):
     # ----------------
     # Indices Query
     # ----------------
-    def get_comprising_sentence_indices(self, article_stripped_token: str) -> Optional[List[int]]:
-        indices = list(chain.from_iterable([v for k, v in self.items() if any(token.startswith(article_stripped_token) for token in k.split(' '))]))
+    def get_comprising_sentence_indices(self, entry: str) -> Optional[List[int]]:
+        indices = list(chain.from_iterable([v for k, v in self.items() if any(token.startswith(get_article_stripped_token(entry)) for token in k.split(' '))]))
         return indices if len(indices) else None
