@@ -7,7 +7,7 @@ import numpy as np
 
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.data_fetching.downloading.sentence_data import fetch_sentence_data_file, language_2_ziplink
+from lingularity.backend.data_fetching.downloading.sentence_data import fetch_sentence_data, language_2_ziplink
 from lingularity.backend.utils.enum import ExtendedEnum
 
 
@@ -17,7 +17,7 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 
 		if self._non_english_language not in self.locally_available_languages:
 			print('Downloading sentence data...')
-			fetch_sentence_data_file(self._non_english_language)
+			fetch_sentence_data(self._non_english_language)
 
 		sentence_data, self.lets_go_translation = self._process_sentence_data_file()
 

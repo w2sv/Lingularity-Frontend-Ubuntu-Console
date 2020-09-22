@@ -43,7 +43,7 @@ class Stem2SentenceIndices(NormalizedTokenMap):
         assert self._stemmer is not None
 
         print('Stemming...')
-        for token, indices in self._unnormalized_token_map.items():
+        for token, indices in tqdm(self._unnormalized_token_map.items(), total=len(self)):
             self.upsert(self._stemmer.stem(token), indices)
 
     def get_comprising_sentence_indices(self, entry: str) -> Optional[List[int]]:
@@ -76,7 +76,7 @@ class Lemma2SentenceIndices(NormalizedTokenMap):
 
     @staticmethod
     def _file_path(language) -> str:
-        return f'{os.getcwd()}/language_data/{language.title()}/lemma_2_sentence_indices.pickle'
+        return f'{os.getcwd()}/.language_data/{language.title()}/lemma_2_sentence_indices.pickle'
 
     def __init__(self, sentence_data: np.ndarray, language: str):
         """ Args:
@@ -85,12 +85,12 @@ class Lemma2SentenceIndices(NormalizedTokenMap):
 
         super().__init__(sentence_data)
 
+        print('Loading model...')
         self.model = self._get_model(language)
 
         print('Lemmatizing...')
-        for token, indices in tqdm(list(self._unnormalized_token_map.items())):
-            lemma = self._lemmatize(token)
-            self.upsert(lemma, indices)
+        for token, indices in tqdm(self._unnormalized_token_map.items(), total=len(self._unnormalized_token_map)):
+            self.upsert(self._lemmatize(token), indices)
 
         self._pickle(language)
 

@@ -7,7 +7,6 @@ import numpy as np
 
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.utils.strings import get_article_stripped_token
 from lingularity.backend.utils.enum import ExtendedEnum
 from lingularity.frontend.console.utils.date import n_days_ago
 

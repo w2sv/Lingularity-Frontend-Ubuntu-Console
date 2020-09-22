@@ -3,6 +3,7 @@ import os
 from abc import ABC
 import time
 import random
+import pickle
 
 import numpy as np
 import gtts
@@ -19,8 +20,8 @@ from lingularity.backend.trainers.token_maps import (UnnormalizedToken2SentenceI
 
 
 class TrainerBackend(ABC):
-    _BASE_LANGUAGE_DATA_PATH = f'{os.getcwd()}/language_data'
-    _TTS_AUDIO_FILE_PATH = f'{os.getcwd()}/tts_audio_files'
+    _BASE_LANGUAGE_DATA_PATH = f'{os.getcwd()}/.language_data'
+    _TTS_AUDIO_FILE_PATH = f'{os.getcwd()}/.tts_audio_files'
 
     _DEFAULT_SENTENCE_DATA_FORENAMES = ('Tom', 'Mary')
 
@@ -106,10 +107,7 @@ class TrainerBackend(ABC):
         return sentence_data, self._query_sentence_data_for_translation("Let's go!", sentence_data, 0.3)
 
     def _read_in_sentence_data(self) -> np.ndarray:
-        """
-            Strips newly downloaded data off reference appendices and overrides data file
-
-            Returns:
+        """ Returns:
                 ndarray of List[reference_language_sentence, target_language_sentence]
                     with if not self._train_english:
                         reference_language_sentence == English
@@ -117,30 +115,15 @@ class TrainerBackend(ABC):
 
         print('Reading in sentence data...')
 
-        raw_data = open(self.sentence_file_path, 'r', encoding='utf-8').readlines()
+        processed_sentence_data = []
+        with open(f'{self.language_dir_path}/sentence_data.txt', 'r', encoding='utf-8') as sentence_data_file:
+            for sentence_pair_line in sentence_data_file.readlines():
+                sentence_pair = sentence_pair_line.strip('\n').split('\t')
+                if self._train_english:
+                    sentence_pair = list(reversed(sentence_pair))
+                processed_sentence_data.append(sentence_pair)
 
-        # remove reference appendices from source file if newly downloaded and write to file
-        reference_appendix_stripped_data = self._get_reference_appendix_stripped_sentence_data(raw_data)
-
-        # split at tab, strip newlines; invert vertical sentence order in case of english training
-        tab_split_data: List[List[str]] = []
-        for i, row in enumerate(reference_appendix_stripped_data):
-            tab_split_data.append(row.strip('\n').split('\t'))
-
-            if self._train_english:
-                tab_split_data[i] = list(reversed(tab_split_data[i]))
-
-        return np.asarray(tab_split_data)
-
-    def _get_reference_appendix_stripped_sentence_data(self, raw_data: List[str]) -> List[str]:
-        if len(raw_data[0].split('\t')) > 2:
-            reference_appendix_stripped_data = ['\t'.join(row.split('\t')[:2]) + '\n' for row in raw_data]
-
-            with open(self.sentence_file_path, 'w', encoding='utf-8') as write_file:
-                write_file.writelines(reference_appendix_stripped_data)
-            return reference_appendix_stripped_data
-        else:
-            return raw_data
+        return np.asarray(processed_sentence_data)
 
     @staticmethod
     def _query_sentence_data_for_translation(english_entry: str, sentence_data: np.ndarray, sentence_file_length_percentage: float = 1.0) -> Optional[str]:

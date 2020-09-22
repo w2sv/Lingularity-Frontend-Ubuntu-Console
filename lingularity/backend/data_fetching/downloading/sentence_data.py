@@ -15,7 +15,7 @@ warnings.filterwarnings('ignore')
 # TODO: debug telugu, north download
 
 
-_BASE_SAVE_DESTINATION_DIR_PATH = f'{os.getcwd()}/language_data'
+_BASE_SAVE_DESTINATION_DIR_PATH = f'{os.getcwd()}/.language_data'
 
 
 language_2_ziplink: Optional[Dict[str, str]] = None
@@ -23,11 +23,11 @@ if language_2_ziplink is None:
     language_2_ziplink = scrape_language_2_downloadlink_dict()
 
 
-def fetch_sentence_data_file(language: str):
+def fetch_sentence_data(language: str):
     """ downloads and unzips respective sentence data file """
 
     zip_file_path = _download_sentence_data(language)
-    _unzip_sentence_data(zip_file_path)
+    _process_zip_file(zip_file_path)
 
 
 def fetch_all_available_sentence_data_files():
@@ -36,7 +36,7 @@ def fetch_all_available_sentence_data_files():
     n_downloaded_language_files = 0
     for language in language_2_ziplink.keys():
         if language not in locally_available_language_files:
-            fetch_sentence_data_file(language)
+            fetch_sentence_data(language)
             n_downloaded_language_files += 1
 
     logging.info(f'Downloaded {n_downloaded_language_files} language files')
@@ -60,10 +60,11 @@ def _download_sentence_data(language: str) -> str:
     return save_destination_link
 
 
-def _unzip_sentence_data(zip_file_link: str):
-    """ unpacks zip file
-        removes _about.txt
-        renames sentence data text file """
+def _process_zip_file(zip_file_link: str):
+    """ - unpack zip file
+        - remove _about.txt
+        - strip reference appendices from sentence data file
+        - rename sentence data file """
 
     language_dir_path = zip_file_link[:zip_file_link.rfind(os.sep)]
 
@@ -74,5 +75,12 @@ def _unzip_sentence_data(zip_file_link: str):
     os.remove(zip_file_link)
     os.remove(f'{language_dir_path}/_about.txt')
 
-    # rename sentence data file
-    os.rename(f'{language_dir_path}/{os.listdir(language_dir_path)[0]}', f'{language_dir_path}/sentence_data.txt')
+    sentence_data_file_path = f'{language_dir_path}/{os.listdir(language_dir_path)[0]}'
+
+    # remove reference appendices from sentence data file
+    raw_sentence_data = open(sentence_data_file_path, 'r', encoding='utf-8').readlines()
+    processed_sentence_data = ('\t'.join(row.split('\t')[:2]) + '\n' for row in raw_sentence_data)
+    with open(sentence_data_file_path, 'w', encoding='utf-8') as sentence_data_file:
+        sentence_data_file.writelines(processed_sentence_data)
+
+    os.rename(sentence_data_file_path, f'{language_dir_path}/sentence_data.txt')
