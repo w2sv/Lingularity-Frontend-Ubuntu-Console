@@ -97,7 +97,7 @@ class VocableTrainerBackend(TrainerBackend):
 
         if not vocable_expansion_mode:
             self._sentence_data, self.lets_go_translation = self._process_sentence_data_file()
-            self._token_2_sentence_indices = self._get_token_2_sentence_indices_map(self._sentence_data)
+            self._token_2_sentence_indices = self._get_token_map(self._sentence_data)
             self._vocable_entries: List[VocableEntry] = self._get_imperfect_vocable_entries()
             self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._vocable_entries)
 

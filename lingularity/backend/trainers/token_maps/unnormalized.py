@@ -1,5 +1,6 @@
 from itertools import chain
 from typing import List, Dict, Optional
+from collections import defaultdict
 
 import numpy as np
 from tqdm import tqdm
@@ -14,7 +15,7 @@ class UnnormalizedToken2SentenceIndices(Token2SentenceIndicesMap):
             values: List[int] = lists of sentence indices in which appearing """
 
     def __init__(self, sentence_data: np.ndarray, discard_proper_nouns=True):
-        super().__init__()
+        super().__init__(defaultdict(list))
 
         self._sentence_data = sentence_data
 
@@ -23,7 +24,7 @@ class UnnormalizedToken2SentenceIndices(Token2SentenceIndicesMap):
             # split, discard impertinent characters, lower all
             for token in (token.lower() for token in get_meaningful_tokens(sentence)):
                 if len(token) and not any(i.isdigit() for i in token):
-                    self.upsert(token, i)
+                    self[token].append(i)
 
         print('Discarding proper nouns...')
         if discard_proper_nouns:

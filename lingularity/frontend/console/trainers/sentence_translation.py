@@ -40,7 +40,6 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             else:
                 return 1.0
 
-
     def _select_language(self) -> Tuple[str, bool]:
         """
             Returns:

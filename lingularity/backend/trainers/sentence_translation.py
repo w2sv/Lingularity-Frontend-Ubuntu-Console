@@ -1,7 +1,7 @@
 from typing import List, Tuple, Iterator
 from itertools import chain
 from bisect import insort
-from operator import ge, le
+import operator
 
 import numpy as np
 
@@ -38,23 +38,22 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 	# -----------------
 	class TrainingMode(ExtendedEnum):
 		VocabularyAcquisition = 'vocabulary acquisition'
-		Lowkey = 'lowkey'
+		Simple = 'simple'
 		Random = 'random'
 
 	def _filter_sentence_data_mode_accordingly(self, sentence_data: np.ndarray, mode: str) -> np.ndarray:
 		if mode == self.TrainingMode.Random.value:
 			return sentence_data
 
-		token_2_sentence_indices = self._get_token_2_sentence_indices_map(sentence_data)
+		token_map = self._get_token_map(sentence_data)
+		meaningful_token_occurrence_median = np.median(list(token_map.relevant_token_2_n_occurrences.values()))
 
-		def get_limit_corresponding_sentence_indices(occurrence_limit: int, filter_mode: str) -> List[int]:
-			assert filter_mode in ['max', 'min']
-			operator = ge if filter_mode == 'min' else le
-			return list(chain.from_iterable((indices for indices in token_2_sentence_indices.values() if operator(len(indices), occurrence_limit))))
+		def get_tokens(comparison) -> List[int]:
+			corresponding_tokens = (token for token, n_occurrences in token_map.relevant_token_2_n_occurrences.items() if comparison(n_occurrences, meaningful_token_occurrence_median))
+			return list(set(chain.from_iterable(map(token_map.get, corresponding_tokens))))
 
 		if mode == self.TrainingMode.VocabularyAcquisition.value:
-			indices = get_limit_corresponding_sentence_indices(20, 'max')
-		else:
-			indices = get_limit_corresponding_sentence_indices(50, 'min')
-		print('Getting corresponding sentences...')
-		return sentence_data[indices]
+			return sentence_data[get_tokens(operator.lt)]
+
+		elif mode == self.TrainingMode.Simple.value:
+			return sentence_data[get_tokens(operator.ge)]

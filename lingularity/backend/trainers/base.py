@@ -76,15 +76,12 @@ class TrainerBackend(ABC):
         np.random.shuffle(item_list)
         return iter(item_list)
 
-    def _get_token_2_sentence_indices_map(self, sentence_data: np.ndarray) -> Token2SentenceIndicesMap:
+    def _get_token_map(self, sentence_data: np.ndarray) -> Token2SentenceIndicesMap:
         lowercase_language = self.language.lower()
 
-        if Lemma2SentenceIndices.exists(lowercase_language):
-            return Lemma2SentenceIndices.from_file(lowercase_language)
-        else:
-            for cls in [Lemma2SentenceIndices, Stem2SentenceIndices]:
-                if cls.is_available(lowercase_language):
-                    return cls(sentence_data, lowercase_language)
+        for cls in [Lemma2SentenceIndices, Stem2SentenceIndices]:
+            if cls.is_available(lowercase_language):
+                return cls(sentence_data, lowercase_language)
 
         return UnnormalizedToken2SentenceIndices(sentence_data, discard_proper_nouns=True)
 
