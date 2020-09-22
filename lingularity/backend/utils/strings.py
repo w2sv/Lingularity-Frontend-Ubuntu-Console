@@ -4,7 +4,8 @@ import re
 
 def get_meaningful_tokens(sentence: str) -> List[str]:
     """ splitting at relevant delimiters, stripping off semantically irrelevant characters """
-    return re.split("[' ’-]", strip_unicode(sentence.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^`{|}~»«'))))
+
+    return re.split("[ -]", strip_unicode(sentence.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^`{|}~»«'))))
 
 
 def strip_unicode(token: str) -> str:

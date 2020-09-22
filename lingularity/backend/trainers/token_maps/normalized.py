@@ -67,7 +67,7 @@ class Lemma2SentenceIndices(Token2SentenceIndicesMap, NormalizedTokenMap):
         self._model = self._get_model(language)
 
         self.relevant_token_2_n_occurrences: DefaultDict[str, int] = defaultdict(lambda: 0)
-        self._save_path = f'{os.getcwd()}/.language_data/{language.title()}/lemma_map.pickle'
+        self._save_path = f'{os.getcwd()}/.language_data/{language.title()}/lemma_maps.pickle'
 
         if os.path.exists(self._save_path):
             _map, mode_relevant_token_map = pickle.load(open(self._save_path, 'rb'))
@@ -96,13 +96,15 @@ class Lemma2SentenceIndices(Token2SentenceIndicesMap, NormalizedTokenMap):
     def _map_tokens(self, sentence_data: np.ndarray):
         unnormalized_token_map = UnnormalizedToken2SentenceIndices(sentence_data, discard_proper_nouns=True)
 
-        print('Creating lemma map...')
-        for token, indices in tqdm(unnormalized_token_map.items(), total=unnormalized_token_map.__len__()):
-            if (doc := self._model(token)[0]).pos_ not in self.IGNORE_POS_TYPES:
-                self[doc.lemma_].extend(indices)
+        print('Creating lemma maps (will henceforth be skipped)...')
+        for chunk, indices in tqdm(unnormalized_token_map.items(), total=unnormalized_token_map.__len__()):
+            tokens = self._model(chunk)
+            for token in tokens:
+                if token.pos_ not in self.IGNORE_POS_TYPES:
+                    self[token.lemma_].extend(indices)
 
-                if doc.pos_ in self.SENTENCE_TRANSLATION_MODE_MAPPING_INCLUSION_POS_TYPES and self.relevant_token_2_n_occurrences.get(doc.lemma_) is None:
-                    self.relevant_token_2_n_occurrences[doc.lemma_] += len(indices)
+                    if token.pos_ in self.SENTENCE_TRANSLATION_MODE_MAPPING_INCLUSION_POS_TYPES:
+                        self.relevant_token_2_n_occurrences[token.lemma_] += len(indices)
 
     def _pickle_maps(self):
         with open(self._save_path, 'wb') as handle:
