@@ -31,9 +31,8 @@ class StemMap(NormalizedTokenMap):
     def is_available(language: str) -> bool:
         return language in nltk.stem.SnowballStemmer.languages
 
-    def __init__(self, sentence_data: np.ndarray, language: str):
+    def __init__(self, sentence_data: np.ndarray, language: str, *args):
         """ Args:
-                sentence_data
                 language: lowercase language """
 
         super().__init__()
@@ -67,22 +66,22 @@ class LemmaMap(NormalizedTokenMap):
     def is_available(language: str) -> bool:
         return language in LANGUAGE_2_CODE.keys()
 
-    def __init__(self, sentence_data: np.ndarray, language: str):
+    def __init__(self, sentence_data: np.ndarray, language: str, load_normalizer=True):
         """ Args:
-                sentence_data
                 language: lowercase language """
 
         super().__init__()
 
-        print('Loading model...')
-        self._model = self._get_model(language)
-
         self._save_path = f'{os.getcwd()}/.language_data/{language.title()}/lemma_maps.pickle'
+        self._model = None
 
         if os.path.exists(self._save_path):
             self._map, self.occurrence_map = pickle.load(open(self._save_path, 'rb'))
+            if load_normalizer:
+                self._model = self._get_model(language)
 
         else:
+            self._model = self._get_model(language)
             self._map_tokens(sentence_data)
             self._pickle_maps()
 
@@ -96,9 +95,12 @@ class LemmaMap(NormalizedTokenMap):
             download_result = os.system(f'python -m spacy download {model_name}')
             if download_result == 256:
                 return LemmaMap._get_model(language, retry=True)
+            print('Loading model...')
             return spacy.load(model_name)
 
     def _map_tokens(self, sentence_data: np.ndarray):
+        assert self._model is not None
+
         unnormalized_token_map = UnnormalizedTokenMap(sentence_data)
 
         self._output_mapping_initialization_message()
@@ -124,6 +126,7 @@ class LemmaMap(NormalizedTokenMap):
                       'NUM': 4,
                       'AUX': 3, 'ADP': 3, 'PRON': 3}
 
+        assert self._model is not None
         tokens = self._model(vocable_entry)
 
         # remove tokens of REMOVE_POS_TYPE if tokens not solely comprised of them
