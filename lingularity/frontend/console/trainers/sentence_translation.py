@@ -117,7 +117,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             "Hit Enter to advance to next sentence",
             "Enter",
             "\t- 'add' to add a vocable",
-            "\t- 'alter' to alter the most recently added vocable entry",
+            "\t- 'alter' to alter the most recently added vocable vocable_entry",
             "\t- 'exit' to terminate program\n",
             "\t- 'enable' to enable speech output",
             "\t- 'disable' to disable speech output",
@@ -266,7 +266,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
     def _modify_latest_vocable_insertion(self, latest_appended_vocable_line: str) -> Tuple[Optional[str], int]:
         """ Returns:
-                altered entry: str, None in case of invalid alteration
+                altered vocable_entry: str, None in case of invalid alteration
                 n_printed_lines: int """
 
         old_token = latest_appended_vocable_line.split(' - ')[0]

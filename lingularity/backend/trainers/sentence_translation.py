@@ -46,14 +46,14 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 			return sentence_data
 
 		token_map = self._get_token_map(sentence_data)
-		meaningful_token_occurrence_median = np.median(list(token_map.relevant_token_2_n_occurrences.values()))
+		token_occurrence_median = np.median(list(token_map.occurrence_map.values()))
 
-		def get_tokens(comparison) -> List[int]:
-			corresponding_tokens = (token for token, n_occurrences in token_map.relevant_token_2_n_occurrences.items() if comparison(n_occurrences, meaningful_token_occurrence_median))
+		def get_sentence_indices(comparison) -> List[int]:
+			corresponding_tokens = (token for token, n_occurrences in token_map.occurrence_map.items() if comparison(n_occurrences, token_occurrence_median))
 			return list(set(chain.from_iterable(map(token_map.get, corresponding_tokens))))
 
 		if mode == self.TrainingMode.VocabularyAcquisition.value:
-			return sentence_data[get_tokens(operator.lt)]
+			return sentence_data[get_sentence_indices(operator.lt)]
 
 		elif mode == self.TrainingMode.Simple.value:
-			return sentence_data[get_tokens(operator.ge)]
+			return sentence_data[get_sentence_indices(operator.ge)]

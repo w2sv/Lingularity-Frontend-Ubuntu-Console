@@ -28,5 +28,13 @@ def get_article_stripped_token(token: str) -> str:
     return token
 
 
-def split_string_at_uppercase(string: str) -> List[str]:
+def split_at_uppercase(string: str) -> List[str]:
     return re.findall('[A-Z][a-z]*', string)
+
+
+def is_non_latin(char: str) -> bool:
+    return ord(char) > 255
+
+
+def is_digit_free(string: str) -> bool:
+    return not any(char.isdigit() for char in string)

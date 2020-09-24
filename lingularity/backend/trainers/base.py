@@ -15,8 +15,8 @@ from lingularity.backend.data_fetching.scraping.language_typical_forenames impor
 from lingularity.backend.data_fetching.scraping.demonyms import scrape_demonyms
 from lingularity.backend.ops import google
 from lingularity.backend.utils.time import get_timestamp
-from lingularity.backend.trainers.token_maps import (UnnormalizedToken2SentenceIndices, Stem2SentenceIndices,
-                                                     Lemma2SentenceIndices, Token2SentenceIndicesMap)
+from lingularity.backend.trainers.token_maps import (UnnormalizedTokenMap, StemMap,
+                                                     LemmaMap, TokenMap)
 
 
 class TrainerBackend(ABC):
@@ -76,14 +76,14 @@ class TrainerBackend(ABC):
         np.random.shuffle(item_list)
         return iter(item_list)
 
-    def _get_token_map(self, sentence_data: np.ndarray) -> Token2SentenceIndicesMap:
+    def _get_token_map(self, sentence_data: np.ndarray) -> TokenMap:
         lowercase_language = self.language.lower()
 
-        for cls in [Lemma2SentenceIndices, Stem2SentenceIndices]:
+        for cls in [LemmaMap, StemMap]:
             if cls.is_available(lowercase_language):
                 return cls(sentence_data, lowercase_language)
 
-        return UnnormalizedToken2SentenceIndices(sentence_data, discard_proper_nouns=True)
+        return UnnormalizedTokenMap(sentence_data)
 
     # ----------------
     # Paths

@@ -1,3 +1,3 @@
-from .base import Token2SentenceIndicesMap
-from .unnormalized import UnnormalizedToken2SentenceIndices
-from .normalized import Stem2SentenceIndices, Lemma2SentenceIndices
+from .base import TokenMap
+from .unnormalized import UnnormalizedTokenMap
+from .normalized import StemMap, LemmaMap

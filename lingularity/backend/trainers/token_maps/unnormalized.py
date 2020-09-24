@@ -1,61 +1,55 @@
-from itertools import chain
-from typing import List, Dict, Optional
-from collections import defaultdict
+from typing import List, Set, Optional
 
 import numpy as np
 from tqdm import tqdm
 
-from lingularity.backend.trainers.token_maps.base import Token2SentenceIndicesMap
-from lingularity.backend.utils.strings import get_meaningful_tokens, get_article_stripped_token
+from lingularity.backend.trainers.token_maps.base import TokenMap
+from lingularity.backend.utils.strings import get_meaningful_tokens, is_non_latin, is_digit_free
 
 
-class UnnormalizedToken2SentenceIndices(Token2SentenceIndicesMap):
-    """ dict with
-            keys: String = distinct lowercase, punctuation-stripped, digit-free foreign language tokens
-            values: List[int] = lists of sentence indices in which appearing """
+class UnnormalizedTokenMap(TokenMap):
+    """ keys: punctuation-stripped, proper noun-stripped, digit-free tokens """
 
-    def __init__(self, sentence_data: np.ndarray, discard_proper_nouns=True):
-        super().__init__(defaultdict(list))
+    def __init__(self, sentence_data: np.ndarray):
+        super().__init__()
 
-        self._sentence_data = sentence_data
+        self._map_tokens(sentence_data)
 
-        print('Mapping tokens...')
-        for i, sentence in enumerate(tqdm(self._sentence_data[:, 1])):
-            # split, discard impertinent characters, lower all
+    def _map_tokens(self, sentence_data: np.ndarray):
+        proper_nouns = self._get_proper_nouns(sentence_data)
+
+        self._output_mapping_initialization_message()
+        for i, sentence in enumerate(tqdm(sentence_data[:, 1])):
             for token in (token.lower() for token in get_meaningful_tokens(sentence)):
-                if len(token) and not any(i.isdigit() for i in token):
+                if len(token) and is_digit_free(token) and token not in proper_nouns:
                     self[token].append(i)
+                    self.occurrence_map[token] += 1
 
-        print('Discarding proper nouns...')
-        if discard_proper_nouns:
-            for proper_noun in self._get_proper_nouns():
-                self.pop(proper_noun, None)
+    @staticmethod
+    def _get_proper_nouns(sentence_data: np.ndarray) -> Set[str]:
+        """ Working principle:
+                for each sentence pair:
+                    - get set of intersection between tokens of english sentence and its translation
+                    - add tokens
+                        starting on an uppercase characters
+                        being either comprised of at least 2 characters or non-latin
 
-    # ----------------
-    # PROPER NOUN QUERY
-    # ----------------
-    def _get_proper_nouns(self) -> List[str]:
-        name_candidates_2_sentence_indices = self._title_based_proper_noun_retrieval()
-        return list(self._bilateral_presence_based_proper_noun_filtering(name_candidates_2_sentence_indices))
+            Returns:
+                set of lowercase proper nouns """
 
-    def _title_based_proper_noun_retrieval(self) -> Dict[str, int]:
-        """ Returns:
-                lowercase name candidates """
+        proper_nouns = set()
 
-        names_2_sentenceindex = {}
-        for i, eng_sent in enumerate(tqdm(self._sentence_data[:, 0])):
-            tokens = get_meaningful_tokens(eng_sent)
-            [names_2_sentenceindex.update({name.lower(): i}) for name in filter(lambda token: token.istitle() and (len(token) > 1 or ord(token) > 255), tokens)]
-        return names_2_sentenceindex
+        print('Procuring proper nouns...')
+        for sentence_pair in tqdm(sentence_data):
+            proper_noun_candidates = set.intersection(*map(lambda sentence: set(get_meaningful_tokens(sentence)), sentence_pair))
+            for candidate in proper_noun_candidates:
+                if candidate.istitle() and (len(candidate) > 1 or is_non_latin(candidate)):
+                    proper_nouns.add(candidate.lower())
 
-    def _bilateral_presence_based_proper_noun_filtering(self, namecandidate_2_sentenceind: Dict[str, int]) -> List[str]:
-        """ returns lowercase names """
-
-        return list(np.asarray(list(filter(lambda item: item[0] in map(lambda token: token.lower(), get_meaningful_tokens(self._sentence_data[item[1]][1])), list(namecandidate_2_sentenceind.items()))))[:, 0])
+        return proper_nouns
 
     # ----------------
-    # Indices Query
+    # Query
     # ----------------
-    def get_comprising_sentence_indices(self, entry: str) -> Optional[List[int]]:
-        indices = list(chain.from_iterable([v for k, v in self.items() if any(token.startswith(get_article_stripped_token(entry)) for token in k.split(' '))]))
-        return indices if len(indices) else None
+    def get_comprising_sentence_indices(self, vocable_entry: str) -> Optional[List[int]]:
+        return self._find_best_fit_sentence_indices(relevance_sorted_tokens=self._get_length_sorted_meaningful_tokens(vocable_entry))

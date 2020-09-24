@@ -12,7 +12,7 @@ from lingularity.frontend.console.utils.date import n_days_ago
 
 
 class VocableEntry:
-    """ wrapper for vocable entry dictionary of structure
+    """ wrapper for vocable vocable_entry dictionary of structure
             {foreign_token: {tf: int},
                             {lfd: str},
                             {s: float},
@@ -156,7 +156,7 @@ class VocableTrainerBackend(TrainerBackend):
     # .related sentences
     # ------------------
     def get_related_sentence_pairs(self, entry: str, n: int) -> Optional[List[List[str]]]:
-        if (sentence_indices := self._token_2_sentence_indices.get_comprising_sentence_indices(entry=entry)) is None:
+        if (sentence_indices := self._token_2_sentence_indices.get_comprising_sentence_indices(entry)) is None:
             return None
 
         sentence_indices = np.asarray(sentence_indices)
