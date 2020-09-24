@@ -117,7 +117,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             "Hit Enter to advance to next sentence",
             "Enter",
             "\t- 'add' to add a vocable",
-            "\t- 'alter' to alter the most recently added vocable vocable_entry",
+            "\t- 'alter' to alter the most recently added vocable entry",
             "\t- 'exit' to terminate program\n",
             "\t- 'enable' to enable speech output",
             "\t- 'disable' to disable speech output",

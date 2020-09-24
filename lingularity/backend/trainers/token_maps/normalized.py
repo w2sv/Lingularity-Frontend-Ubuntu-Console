@@ -111,11 +111,11 @@ class LemmaMap(NormalizedTokenMap):
                     self[token.lemma_].extend(indices)
 
                     if token.pos_ in self.SENTENCE_TRANSLATION_MODE_MAPPING_INCLUSION_POS_TYPES:
-                        self.token_2_occurrences[token.lemma_] += len(indices)
+                        self.occurrence_map[token.lemma_] += len(indices)
 
     def _pickle_maps(self):
         with open(self._save_path, 'wb') as handle:
-            pickle.dump((dict(self._map), dict(self.token_2_occurrences)), handle, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump((dict(self._map), dict(self.occurrence_map)), handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     # ------------------
     # Query

@@ -80,7 +80,7 @@ class TrainerBackend(ABC):
         lowercase_language = self.language.lower()
 
         for cls in [LemmaMap, StemMap]:
-            if cls.is_available(lowercase_language):
+            if cls.is_available(lowercase_language):  # type: ignore
                 return cls(sentence_data, lowercase_language, load_normalizer=str(self) == 'v')
 
         return UnnormalizedTokenMap(sentence_data)
