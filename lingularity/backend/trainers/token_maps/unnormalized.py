@@ -4,15 +4,16 @@ import numpy as np
 from tqdm import tqdm
 
 from lingularity.backend.trainers.token_maps.base import TokenMap
-from lingularity.backend.utils.strings import get_meaningful_tokens, is_non_latin, is_digit_free
+from lingularity.backend.utils.strings import get_meaningful_tokens, is_digit_free
 
 
 class UnnormalizedTokenMap(TokenMap):
     """ keys: punctuation-stripped, proper noun-stripped, digit-free tokens """
 
-    def __init__(self, sentence_data: np.ndarray):
+    def __init__(self, sentence_data: np.ndarray, apostrophe_splitting=True):
         super().__init__()
 
+        self._apostrophe_splitting = apostrophe_splitting
         self._map_tokens(sentence_data)
 
     def _map_tokens(self, sentence_data: np.ndarray):
@@ -20,7 +21,7 @@ class UnnormalizedTokenMap(TokenMap):
 
         self._output_mapping_initialization_message()
         for i, sentence in enumerate(tqdm(sentence_data[:, 1])):
-            for token in (token.lower() for token in get_meaningful_tokens(sentence)):
+            for token in (token.lower() for token in get_meaningful_tokens(sentence, self._apostrophe_splitting)):
                 if len(token) and is_digit_free(token) and token not in proper_nouns:
                     self[token].append(i)
                     self.occurrence_map[token] += 1
@@ -43,7 +44,7 @@ class UnnormalizedTokenMap(TokenMap):
         for sentence_pair in tqdm(sentence_data):
             proper_noun_candidates = set.intersection(*map(lambda sentence: set(get_meaningful_tokens(sentence)), sentence_pair))
             for candidate in proper_noun_candidates:
-                if candidate.istitle() and (len(candidate) > 1 or is_non_latin(candidate)):
+                if candidate.istitle() and len(candidate) > 1:
                     proper_nouns.add(candidate.lower())
 
         return proper_nouns
@@ -51,5 +52,5 @@ class UnnormalizedTokenMap(TokenMap):
     # ----------------
     # Query
     # ----------------
-    def get_comprising_sentence_indices(self, vocable_entry: str) -> Optional[List[int]]:
+    def query_sentence_indices(self, vocable_entry: str) -> Optional[List[int]]:
         return self._find_best_fit_sentence_indices(relevance_sorted_tokens=self._get_length_sorted_meaningful_tokens(vocable_entry))

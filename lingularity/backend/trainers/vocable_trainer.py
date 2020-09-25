@@ -156,7 +156,7 @@ class VocableTrainerBackend(TrainerBackend):
     # .related sentences
     # ------------------
     def get_related_sentence_pairs(self, entry: str, n: int) -> Optional[List[List[str]]]:
-        if (sentence_indices := self._token_2_sentence_indices.get_comprising_sentence_indices(entry)) is None:
+        if (sentence_indices := self._token_2_sentence_indices.query_sentence_indices(entry)) is None:
             return None
 
         sentence_indices = np.asarray(sentence_indices)

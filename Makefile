@@ -13,7 +13,7 @@ test: mypy pytest
 # ----------Installation--------------
 
 _install-base-dependencies:
-	bash install-dependencies.sh
+	bash os_dependencies/base.sh
 
 install-console-env: _install-base-dependencies
 	rm -rf console-env

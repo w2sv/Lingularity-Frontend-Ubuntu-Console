@@ -1,31 +1,46 @@
-from typing import List
+from typing import List, Optional
 import re
 
 
-def get_meaningful_tokens(sentence: str) -> List[str]:
-    """ splitting at relevant delimiters, stripping off semantically irrelevant characters """
-
-    return re.split("[ -]", strip_unicode(sentence.translate(str.maketrans('', '', '"!#$%&()*+,./:;<=>?@[\]^`{|}~»«'))))
+APOSTROPHES = "'’"
 
 
-def strip_unicode(token: str) -> str:
-    return token.translate(str.maketrans('', '', "\u2009\u202f\xa0\xa2\u200b"))
+def _replace_multiple_characters(text: str, characters: str, replacement: str) -> str:
+    for char in characters:
+        text = text.replace(char, replacement)
+    return text
 
 
-def lower_case_sentence_beginnings(sentence: str) -> str:
-    chars = list(sentence)
-    chars[0] = chars[0].lower()
-    point_positions = (i for i in range(len(sentence) - 1) if sentence[i: i + 2] == '. ')
-    for i in point_positions:
-        chars[i + 2] = chars[i + 2].lower()
-    return ''.join(chars)
+def _strip_multiple_characters(text: str, characters: str) -> str:
+    return _replace_multiple_characters(text, characters, replacement='')
 
 
-def get_article_stripped_token(token: str) -> str:
-    parts = token.replace("'", ' ').split(' ')
+def _strip_unicode(token: str) -> str:
+    return _strip_multiple_characters(token, characters="\u2009\u202f\xa0\xa2\u200b")
+
+
+def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> List[str]:
+    """ Working Principle:
+            - strip special characters, unicode remnants
+            - break text into distinct tokens
+            - remove tokens containing digit(s) """
+
+    special_character_stripped = _strip_multiple_characters(text, characters='"!#$%&()*+,./:;<=>?@[\]^`{|}~»«')
+    unicode_stripped = _strip_unicode(special_character_stripped)
+
+    split_characters = ' -'
+    if apostrophe_splitting:
+        split_characters += APOSTROPHES
+
+    tokens = re.split(f"[{split_characters}]", unicode_stripped)
+    return list(filter(is_digit_free, tokens))
+
+
+def get_article_stripped_noun(noun_candidate: str) -> Optional[str]:
+    parts = _replace_multiple_characters(noun_candidate, APOSTROPHES, replacement=' ').split(' ')
     if len(parts) == 2 and len(parts[0]) < len(parts[1]):
         return parts[1]
-    return token
+    return None
 
 
 def split_at_uppercase(string: str) -> List[str]:

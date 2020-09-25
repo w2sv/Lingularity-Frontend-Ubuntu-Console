@@ -43,7 +43,7 @@ class StemMap(NormalizedTokenMap):
     def _map_tokens(self, sentence_data: np.ndarray):
         assert self._stemmer is not None
 
-        unnormalized_token_map = UnnormalizedTokenMap(sentence_data)
+        unnormalized_token_map = UnnormalizedTokenMap(sentence_data, apostrophe_splitting=True)
 
         self._output_mapping_initialization_message()
         for token, indices in tqdm(unnormalized_token_map.items(), total=unnormalized_token_map.__len__()):
@@ -51,7 +51,7 @@ class StemMap(NormalizedTokenMap):
             self[stem].extend(indices)
             self.occurrence_map[stem] += len(indices)
 
-    def get_comprising_sentence_indices(self, vocable_entry: str) -> Optional[List[int]]:
+    def query_sentence_indices(self, vocable_entry: str) -> Optional[List[int]]:
         assert self._stemmer is not None
 
         length_sorted_stems = list(map(self._stemmer.stem, self._get_length_sorted_meaningful_tokens(vocable_entry)))
@@ -89,19 +89,31 @@ class LemmaMap(NormalizedTokenMap):
     def _get_model(language: str, retry=False):
         model_name = f'{LANGUAGE_2_CODE[language]}_core_{"web" if retry else "news"}_md'
 
-        try:
-            return spacy.load(model_name)
-        except OSError:
-            download_result = os.system(f'python -m spacy download {model_name}')
-            if download_result == 256:
-                return LemmaMap._get_model(language, retry=True)
+        def load_model():
             print('Loading model...')
             return spacy.load(model_name)
+
+        try:
+            return load_model()
+        except OSError:
+            # install os dependencies if required
+            relative_os_dependency_installation_file_path = f'os_dependencies/languages/{language}.sh'
+            if os.path.exists(f'{os.getcwd()}/{relative_os_dependency_installation_file_path}'):
+                os.system(f'bash {relative_os_dependency_installation_file_path}')
+
+            # try to download model
+            if os.system(f'python -m spacy download {model_name}') == 256:
+                if not retry:
+                    return LemmaMap._get_model(language, retry=True)
+                else:
+                    raise EnvironmentError("Couldn't download spacy model")
+
+            return load_model()
 
     def _map_tokens(self, sentence_data: np.ndarray):
         assert self._model is not None
 
-        unnormalized_token_map = UnnormalizedTokenMap(sentence_data)
+        unnormalized_token_map = UnnormalizedTokenMap(sentence_data, apostrophe_splitting=False)
 
         self._output_mapping_initialization_message()
         for chunk, indices in tqdm(unnormalized_token_map.items(), total=unnormalized_token_map.__len__()):
@@ -120,7 +132,7 @@ class LemmaMap(NormalizedTokenMap):
     # ------------------
     # Query
     # ------------------
-    def get_comprising_sentence_indices(self, vocable_entry: str) -> Optional[List[int]]:
+    def query_sentence_indices(self, vocable_entry: str) -> Optional[List[int]]:
         REMOVE_POS_TYPES = {'DET', 'PROPN', 'SYM'}
         POS_VALUES = {'NOUN': 5, 'VERB': 5, 'ADJ': 5, 'ADV': 5,
                       'NUM': 4,
