@@ -80,6 +80,6 @@ class TokenMap(CustomDict, ABC):
 
     @staticmethod
     def _get_length_sorted_meaningful_tokens(vocable_entry: str) -> List[str]:
-        if len((article_stripped_token := get_article_stripped_noun(vocable_entry))) == 1:
-            return [article_stripped_token]
+        if (article_stripped_noun := get_article_stripped_noun(vocable_entry)) is not None:
+            return [article_stripped_noun]
         return sorted(get_meaningful_tokens(vocable_entry, apostrophe_splitting=True), key=lambda token: len(token))
