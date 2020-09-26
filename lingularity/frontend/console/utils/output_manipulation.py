@@ -21,7 +21,8 @@ def _erase_previous_line():
 
 
 def erase_lines(n_lines: int):
-    [_erase_previous_line() for _ in range(n_lines)]
+    print('')
+    [_erase_previous_line() for _ in range(n_lines + 1)]
 
 
 class BufferPrint:

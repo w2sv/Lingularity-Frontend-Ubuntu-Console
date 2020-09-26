@@ -28,7 +28,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         self._backend = Backend(non_english_language, train_english, training_mode, mongodb_client)
 
-        self._tts_disabled = False
+        self._tts_enabled = True
         self._playback_speed = self._get_playback_speed()
 
         self._training_loop_suspended = False
@@ -82,7 +82,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
     def _select_mode(self) -> str:
         explanations = (
-            'show me sentences possessing an increased probability of containing rather infrequently used vocabulary',
+            'show me sentences containing rather infrequently used vocabulary',
             'show me sentences comprising exclusively commonly used vocabulary',
             'just hit me with dem sentences brah')
 
@@ -122,7 +122,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         instructions = (
             "Hit Enter to advance to next sentence",
             "Enter",
-            "\t- 'add' to add a vocable",
+            "\t- 'vocable' to add a vocable",
             "\t- 'alter' to alter the most recently added vocable entry",
             "\t- 'exit' to terminate program\n",
             "\t- 'enable' to enable speech output",
@@ -147,69 +147,79 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     def _tts_available_and_enabled(self) -> bool:
         assert self._backend is not None
 
-        return self._backend.tts_available and not self._tts_disabled
+        return self._backend.tts_available and self._tts_enabled
 
     class TrainingOption(ExtendedEnum):
-        AddVocabulary = 'add'
+        AddVocabulary = 'vocabulary'
         AlterLatestVocableEntry = 'alter'
         Exit = 'exit'
 
-        DisableTTS = 'disable'
         EnableTTS = 'enable'
+        DisableTTS = 'disable'
         ChangePlaybackSpeed = 'change'
 
+    def _remove_audio_file(self):
+        os.remove(self._audio_file_path)
+        self._audio_file_path = None
+
     def _run_training(self):
-        previous_audio_file_path: Optional[str] = None
         translation: Optional[str] = None
 
         INDENTATION = ' ' * 16
 
         while True:
             if not self._training_loop_suspended:
+                # get sentence pair
                 if (sentence_pair := self._backend.get_training_item()) is None:
                     print('\nSentence data file depleted')
                     return
 
+                # try to convert forenames, output reference language sentence
                 reference_sentence, translation = self._backend.convert_sentences_forenames_if_feasible(sentence_pair)
                 self._buffer_print(f'{INDENTATION}{reference_sentence}')
                 print(f"{INDENTATION}pending... ")
 
-                if self._tts_available_and_enabled:
-                    self._audio_file_path = self._backend.download_tts_audio(text=translation)
+            # get tts audio file if available
+            if self._tts_available_and_enabled and self._audio_file_path is None:
+                self._audio_file_path = self._backend.download_tts_audio(text=translation)
 
             self._training_loop_suspended = False
+
+            # get response, execute selected option if applicable
             if (response := resolve_input(input('$').lower(), options=self.TrainingOption.values())) is not None:
-                exit_training = self._execute_option(self.TrainingOption(response), translation=translation)
+                exit_training = self._execute_option(option=self.TrainingOption(response))
                 if exit_training:
                     return
 
             if not self._training_loop_suspended:
+                # erase pending...
                 erase_lines(2)
 
+                # output translation
                 self._buffer_print(f'{INDENTATION}{translation}')
                 self._buffer_print(f'{INDENTATION}_______________')
 
+                # play tts file if available, otherwise suspend program
+                # for some time to incentivise gleaning over translation
                 if self._tts_available_and_enabled:
                     self._backend.play_audio_file(self._audio_file_path, self._playback_speed, suspend_program_for_duration=True)
-                    if previous_audio_file_path is not None:
-                        os.remove(previous_audio_file_path)
-                    previous_audio_file_path = self._audio_file_path
+                    self._remove_audio_file()
                 else:
-                    # TODO: let sleep duration be proportional to translation length
-                    time.sleep(1.2)
+                    time.sleep(len(translation) * 0.05)
 
                 self._n_trained_items += 1
 
                 if self._n_trained_items >= 5:
                     self._buffer_print.partially_redo_buffered_output(n_lines_to_be_removed=3)
 
-    def _execute_option(self, option: TrainingOption, translation: str) -> bool:
+    def _execute_option(self, option: TrainingOption) -> bool:
         """ Returns:
-                exit training flag """
+                exit_training flag """
+
+        assert self._backend is not None
 
         def suspend_training_loop(n_lines_to_be_erased: int):
             self._training_loop_suspended = True
-            print(" ")
             erase_lines(n_lines_to_be_erased)
 
         if option is self.TrainingOption.AddVocabulary:
@@ -220,7 +230,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             if self._most_recent_vocable_entry_line_repr is None:
                 print("You haven't added any vocabulary during the current session")
                 time.sleep(1)
-                suspend_training_loop(n_lines_to_be_erased=2)
+                suspend_training_loop(n_lines_to_be_erased=1)
             else:
                 altered_entry, n_printed_lines = self._modify_latest_vocable_insertion(self._most_recent_vocable_entry_line_repr)
                 if altered_entry is not None:
@@ -229,8 +239,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         elif option is self.TrainingOption.Exit:
             self._backend.clear_tts_audio_file_dir()
-            print('')
-            erase_lines(2)
+            erase_lines(1)
             print(f'\nNumber of faced sentences: {self._n_trained_items}')
             cursor.show()
             return True
@@ -241,16 +250,18 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         # ----------------
         # TTS Options
         # ----------------
-        elif option is self.TrainingOption.DisableTTS:
-            self._tts_disabled = True
+        elif option is self.TrainingOption.DisableTTS and self._tts_enabled:
+            self._remove_audio_file()
+            self._tts_enabled = False
+            suspend_training_loop(n_lines_to_be_erased=1)
 
-        elif option is self.TrainingOption.EnableTTS and self._tts_disabled:
-            self._tts_disabled = False
-            self._audio_file_path = self._backend.download_tts_audio(translation)
+        elif option is self.TrainingOption.EnableTTS and not self._tts_enabled:
+            self._tts_enabled = True
+            suspend_training_loop(n_lines_to_be_erased=1)
 
         elif option is self.TrainingOption.ChangePlaybackSpeed:
             self._change_playback_speed()
-            suspend_training_loop(n_lines_to_be_erased=3)
+            suspend_training_loop(n_lines_to_be_erased=2)
 
         return False
 
