@@ -84,7 +84,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         explanations = (
             'show me sentences containing rather infrequently used vocabulary',
             'show me sentences comprising exclusively commonly used vocabulary',
-            'just hit me with dem sentences brah')
+            'just hit me with dem sentences')
 
         clear_screen()
         indentation = get_max_line_length_based_indentation(explanations)
@@ -98,8 +98,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         if mode_selection is None:
             return recurse_on_unresolvable_input(self._select_mode, deletion_lines=-1)
-        print('\n', end='')
 
+        print('\n', end='')
         return mode_selection
 
     # -----------------
@@ -117,23 +117,25 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     def _display_pre_training_instructions(self):
         clear_screen()
-        centered_print(f"{DEFAULT_VERTICAL_VIEW_OFFSET * 2}Database comprises {self._backend.sentence_data_magnitude:,d} sentences.\n\n")
+        centered_print(f"{DEFAULT_VERTICAL_VIEW_OFFSET * 2}Document comprises {self._backend.sentence_data_magnitude:,d} sentences.\n\n")
+
+        explanations = (
+            'add a vocable',
+            'alter the most recently added vocable entry',
+            'to terminate program\n',
+            'enable speech output',
+            'disable speech output',
+            'change playback speed')
 
         instructions = (
             "Hit Enter to advance to next sentence",
             "Enter",
-            "\t- 'vocable' to add a vocable",
-            "\t- 'alter' to alter the most recently added vocable entry",
-            "\t- 'exit' to terminate program\n",
-            "\t- 'enable' to enable speech output",
-            "\t- 'disable' to disable speech output",
-            "\t- 'change' to change playback speed")
+            *[f"\t- '{option.value}' to {explanations[i]}" for i, option in enumerate(self.TrainingOption)])
 
         if not self._backend.tts_available:
             instructions = instructions[:-3]
 
         indentation = get_max_line_length_based_indentation(instructions)
-
         for line in instructions:
             print(indentation, line)
 
@@ -149,6 +151,10 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         return self._backend.tts_available and self._tts_enabled
 
+    def _remove_audio_file(self):
+        os.remove(self._audio_file_path)
+        self._audio_file_path = None
+
     class TrainingOption(ExtendedEnum):
         AddVocabulary = 'vocabulary'
         AlterLatestVocableEntry = 'alter'
@@ -157,10 +163,6 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         EnableTTS = 'enable'
         DisableTTS = 'disable'
         ChangePlaybackSpeed = 'change'
-
-    def _remove_audio_file(self):
-        os.remove(self._audio_file_path)
-        self._audio_file_path = None
 
     def _run_training(self):
         translation: Optional[str] = None
@@ -192,7 +194,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     return
 
             if not self._training_loop_suspended:
-                # erase pending...
+                # erase pending... + entered option identifier
                 erase_lines(2)
 
                 # output translation
