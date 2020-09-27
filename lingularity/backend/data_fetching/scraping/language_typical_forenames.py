@@ -9,7 +9,7 @@ from .utils import read_page_source
 _POPULAR_FORENAMES_PAGE_URL = 'http://en.wikipedia.org/wiki/List_of_most_popular_given_names'
 
 
-def scrape_language_typical_forenames(language: str) -> Tuple[Optional[List[List[str]]], Optional[str]]:
+def scrape_typical_forenames(language: str) -> Tuple[Optional[List[List[str]]], Optional[str]]:
     """
         Args:
             language: uppercase
@@ -121,5 +121,5 @@ if __name__ == '__main__':
     from time import time
 
     t1 = time()
-    print(_scrape_popular_forenames('Korea'))
+    print(_scrape_popular_forenames('China'))
     print(f'took {time() - t1}s')

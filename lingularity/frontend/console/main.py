@@ -11,11 +11,15 @@ import logging
 import cursor
 
 from lingularity.backend.database import MongoDBClient
+from lingularity.backend.ops.google.translation import GoogleTranslation
 from lingularity.frontend.console.utils.input_resolution import recurse_on_unresolvable_input, recurse_on_invalid_input, resolve_input
-from lingularity.frontend.console.utils.output_manipulation import clear_screen, erase_lines, centered_print, get_centered_input_query_indentation, DEFAULT_VERTICAL_VIEW_OFFSET
 from lingularity.frontend.console.utils.date import today_or_yesterday, string_date_2_datetime_type
 from lingularity.frontend.console.utils.signup_credential_validation import invalid_mailadress, invalid_password, invalid_username
-from lingularity.frontend.console.utils.user_login_storage import get_logged_in_user, write_fernet_key_if_not_existent, store_user_login, USER_ENCRYPTION_FILE_PATH
+from lingularity.frontend.console.utils.user_login_storage import (get_logged_in_user, write_fernet_key_if_not_existent,
+                                                                   store_user_login, USER_ENCRYPTION_FILE_PATH)
+from lingularity.frontend.console.utils.output_manipulation import (clear_screen, erase_lines, centered_print,
+                                                                    get_centered_input_query_indentation,
+                                                                    DEFAULT_VERTICAL_VIEW_OFFSET)
 
 
 def display_starting_screen():
@@ -119,9 +123,9 @@ def extended_starting_screen(username: str, latest_trained_language: Optional[st
     centered_print("Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,")
     centered_print("e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
 
-    constitution_query = random.choice(list(map(lambda question_corpus: question_corpus + f' {username.title()}?', [f"What's up", f"How are you"])))
-    if latest_trained_language is not None and (google_language_abbreviation := google.get_language_abbreviation(latest_trained_language)) is not None:
-        constitution_query_translation = google.translate(constitution_query, src='en', dest=google_language_abbreviation)
+    constitution_query = random.choice([f"What's up", f"How are you"]) + f' {username.title()}?'
+    if latest_trained_language is not None and (language_identifier := GoogleTranslation().get_identifier(latest_trained_language)) is not None:
+        constitution_query_translation = GoogleTranslation().translate(constitution_query, src='en', dest=language_identifier)
         centered_print(constitution_query_translation, CONSECUTIVE_VERTICAL_SPACE)
     else:
         centered_print(constitution_query, CONSECUTIVE_VERTICAL_SPACE)
@@ -146,7 +150,7 @@ def select_action() -> Optional[str]:
     in_between_indentation = ' ' * 6
     input_message = f"What would you like to do?: {in_between_indentation}Translate (S)entences{in_between_indentation}Train (V)ocabulary{in_between_indentation}(A)dd Vocabulary{in_between_indentation}(C)hange Account\n"
     centered_print(input_message, ' ', end='')
-    training = resolve_input(input().lower(), list(ELIGIBLE_ACTIONS.keys()))
+    training = resolve_input('', list(ELIGIBLE_ACTIONS.keys()))
 
     if training is None:
         return recurse_on_unresolvable_input(select_action, 4)

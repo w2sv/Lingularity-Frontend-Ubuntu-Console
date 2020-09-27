@@ -3,7 +3,7 @@ from itertools import chain
 from collections import Counter
 
 from lingularity.backend.data_fetching.scraping.sentence_data_download_links import scrape_language_2_downloadlink_dict
-from lingularity.backend.data_fetching.scraping.demonyms import scrape_demonyms
+from lingularity.backend.data_fetching.scraping.demonyms import scrape_demonym
 from lingularity.backend.data_fetching.scraping.language_typical_forenames import _scrape_countries_language_employed_in, _scrape_popular_forenames
 
 
@@ -16,25 +16,25 @@ def test_zip_download_link_parsing():
         print(f'# of available languages has changed: {n_languages}')
 
 
-@pytest.mark.parametrize('country,expected_demonyms', [
-    ('USA', ['American']),
-    ('France', ['French']),
-    ('Hungary', ['Hungarian']),
-    ('Germany', ['German']),
-    ('Russia', ['Russian']),
-    ('Turkmenistan', ['Turkmenistani', 'Turkmen']),
-    ('Sweden', ['Swedish', 'Swede']),
-    ('Spain', ['Spanish', 'Spaniard']),
-    ('Australia', ['Australian']),
-    ('Israel', ['Israeli']),
-    ('Serbia', ['Serbian']),
-    ('Austria', ['Austrian']),
-    ('Monaco', ['Monégasque', 'Monacan']),
-    ('Uzbekistan', ['Uzbek']),
+@pytest.mark.parametrize('country,expected_demonym', [
+    ('USA', 'American'),
+    ('France', 'French'),
+    ('Hungary', 'Hungarian'),
+    ('Germany', 'German'),
+    ('Russia', 'Russian'),
+    ('Turkmenistan', 'Turkmenistani'),
+    ('Sweden', 'Swede'),
+    ('Spain', 'Spanish'),
+    ('Australia', 'Australian'),
+    ('Israel', 'Israeli'),
+    ('Serbia', 'Serbian'),
+    ('Austria', 'Austrian'),
+    ('Monaco', 'Monacan'),
+    ('Uzbekistan', 'Uzbekistani'),
     ('Indogermanic', None)
 ])
-def test_demonyms_fetching(country, expected_demonyms):
-    assert scrape_demonyms(country) == expected_demonyms
+def test_demonyms_fetching(country, expected_demonym):
+    assert scrape_demonym(country) == expected_demonym
 
 
 @pytest.mark.parametrize('language,expected_countries', [

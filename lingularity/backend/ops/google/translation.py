@@ -1,15 +1,18 @@
 from googletrans import LANGUAGES, Translator
 
-
-_translator = Translator()
-
-
-def language_available(language: str) -> bool:
-    return language in LANGUAGES
+from . import GoogleOp
 
 
-def translate(content: str, src: str, dest: str) -> str:
-    """ Args:
-            Refer to google.__init__ concerning the required form of src, dest """
+class GoogleTranslation(GoogleOp):
+    def __init__(self):
+        super().__init__(language_2_identifier={v.title(): k for k, v in LANGUAGES.items()})
 
-    return _translator.translate(content, src=src, dest=dest).text
+        self._translator = Translator()
+
+    def translate(self, text: str, src: str, dest: str) -> str:
+        """ Args:
+                text: to be translated
+                src: language identifier of source language
+                dest: language identifier of destination language """
+
+        return self._translator.translate(text, src=src, dest=dest).text

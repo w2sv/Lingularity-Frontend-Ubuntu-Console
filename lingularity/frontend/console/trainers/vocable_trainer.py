@@ -44,9 +44,9 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             print(indentation, language)
 
         input_query_message = 'Enter desired language: '
-        language_selection = resolve_input(input(f'\n{indentation[:-int(len(input_query_message) * 3/4)]}{input_query_message}').title(), eligible_languages)
+        language_selection = resolve_input(f'\n{indentation[:-int(len(input_query_message) * 3/4)]}{input_query_message}', eligible_languages)
         if language_selection is None:
-            return recurse_on_unresolvable_input(self._select_language, deletion_lines=-1)
+            return recurse_on_unresolvable_input(self._select_language, n_deletion_lines=-1)
         print('\n' * 2, end='')
         return language_selection, False  # TODO
 
@@ -79,7 +79,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             print(DEFAULT_VERTICAL_VIEW_OFFSET)
             centered_print('Would you like to see the vocabulary you recently added? (y)es/(n)o')
             centered_print(' ', end='')
-            display_vocabulary = resolve_input(input().lower(), ['yes', 'no'])
+            display_vocabulary = resolve_input('', ['yes', 'no'])
             if display_vocabulary == 'yes':
                 [print('\t', entry.line_repr) for entry in new_vocabulary]
                 print('\n')
@@ -154,7 +154,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             print(f'{translation_query_output}{response} | {response_evaluation.name.upper()} {f"| Correct translation: {entry.display_translation}" if response_evaluation.name != "Perfect" else ""}{f" | New Score: {entry.score if entry.score % 1 != 0 else int(entry.score)}" if entry.score < 5 else "| Entry Perfected"}\n')
 
             if (related_sentence_pairs := self._backend.get_related_sentence_pairs(entry.display_translation, n=2)) is not None:
-                forename_converted_sentence_pairs = [reversed(self._backend.convert_sentences_forenames_if_feasible(sentence_pair)) for sentence_pair in related_sentence_pairs]
+                forename_converted_sentence_pairs = [reversed(self._backend.convert_forenames_if_feasible(sentence_pair)) for sentence_pair in related_sentence_pairs]
                 joined_sentence_pairs = [' - '.join(sentence_pair) for sentence_pair in forename_converted_sentence_pairs]
                 [centered_print(joined_sentence_pair) for joined_sentence_pair in joined_sentence_pairs]
 

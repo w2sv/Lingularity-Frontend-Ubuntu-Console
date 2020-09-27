@@ -1,4 +1,4 @@
-from typing import List, Tuple, Iterator
+from typing import List, Tuple, Iterator, Optional
 from itertools import chain
 from bisect import insort
 import operator

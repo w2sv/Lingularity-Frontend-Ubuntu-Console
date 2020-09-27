@@ -1,18 +1,17 @@
-from typing import List, Optional, Iterator, Any, Sequence, Tuple
+from typing import List, Optional, Iterator, Any, Sequence, Tuple, Dict
 import os
 from abc import ABC
 import time
 import random
 
 import numpy as np
-import gtts
 import vlc
 from mutagen.mp3 import MP3
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.data_fetching.scraping.language_typical_forenames import scrape_language_typical_forenames
-from lingularity.backend.data_fetching.scraping.demonyms import scrape_demonyms
-from lingularity.backend.ops import google
+from lingularity.backend.data_fetching.scraping.language_typical_forenames import scrape_typical_forenames
+from lingularity.backend.data_fetching.scraping.demonyms import scrape_demonym
+from lingularity.backend.ops.google.tts import GoogleTTS
 from lingularity.backend.utils.time import get_timestamp
 from lingularity.backend.trainers.token_maps import (UnnormalizedTokenMap, StemMap,
                                                      LemmaMap, TokenMap)
@@ -32,15 +31,14 @@ class TrainerBackend(ABC):
         self._train_english = train_english
 
         if not vocable_expansion_mode:
-            self._language_typical_forenames, corresponding_country = scrape_language_typical_forenames(non_english_language)
-            self.names_convertible: bool = all(variable is not None for variable in [self._language_typical_forenames, corresponding_country])
-            if self.names_convertible and (language_demonyms := scrape_demonyms(country_name=corresponding_country)) is not None:  # type: ignore
-                # TODO: check whether demonym equals adjective
+            # forename converting
+            self._language_typical_forenames, corresponding_country = scrape_typical_forenames(non_english_language)
+            self.forenames_convertible = self._language_typical_forenames is not None
+            self.demonym = scrape_demonym(country_name=corresponding_country) if self.forenames_convertible else None
 
-                print(f'Employing {language_demonyms[0]} names.')
-
-            self._google_ops_language_abbreviation: Optional[str] = google.get_language_abbreviation(self._non_english_language)
-            self.tts_available: bool = self._google_ops_language_abbreviation is not None
+            # tts
+            self.tts_language_identifier: Optional[str] = GoogleTTS().get_identifier(self._non_english_language)
+            self.tts_available: bool = self.tts_language_identifier is not None
 
         mongodb_client.language = non_english_language
         self.mongodb_client = mongodb_client
@@ -150,7 +148,7 @@ class TrainerBackend(ABC):
         except StopIteration:
             return None
 
-    def convert_sentences_forenames_if_feasible(self, sentences: List[str]) -> Tuple[str, str]:
+    def convert_forenames_if_feasible(self, sentences: List[str]) -> List[str]:
         """
             Args:
                 sentences: [reference_language_sentence, translation]
@@ -158,22 +156,21 @@ class TrainerBackend(ABC):
                 converted sentences if forenames convertible and convertible names present in reference_language_sentence,
                 otherwise original sentences """
 
-        reference_language_sentence, translation = sentences
-        if self.names_convertible and any(
-                default_name in reference_language_sentence for default_name in self._DEFAULT_SENTENCE_DATA_FORENAMES):
-            reference_language_sentence, picked_names = self._convert_sentence_forenames(reference_language_sentence)
-            translation, _ = self._convert_sentence_forenames(translation, picked_names)
-        return reference_language_sentence, translation
+        picked_names = None
+        if self.forenames_convertible and any(default_name in sentences[0] for default_name in self._DEFAULT_SENTENCE_DATA_FORENAMES):
+            for i, sentence in enumerate(sentences):
+                sentences[i], picked_names = self._convert_forenames(sentence, picked_names)
+        return sentences
 
-    def _convert_sentence_forenames(self, sentence: str, names: Optional[List[Optional[str]]]=None) -> Tuple[str, List[Optional[str]]]:
-        """ Note: Assertion of self.names_convertible being True to be made before invocation
+    def _convert_forenames(self, sentence: str, replacement_names: Optional[List[Optional[str]]] = None) -> Tuple[str, List[Optional[str]]]:
+        """ Note: Assertion of self.forenames_convertible being True to be made before invocation
 
             Args:
                 sentence: comprising default english names to be converted
-                names: list of already selected forenames of order [male_forename, female_forename], which,
-                            in case of presence, the correspondingly gendered default forename(s) will be
-                            replaced by in order to align the converted names of the reference sentence with
-                            the ones of the inherent translation sentence
+                replacement_names: list of already selected forenames of order [male_forename, female_forename], which,
+                                   in case of presence, the correspondingly gendered default forename(s) will be
+                                   replaced by in order to align the converted names of the reference sentence with
+                                   the ones of the inherent translation sentence
 
             Picks gender corresponding forenames randomly from self._language_typical_forenames
             Doesn't demand passed sentence to forcibly contain a convertible name. In that case the original sentence
@@ -183,51 +180,42 @@ class TrainerBackend(ABC):
                 converted sentence: str
                 selected names: List[Optional[str]] """
 
-        # break up sentence into distinct tokens
-        sentence_tokens = sentence[:-1].split(' ')
-
-        # strip tokens off post-apostrophe-appendixes and store the latter with corresponding
-        # token index
-        post_apostrophe_components_with_index: List[Tuple[str, int]] = []
-        for i, token in enumerate(sentence_tokens):
-            if len((apostrophe_split_token := token.split("'"))) == 2:
-                sentence_tokens[i] = apostrophe_split_token[0]
-                post_apostrophe_components_with_index.append((apostrophe_split_token[1], i))
-
-        # replace default name with language and gender-corresponding one if existent
+        converted_sentence = f'X{sentence}X'
         picked_names: List[Optional[str]] = [None, None]
+
         for gender_index, default_name in enumerate(self._DEFAULT_SENTENCE_DATA_FORENAMES):
-            try:
-                tokens_replacement_index = sentence_tokens.index(default_name)  # throws ValueError in case of no default name being present
-
-                if names is None:
+            if len((name_split_parts := converted_sentence.split(default_name))) > 1:
+                if replacement_names is None:
                     assert self._language_typical_forenames is not None
-
                     employed_name = random.choice(self._language_typical_forenames[gender_index])
                 else:
-                    assert names[gender_index] is not None
+                    assert replacement_names[gender_index] is not None
+                    employed_name = replacement_names[gender_index]  # type: ignore
 
-                    employed_name = names[gender_index]  # type: ignore
-
-                sentence_tokens[tokens_replacement_index] = employed_name
+                converted_sentence = employed_name.join(name_split_parts)
                 picked_names[gender_index] = employed_name
-            except ValueError:
-                pass
 
-        # add post-apostrophe-appendixes back to corresponding tokens
-        for post_apostrophe_token, corresponding_sentence_token_index in post_apostrophe_components_with_index:
-            sentence_tokens[corresponding_sentence_token_index] += f"'{post_apostrophe_token}"
-
-        # fuse tokens to string, append sentence closing punctuation
-        return ' '.join(sentence_tokens) + sentence[-1], picked_names
+        return converted_sentence[1:-1], picked_names
 
     # -----------------
     # .TTS
     # -----------------
+    def _get_playback_speed(self) -> Optional[float]:
+        if not self.tts_available:
+            return None
+        else:
+            if (preset_playback_speed := self.mongodb_client.query_playback_speed()) is not None:
+                return preset_playback_speed
+            else:
+                return 1.0
+
+    def get_tts_dialect_choices(self) -> Optional[Dict[str, str]]:
+        return GoogleTTS().get_dialect_choices(self._non_english_language)
+
     def download_tts_audio(self, text: str) -> str:
         audio_file_path = f'{self._TTS_AUDIO_FILE_PATH}/{get_timestamp()}.mp3'
 
-        gtts.gTTS(text, lang=self._google_ops_language_abbreviation).save(audio_file_path)
+        GoogleTTS.get_tts_audio(text, self.tts_language_identifier, audio_file_path)
         return audio_file_path
 
     @staticmethod

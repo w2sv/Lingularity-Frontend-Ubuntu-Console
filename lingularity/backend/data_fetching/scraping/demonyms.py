@@ -1,36 +1,37 @@
-from typing import List, Optional
+from typing import Optional
 import logging
 
 from bs4 import BeautifulSoup
+from textacy.similarity import levenshtein
 
 from .utils import read_page_source
 
 
-def scrape_demonyms(country_name: str) -> Optional[List[str]]:
+def scrape_demonym(country_name: str) -> Optional[str]:
     """
         Args:
             country_name: uppercase
         Returns:
-            None in case of irretrievability, otherwise list of demonyms (predominantly 2 at max)"""
+            None in case of irretrievability, otherwise best fit demonym """
 
     page_url = f'http://en.wikipedia.org/wiki/{country_name}'
 
     soup: BeautifulSoup = read_page_source(page_url)
-    demonym_tag = soup.find('a', href='/wiki/Demonym')
 
-    if demonym_tag is None:
+    if (demonym_tag := soup.find('a', href='/wiki/Demonym')) is None:
         return None
 
-    is_demonym = lambda demonym_candidate: demonym_candidate[:2] == country_name[:2]
+    is_demonym = lambda demonym_candidate: country_name.startswith(demonym_candidate[:2])
 
-    first_demonym_fetched, demonyms = False, []
+    demonym = None
     for element in list(demonym_tag.next_elements)[1:10]:
         if element.name is None:
-            if not first_demonym_fetched:
-                demonyms.append(element)
-                first_demonym_fetched = True
-            elif first_demonym_fetched and is_demonym(element):
-                demonyms.append(element)
+            for demonym_candidate in filter(lambda c: c.istitle(), element.split(' ')):
+                if not demonym:
+                    demonym = demonym_candidate
+                else:
+                    if is_demonym(demonym_candidate) and levenshtein(country_name, demonym_candidate) > levenshtein(country_name, demonym):
+                        demonym = demonym_candidate
 
-    logging.info(f'demonyms: {demonyms}')
-    return demonyms if len(demonyms) else None
+    logging.info(f'demonym: {demonym}')
+    return demonym

@@ -28,23 +28,15 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         self._backend = Backend(non_english_language, train_english, training_mode, mongodb_client)
 
+        if self._backend.tts_available and (dialect_choices := self._backend.get_tts_dialect_choices()) is not None:
+            self._select_dialect(dialect_choices)
+
         self._tts_enabled = True
-        self._playback_speed = self._get_playback_speed()
+        self._playback_speed = self._backend._get_playback_speed()
 
         self._training_loop_suspended = False
         self._most_recent_vocable_entry_line_repr: Optional[str] = None  # 'token - meaning'
         self._audio_file_path: Optional[str] = None
-
-    def _get_playback_speed(self) -> Optional[float]:
-        assert self._backend is not None
-
-        if not self._backend.tts_available:
-            return None
-        else:
-            if (preset_playback_speed := self._backend.mongodb_client.query_playback_speed()) is not None:
-                return preset_playback_speed
-            else:
-                return 1.0
 
     def _select_language(self) -> Tuple[str, bool]:
         """
@@ -62,16 +54,16 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         for language_group in starting_letter_grouped_languages:
             print(indentation, language_group)
 
-        selection, train_english = resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Select language: ').title(), eligible_languages), False
+        selection, train_english = resolve_input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Select language: ', eligible_languages), False
         if selection is None:
-            return recurse_on_unresolvable_input(self._select_language, deletion_lines=-1)
+            return recurse_on_unresolvable_input(self._select_language, n_deletion_lines=-1)
 
         elif selection == 'English':
             eligible_languages.remove('English')
             reference_language_validity = False
 
             while not reference_language_validity:
-                reference_language = resolve_input(input('Enter desired reference language: \n\n').title(), eligible_languages)
+                reference_language = resolve_input('Enter desired reference language: \n\n', eligible_languages)
                 if reference_language is None:
                     print("Couldn't resolve input")
                     time.sleep(1)
@@ -94,10 +86,10 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             print(f'{indentation}{Backend.TrainingMode.values()[i].title()}:')
             print(f'{indentation}\t{explanations[i]}\n')
 
-        mode_selection = resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: ').lower(), Backend.TrainingMode.values())
+        mode_selection = resolve_input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: ', Backend.TrainingMode.values())
 
         if mode_selection is None:
-            return recurse_on_unresolvable_input(self._select_mode, deletion_lines=-1)
+            return recurse_on_unresolvable_input(self._select_mode, n_deletion_lines=-1)
 
         print('\n', end='')
         return mode_selection
@@ -177,7 +169,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     return
 
                 # try to convert forenames, output reference language sentence
-                reference_sentence, translation = self._backend.convert_sentences_forenames_if_feasible(sentence_pair)
+                reference_sentence, translation = self._backend.convert_forenames_if_feasible(sentence_pair)
                 self._buffer_print(f'{INDENTATION}{reference_sentence}')
                 print(f"{INDENTATION}pending... ")
 
@@ -188,7 +180,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             self._training_loop_suspended = False
 
             # get response, execute selected option if applicable
-            if (response := resolve_input(input('$').lower(), options=self.TrainingOption.values())) is not None:
+            if (response := resolve_input('$', options=self.TrainingOption.values())) is not None:
                 exit_training = self._execute_option(option=self.TrainingOption(response))
                 if exit_training:
                     return
@@ -263,7 +255,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         elif option is self.TrainingOption.ChangePlaybackSpeed:
             self._change_playback_speed()
-            suspend_training_loop(n_lines_to_be_erased=2)
+            suspend_training_loop(n_lines_to_be_erased=3)
 
         return False
 

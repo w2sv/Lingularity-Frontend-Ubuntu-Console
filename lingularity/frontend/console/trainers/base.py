@@ -1,14 +1,17 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 from abc import ABC, abstractmethod
 import time
 
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
+import cursor
 
 from lingularity.backend.trainers import TrainerBackend
-from lingularity.frontend.console.utils.output_manipulation import BufferPrint, centered_print
-from lingularity.frontend.console.utils.input_resolution import resolve_input
+from lingularity.backend.utils.strings import find_common_start, strip_multiple_characters
+from lingularity.frontend.console.utils.output_manipulation import (BufferPrint, centered_print,
+                                                                    DEFAULT_VERTICAL_VIEW_OFFSET, clear_screen)
+from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
 
 
@@ -46,6 +49,27 @@ class TrainerConsoleFrontend(ABC):
         else:
             output = "Let's go!"
         centered_print(output, '\n' * 2)
+
+    def _select_dialect(self, dialect_2_identifier: Dict[str, str]):
+        clear_screen()
+        print(DEFAULT_VERTICAL_VIEW_OFFSET)
+        centered_print('SELECT TEXT-TO-SPEECH DIALECT\n\n')
+
+        dialect_choices = list(dialect_2_identifier.keys())
+
+        common_start_length = len(find_common_start(*dialect_choices))
+        processed_dialect_choices = [strip_multiple_characters(dialect[common_start_length:], '()') for dialect in dialect_choices]
+        for dialect in processed_dialect_choices:
+            centered_print(dialect)
+        print('')
+
+        centered_print(' ', end='')
+        cursor.show()
+        if (dialect_selection := resolve_input('', options=processed_dialect_choices)) is None:
+            return recurse_on_unresolvable_input(self._select_dialect, 1, dialect_2_identifier)
+        else:
+            cursor.hide()
+            self._backend.tts_language_identifier = dialect_2_identifier[dialect_choices[processed_dialect_choices.index(dialect_selection)]]
 
     # -----------------
     # Training
