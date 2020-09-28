@@ -39,13 +39,17 @@ class BufferPrint:
         self._buffer.append(''.join(args))
         _print(*args, **kwargs)
 
-    def partially_redo_buffered_output(self, n_lines_to_be_removed: int):
-        erase_lines(self.n_buffered_lines)
-        for _ in range(n_lines_to_be_removed):
-            self._buffer.popleft()
-
+    def output_buffer_content(self):
         for line in self._buffer:
             print(line)
+
+    def partially_redo_buffer_content(self, n_deletion_lines: int):
+        erase_lines(self.n_buffered_lines)
+
+        for _ in range(n_deletion_lines):
+            self._buffer.popleft()
+
+        self.output_buffer_content()
 
 
 def _get_indentation(line_length: int) -> str:

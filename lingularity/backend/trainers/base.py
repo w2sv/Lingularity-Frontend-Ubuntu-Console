@@ -30,6 +30,12 @@ class TrainerBackend(ABC):
         self._non_english_language = non_english_language
         self._train_english = train_english
 
+        mongodb_client.language = non_english_language
+        self.mongodb_client = mongodb_client
+
+        self._item_iterator: Optional[Iterator[Any]] = None
+        self.lets_go_translation: Optional[str] = None
+
         if not vocable_expansion_mode:
             # forename converting
             self._language_typical_forenames, corresponding_country = scrape_typical_forenames(non_english_language)
@@ -37,14 +43,14 @@ class TrainerBackend(ABC):
             self.demonym = scrape_demonym(country_name=corresponding_country) if self.forenames_convertible else None
 
             # tts
-            self.tts_language_identifier: Optional[str] = GoogleTTS().get_identifier(self._non_english_language)
-            self.tts_available: bool = self.tts_language_identifier is not None
+            self._tts_dialect_2_identifier = GoogleTTS().get_dialect_choices(self._non_english_language)
+            self.tts_language_varieties = None if self._tts_dialect_2_identifier is None else list(self._tts_dialect_2_identifier.keys())
+            self._tts_language_identifier: Optional[str] = self._get_tts_identifier()
+            self.tts_available: bool = any([self._tts_dialect_2_identifier, self._tts_language_identifier])
 
-        mongodb_client.language = non_english_language
-        self.mongodb_client = mongodb_client
-
-        self._item_iterator: Optional[Iterator[Any]] = None
-        self.lets_go_translation: Optional[str] = None
+    @property
+    def tts_language_identifier_set(self) -> bool:
+        return self._tts_language_identifier is not None
 
     @property
     def locally_available_languages(self) -> List[str]:
@@ -200,22 +206,42 @@ class TrainerBackend(ABC):
     # -----------------
     # .TTS
     # -----------------
-    def _get_playback_speed(self) -> Optional[float]:
+    def query_tts_enablement(self):
+        if not self.tts_available:
+            return False
+        if (flag := self.mongodb_client.query_tts_enablement()) is None:
+            return True
+        return flag
+
+    def _get_tts_identifier(self) -> Optional[str]:
+        if self._tts_dialect_2_identifier is None:
+            return GoogleTTS().get_identifier(self._non_english_language)
+
+        return self.mongodb_client.query_language_variety_identifier()
+
+    def change_tts_dialect(self, dialect: str):
+        if self._tts_language_identifier is not None:
+            self.mongodb_client.set_language_variety_usage(self._tts_language_identifier, False)
+
+        self._tts_language_identifier = self._tts_dialect_2_identifier[dialect]
+        self.mongodb_client.set_language_variety_usage(self._tts_language_identifier, True)
+
+    def get_playback_speed(self) -> Optional[float]:
         if not self.tts_available:
             return None
         else:
-            if (preset_playback_speed := self.mongodb_client.query_playback_speed()) is not None:
+            if (preset_playback_speed := self.mongodb_client.query_playback_speed(self._tts_language_identifier)) is not None:
                 return preset_playback_speed
             else:
                 return 1.0
 
-    def get_tts_dialect_choices(self) -> Optional[Dict[str, str]]:
-        return GoogleTTS().get_dialect_choices(self._non_english_language)
+    def change_playback_speed(self, playback_speed: float):
+        self.mongodb_client.insert_playback_speed(self._tts_language_identifier, playback_speed)
 
     def download_tts_audio(self, text: str) -> str:
         audio_file_path = f'{self._TTS_AUDIO_FILE_PATH}/{get_timestamp()}.mp3'
 
-        GoogleTTS.get_tts_audio(text, self.tts_language_identifier, audio_file_path)
+        GoogleTTS.get_tts_audio(text, self._tts_language_identifier, audio_file_path)
         return audio_file_path
 
     @staticmethod

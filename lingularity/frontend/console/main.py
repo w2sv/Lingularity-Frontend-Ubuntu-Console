@@ -64,7 +64,7 @@ def authenticate(mongodb_client) -> MongoDBClient:
 
     username = input(f'{INDENTATION}Enter user name: ')
     if invalid_username(username):
-        return recurse_on_invalid_input(authenticate, 'Empty username is not allowed', 2)
+        return recurse_on_invalid_input(authenticate, message='Empty username is not allowed', n_deletion_lines=2)
 
     if username in mongodb_client.usernames:
         mongodb_client.user = username
@@ -87,7 +87,7 @@ def authenticate(mongodb_client) -> MongoDBClient:
 
 def sign_up(user: str, client: MongoDBClient, indentation: str, email_address: Optional[str] = None):
     args = list(locals().values())
-    _recurse_on_invalid_input = partial(recurse_on_invalid_input, func=sign_up)  # type: ignore
+    _recurse_on_invalid_input = partial(recurse_on_invalid_input, function=sign_up)  # type: ignore
 
     centered_print('Create a new account\n')
 
@@ -97,7 +97,7 @@ def sign_up(user: str, client: MongoDBClient, indentation: str, email_address: O
     else:
         email_address = input(f'{indentation}{email_query}')
         if invalid_mailadress(email_address):
-            return _recurse_on_invalid_input(message='Invalid email address', n_deletion_lines=4, args=args)
+            return _recurse_on_invalid_input(message='Invalid email address', n_deletion_lines=4, func_args=args)
         """elif client.mail_address_taken(mail_address):
             return _recurse_on_invalid_input(message='Email address taken')"""
 
@@ -153,7 +153,7 @@ def select_action() -> Optional[str]:
     training = resolve_input('', list(ELIGIBLE_ACTIONS.keys()))
 
     if training is None:
-        return recurse_on_unresolvable_input(select_action, 4)
+        return recurse_on_unresolvable_input(select_action, n_deletion_lines=4)
 
     clear_screen()
     return training

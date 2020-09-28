@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Dict
+from typing import Optional, Tuple, List
 from abc import ABC, abstractmethod
 import time
 
@@ -10,7 +10,8 @@ import cursor
 from lingularity.backend.trainers import TrainerBackend
 from lingularity.backend.utils.strings import find_common_start, strip_multiple_characters
 from lingularity.frontend.console.utils.output_manipulation import (BufferPrint, centered_print,
-                                                                    DEFAULT_VERTICAL_VIEW_OFFSET, clear_screen)
+                                                                    DEFAULT_VERTICAL_VIEW_OFFSET, clear_screen,
+                                                                    get_max_line_length_based_indentation)
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
 
@@ -50,26 +51,27 @@ class TrainerConsoleFrontend(ABC):
             output = "Let's go!"
         centered_print(output, '\n' * 2)
 
-    def _select_dialect(self, dialect_2_identifier: Dict[str, str]):
+    def _select_language_variety(self) -> str:
+        """ Returns:
+                selected language variety: element of tts_language_varieties """
+
         clear_screen()
         print(DEFAULT_VERTICAL_VIEW_OFFSET)
-        centered_print('SELECT TEXT-TO-SPEECH DIALECT\n\n')
+        centered_print('SELECT TEXT-TO-SPEECH LANGUAGE VARIETY\n\n')
 
-        dialect_choices = list(dialect_2_identifier.keys())
-
-        common_start_length = len(find_common_start(*dialect_choices))
-        processed_dialect_choices = [strip_multiple_characters(dialect[common_start_length:], '()') for dialect in dialect_choices]
-        for dialect in processed_dialect_choices:
-            centered_print(dialect)
+        common_start_length = len(find_common_start(*self._backend.tts_language_varieties))
+        processed_varieties = [strip_multiple_characters(dialect[common_start_length:], '()') for dialect in self._backend.tts_language_varieties]
+        indentation = get_max_line_length_based_indentation(processed_varieties)
+        for variety in processed_varieties:
+            print(indentation, variety)
         print('')
 
-        centered_print(' ', end='')
         cursor.show()
-        if (dialect_selection := resolve_input('', options=processed_dialect_choices)) is None:
-            return recurse_on_unresolvable_input(self._select_dialect, 1, dialect_2_identifier)
+        if (dialect_selection := resolve_input(indentation[:-5], options=processed_varieties)) is None:
+            return recurse_on_unresolvable_input(self._select_language_variety, 1, self._backend.tts_language_varieties)
         else:
             cursor.hide()
-            self._backend.tts_language_identifier = dialect_2_identifier[dialect_choices[processed_dialect_choices.index(dialect_selection)]]
+            return self._backend.tts_language_varieties[processed_varieties.index(dialect_selection)]
 
     # -----------------
     # Training
