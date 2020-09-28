@@ -1,4 +1,4 @@
-from typing import *
+from typing import Optional, Tuple
 from time import sleep
 
 import matplotlib.pyplot as plt
@@ -8,15 +8,15 @@ import cursor
 from lingularity.frontend.console.trainers import TrainerConsoleFrontend, SentenceTranslationTrainerConsoleFrontend
 from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend, VocableEntry
 from lingularity.backend.database import MongoDBClient
-from lingularity.frontend.console.utils.output_manipulation import (clear_screen, erase_lines, DEFAULT_VERTICAL_VIEW_OFFSET,
-                                                                    centered_print, get_max_line_length_based_indentation)
+from lingularity.frontend.console.utils.output import (clear_screen, erase_lines, DEFAULT_VERTICAL_VIEW_OFFSET,
+                                                       centered_print, get_max_line_length_based_indentation)
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.backend.utils.enum import ExtendedEnum
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
 
 
 class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
-    def __init__(self, mongodb_client: MongoDBClient, vocable_expansion_mode=False):
+    def __init__(self, mongodb_client: MongoDBClient):
         super().__init__()
 
         self._n_correct_responses = 0
@@ -27,14 +27,14 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         cursor.hide()
 
-        self._backend = VocableTrainerBackend(non_english_language, train_english, mongodb_client, vocable_expansion_mode)
+        self._backend = VocableTrainerBackend(non_english_language, train_english, mongodb_client)
         cursor.show()
 
     def _select_language(self) -> Tuple[str, bool]:
-        if not (eligible_languages:= self._temp_mongodb_client.get_vocabulary_possessing_languages()):
+        if not (eligible_languages := self._temp_mongodb_client.get_vocabulary_possessing_languages()):
             self._start_sentence_translation_trainer()
 
-        elif eligible_languages.__len__() == 1:
+        elif len(eligible_languages) == 1:
             return eligible_languages[0], False
 
         centered_print(DEFAULT_VERTICAL_VIEW_OFFSET, 'ELIGIBLE LANGUAGES', DEFAULT_VERTICAL_VIEW_OFFSET)
@@ -63,7 +63,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     def run(self):
         self._display_new_vocabulary()
-        self._display_pre_training_instructions()
+        self._display_instructions()
         self._run_training()
         self._backend.insert_session_statistics_into_database(self._n_trained_items)
         self._display_pie_chart()
@@ -85,11 +85,11 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 print('\n')
                 input('Press any key to continue')
 
-    def _display_pre_training_instructions(self):
+    def _display_instructions(self):
         clear_screen()
 
         print(DEFAULT_VERTICAL_VIEW_OFFSET * 2)
-        centered_print(f'Found {self._backend.n_imperfect_vocable_entries} imperfect entries.\n\n')
+        centered_print(f'Found {self._backend.n_training_items} imperfect entries.\n\n')
         between_instruction_indentation = ' ' * 2
         INSTRUCTIONS = ("Enter:",
                         f"{between_instruction_indentation}- '#alter' in order to alter the translation(s) of the previously faced item.",
@@ -136,7 +136,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 continue
             elif response == Option.Vocable.value:
                 cursor.show()
-                _, n_printed_lines = self.insert_vocable_into_database()
+                _, n_printed_lines = self.get_new_vocable()
                 cursor.hide()
                 erase_lines(n_printed_lines + 1)
                 continue
@@ -161,8 +161,8 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             self._n_trained_items += 1
             self._n_correct_responses += response_evaluation.value
 
-            if not self._n_trained_items % 10 and self._n_trained_items != self._backend.n_imperfect_vocable_entries:
-                centered_print(f'\n\n{self._n_trained_items} Entries faced, {self._backend.n_imperfect_vocable_entries - self._n_trained_items} more to go\n\n')
+            if not self._n_trained_items % 10 and self._n_trained_items != self._backend.n_training_items:
+                centered_print(f'\n\n{self._n_trained_items} Entries faced, {self._backend.n_training_items - self._n_trained_items} more to go\n\n')
             else:
                 centered_print('\n-----------------------\n')
             previous_entry = entry
@@ -173,10 +173,11 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         if not entry:
             return 1
+
         KeyboardController().type(entry.translation)
         extended_translation = input('')
         if extended_translation:
-            self._backend.mongodb_client.alter_vocable_entry(*[entry.token] * 2, extended_translation)  # type: ignore
+            self._backend.mongodb_client.insert_altered_vocable_entry(*[entry.token] * 2, extended_translation)  # type: ignore
             return 2
         else:
             print('Invalid input')

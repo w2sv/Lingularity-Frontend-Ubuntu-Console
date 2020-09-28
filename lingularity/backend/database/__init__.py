@@ -138,16 +138,10 @@ class MongoDBClient:
 
         return self.user_data_base['vocabulary']
 
-    def insert_vocable(self, target_language_token: str, translation: str):
+    def insert_vocable(self, vocable_entry):
         self.vocabulary_collection.update_one(
             filter={'_id': self._language},
-            update={'$set': {target_language_token: {
-                         't': translation,
-                         'tf': 0,
-                         's': 0,
-                         'lfd': None}
-                }
-            },
+            update={'$set': vocable_entry.entry},
             upsert=True
         )
 
@@ -160,23 +154,15 @@ class MongoDBClient:
             upsert=False
         )
 
-    def alter_vocable_entry(self, current_token: str, new_token: Optional[str], altered_meaning: Optional[str]):
-        vocable_attributes = self.vocabulary_collection.find_one({'_id': self._language})[current_token]
-        new_attributes = {k: v if k != 'translation' else altered_meaning for k, v in vocable_attributes.items()}
-        if current_token == new_token:
-            self.vocabulary_collection.update_one(
-                filter={'_id': self._language},
-                update={'$set': {current_token: new_attributes}}
-            )
-        else:
-            self.vocabulary_collection.find_one_and_update(
-                filter={'_id': self._language},
-                update={'$unset': {current_token: 1}}
-            )
-            self.vocabulary_collection.find_one_and_update(
-                filter={'_id': self._language},
-                update={'$set': {new_token: new_attributes}}
-            )
+    def insert_altered_vocable_entry(self, old_vocable: str, altered_vocable_entry):
+        # delete old sub document corresponding to old_vocable regardless of whether the vocable,
+        # that is the sub document key has changed
+        self.vocabulary_collection.find_one_and_update(
+            filter={'_id': self._language},
+            update={'$unset': {old_vocable: 1}}
+        )
+
+        self.insert_vocable(altered_vocable_entry)
 
     def query_vocable_attributes(self, vocable: str) -> VocableAttributes:
         return self.vocabulary_collection.find_one(self._language)[vocable]

@@ -12,17 +12,30 @@ from lingularity.backend.utils.enum import ExtendedEnum
 
 
 class SentenceTranslationTrainerBackend(TrainerBackend):
-	def __init__(self, non_english_language: str, train_english: bool, training_mode: str, mongodb_client: MongoDBClient):
+	def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
 		super().__init__(non_english_language, train_english, mongodb_client)
 
 		if self._non_english_language not in self.locally_available_languages:
-			print('Downloading sentence data...')
 			fetch_sentence_data(self._non_english_language)
 
-		sentence_data, self.lets_go_translation = self._process_sentence_data_file()
+		self._training_mode: Optional[str] = None
 
-		filtered_sentence_data = self._filter_sentence_data_mode_accordingly(sentence_data, training_mode)
-		self.sentence_data_magnitude = len(filtered_sentence_data)
+	@property
+	def training_mode(self) -> Optional[str]:
+		return self._training_mode
+
+	@training_mode.setter
+	def training_mode(self, value: str):
+		if self._training_mode is not None:
+			raise AttributeError("Training mode shan't be reassigned")
+		self._training_mode = value
+
+	def set_item_iterator(self):
+		assert self._training_mode is not None
+
+		sentence_data, self.lets_go_translation = self._process_sentence_data_file()
+		filtered_sentence_data = self._filter_sentence_data_mode_accordingly(sentence_data, self._training_mode)
+		self.n_training_items = len(filtered_sentence_data)
 		self._item_iterator: Iterator[Tuple[str, str]] = self._get_item_iterator(filtered_sentence_data)
 
 	@staticmethod

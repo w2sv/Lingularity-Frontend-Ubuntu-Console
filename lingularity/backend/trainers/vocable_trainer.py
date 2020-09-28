@@ -14,7 +14,7 @@ from lingularity.frontend.console.utils.date import n_days_ago
 class VocableEntry:
     """ wrapper for vocable vocable_entry dictionary of structure
             {foreign_token: {tf: int},
-                            {lfd: str},
+                            {lfd: Optional[str]},
                             {s: float},
                             {t: str}}
 
@@ -23,16 +23,27 @@ class VocableEntry:
 
     RawType = Dict[str, Dict[str, Any]]
 
-    def __init__(self, entry: RawType, reference_to_foreign: bool):
-        self._entry = entry
+    @classmethod
+    def new(cls, vocable: str, translation: str):
+        return cls({vocable: {'tf': 0,
+                              'lfd': None,
+                              's': 0,
+                              't': translation}}, None)
+
+    def __init__(self, entry: RawType, reference_to_foreign: Optional[bool]):
+        self.entry = entry
         self._reference_to_foreign = reference_to_foreign
+
+    def alter(self, new_vocable: str, new_translation: str):
+        self.entry[self.token]['t'] = new_translation
+        self.entry[new_vocable] = self.entry.pop(self.token)
 
     # -----------------
     # Token
     # -----------------
     @property
     def token(self) -> str:
-        return next(iter(self._entry.keys()))
+        return next(iter(self.entry.keys()))
 
     @property
     def display_token(self) -> str:
@@ -43,7 +54,7 @@ class VocableEntry:
     # -----------------
     @property
     def translation(self) -> str:
-        return self._entry[self.token]['t']
+        return self.entry[self.token]['t']
 
     @property
     def display_translation(self) -> str:
@@ -54,15 +65,15 @@ class VocableEntry:
     # -----------------
     @property
     def last_faced_date(self) -> Optional[str]:
-        return self._entry[self.token]['lfd']
+        return self.entry[self.token]['lfd']
 
     @property
     def score(self) -> float:
-        return self._entry[self.token]['s']
+        return self.entry[self.token]['s']
 
     @score.setter
     def score(self, value):
-        self._entry[self.token]['s'] = value
+        self.entry[self.token]['s'] = value
 
     def update_score(self, increment: float):
         self.score += increment
@@ -88,18 +99,21 @@ class VocableEntry:
     # Dunder(s)
     # -----------------
     def __str__(self):
-        return str(self._entry)
+        return str(self.entry)
 
 
 class VocableTrainerBackend(TrainerBackend):
-    def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient, vocable_expansion_mode=False):
-        super().__init__(non_english_language, train_english, mongodb_client, vocable_expansion_mode)
+    def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
+        super().__init__(non_english_language, train_english, mongodb_client)
 
-        if not vocable_expansion_mode:
-            self._sentence_data, self.lets_go_translation = self._process_sentence_data_file()
-            self._token_2_sentence_indices = self._get_token_map(self._sentence_data)
-            self._vocable_entries: List[VocableEntry] = self._get_imperfect_vocable_entries()
-            self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._vocable_entries)
+        self._sentence_data, self.lets_go_translation = self._process_sentence_data_file()
+        self._token_2_sentence_indices = self._get_token_map(self._sentence_data)
+        self._vocable_entries: Optional[List[VocableEntry]] = None
+
+    def set_item_iterator(self) -> Iterator[Any]:
+        self._vocable_entries = self._get_imperfect_vocable_entries()
+        self.n_training_items = len(self._vocable_entries)
+        self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._vocable_entries)
 
     def _get_imperfect_vocable_entries(self) -> List[VocableEntry]:
         entire_vocabulary = starmap(VocableEntry, zip(self.mongodb_client.query_vocabulary_data(), repeat(self._train_english)))
@@ -108,10 +122,6 @@ class VocableTrainerBackend(TrainerBackend):
     # ---------------
     # Pre training
     # ---------------
-    @property
-    def n_imperfect_vocable_entries(self) -> int:
-        return len(self._vocable_entries)
-
     def get_new_vocable_entries(self) -> List[VocableEntry]:
         return list(filter(lambda entry: entry.is_new, self._vocable_entries))
 

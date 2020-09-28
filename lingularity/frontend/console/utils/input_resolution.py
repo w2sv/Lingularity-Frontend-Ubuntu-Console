@@ -2,7 +2,7 @@ from typing import Iterable, Optional, Callable, List, Any
 import time
 import cursor
 
-from lingularity.frontend.console.utils.output_manipulation import clear_screen, erase_lines, centered_print
+from lingularity.frontend.console.utils.output import clear_screen, erase_lines, centered_print
 
 
 def resolve_input(input_request_message: str, options: Iterable[str]) -> Optional[str]:

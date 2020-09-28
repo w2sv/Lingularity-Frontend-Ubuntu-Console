@@ -17,9 +17,9 @@ from lingularity.frontend.console.utils.date import today_or_yesterday, string_d
 from lingularity.frontend.console.utils.signup_credential_validation import invalid_mailadress, invalid_password, invalid_username
 from lingularity.frontend.console.utils.user_login_storage import (get_logged_in_user, write_fernet_key_if_not_existent,
                                                                    store_user_login, USER_ENCRYPTION_FILE_PATH)
-from lingularity.frontend.console.utils.output_manipulation import (clear_screen, erase_lines, centered_print,
-                                                                    get_centered_input_query_indentation,
-                                                                    DEFAULT_VERTICAL_VIEW_OFFSET)
+from lingularity.frontend.console.utils.output import (clear_screen, erase_lines, centered_print,
+                                                       get_centered_input_query_indentation,
+                                                       DEFAULT_VERTICAL_VIEW_OFFSET)
 
 
 def display_starting_screen():
@@ -33,7 +33,9 @@ def display_starting_screen():
 
 try:
     from lingularity.frontend.console.trainers import (SentenceTranslationTrainerConsoleFrontend,
-                                                       VocableTrainerConsoleFrontend, TrainerConsoleFrontend)
+                                                       VocableTrainerConsoleFrontend,
+                                                       TrainerConsoleFrontend,
+                                                       VocableAdderFrontend)
     from lingularity.backend.ops import google
 except (RuntimeError, requests.exceptions.ConnectionError):
     display_starting_screen()
@@ -159,29 +161,10 @@ def select_action() -> Optional[str]:
     return training
 
 
-def add_vocabulary(mongodb_client: MongoDBClient):
-    clear_screen()
-
-    vocable_trainer_frontend = VocableTrainerConsoleFrontend(mongodb_client, vocable_expansion_mode=True)
-
-    clear_screen()
-    centered_print(f"{DEFAULT_VERTICAL_VIEW_OFFSET * 2}Enter '#exit' in order to stop adding vocabulary{DEFAULT_VERTICAL_VIEW_OFFSET * 2}")
-
-    while True:
-        try:
-            appended_line, lines_to_be_deleted = vocable_trainer_frontend.insert_vocable_into_database()
-            erase_lines(lines_to_be_deleted)
-            print(f'Added {appended_line}')
-        except (SyntaxError, SystemExit) as e:
-            if type(e) is SystemExit:
-                return complete_initialization()
-            pass
-
-
 ELIGIBLE_ACTIONS: Dict[str, Union[type, Callable]] = {
     'sentence translation': SentenceTranslationTrainerConsoleFrontend,
     'vocabulary trainer': VocableTrainerConsoleFrontend,
-    'add vocabulary': add_vocabulary,
+    'add vocabulary': VocableAdderFrontend,
     'change account': change_account
 }
 
@@ -206,10 +189,11 @@ def complete_initialization():
     action_executor = ELIGIBLE_ACTIONS[action_selection]
 
     if isinstance(action_executor, type):
-        return action_executor(mongodb_client).run()
+        action_executor(mongodb_client).run()
+        if action_executor is VocableAdderFrontend:
+            return complete_initialization()
     else:
-        args = [mongodb_client] if action_executor is add_vocabulary else []
-        return action_executor(*args)
+        return action_executor()
 
 
 if __name__ == '__main__':

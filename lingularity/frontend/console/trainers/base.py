@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple
 from abc import ABC, abstractmethod
 import time
 
@@ -6,12 +6,14 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 import cursor
+from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.backend.trainers import TrainerBackend
+from lingularity.backend.trainers.vocable_trainer import VocableEntry
 from lingularity.backend.utils.strings import find_common_start, strip_multiple_characters
-from lingularity.frontend.console.utils.output_manipulation import (BufferPrint, centered_print,
-                                                                    DEFAULT_VERTICAL_VIEW_OFFSET, clear_screen,
-                                                                    get_max_line_length_based_indentation)
+from lingularity.frontend.console.utils.output import (BufferPrint, centered_print,
+                                                       DEFAULT_VERTICAL_VIEW_OFFSET, clear_screen,
+                                                       get_max_line_length_based_indentation)
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
 
@@ -24,6 +26,7 @@ class TrainerConsoleFrontend(ABC):
         self._backend: Optional[TrainerBackend] = None
         self._n_trained_items: int = 0
 
+        self._latest_created_vocable_entry: Optional[VocableEntry] = None
         self._buffer_print = BufferPrint()
 
     # -----------------
@@ -41,7 +44,7 @@ class TrainerConsoleFrontend(ABC):
         pass
 
     @abstractmethod
-    def _display_pre_training_instructions(self):
+    def _display_instructions(self):
         pass
 
     def _output_lets_go(self):
@@ -80,17 +83,14 @@ class TrainerConsoleFrontend(ABC):
     def _run_training(self):
         pass
 
-    def insert_vocable_into_database(self) -> Tuple[Optional[str], int]:
+    def get_new_vocable(self) -> Tuple[Optional[VocableEntry], int]:
         """ Returns:
                 inserted vocable vocable_entry line repr, None in case of invalid input
                 number of printed lines """
 
         assert self._backend is not None
+
         vocable = input(f'Enter {self._backend.language} word/phrase: ')
-
-        if resolve_input(vocable, ['#exit']) == '#exit':
-            raise SystemExit
-
         meanings = input('Enter meaning(s): ')
 
         if not all([vocable, meanings]):
@@ -98,8 +98,28 @@ class TrainerConsoleFrontend(ABC):
             time.sleep(1)
             return None, 3
 
-        self._backend.mongodb_client.insert_vocable(vocable, meanings)
-        return ' - '.join([vocable, meanings]), 2
+        return VocableEntry.new(vocable, meanings), 2
+
+    def _alter_latest_vocable_entry(self) -> int:
+        """ Returns:
+                n_printed_lines: int """
+
+        old_line_repr = self._latest_created_vocable_entry.line_repr
+        KeyboardController().type(f'{old_line_repr}')
+        new_entry_components = input('').split(' - ')
+
+        if len(new_entry_components) != 2:
+            print('Invalid alteration')
+            time.sleep(1)
+            return 3
+
+        old_vocable = self._latest_created_vocable_entry.token
+        self._latest_created_vocable_entry.alter(*new_entry_components)
+
+        if self._latest_created_vocable_entry.line_repr != old_line_repr:
+            assert self._backend is not None
+            self._backend.mongodb_client.insert_altered_vocable_entry(old_vocable, self._latest_created_vocable_entry)
+        return 2
 
     # -----------------
     # Post Training

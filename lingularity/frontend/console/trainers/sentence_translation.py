@@ -8,11 +8,12 @@ from pynput.keyboard import Controller as KeyboardController
 import cursor
 
 from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend
+from lingularity.backend.trainers.vocable_trainer import VocableEntry
 from lingularity.backend.database import MongoDBClient
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
-from lingularity.frontend.console.utils.output_manipulation import (clear_screen, erase_lines, centered_print,
-                                                                    get_max_line_length_based_indentation,
-                                                                    DEFAULT_VERTICAL_VIEW_OFFSET)
+from lingularity.frontend.console.utils.output import (clear_screen, erase_lines, centered_print,
+                                                       get_max_line_length_based_indentation,
+                                                       DEFAULT_VERTICAL_VIEW_OFFSET)
 from lingularity.frontend.console.utils.input_resolution import (resolve_input, recurse_on_unresolvable_input,
                                                                  recurse_on_invalid_input, indissolubility_output)
 from lingularity.backend.utils.enum import ExtendedEnum
@@ -25,10 +26,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         super().__init__()
 
         non_english_language, train_english = self._select_language()
-        training_mode = self._select_mode()
-        cursor.hide()
-
-        self._backend = Backend(non_english_language, train_english, training_mode, mongodb_client)
+        self._backend = Backend(non_english_language, train_english, mongodb_client)
 
         if self._backend.tts_available and self._backend.tts_language_varieties is not None and not self._backend.tts_language_identifier_set:
             selected_variety = self._select_language_variety()
@@ -38,7 +36,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._playback_speed = self._backend.get_playback_speed()
 
         self._training_loop_suspended = False
-        self._most_recent_vocable_entry_line_repr: Optional[str] = None  # 'token - meaning'
+        self._latest_created_vocable_entry: Optional[VocableEntry] = None
         self._audio_file_path: Optional[str] = None
 
     def _select_language(self) -> Tuple[str, bool]:
@@ -75,33 +73,15 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     train_english, reference_language_validity = [True]*2
         return selection, train_english
 
-    def _select_mode(self) -> str:
-        explanations = (
-            'show me sentences containing rather infrequently used vocabulary',
-            'show me sentences comprising exclusively commonly used vocabulary',
-            'just hit me with dem sentences')
-
-        clear_screen()
-        indentation = get_max_line_length_based_indentation(explanations)
-
-        centered_print(f'{DEFAULT_VERTICAL_VIEW_OFFSET}TRAINING MODES\n')
-        for i in range(3):
-            print(f'{indentation}{Backend.TrainingMode.values()[i].title()}:')
-            print(f'{indentation}\t{explanations[i]}\n')
-
-        mode_selection = resolve_input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: ', Backend.TrainingMode.values())
-
-        if mode_selection is None:
-            return recurse_on_unresolvable_input(self._select_mode, n_deletion_lines=-1)
-
-        print('\n', end='')
-        return mode_selection
-
     # -----------------
     # Driver
     # -----------------
     def run(self):
-        self._display_pre_training_instructions()
+        self._backend.training_mode = self._select_mode()
+        self._backend.set_item_iterator()
+        cursor.hide()
+
+        self._display_instructions()
         self._run_training()
 
         self._backend.insert_session_statistics_into_database(self._n_trained_items)
@@ -110,10 +90,30 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Pre training
     # -----------------
-    def _display_pre_training_instructions(self):
+    def _select_mode(self) -> str:
+        explanations = (
+            'show me sentences containing rather infrequently used vocabulary',
+            'show me sentences comprising exclusively commonly used vocabulary',
+            'just hit me with dem sentences')
+
+        clear_screen()
+        centered_print(f'{DEFAULT_VERTICAL_VIEW_OFFSET}TRAINING MODES\n')
+
+        indentation = get_max_line_length_based_indentation(explanations)
+        for i, training_mode in enumerate(Backend.TrainingMode):
+            print(f'{indentation}{training_mode.value.title()}:')
+            print(f'{indentation}\t{explanations[i]}\n')
+
+        if (mode_selection := resolve_input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: ', Backend.TrainingMode.values())) is None:
+            return recurse_on_unresolvable_input(self._select_mode, n_deletion_lines=-1)
+
+        print('\n', end='')
+        return mode_selection
+
+    def _display_instructions(self):
         # clear, print header
         clear_screen()
-        centered_print(f"{DEFAULT_VERTICAL_VIEW_OFFSET * 2}Document comprises {self._backend.sentence_data_magnitude:,d} sentences.\n\n")
+        centered_print(f"{DEFAULT_VERTICAL_VIEW_OFFSET * 2}Document comprises {self._backend.n_training_items:,d} sentences.\n\n")
 
         # assemble, print general instructions
         training_option_iter = iter(self.TrainingOption)
@@ -170,6 +170,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         AlterLatestVocableEntry = 'alter'
         Exit = 'exit'
 
+        # TTS Options
         EnableTTS = 'enable'
         DisableTTS = 'disable'
         ChangePlaybackSpeed = 'speed'
@@ -246,18 +247,19 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             suspend_training_loop(n_deletion_lines=1)
 
         if option is self.TrainingOption.AddVocabulary:
-            self._most_recent_vocable_entry_line_repr, n_printed_lines = self.insert_vocable_into_database()
+            created_vocable_entry, n_printed_lines = self.get_new_vocable()
+            if created_vocable_entry is not None:
+                self._backend.mongodb_client.insert_vocable(created_vocable_entry)
+                self._latest_created_vocable_entry = created_vocable_entry
             suspend_training_loop(n_deletion_lines=n_printed_lines + 1)
 
         elif option is self.TrainingOption.AlterLatestVocableEntry:
-            if self._most_recent_vocable_entry_line_repr is None:
-                print("You haven't added any vocabulary during the current session")
-                time.sleep(1)
-                suspend_training_loop(n_deletion_lines=1)
+            if self._latest_created_vocable_entry is None:
+                centered_print("You haven't added any vocabulary during the current session")
+                time.sleep(1.5)
+                suspend_training_loop(n_deletion_lines=2)
             else:
-                altered_entry, n_printed_lines = self._modify_latest_vocable_insertion(self._most_recent_vocable_entry_line_repr)
-                if altered_entry is not None:
-                    self._most_recent_vocable_entry_line_repr = altered_entry
+                n_printed_lines = self._alter_latest_vocable_entry()
                 suspend_training_loop(n_deletion_lines=n_printed_lines)
 
         elif option is self.TrainingOption.Exit:
@@ -294,7 +296,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
             # redo previous output
             suspend_training_loop(n_deletion_lines=0)
-            self._display_pre_training_instructions()
+            self._display_instructions()
             self._buffer_print.output_buffer_content()
             self._pending_output()
 
@@ -319,21 +321,3 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             self._backend.change_playback_speed(altered_playback_speed)
         except ValueError:
             return _recurse()
-
-    def _modify_latest_vocable_insertion(self, latest_appended_vocable_line: str) -> Tuple[Optional[str], int]:
-        """ Returns:
-                altered vocable_entry: str, None in case of invalid alteration
-                n_printed_lines: int """
-
-        old_token = latest_appended_vocable_line.split(' - ')[0]
-        KeyboardController().type(f'{latest_appended_vocable_line}')
-        new_entry = input('')
-        new_split_entry = new_entry.split(' - ')
-        if new_split_entry.__len__() == 1 or not all(new_split_entry):
-            print('Invalid alteration')
-            time.sleep(1)
-            return None, 3
-
-        assert self._backend is not None
-        self._backend.mongodb_client.alter_vocable_entry(old_token, *new_split_entry)
-        return new_entry, 2

@@ -26,6 +26,7 @@ if language_2_ziplink is None:
 def fetch_sentence_data(language: str):
     """ downloads and unzips respective sentence data file """
 
+    print('Downloading sentence data...')
     zip_file_path = _download_sentence_data(language)
     _process_zip_file(zip_file_path)
 

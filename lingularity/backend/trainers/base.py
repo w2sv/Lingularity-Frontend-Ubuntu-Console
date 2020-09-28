@@ -1,6 +1,6 @@
 from typing import List, Optional, Iterator, Any, Sequence, Tuple, Dict
 import os
-from abc import ABC
+from abc import ABC, abstractmethod
 import time
 import random
 
@@ -23,7 +23,7 @@ class TrainerBackend(ABC):
 
     _DEFAULT_SENTENCE_DATA_FORENAMES = ('Tom', 'Mary')
 
-    def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient, vocable_expansion_mode=False):
+    def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
         if not os.path.exists(self._BASE_LANGUAGE_DATA_PATH):
             os.mkdir(self._BASE_LANGUAGE_DATA_PATH)
 
@@ -35,18 +35,18 @@ class TrainerBackend(ABC):
 
         self._item_iterator: Optional[Iterator[Any]] = None
         self.lets_go_translation: Optional[str] = None
+        self.n_training_items: Optional[int] = None
 
-        if not vocable_expansion_mode:
-            # forename converting
-            self._language_typical_forenames, corresponding_country = scrape_typical_forenames(non_english_language)
-            self.forenames_convertible = self._language_typical_forenames is not None
-            self.demonym = scrape_demonym(country_name=corresponding_country) if self.forenames_convertible else None
+        # forename converting
+        self._language_typical_forenames, corresponding_country = scrape_typical_forenames(non_english_language)
+        self.forenames_convertible = self._language_typical_forenames is not None
+        self.demonym = scrape_demonym(country_name=corresponding_country) if self.forenames_convertible else None
 
-            # tts
-            self._tts_dialect_2_identifier = GoogleTTS().get_dialect_choices(self._non_english_language)
-            self.tts_language_varieties = None if self._tts_dialect_2_identifier is None else list(self._tts_dialect_2_identifier.keys())
-            self._tts_language_identifier: Optional[str] = self._get_tts_identifier()
-            self.tts_available: bool = any([self._tts_dialect_2_identifier, self._tts_language_identifier])
+        # tts
+        self._tts_dialect_2_identifier = GoogleTTS().get_dialect_choices(self._non_english_language)
+        self.tts_language_varieties = None if self._tts_dialect_2_identifier is None else list(self._tts_dialect_2_identifier.keys())
+        self._tts_language_identifier: Optional[str] = self._get_tts_identifier()
+        self.tts_available: bool = any([self._tts_dialect_2_identifier, self._tts_language_identifier])
 
     @property
     def tts_language_identifier_set(self) -> bool:
@@ -73,6 +73,11 @@ class TrainerBackend(ABC):
     @property
     def language(self):
         return self._non_english_language if not self._train_english else 'English'
+
+    @abstractmethod
+    def set_item_iterator(self):
+        """ sets _item_iterator, n_training_items """
+        pass
 
     @staticmethod
     def _get_item_iterator(item_list: Sequence[Any]) -> Iterator[Any]:
