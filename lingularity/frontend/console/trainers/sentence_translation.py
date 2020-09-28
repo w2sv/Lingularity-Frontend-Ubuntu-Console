@@ -3,6 +3,7 @@ from typing import Optional, Tuple, List
 from itertools import groupby
 import os
 from functools import partial
+from abc import ABC, abstractmethod
 
 from pynput.keyboard import Controller as KeyboardController
 import cursor
@@ -119,7 +120,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         training_option_iter = iter(self.TrainingOption)
 
         def assemble_instruction_block(explanations: List[str]) -> List[str]:
-            return [f"\t- '{option.value}' to {explanation}" for option, explanation in zip(training_option_iter, explanations)]
+            return [f"\t- '{option.value}' to {explanation}" for explanation, option in zip(explanations, training_option_iter)]
 
         instructions = [
             "Hit Enter to advance to next sentence",
