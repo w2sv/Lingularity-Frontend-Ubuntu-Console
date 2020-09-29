@@ -5,8 +5,7 @@ import cursor
 from lingularity.frontend.console.utils.output import clear_screen, erase_lines, centered_print
 
 
-def resolve_input(input_request_message: str, options: Iterable[str]) -> Optional[str]:
-    _input = input(input_request_message)
+def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
     options_starting_on_input = list(filter(lambda option: option.lower().startswith(_input.lower()), options))
 
     if len(options_starting_on_input) == 1:

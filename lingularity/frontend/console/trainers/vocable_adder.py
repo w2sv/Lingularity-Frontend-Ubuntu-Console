@@ -13,9 +13,7 @@ from lingularity.frontend.console.utils.output import (clear_screen, get_max_lin
 
 class VocableAdderFrontend(VocableTrainerConsoleFrontend):
     def __init__(self, mongodb_client: MongoDBClient):
-        self._temp_mongodb_client = mongodb_client
-        non_english_language, train_english = self._select_language()
-        del self._temp_mongodb_client
+        non_english_language, train_english = self._select_language(mongodb_client)
 
         self._backend = VocableAdderBackend(non_english_language, mongodb_client)
 
@@ -41,7 +39,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
 
     def _get_option_selection(self) -> Optional[Option]:
         erase_lines(0)
-        if (option_keyword := resolve_input('Enter option keyword: ', options=self.Option.values())) is not None:
+        if (option_keyword := resolve_input(input('Enter option keyword: '), options=self.Option.values())) is not None:
             return self.Option(option_keyword)
         else:
             return None
@@ -54,7 +52,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
 
         while True:
             try:
-                created_vocable_entry, n_printed_lines = self.get_new_vocable()
+                created_vocable_entry, n_printed_lines = self._get_new_vocable()
                 if created_vocable_entry is not None:
                     self._latest_created_vocable_entry = created_vocable_entry
                     self._backend.mongodb_client.insert_vocable(created_vocable_entry)
@@ -72,6 +70,6 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
                     return
 
                 elif option is self.Option.AlterLatestVocableEntry:
-                    n_printed_lines = self._alter_latest_vocable_entry()
+                    n_printed_lines = self._alter_vocable_entry(self._latest_created_vocable_entry)
                     erase_lines(n_printed_lines + 1)
                     self._output_vocable_addition_confirmation()

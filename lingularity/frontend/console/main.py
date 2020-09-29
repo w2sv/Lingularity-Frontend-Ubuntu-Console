@@ -152,7 +152,7 @@ def select_action() -> Optional[str]:
     in_between_indentation = ' ' * 6
     input_message = f"What would you like to do?: {in_between_indentation}Translate (S)entences{in_between_indentation}Train (V)ocabulary{in_between_indentation}(A)dd Vocabulary{in_between_indentation}(C)hange Account\n"
     centered_print(input_message, ' ', end='')
-    training = resolve_input('', list(ELIGIBLE_ACTIONS.keys()))
+    training = resolve_input(input(''), list(ELIGIBLE_ACTIONS.keys()))
 
     if training is None:
         return recurse_on_unresolvable_input(select_action, n_deletion_lines=4)

@@ -28,6 +28,7 @@ class TTS:
 
         self._language_variety_2_identifier: Optional[Dict[str, str]] = self._google_tts.get_dialect_choices(language)
         self.language_varieties: Optional[List[str]] = None if self._language_variety_2_identifier is None else list(self._language_variety_2_identifier.keys())
+        self.language_varieties_available = bool(self.language_varieties)
 
         self._language_variety_identifier: Optional[str] = self._query_language_variety_identifier()
 

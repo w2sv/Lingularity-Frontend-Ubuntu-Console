@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Any, List, Type, Dict, Iterator
 from abc import ABC, abstractmethod
 import time
 
@@ -19,6 +19,56 @@ from lingularity.frontend.console.utils.input_resolution import resolve_input, r
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
 
 
+class TrainingOption(ABC):
+    _FRONTEND_INSTANCE = None
+
+    _VARIABLE_NAMES = ['keyword', '_explanation']
+
+    @staticmethod
+    @abstractmethod
+    def set_frontend_instance(instance):
+        pass
+
+    def __init__(self, keyword: str, explanation: str):
+        self.keyword = keyword
+        self._explanation = explanation
+
+    @property
+    def instruction(self) -> str:
+        return f"\t- '{self.keyword}' to {self._explanation}"
+
+    @abstractmethod
+    def execute(self):
+        pass
+
+    def __setattr__(self, key, value):
+        if key in TrainingOption.__dict__['_VARIABLE_NAMES']:
+            self.__dict__[key] = value
+
+        else:
+            assert hasattr(self._FRONTEND_INSTANCE, key)
+
+            setattr(self._FRONTEND_INSTANCE, key, value)
+
+    def __getattr__(self, item):
+        return getattr(self._FRONTEND_INSTANCE, item)
+
+
+class TrainingOptionCollection:
+    def __init__(self, option_classes: List[Type[TrainingOption]]):
+        options = [cls() for cls in option_classes]
+
+        self.keywords = [option.keyword for option in options]
+        self.instructions = [option.instruction for option in options]
+        self._keyword_2_option: Dict[str, TrainingOption] = {option.keyword: option for option in options}
+
+    def __iter__(self) -> Iterator[TrainingOption]:
+        return iter(self._keyword_2_option.values())
+
+    def __getitem__(self, item: str) -> TrainingOption:
+        return self._keyword_2_option[item]
+
+
 class TrainerConsoleFrontend(ABC):
     plt.rcParams['toolbar'] = 'None'
     SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'
@@ -29,6 +79,12 @@ class TrainerConsoleFrontend(ABC):
 
         self._latest_created_vocable_entry: Optional[VocableEntry] = None
         self._buffer_print = BufferPrint()
+
+        self._training_options: TrainingOptionCollection = None
+
+    @abstractmethod
+    def _get_training_options(self) -> TrainingOptionCollection:
+        pass
 
     # -----------------
     # Driver
@@ -72,7 +128,7 @@ class TrainerConsoleFrontend(ABC):
         print('')
 
         cursor.show()
-        if (dialect_selection := resolve_input(indentation[:-5], options=processed_varieties)) is None:
+        if (dialect_selection := resolve_input(input(indentation[:-5]), options=processed_varieties)) is None:
             return recurse_on_unresolvable_input(self._select_language_variety, 1, self._backend.tts.language_varieties)
         else:
             cursor.hide()
@@ -85,7 +141,7 @@ class TrainerConsoleFrontend(ABC):
     def _run_training(self):
         pass
 
-    def get_new_vocable(self) -> Tuple[Optional[VocableEntry], int]:
+    def _get_new_vocable(self) -> Tuple[Optional[VocableEntry], int]:
         """ Returns:
                 inserted vocable vocable_entry line repr, None in case of invalid input
                 number of printed lines """
@@ -100,13 +156,11 @@ class TrainerConsoleFrontend(ABC):
 
         return VocableEntry.new(vocable, meanings), 2
 
-    def _alter_latest_vocable_entry(self) -> int:
+    def _alter_vocable_entry(self, vocable_entry: VocableEntry) -> int:
         """ Returns:
                 n_printed_lines: int """
 
-        assert self._latest_created_vocable_entry is not None
-
-        old_line_repr = self._latest_created_vocable_entry.line_repr
+        old_line_repr = vocable_entry.line_repr
         KeyboardController().type(f'{old_line_repr}')
         new_entry_components = input('').split(' - ')
 
@@ -115,12 +169,12 @@ class TrainerConsoleFrontend(ABC):
             time.sleep(1)
             return 3
 
-        old_vocable = self._latest_created_vocable_entry.token
-        self._latest_created_vocable_entry.alter(*new_entry_components)
+        old_vocable = vocable_entry.token
+        vocable_entry.alter(*new_entry_components)
 
-        if self._latest_created_vocable_entry.line_repr != old_line_repr:
+        if vocable_entry.line_repr != old_line_repr:
             assert self._backend is not None
-            self._backend.mongodb_client.insert_altered_vocable_entry(old_vocable, self._latest_created_vocable_entry)
+            self._backend.mongodb_client.insert_altered_vocable_entry(old_vocable, vocable_entry)
         return 2
 
     # -----------------
