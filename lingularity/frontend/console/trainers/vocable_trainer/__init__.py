@@ -127,7 +127,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 continue
             if response == Option.AddMeaning.value:
                 cursor.show()
-                n_printed_lines = self._alter_entry_translation(previous_entry)
+                n_printed_lines = self._alter_latest_vocable_entry()
                 cursor.hide()
                 erase_lines(n_printed_lines)
                 continue
