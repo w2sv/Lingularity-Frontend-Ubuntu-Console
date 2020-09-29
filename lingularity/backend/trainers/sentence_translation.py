@@ -33,13 +33,19 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 	def set_item_iterator(self):
 		assert self._training_mode is not None
 
-		sentence_data, self.lets_go_translation = self._process_sentence_data_file()
+		# get sentence data, set lets go translation
+		sentence_data = self._get_sentence_data()
+		self.lets_go_translation = sentence_data.query_lets_go_translation()
+
+		# get mode filtered sentence data
 		filtered_sentence_data = self._filter_sentence_data_mode_accordingly(sentence_data, self._training_mode)
+
+		# set downstream attributes
 		self.n_training_items = len(filtered_sentence_data)
 		self._item_iterator: Iterator[Tuple[str, str]] = self._get_item_iterator(filtered_sentence_data)
 
 	@staticmethod
-	def get_eligible_languages() -> List[str]:
+	def get_eligible_languages(mongodb_client: Optional[MongoDBClient] = None) -> List[str]:
 		assert language_2_ziplink is not None
 
 		_eligible_languages = list(language_2_ziplink.keys())

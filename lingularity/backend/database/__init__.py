@@ -71,7 +71,7 @@ class MongoDBClient:
 
     @property
     def user_data_base(self) -> pymongo.collection.Collection:
-        assert self._cluster is not None, ''
+        assert self._cluster is not None
         return self._cluster[self._user]
 
     # -------------------
@@ -80,6 +80,13 @@ class MongoDBClient:
     def drop_all_databases(self):
         for db in self._cluster.list_database_names():
             self._cluster.drop_database(db)
+
+    def delete_user(self, user: str):
+        self._cluster.drop_database(user)
+
+    @staticmethod
+    def _get_ids(collection: pymongo.collection.Collection) -> List[Any]:
+        return list(collection.find().distinct('_id'))
 
     # ------------------
     # Collections
@@ -164,16 +171,13 @@ class MongoDBClient:
 
         self.insert_vocable(altered_vocable_entry)
 
-    def query_vocable_attributes(self, vocable: str) -> VocableAttributes:
-        return self.vocabulary_collection.find_one(self._language)[vocable]
+    def query_vocabulary_possessing_languages(self) -> List[str]:
+        return self._get_ids(self.vocabulary_collection)
 
     def query_vocabulary_data(self) -> List[Dict[str, Any]]:
         result = self.vocabulary_collection.find_one(self._language)
         result.pop('_id')
         return [{k: v} for k, v in result.items()]
-
-    def get_vocabulary_possessing_languages(self) -> List[str]:
-        return list(self.vocabulary_collection.find().distinct('_id'))
 
     # ------------------
     # .Training Chronic
@@ -260,4 +264,5 @@ class MongoDBClient:
 
 
 if __name__ == '__main__':
-    client = MongoDBClient(user='janek_zangenberg', language='Italian')
+    client = MongoDBClient(user='janek')
+    print(client.query_vocabulary_possessing_languages())

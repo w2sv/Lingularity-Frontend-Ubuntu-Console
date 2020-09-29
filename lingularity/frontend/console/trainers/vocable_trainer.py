@@ -6,7 +6,7 @@ from pynput.keyboard import Controller as KeyboardController
 import cursor
 
 from lingularity.frontend.console.trainers import TrainerConsoleFrontend, SentenceTranslationTrainerConsoleFrontend
-from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend, VocableEntry
+from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend as Backend, VocableEntry
 from lingularity.backend.database import MongoDBClient
 from lingularity.frontend.console.utils.output import (clear_screen, erase_lines, DEFAULT_VERTICAL_VIEW_OFFSET,
                                                        centered_print, get_max_line_length_based_indentation)
@@ -19,20 +19,16 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     def __init__(self, mongodb_client: MongoDBClient):
         super().__init__()
 
-        self._n_correct_responses = 0
-
-        self._temp_mongodb_client = mongodb_client
-        non_english_language, train_english = self._select_language()
-        del self._temp_mongodb_client
+        self._accumulated_score = 0.0
+        non_english_language, train_english = self._select_language(mongodb_client)
 
         cursor.hide()
-
-        self._backend = VocableTrainerBackend(non_english_language, train_english, mongodb_client)
+        self._backend = Backend(non_english_language, train_english, mongodb_client)
         cursor.show()
 
-    def _select_language(self) -> Tuple[str, bool]:
-        if not (eligible_languages := self._temp_mongodb_client.get_vocabulary_possessing_languages()):
-            self._start_sentence_translation_trainer()
+    def _select_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
+        if not (eligible_languages := Backend.get_eligible_languages(mongodb_client)):
+            return self._start_sentence_translation_trainer()
 
         elif len(eligible_languages) == 1:
             return eligible_languages[0], False
@@ -51,6 +47,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         return language_selection, False  # TODO
 
     def _start_sentence_translation_trainer(self):
+        print(DEFAULT_VERTICAL_VIEW_OFFSET)
         centered_print('You have to accumulate vocabulary by means of the SentenceTranslation™ TrainerBackend or manual amassment first.')
         sleep(3)
         centered_print('Initiating SentenceTranslation TrainerBackend...')
@@ -62,10 +59,11 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # Run
     # -----------------
     def run(self):
+        self._backend.set_item_iterator()
         self._display_new_vocabulary()
         self._display_instructions()
         self._run_training()
-        self._backend.insert_session_statistics_into_database(self._n_trained_items)
+        self._backend.enter_session_statistics_into_database(self._n_trained_items)
         self._display_pie_chart()
         self._plot_training_history()
 
@@ -154,12 +152,12 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             print(f'{translation_query_output}{response} | {response_evaluation.name.upper()} {f"| Correct translation: {entry.display_translation}" if response_evaluation.name != "Perfect" else ""}{f" | New Score: {entry.score if entry.score % 1 != 0 else int(entry.score)}" if entry.score < 5 else "| Entry Perfected"}\n')
 
             if (related_sentence_pairs := self._backend.get_related_sentence_pairs(entry.display_translation, n=2)) is not None:
-                forename_converted_sentence_pairs = [reversed(self._backend.convert_forenames_if_feasible(sentence_pair)) for sentence_pair in related_sentence_pairs]
+                forename_converted_sentence_pairs = [reversed(self._backend.forename_converter(sentence_pair)) for sentence_pair in related_sentence_pairs]
                 joined_sentence_pairs = [' - '.join(sentence_pair) for sentence_pair in forename_converted_sentence_pairs]
                 [centered_print(joined_sentence_pair) for joined_sentence_pair in joined_sentence_pairs]
 
             self._n_trained_items += 1
-            self._n_correct_responses += response_evaluation.value
+            self._accumulated_score += response_evaluation.value
 
             if not self._n_trained_items % 10 and self._n_trained_items != self._backend.n_training_items:
                 centered_print(f'\n\n{self._n_trained_items} Entries faced, {self._backend.n_training_items - self._n_trained_items} more to go\n\n')
@@ -189,14 +187,14 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     @property
     def n_correct_responses(self) -> float:
-        if int(self._n_correct_responses) == self._n_correct_responses:
-            return int(self._n_correct_responses)
+        if int(self._accumulated_score) == self._accumulated_score:
+            return int(self._accumulated_score)
         else:
-            return self._n_correct_responses
+            return self._accumulated_score
 
     @property
     def correctness_percentage(self) -> float:
-        return self._n_correct_responses / self._n_trained_items * 100
+        return self._accumulated_score / self._n_trained_items * 100
 
     @property
     def performance_verdict(self) -> str:

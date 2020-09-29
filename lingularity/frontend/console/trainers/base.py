@@ -10,6 +10,7 @@ from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.backend.trainers import TrainerBackend
 from lingularity.backend.trainers.vocable_trainer import VocableEntry
+from lingularity.backend.database import MongoDBClient
 from lingularity.backend.utils.strings import find_common_start, strip_multiple_characters
 from lingularity.frontend.console.utils.output import (BufferPrint, centered_print,
                                                        DEFAULT_VERTICAL_VIEW_OFFSET, clear_screen,
@@ -40,7 +41,7 @@ class TrainerConsoleFrontend(ABC):
     # Pre Training
     # -----------------
     @abstractmethod
-    def _select_language(self) -> Tuple[str, bool]:
+    def _select_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
         pass
 
     @abstractmethod
@@ -56,14 +57,14 @@ class TrainerConsoleFrontend(ABC):
 
     def _select_language_variety(self) -> str:
         """ Returns:
-                selected language variety: element of tts_language_varieties """
+                selected language variety: element of language_varieties """
 
         clear_screen()
         print(DEFAULT_VERTICAL_VIEW_OFFSET)
         centered_print('SELECT TEXT-TO-SPEECH LANGUAGE VARIETY\n\n')
 
-        common_start_length = len(find_common_start(*self._backend.tts_language_varieties))
-        processed_varieties = [strip_multiple_characters(dialect[common_start_length:], '()') for dialect in self._backend.tts_language_varieties]
+        common_start_length = len(find_common_start(*self._backend.tts.language_varieties))
+        processed_varieties = [strip_multiple_characters(dialect[common_start_length:], '()') for dialect in self._backend.tts.language_varieties]
         indentation = get_max_line_length_based_indentation(processed_varieties)
         for variety in processed_varieties:
             print(indentation, variety)
@@ -71,10 +72,10 @@ class TrainerConsoleFrontend(ABC):
 
         cursor.show()
         if (dialect_selection := resolve_input(indentation[:-5], options=processed_varieties)) is None:
-            return recurse_on_unresolvable_input(self._select_language_variety, 1, self._backend.tts_language_varieties)
+            return recurse_on_unresolvable_input(self._select_language_variety, 1, self._backend.tts.language_varieties)
         else:
             cursor.hide()
-            return self._backend.tts_language_varieties[processed_varieties.index(dialect_selection)]
+            return self._backend.tts.language_varieties[processed_varieties.index(dialect_selection)]
 
     # -----------------
     # Training

@@ -106,14 +106,21 @@ class VocableTrainerBackend(TrainerBackend):
     def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
         super().__init__(non_english_language, train_english, mongodb_client)
 
-        self._sentence_data, self.lets_go_translation = self._process_sentence_data_file()
+        self._training_items: Optional[List[VocableEntry]] = None
+
+        self._sentence_data = self._get_sentence_data()
+        self.lets_go_translation = self._sentence_data.query_lets_go_translation()
+
         self._token_2_sentence_indices = self._get_token_map(self._sentence_data)
-        self._vocable_entries: Optional[List[VocableEntry]] = None
+
+    @staticmethod
+    def get_eligible_languages(mongodb_client: Optional[MongoDBClient]) -> List[str]:
+        return mongodb_client.query_vocabulary_possessing_languages()
 
     def set_item_iterator(self) -> Iterator[Any]:
-        self._vocable_entries = self._get_imperfect_vocable_entries()
-        self.n_training_items = len(self._vocable_entries)
-        self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._vocable_entries)
+        self._training_items = self._get_imperfect_vocable_entries()
+        self.n_training_items = len(self._training_items)
+        self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._training_items)
 
     def _get_imperfect_vocable_entries(self) -> List[VocableEntry]:
         entire_vocabulary = starmap(VocableEntry, zip(self.mongodb_client.query_vocabulary_data(), repeat(self._train_english)))
@@ -123,7 +130,7 @@ class VocableTrainerBackend(TrainerBackend):
     # Pre training
     # ---------------
     def get_new_vocable_entries(self) -> List[VocableEntry]:
-        return list(filter(lambda entry: entry.is_new, self._vocable_entries))
+        return list(filter(lambda entry: entry.is_new, self._training_items))
 
     # ---------------
     # Training

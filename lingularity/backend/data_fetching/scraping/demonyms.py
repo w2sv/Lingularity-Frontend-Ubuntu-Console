@@ -12,7 +12,7 @@ def scrape_demonym(country_name: str) -> Optional[str]:
         Args:
             country_name: uppercase
         Returns:
-            None in case of irretrievability, otherwise best fit demonym """
+            None in case of irretrievability, otherwise best fit forename_country_demonym """
 
     page_url = f'http://en.wikipedia.org/wiki/{country_name}'
 
@@ -33,5 +33,5 @@ def scrape_demonym(country_name: str) -> Optional[str]:
                     if is_demonym(demonym_candidate) and levenshtein(country_name, demonym_candidate) > levenshtein(country_name, demonym):
                         demonym = demonym_candidate
 
-    logging.info(f'demonym: {demonym}')
+    logging.info(f'forename_country_demonym: {demonym}')
     return demonym
