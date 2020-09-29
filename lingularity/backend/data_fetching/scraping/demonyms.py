@@ -12,7 +12,7 @@ def scrape_demonym(country_name: str) -> Optional[str]:
         Args:
             country_name: uppercase
         Returns:
-            None in case of irretrievability, otherwise best fit forename_country_demonym """
+            None in case of irretrievability, otherwise best fit country_demonym """
 
     page_url = f'http://en.wikipedia.org/wiki/{country_name}'
 
@@ -21,17 +21,18 @@ def scrape_demonym(country_name: str) -> Optional[str]:
     if (demonym_tag := soup.find('a', href='/wiki/Demonym')) is None:
         return None
 
-    is_demonym = lambda demonym_candidate: country_name.startswith(demonym_candidate[:2])
+    def is_demonym(_demonym_candidate) -> bool:
+        return country_name.startswith(_demonym_candidate[:2])
 
-    demonym = None
+    demonym: Optional[str] = None
     for element in list(demonym_tag.next_elements)[1:10]:
         if element.name is None:
             for demonym_candidate in filter(lambda c: c.istitle(), element.split(' ')):
-                if not demonym:
+                if demonym is None:
                     demonym = demonym_candidate
                 else:
                     if is_demonym(demonym_candidate) and levenshtein(country_name, demonym_candidate) > levenshtein(country_name, demonym):
                         demonym = demonym_candidate
 
-    logging.info(f'forename_country_demonym: {demonym}')
+    logging.info(f'country_demonym: {demonym}')
     return demonym

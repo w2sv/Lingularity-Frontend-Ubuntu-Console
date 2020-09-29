@@ -26,7 +26,7 @@ class TTS:
 
         self._google_tts: GoogleTTS = GoogleTTS()
 
-        self._language_variety_2_identifier: Dict[str, str] = self._google_tts.get_dialect_choices(language)
+        self._language_variety_2_identifier: Optional[Dict[str, str]] = self._google_tts.get_dialect_choices(language)
         self.language_varieties: Optional[List[str]] = None if self._language_variety_2_identifier is None else list(self._language_variety_2_identifier.keys())
 
         self._language_variety_identifier: Optional[str] = self._query_language_variety_identifier()
@@ -61,6 +61,8 @@ class TTS:
             Args:
                 variety: element of language_varieties, e.g. 'Spanish (Spain)'  """
 
+        assert self._language_variety_2_identifier is not None
+
         if self._language_variety_identifier is not None:
             self._mongodb_client.set_language_variety_usage(self._language_variety_identifier, False)
 
@@ -71,19 +73,22 @@ class TTS:
         if not self.available:
             return None
         else:
-            if (preset_playback_speed := self._mongodb_client.query_playback_speed(
-                    self._language_variety_identifier)) is not None:
+            assert self._language_variety_identifier is not None
+            if (preset_playback_speed := self._mongodb_client.query_playback_speed(self._language_variety_identifier)) is not None:
                 return preset_playback_speed
             else:
                 return 1.0
 
     def enter_playback_speed_change_into_database(self, playback_speed: float):
+        assert self._language_variety_identifier is not None
+
         self._mongodb_client.insert_playback_speed(self._language_variety_identifier, playback_speed)
 
     def download_audio(self, text: str) -> str:
-        audio_file_path = f'{self._AUDIO_FILE_PATH}/{get_timestamp()}.mp3'
+        assert self._language_variety_identifier is not None
 
-        GoogleTTS.get_tts_audio(text, self._language_variety_identifier, audio_file_path)
+        audio_file_path = f'{self._AUDIO_FILE_PATH}/{get_timestamp()}.mp3'
+        self._google_tts.get_tts_audio(text, self._language_variety_identifier, save_path=audio_file_path)
         return audio_file_path
 
     @staticmethod
@@ -111,7 +116,7 @@ class ForenameConvertor:
         self._language_typical_forenames, corresponding_country = scrape_typical_forenames(language)
 
         self._forenames_convertible = self._language_typical_forenames is not None
-        self.forename_country_demonym = scrape_demonym(country_name=corresponding_country) if self._language_typical_forenames else None
+        self.country_demonym = scrape_demonym(country_name=corresponding_country) if self._language_typical_forenames else None  # type: ignore
 
     def __call__(self, sentence_pair: List[str]) -> List[str]:
         """

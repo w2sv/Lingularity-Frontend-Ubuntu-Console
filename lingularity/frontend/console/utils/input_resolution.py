@@ -1,4 +1,4 @@
-from typing import Iterable, Optional, Callable, List, Any
+from typing import Iterable, Optional, Callable, Tuple, Any
 import time
 import cursor
 
@@ -28,9 +28,9 @@ def recurse_on_invalid_input(function: Callable,
                              message: str,
                              n_deletion_lines: int,
                              sleep_duration=1.0,
-                             func_args: Optional[List[Any]] = None):
+                             func_args: Optional[Tuple[Any, ...]] = None):
     if func_args is None:
-        func_args = []
+        func_args = ()
 
     indissolubility_output(message, sleep_duration, n_deletion_lines)
 

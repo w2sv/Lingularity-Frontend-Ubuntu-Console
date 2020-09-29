@@ -24,7 +24,7 @@ class TrainerConsoleFrontend(ABC):
     SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'
 
     def __init__(self):
-        self._backend: Optional[TrainerBackend] = None
+        self._backend: TrainerBackend = None
         self._n_trained_items: int = 0
 
         self._latest_created_vocable_entry: Optional[VocableEntry] = None
@@ -63,6 +63,7 @@ class TrainerConsoleFrontend(ABC):
         print(DEFAULT_VERTICAL_VIEW_OFFSET)
         centered_print('SELECT TEXT-TO-SPEECH LANGUAGE VARIETY\n\n')
 
+        assert self._backend.tts.language_varieties is not None
         common_start_length = len(find_common_start(*self._backend.tts.language_varieties))
         processed_varieties = [strip_multiple_characters(dialect[common_start_length:], '()') for dialect in self._backend.tts.language_varieties]
         indentation = get_max_line_length_based_indentation(processed_varieties)
@@ -89,8 +90,6 @@ class TrainerConsoleFrontend(ABC):
                 inserted vocable vocable_entry line repr, None in case of invalid input
                 number of printed lines """
 
-        assert self._backend is not None
-
         vocable = input(f'Enter {self._backend.language} word/phrase: ')
         meanings = input('Enter meaning(s): ')
 
@@ -104,6 +103,8 @@ class TrainerConsoleFrontend(ABC):
     def _alter_latest_vocable_entry(self) -> int:
         """ Returns:
                 n_printed_lines: int """
+
+        assert self._latest_created_vocable_entry is not None
 
         old_line_repr = self._latest_created_vocable_entry.line_repr
         KeyboardController().type(f'{old_line_repr}')

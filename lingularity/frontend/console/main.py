@@ -89,7 +89,7 @@ def authenticate(mongodb_client) -> MongoDBClient:
 
 def sign_up(user: str, client: MongoDBClient, indentation: str, email_address: Optional[str] = None):
     args = list(locals().values())
-    _recurse_on_invalid_input = partial(recurse_on_invalid_input, function=sign_up)  # type: ignore
+    _recurse_on_invalid_input = partial(recurse_on_invalid_input, function=sign_up)
 
     centered_print('Create a new account\n')
 

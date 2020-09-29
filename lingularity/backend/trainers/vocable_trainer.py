@@ -115,9 +115,11 @@ class VocableTrainerBackend(TrainerBackend):
 
     @staticmethod
     def get_eligible_languages(mongodb_client: Optional[MongoDBClient]) -> List[str]:
+        assert mongodb_client is not None
+
         return mongodb_client.query_vocabulary_possessing_languages()
 
-    def set_item_iterator(self) -> Iterator[Any]:
+    def set_item_iterator(self):
         self._training_items = self._get_imperfect_vocable_entries()
         self.n_training_items = len(self._training_items)
         self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._training_items)
@@ -130,6 +132,8 @@ class VocableTrainerBackend(TrainerBackend):
     # Pre training
     # ---------------
     def get_new_vocable_entries(self) -> List[VocableEntry]:
+        assert self._training_items is not None
+
         return list(filter(lambda entry: entry.is_new, self._training_items))
 
     # ---------------

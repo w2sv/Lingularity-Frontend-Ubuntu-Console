@@ -2,7 +2,6 @@ from typing import Optional, Tuple
 from time import sleep
 
 import matplotlib.pyplot as plt
-from pynput.keyboard import Controller as KeyboardController
 import cursor
 
 from lingularity.frontend.console.trainers import TrainerConsoleFrontend, SentenceTranslationTrainerConsoleFrontend
@@ -42,7 +41,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         input_query_message = 'Enter desired language: '
         language_selection = resolve_input(f'\n{indentation[:-int(len(input_query_message) * 3/4)]}{input_query_message}', eligible_languages)
         if language_selection is None:
-            return recurse_on_unresolvable_input(self._select_language, n_deletion_lines=-1)
+            return recurse_on_unresolvable_input(self._select_language, -1, mongodb_client)
         print('\n' * 2, end='')
         return language_selection, False  # TODO
 
@@ -164,23 +163,6 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             else:
                 centered_print('\n-----------------------\n')
             previous_entry = entry
-
-    def _alter_entry_translation(self, entry: Optional[VocableEntry]) -> int:
-        """ Returns:
-                number of printed lines"""
-
-        if not entry:
-            return 1
-
-        KeyboardController().type(entry.translation)
-        extended_translation = input('')
-        if extended_translation:
-            self._backend.mongodb_client.insert_altered_vocable_entry(*[entry.token] * 2, extended_translation)  # type: ignore
-            return 2
-        else:
-            print('Invalid input')
-            sleep(1)
-            return 2
 
     # -----------------
     # Post training

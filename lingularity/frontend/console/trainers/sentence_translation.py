@@ -28,7 +28,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         non_english_language, train_english = self._select_language()
         self._backend = Backend(non_english_language, train_english, mongodb_client)
 
-        if self._backend.tts.available and self._backend.tts.language_varieties is not None and not self._backend.tts.language_identifier_set:
+        if self._backend.tts.available and self._backend.tts.language_varieties is not None and not self._backend.tts.language_variety_identifier_set:
             selected_variety = self._select_language_variety()
             self._backend.tts.change_language_variety(selected_variety)
 
@@ -157,8 +157,6 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     @property
     def _tts_available_and_enabled(self) -> bool:
-        assert self._backend is not None
-
         return self._backend.tts.available and self._tts_enabled
 
     def _remove_audio_file(self):
@@ -234,8 +232,6 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     def _execute_option(self, option: TrainingOption) -> bool:
         """ Returns:
                 exit_training flag """
-
-        assert self._backend is not None
 
         def suspend_training_loop(n_deletion_lines: int):
             self._training_loop_suspended = True
