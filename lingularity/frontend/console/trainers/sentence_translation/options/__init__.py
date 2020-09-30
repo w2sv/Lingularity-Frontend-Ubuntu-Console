@@ -23,14 +23,10 @@ class SentenceTranslationOption(TrainingOption, ABC):
     def __init__(self, keyword: str, explanation: str):
         super().__init__(keyword, explanation)
 
-    def _suspend_training_loop(self, n_deletion_lines: int):
-        self._training_loop_suspended = True
-        erase_lines(n_deletion_lines)
-
     def _alter_tts_enablement(self, value: bool):
         self._tts_enabled = value
         self._backend.mongodb_client.set_tts_enablement(value)
-        self._suspend_training_loop(n_deletion_lines=1)
+        erase_lines(1)
 
 
 class AddVocabulary(SentenceTranslationOption):
@@ -39,7 +35,7 @@ class AddVocabulary(SentenceTranslationOption):
 
     def execute(self):
         n_printed_lines = self._get_new_vocable()
-        self._suspend_training_loop(n_deletion_lines=n_printed_lines + 1)
+        erase_lines(n_printed_lines + 1)
 
 
 class AlterLatestVocableEntry(SentenceTranslationOption):
@@ -50,10 +46,10 @@ class AlterLatestVocableEntry(SentenceTranslationOption):
         if self._latest_created_vocable_entry is None:
             centered_print("You haven't added any vocabulary during the current session")
             sleep(1.5)
-            self._suspend_training_loop(n_deletion_lines=2)
+            erase_lines(2)
         else:
             n_printed_lines = self._alter_vocable_entry(self._latest_created_vocable_entry)
-            self._suspend_training_loop(n_deletion_lines=n_printed_lines)
+            erase_lines(n_printed_lines)
 
 
 class Exit(SentenceTranslationOption):
@@ -90,7 +86,7 @@ class ChangePlaybackSpeed(SentenceTranslationOption):
 
     def execute(self):
         self._change_playback_speed()
-        self._suspend_training_loop(n_deletion_lines=3)
+        erase_lines(3)
 
     def _change_playback_speed(self):
         def is_valid(playback_speed: float) -> bool:
@@ -123,7 +119,6 @@ class ChangeTTSLanguageVariety(SentenceTranslationOption):
         self._remove_audio_file()
 
         # redo previous terminal output
-        self._suspend_training_loop(n_deletion_lines=0)
         self._display_instructions()
         self._buffer_print.output_buffer_content()
         self._pending_output()

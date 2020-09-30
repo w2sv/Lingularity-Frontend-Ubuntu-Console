@@ -32,8 +32,6 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._playback_speed = self._backend.tts.query_playback_speed()
         self._audio_file_path: Optional[str] = None
 
-        self._training_loop_suspended = False
-
     def _select_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
         """
             Returns:
@@ -147,55 +145,57 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     def _pending_output(self):
         print(f"{self._TRAINING_LOOP_INDENTATION}pending... ")
 
+    def _process_sentence_pair(self) -> Optional[str]:
+        if (sentence_pair := self._backend.get_training_item()) is None:
+            return None
+
+        # try to convert forenames, output reference language sentence
+        reference_sentence, translation = self._backend.forename_converter(sentence_pair)
+        self._buffer_print(f'{self._TRAINING_LOOP_INDENTATION}{reference_sentence}')
+        self._pending_output()
+
+        return translation
+
     def _run_training(self):
-        translation: Optional[str] = None
+        translation = self._process_sentence_pair()
 
-        while True:
-            if not self._training_loop_suspended:
-                # get sentence pair
-                if (sentence_pair := self._backend.get_training_item()) is None:
-                    print('\nSentence data file depleted')
-                    return
-
-                # try to convert forenames, output reference language sentence
-                reference_sentence, translation = self._backend.forename_converter(sentence_pair)
-                self._buffer_print(f'{self._TRAINING_LOOP_INDENTATION}{reference_sentence}')
-                self._pending_output()
-
+        while translation is not None:
             # get tts audio file if available
             if self._tts_available_and_enabled and self._audio_file_path is None:
                 self._audio_file_path = self._backend.tts.download_audio(text=translation)
-
-            self._training_loop_suspended = False
 
             # get response, execute selected option if applicable
             if (response := resolve_input(input('$'), options=self._training_options.keywords + [''])) is not None:
                 if len(response):
                     self._training_options[response].execute()
+
                     if type(self._training_options[response]) is Exit:
                         return
 
+                else:
+                    # erase pending... + entered option identifier
+                    erase_lines(2)
+
+                    # output translation
+                    self._buffer_print(f'{self._TRAINING_LOOP_INDENTATION}{translation}')
+                    self._buffer_print(f'{self._TRAINING_LOOP_INDENTATION}_______________')
+
+                    # play tts file if available, otherwise suspend program
+                    # for some time to incentivise gleaning over translation
+                    if self._tts_available_and_enabled:
+                        self._backend.tts.play_audio_file(self._audio_file_path, self._playback_speed, suspend_program_for_duration=True)
+                        self._remove_audio_file()
+                    else:
+                        time.sleep(len(translation) * 0.05)
+
+                    self._n_trained_items += 1
+
+                    if self._n_trained_items >= 5:
+                        self._buffer_print.partially_redo_buffer_content(n_deletion_lines=3)
+
+                    translation = self._process_sentence_pair()
+
             else:
                 indissolubility_output("Couldn't resolve input", sleep_duration=0.8, n_deletion_lines=2)
-                self._training_loop_suspended = True
 
-            if not self._training_loop_suspended:
-                # erase pending... + entered option identifier
-                erase_lines(2)
-
-                # output translation
-                self._buffer_print(f'{self._TRAINING_LOOP_INDENTATION}{translation}')
-                self._buffer_print(f'{self._TRAINING_LOOP_INDENTATION}_______________')
-
-                # play tts file if available, otherwise suspend program
-                # for some time to incentivise gleaning over translation
-                if self._tts_available_and_enabled:
-                    self._backend.tts.play_audio_file(self._audio_file_path, self._playback_speed, suspend_program_for_duration=True)
-                    self._remove_audio_file()
-                else:
-                    time.sleep(len(translation) * 0.05)
-
-                self._n_trained_items += 1
-
-                if self._n_trained_items >= 5:
-                    self._buffer_print.partially_redo_buffer_content(n_deletion_lines=3)
+        print('\nSentence data file depleted')
