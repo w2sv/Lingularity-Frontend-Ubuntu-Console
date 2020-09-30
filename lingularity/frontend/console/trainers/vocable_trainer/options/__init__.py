@@ -24,10 +24,7 @@ class AddVocable(VocableTrainerOption):
         super().__init__('#vocable', 'add a new vocable')
 
     def execute(self):
-        created_vocable_entry, n_printed_lines = self._get_new_vocable()
-        if created_vocable_entry is not None:
-            self._backend.mongodb_client.insert_vocable(created_vocable_entry)
-            self._latest_created_vocable_entry = created_vocable_entry
+        n_printed_lines = self._get_new_vocable()
         erase_lines(n_printed_lines + 1)
 
 
@@ -36,10 +33,10 @@ class VocableModifier(VocableTrainerOption, ABC):
         if vocable_entry is None:
             centered_print(message)
             sleep(1.5)
-            self._suspend_training_loop(n_deletion_lines=2)
+            erase_lines(2)
         else:
-            n_printed_lines = self._alter_latest_vocable_entry()
-            self._suspend_training_loop(n_deletion_lines=n_printed_lines)
+            n_printed_lines = self._alter_vocable_entry(vocable_entry)
+            erase_lines(n_printed_lines)
 
 
 class AlterLatestFacedVocableEntry(VocableModifier):

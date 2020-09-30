@@ -20,23 +20,19 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     _TRAINING_LOOP_INDENTATION = ' ' * 16
 
     def __init__(self, mongodb_client: MongoDBClient):
-        super().__init__()
+        super().__init__(Backend, mongodb_client)
 
-        non_english_language, train_english = self._select_language()
-        self._backend = Backend(non_english_language, train_english, mongodb_client)
-
-        if self._backend.tts.available and self._backend.tts.language_varieties is not None and not self._backend.tts.language_variety_identifier_set:
+        # select tts language variety if applicable
+        if all([self._backend.tts.available, self._backend.tts.language_varieties, not self._backend.tts.language_variety_identifier_set]):
             selected_variety = self._select_language_variety()
             self._backend.tts.change_language_variety(selected_variety)
 
+        # tts
         self._tts_enabled = self._backend.tts.query_enablement()
         self._playback_speed = self._backend.tts.query_playback_speed()
-
-        self._training_loop_suspended = False
-        self._latest_created_vocable_entry: Optional[VocableEntry] = None
         self._audio_file_path: Optional[str] = None
 
-        self._training_options = self._get_training_options()
+        self._training_loop_suspended = False
 
     def _select_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
         """

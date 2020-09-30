@@ -38,10 +38,7 @@ class AddVocabulary(SentenceTranslationOption):
         super().__init__('vocabulary', 'add a vocable')
 
     def execute(self):
-        created_vocable_entry, n_printed_lines = self._get_new_vocable()
-        if created_vocable_entry is not None:
-            self._backend.mongodb_client.insert_vocable(created_vocable_entry)
-            self._latest_created_vocable_entry = created_vocable_entry
+        n_printed_lines = self._get_new_vocable()
         self._suspend_training_loop(n_deletion_lines=n_printed_lines + 1)
 
 
@@ -97,7 +94,7 @@ class ChangePlaybackSpeed(SentenceTranslationOption):
 
     def _change_playback_speed(self):
         def is_valid(playback_speed: float) -> bool:
-            return 0.1 < playback_speed < 5
+            return 0.1 < playback_speed < 3
 
         print('Playback speed:\n\t', end='')
         KeyboardController().type(str(self._playback_speed))
@@ -125,7 +122,7 @@ class ChangeTTSLanguageVariety(SentenceTranslationOption):
         self._backend.tts.change_language_variety(selected_variety)
         self._remove_audio_file()
 
-        # redo previous output
+        # redo previous terminal output
         self._suspend_training_loop(n_deletion_lines=0)
         self._display_instructions()
         self._buffer_print.output_buffer_content()

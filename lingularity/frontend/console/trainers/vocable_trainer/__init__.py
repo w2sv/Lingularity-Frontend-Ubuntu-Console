@@ -17,20 +17,16 @@ from lingularity.frontend.console.utils.matplotlib import center_matplotlib_wind
 
 class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     def __init__(self, mongodb_client: MongoDBClient):
-        super().__init__()
+        super().__init__(Backend, mongodb_client)
 
         self._accumulated_score = 0.0
-        non_english_language, train_english = self._select_language(mongodb_client)
-
-        cursor.hide()
-        self._backend = Backend(non_english_language, train_english, mongodb_client)
-        cursor.show()
 
         self._latest_faced_vocable_entry: Optional[VocableEntry] = None
-        self._training_options = self._get_training_options()
 
     def _select_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
         if not (eligible_languages := Backend.get_eligible_languages(mongodb_client)):
+            assert mongodb_client is not None
+
             return self._start_sentence_translation_trainer(mongodb_client)
 
         elif len(eligible_languages) == 1:
@@ -116,7 +112,9 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     def _run_training(self):
         INDENTATION = '\t' * 2
 
-        while (entry := self._backend.get_training_item()) is not None:
+        entry: VocableEntry = self._backend.get_training_item()
+
+        while entry is not None:
             translation_query_output = f'{INDENTATION + entry.display_token} = '
             print(translation_query_output, end='')
 
@@ -148,6 +146,8 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                     centered_print(f'\n\n{self._n_trained_items} Entries faced, {self._backend.n_training_items - self._n_trained_items} more to go\n\n')
                 else:
                     centered_print('\n-----------------------\n')
+
+                entry = self._backend.get_training_item()
 
     # -----------------
     # Post training

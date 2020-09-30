@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Any, List, Type, Dict, Iterator
+from typing import Optional, Tuple, List, Type, Dict, Iterator
 from abc import ABC, abstractmethod
 import time
 
@@ -73,14 +73,15 @@ class TrainerConsoleFrontend(ABC):
     plt.rcParams['toolbar'] = 'None'
     SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'
 
-    def __init__(self):
-        self._backend: TrainerBackend = None
-        self._n_trained_items: int = 0
+    def __init__(self, backend: Type[TrainerBackend], mongodb_client: MongoDBClient):
+        non_english_language, train_english = self._select_language(mongodb_client)
+        self._backend = backend(non_english_language, train_english, mongodb_client)
 
-        self._latest_created_vocable_entry: Optional[VocableEntry] = None
         self._buffer_print = BufferPrint()
+        self._training_options: TrainingOptionCollection = self._get_training_options()
 
-        self._training_options: TrainingOptionCollection = None
+        self._n_trained_items: int = 0
+        self._latest_created_vocable_entry: Optional[VocableEntry] = None
 
     @abstractmethod
     def _get_training_options(self) -> TrainingOptionCollection:
@@ -141,20 +142,22 @@ class TrainerConsoleFrontend(ABC):
     def _run_training(self):
         pass
 
-    def _get_new_vocable(self) -> Tuple[Optional[VocableEntry], int]:
+    def _get_new_vocable(self) -> int:
         """ Returns:
-                inserted vocable vocable_entry line repr, None in case of invalid input
                 number of printed lines """
 
         vocable = input(f'Enter {self._backend.language} word/phrase: ')
         meanings = input('Enter meaning(s): ')
 
         if not all([vocable, meanings]):
-            print("Input field left unfilled")
+            centered_print("Input field left unfilled")
             time.sleep(1)
-            return None, 3
+            return 3
 
-        return VocableEntry.new(vocable, meanings), 2
+        self._latest_created_vocable_entry = VocableEntry.new(vocable, meanings)
+        self._backend.mongodb_client.insert_vocable(self._latest_created_vocable_entry)
+
+        return 2
 
     def _alter_vocable_entry(self, vocable_entry: VocableEntry) -> int:
         """ Returns:
