@@ -1,11 +1,11 @@
 from typing import Optional
+from enum import Enum
 
 import cursor
 
 from lingularity.backend.trainers import VocableAdderBackend
 from lingularity.backend.database import MongoDBClient
 from lingularity.frontend.console.trainers import VocableTrainerConsoleFrontend
-from lingularity.backend.utils.enum import ExtendedEnum
 from lingularity.frontend.console.utils.input_resolution import resolve_input, indissolubility_output
 from lingularity.frontend.console.utils.output import (clear_screen, get_max_line_length_based_indentation,
                                                        DEFAULT_VERTICAL_VIEW_OFFSET, erase_lines)
@@ -17,7 +17,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
 
         self._backend = VocableAdderBackend(non_english_language, mongodb_client)
 
-    class Option(ExtendedEnum):
+    class Option(Enum):
         Exit = 'exit'
         AlterLatestVocableEntry = 'alter'
 
@@ -26,7 +26,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
         print(DEFAULT_VERTICAL_VIEW_OFFSET * 2)
 
         instructions = (
-            f"Press CTRL + C in order to enter one of the following options:",
+            f"Press CTRL + C in order to select one of the following options:",
             "\t  - 'exit' and return to trainer selection screen",
             "\t  - 'alter' the latest vocable entry"
         )
@@ -39,7 +39,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
 
     def _get_option_selection(self) -> Optional[Option]:
         erase_lines(0)
-        if (option_keyword := resolve_input(input('Enter option keyword: '), options=self.Option.values())) is not None:
+        if (option_keyword := resolve_input(input('Enter option keyword: '), options=[op.value for op in self.Option])) is not None:
             return self.Option(option_keyword)
         else:
             return None
@@ -52,11 +52,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
 
         while True:
             try:
-                created_vocable_entry, n_printed_lines = self._get_new_vocable()
-                if created_vocable_entry is not None:
-                    self._latest_created_vocable_entry = created_vocable_entry
-                    self._backend.mongodb_client.insert_vocable(created_vocable_entry)
-
+                n_printed_lines = self._get_new_vocable()
                 erase_lines(n_printed_lines)
                 self._output_vocable_addition_confirmation()
 

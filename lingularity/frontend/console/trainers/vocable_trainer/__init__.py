@@ -2,7 +2,6 @@ from typing import Optional, Tuple
 from time import sleep
 
 import matplotlib.pyplot as plt
-import cursor
 
 from lingularity.frontend.console.trainers.vocable_trainer.options import *
 from lingularity.frontend.console.trainers.sentence_translation import SentenceTranslationTrainerConsoleFrontend
@@ -24,9 +23,9 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._latest_faced_vocable_entry: Optional[VocableEntry] = None
 
     def _select_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
-        if not (eligible_languages := Backend.get_eligible_languages(mongodb_client)):
-            assert mongodb_client is not None
+        assert mongodb_client is not None
 
+        if not (eligible_languages := Backend.get_eligible_languages(mongodb_client)):
             return self._start_sentence_translation_trainer(mongodb_client)
 
         elif len(eligible_languages) == 1:

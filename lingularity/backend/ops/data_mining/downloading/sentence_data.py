@@ -1,29 +1,22 @@
-""" scrapes language_2_ziplink dict as soon as something from
-    the module is getting imported in case of the former not already being set """
-
-from typing import Dict, List, Optional
+from typing import List
 import os
 import warnings
 import logging
-
 import zipfile
 
-from lingularity.backend.data_fetching.scraping.sentence_data_download_links import scrape_language_2_downloadlink_dict, SENTENCE_DATA_PAGE_URL
+from lingularity.backend.ops.data_mining.scraping.sentence_data_download_links import SENTENCE_DATA_PAGE_URL, scrape_sentence_data_download_links
 from .utils import patched_urllib
 
 warnings.filterwarnings('ignore')
-# TODO: debug telugu, north download
 
 
 _BASE_SAVE_DESTINATION_DIR_PATH = f'{os.getcwd()}/.language_data'
 
 
-language_2_ziplink: Optional[Dict[str, str]] = None
-if language_2_ziplink is None:
-    language_2_ziplink = scrape_language_2_downloadlink_dict()
+language_2_downloadlink = scrape_sentence_data_download_links()
 
 
-def fetch_sentence_data(language: str):
+def download_sentence_data(language: str):
     """ downloads and unzips respective sentence data file """
 
     print('Downloading sentence data...')
@@ -31,26 +24,24 @@ def fetch_sentence_data(language: str):
     _process_zip_file(zip_file_path)
 
 
-def fetch_all_available_sentence_data_files():
-    locally_available_language_files: List[str] = os.listdir(_BASE_SAVE_DESTINATION_DIR_PATH)
+# def fetch_all_available_sentence_data_files(source='tatoebaProject'):
+#     locally_available_language_files: List[str] = os.listdir(_BASE_SAVE_DESTINATION_DIR_PATH)
+#
+#     n_downloaded_language_files = 0
+#     for language, language_data in language_metadata.items():
+#         if language not in locally_available_language_files:
+#             download_sentence_data(language_data["sentenceDataDownloadLinks"][source])
+#             n_downloaded_language_files += 1
+#
+#     logging.info(f'Downloaded {n_downloaded_language_files} language files')
 
-    n_downloaded_language_files = 0
-    for language in language_2_ziplink.keys():
-        if language not in locally_available_language_files:
-            fetch_sentence_data(language)
-            n_downloaded_language_files += 1
 
-    logging.info(f'Downloaded {n_downloaded_language_files} language files')
-
-
-def _download_sentence_data(language: str) -> str:
+def _download_sentence_data(language: str, source='tatoebaProject') -> str:
     """
         Returns:
             absolute zip file save destination path """
 
-    assert language_2_ziplink is not None
-
-    download_link = f'{SENTENCE_DATA_PAGE_URL}/{language_2_ziplink[language]}'
+    download_link = f'{SENTENCE_DATA_PAGE_URL}/{language_2_downloadlink[language]}'
     save_destination_dir = f'{_BASE_SAVE_DESTINATION_DIR_PATH}/{language}'
     if not os.path.exists(save_destination_dir):
         os.makedirs(save_destination_dir)

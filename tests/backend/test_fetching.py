@@ -1,18 +1,16 @@
 import pytest
-from itertools import chain
 from collections import Counter
 
-from lingularity.backend.data_fetching.scraping.sentence_data_download_links import scrape_language_2_downloadlink_dict
-from lingularity.backend.data_fetching.scraping.demonyms import scrape_demonym
-from lingularity.backend.data_fetching.scraping.language_typical_forenames import _scrape_countries_language_employed_in, _scrape_popular_forenames
+from lingularity.backend.ops.data_mining.scraping import (scrape_sentence_data_download_links, scrape_demonym,
+                                                          scrape_popular_forenames, scrape_countries_language_employed_in)
 
 
 def test_zip_download_link_parsing():
-    language_2_downloadlink = scrape_language_2_downloadlink_dict()
-    assert all(k.endswith('.zip') for k in language_2_downloadlink.values())
+    language_2_download_link = scrape_sentence_data_download_links()
+    assert all(k.endswith('.zip') for k in language_2_download_link.values())
 
     # check if number of languages has changed
-    if (n_languages := len(language_2_downloadlink)) != 79:
+    if (n_languages := len(language_2_download_link)) != 79:
         print(f'# of available languages has changed: {n_languages}')
 
 
@@ -55,19 +53,9 @@ def test_demonyms_fetching(country, expected_demonym):
     ('Serbian', ['Bosnia_and_Herzegovina', 'Hungary', 'Croatia', 'North_Macedonia', 'Serbia', 'Slovakia', 'Kosovo', 'Montenegro', 'Romania', 'Czech_Republic']),
 ])
 def test_language_corresponding_countries_fetching(language, expected_countries):
-    if hasattr(expected_countries, '__iter__'):
-        assert Counter(_scrape_countries_language_employed_in(language)) == Counter(expected_countries)
+    countries_language_employed_in = scrape_countries_language_employed_in(language)
+
+    if expected_countries is None:
+        assert countries_language_employed_in is None
     else:
-        assert _scrape_countries_language_employed_in(language) == expected_countries
-
-
-@pytest.mark.parametrize('country,expected_forenames', [
-    ('France', [['Gabriel', 'Louis', 'Raphaël', 'Jules', 'Adam', 'Lucas', 'Léo', 'Hugo', 'Arthur', 'Nathan'], ['Emma', 'Louise', 'Jade', 'Alice', 'Chloé', 'Lina', 'Mila', 'Léa', 'Manon', 'Rose']]),
-    ('Germany', [['Ben', 'Jonas', 'Leon', 'Elias', 'Finn', 'Noah', 'Paul', 'Luis', 'Lukas', 'Luca'], ['Mia', 'Emma', 'Hannah', 'Sofia', 'Anna', 'Emilia', 'Lina', 'Marie', 'Lena', 'Mila']]),
-    ('Spain', [['Hugo', 'Daniel', 'Martín', 'Pablo', 'Alejandro', 'Lucas', 'Álvaro', 'Adrián', 'Mateo', 'David'], ['Markel', 'Aimar', 'Jon', 'Ibai', 'Julen', 'Ander', 'Unax', 'Oier', 'Mikel', 'Iker']]),
-    ('Korea', [['Min-jun', 'Seo-jun', 'Joo-won', 'Ye-jun', 'Shi-woo', 'Jun-seo', 'Do-yoon (도윤)', 'Hyun-woo', 'Gun-woo', 'Ji-hoon'], ['Seo-yeon', 'Seo-yun', 'Ji-woo', 'Seo-hyeon', 'Min-seo', 'Yun-o', 'Chae-won', 'Ha-yoon', 'Ji-ah (지아)', 'Eun-seo']]),
-    ('Japan', [['Sō', 'Itsuki', 'Ren', 'Hinata', 'Asahi', 'Sōta', 'Yuuma', 'Arata', 'Ryō', 'Yūto'], ['Sakura', 'Riko', 'Aoi', 'Wakana', 'Sakura', 'Rin', 'Anna', 'Himari', 'Yuna', 'Kaed']])
-])
-def test_forename_scraping(country, expected_forenames):
-    get_flattened_set = lambda forenames_list: set(chain.from_iterable(forenames_list))
-    assert not len(get_flattened_set(_scrape_popular_forenames(country)) ^ get_flattened_set(expected_forenames))
+        assert Counter(countries_language_employed_in) == Counter(expected_countries)

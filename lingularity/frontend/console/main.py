@@ -11,7 +11,7 @@ import logging
 import cursor
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.ops.google.translation import GoogleTranslation
+from lingularity.backend.metadata import language_metadata
 from lingularity.frontend.console.utils.input_resolution import recurse_on_unresolvable_input, recurse_on_invalid_input, resolve_input
 from lingularity.frontend.console.utils.date import today_or_yesterday, string_date_2_datetime_type
 from lingularity.frontend.console.utils.signup_credential_validation import invalid_mailadress, invalid_password, invalid_username
@@ -125,12 +125,12 @@ def extended_starting_screen(username: str, latest_trained_language: Optional[st
     centered_print("Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,")
     centered_print("e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
 
-    constitution_query = random.choice([f"What's up", f"How are you"]) + f' {username.title()}?'
-    if latest_trained_language is not None and (language_identifier := GoogleTranslation().get_identifier(latest_trained_language)) is not None:
-        constitution_query_translation = GoogleTranslation().translate(constitution_query, src='en', dest=language_identifier)
-        centered_print(constitution_query_translation, CONSECUTIVE_VERTICAL_SPACE)
+    if all([latest_trained_language, (constitution_query_choices := language_metadata[latest_trained_language]['translations']['constitutionQuery'])]):
+        constitution_query_choices = map(lambda query: query.replace('{}', username.title()), constitution_query_choices)
     else:
-        centered_print(constitution_query, CONSECUTIVE_VERTICAL_SPACE)
+        constitution_query_choices = map(lambda query: query + f' {username.title()}?', [f"What's up", f"How are you"])
+
+    centered_print(random.choice(list(constitution_query_choices)), CONSECUTIVE_VERTICAL_SPACE)
 
 
 def display_last_session_statistics(last_session_metrics: Optional[Dict[str, Any]]):

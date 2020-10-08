@@ -4,6 +4,7 @@ import screeninfo
 
 
 matplotlib.use("TkAgg")
+plt.rcParams['toolbar'] = 'None'
 
 
 def center_matplotlib_windows():

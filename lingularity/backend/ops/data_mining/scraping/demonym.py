@@ -1,5 +1,6 @@
 from typing import Optional
 import logging
+from itertools import islice
 
 from bs4 import BeautifulSoup
 from textacy.similarity import levenshtein
@@ -25,7 +26,7 @@ def scrape_demonym(country_name: str) -> Optional[str]:
         return country_name.startswith(_demonym_candidate[:2])
 
     demonym: Optional[str] = None
-    for element in list(demonym_tag.next_elements)[1:10]:
+    for element in islice(demonym_tag.next_elements, start=1, stop=10):
         if element.name is None:
             for demonym_candidate in filter(lambda c: c.istitle(), element.split(' ')):
                 if demonym is None:

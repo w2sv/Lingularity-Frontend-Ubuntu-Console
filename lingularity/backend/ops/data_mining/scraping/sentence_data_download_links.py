@@ -6,7 +6,7 @@ from .utils import read_page_source
 SENTENCE_DATA_PAGE_URL = 'http://www.manythings.org/anki'
 
 
-def scrape_language_2_downloadlink_dict() -> Dict[str, str]:
+def scrape_sentence_data_download_links() -> Dict[str, str]:
     FLAG_URL = 'http://www.manythings.org/img/usa.png'  # initiating every zip link row
 
     page_content = str(read_page_source(SENTENCE_DATA_PAGE_URL))

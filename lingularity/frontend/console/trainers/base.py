@@ -10,8 +10,9 @@ from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.backend.trainers import TrainerBackend
 from lingularity.backend.trainers.vocable_trainer import VocableEntry
+from lingularity.backend.metadata import language_metadata
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.utils.strings import find_common_start, strip_multiple_characters
+from lingularity.backend.utils.strings import find_common_start, strip_multiple
 from lingularity.frontend.console.utils.output import (BufferPrint, centered_print,
                                                        DEFAULT_VERTICAL_VIEW_OFFSET, clear_screen,
                                                        get_max_line_length_based_indentation)
@@ -56,7 +57,7 @@ class TrainingOption(ABC):
 
 class TrainingOptionCollection:
     def __init__(self, option_classes: List[Type[TrainingOption]]):
-        options = [cls() for cls in option_classes]
+        options = [cls() for cls in option_classes]  # type: ignore
 
         self.keywords = [option.keyword for option in options]
         self.instructions = [option.instruction for option in options]
@@ -70,14 +71,13 @@ class TrainingOptionCollection:
 
 
 class TrainerConsoleFrontend(ABC):
-    plt.rcParams['toolbar'] = 'None'
     SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'
 
     def __init__(self, backend: Type[TrainerBackend], mongodb_client: MongoDBClient):
         non_english_language, train_english = self._select_language(mongodb_client)
-        self._backend = backend(non_english_language, train_english, mongodb_client)
+        self._backend: TrainerBackend = backend(non_english_language, train_english, mongodb_client)
 
-        self._buffer_print = BufferPrint()
+        self._buffer_print: BufferPrint = BufferPrint()
         self._training_options: TrainingOptionCollection = self._get_training_options()
 
         self._n_trained_items: int = 0
@@ -106,8 +106,8 @@ class TrainerConsoleFrontend(ABC):
         pass
 
     def _output_lets_go(self):
-        if self._backend.lets_go_translation is not None:
-            output = self._backend.lets_go_translation
+        if (translation := language_metadata[self._backend.language]['translations']['letsGo']) is not None:
+            output = translation
         else:
             output = "Let's go!"
         centered_print(output, '\n' * 2)
@@ -122,7 +122,7 @@ class TrainerConsoleFrontend(ABC):
 
         assert self._backend.tts.language_varieties is not None
         common_start_length = len(find_common_start(*self._backend.tts.language_varieties))
-        processed_varieties = [strip_multiple_characters(dialect[common_start_length:], '()') for dialect in self._backend.tts.language_varieties]
+        processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._backend.tts.language_varieties]
         indentation = get_max_line_length_based_indentation(processed_varieties)
         for variety in processed_varieties:
             print(indentation, variety)
@@ -176,7 +176,6 @@ class TrainerConsoleFrontend(ABC):
         vocable_entry.alter(*new_entry_components)
 
         if vocable_entry.line_repr != old_line_repr:
-            assert self._backend is not None
             self._backend.mongodb_client.insert_altered_vocable_entry(old_vocable, vocable_entry)
         return 2
 

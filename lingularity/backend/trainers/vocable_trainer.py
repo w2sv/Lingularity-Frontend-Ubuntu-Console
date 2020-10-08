@@ -1,13 +1,14 @@
-from typing import List, Dict, Optional, Any, Iterator
+from typing import List, Dict, Optional, Any
 from collections import Counter
 from itertools import repeat, starmap
+from enum import Enum
 
 import unidecode
 import numpy as np
 
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.utils.enum import ExtendedEnum
+from lingularity.backend.token_maps import get_token_map
 from lingularity.frontend.console.utils.date import n_days_ago
 
 
@@ -111,7 +112,7 @@ class VocableTrainerBackend(TrainerBackend):
         self._sentence_data = self._get_sentence_data()
         self.lets_go_translation = self._sentence_data.query_lets_go_translation()
 
-        self._token_2_sentence_indices = self._get_token_map(self._sentence_data)
+        self._token_2_sentence_indices = get_token_map(self._sentence_data, self.language, load_normalizer=True)
 
     @staticmethod
     def get_eligible_languages(mongodb_client: Optional[MongoDBClient]) -> List[str]:
@@ -121,8 +122,7 @@ class VocableTrainerBackend(TrainerBackend):
 
     def set_item_iterator(self):
         self._training_items = self._get_imperfect_vocable_entries()
-        self.n_training_items = len(self._training_items)
-        self._item_iterator: Iterator[VocableEntry] = self._get_item_iterator(self._training_items)
+        self._set_item_iterator(self._training_items)
 
     def _get_imperfect_vocable_entries(self) -> List[VocableEntry]:
         entire_vocabulary = starmap(VocableEntry, zip(self.mongodb_client.query_vocabulary_data(), repeat(self._train_english)))
@@ -143,7 +143,7 @@ class VocableTrainerBackend(TrainerBackend):
     # ---------------
     # .Evaluation
     # ---------------
-    class ResponseEvaluation(ExtendedEnum):
+    class ResponseEvaluation(Enum):
         Wrong = 0.0
         AlmostCorrect = 0.5
         AccentError = 0.75

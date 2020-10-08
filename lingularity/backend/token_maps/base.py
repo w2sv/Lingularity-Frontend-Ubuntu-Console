@@ -1,6 +1,6 @@
 from typing import DefaultDict, Optional, List
 from abc import ABC, abstractmethod
-from collections import defaultdict
+from collections import defaultdict, UserDict
 
 import numpy as np
 
@@ -8,21 +8,7 @@ from lingularity.backend.utils.strings import split_at_uppercase, get_meaningful
 from lingularity.backend.utils.iterables import iterables_intersection, none_stripped
 
 
-class CustomDict(ABC):
-    def __getattr__(self, item):
-        return getattr(self._map, item)
-
-    def __getitem__(self, item):
-        return self._map[item]
-
-    def __setitem__(self, item, value):
-        self._map[item] = value
-
-    def __str__(self):
-        return str(self._map)
-
-
-class TokenMap(CustomDict, ABC):
+class TokenMap(UserDict, ABC):
     """
     Interface for map classes comprising an association of
         unique, LOWERCASE and RELEVANT tokens (unnormalized/normalized): str
@@ -33,12 +19,13 @@ class TokenMap(CustomDict, ABC):
     """
 
     def __init__(self):
-        self._map: DefaultDict[str, List[int]] = defaultdict(list)
+        super().__init__(dict=defaultdict(list))
+
         self.occurrence_map: DefaultDict[str, int] = defaultdict(lambda: 0)
 
     @abstractmethod
     def _map_tokens(self, sentence_data: np.ndarray):
-        """ Sets both _map and occurrence_map """
+        """ Sets both data and occurrence_map """
         pass
 
     def _output_mapping_initialization_message(self):

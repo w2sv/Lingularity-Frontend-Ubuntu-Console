@@ -4,8 +4,8 @@ from itertools import groupby
 import os
 import cursor
 
-from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend
-from lingularity.backend.trainers.vocable_trainer import VocableEntry
+from lingularity.backend.trainers.sentence_translation import (SentenceTranslationTrainerBackend as Backend,
+                                                               modes)
 from lingularity.backend.database import MongoDBClient
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, TrainingOptionCollection
 from lingularity.frontend.console.trainers.sentence_translation.options import *
@@ -24,22 +24,24 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         # select tts language variety if applicable
         if all([self._backend.tts.available, self._backend.tts.language_varieties, not self._backend.tts.language_variety_identifier_set]):
-            selected_variety = self._select_language_variety()
-            self._backend.tts.change_language_variety(selected_variety)
+            self._backend.tts.change_language_variety(variety=self._select_language_variety())
 
         # tts
         self._tts_enabled = self._backend.tts.query_enablement()
         self._playback_speed = self._backend.tts.query_playback_speed()
         self._audio_file_path: Optional[str] = None
 
+    @property
+    def _tts_available_and_enabled(self) -> bool:
+        return self._backend.tts.available and self._tts_enabled
+
     def _select_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
-        """
-            Returns:
+        """ Returns:
                 non-english language: str
-                train_english: bool """
+                _train_english: bool """
 
         clear_screen()
-        eligible_languages = Backend.get_eligible_languages()
+        eligible_languages = Backend.get_eligible_languages(mongodb_client)
 
         centered_print(f'{DEFAULT_VERTICAL_VIEW_OFFSET}Eligible languages:\n'.upper())
         starting_letter_grouped_languages = [', '.join(list(v)) for _, v in groupby(eligible_languages, lambda x: x[0])]
@@ -77,14 +79,15 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         if self._backend.tts.language_varieties_available:
             option_classes.append(ChangeTTSLanguageVariety)
 
-        return TrainingOptionCollection(option_classes)
+        return TrainingOptionCollection(option_classes)  # type: ignore
 
     # -----------------
     # Driver
     # -----------------
     def run(self):
-        self._backend.training_mode = self._select_mode()
+        self._select_training_mode()
         self._backend.set_item_iterator()
+
         cursor.hide()
 
         self._display_instructions()
@@ -96,32 +99,32 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Pre training
     # -----------------
-    def _select_mode(self) -> str:
-        explanations = (
-            'show me sentences containing rather infrequently used vocabulary',
-            'show me sentences comprising exclusively commonly used vocabulary',
-            'just hit me with dem sentences')
-
+    def _select_training_mode(self):
         clear_screen()
         centered_print(f'{DEFAULT_VERTICAL_VIEW_OFFSET}TRAINING MODES\n')
 
-        indentation = get_max_line_length_based_indentation(explanations)
-        for i, training_mode in enumerate(Backend.TrainingMode):
-            print(f'{indentation}{training_mode.value.title()}:')
-            print(f'{indentation}\t{explanations[i]}\n')
+        indentation = get_max_line_length_based_indentation(modes.explanations)
+        for keyword, explanation in zip(modes.keywords, modes.explanations):
+            print(f'{indentation}{keyword.title()}:')
+            print(f'{indentation}\t{explanation}\n')
 
-        if (mode_selection := resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: '), Backend.TrainingMode.values())) is None:
-            return recurse_on_unresolvable_input(self._select_mode, n_deletion_lines=-1)
+        if (mode_selection := resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: '), modes.keywords)) is None:
+            return recurse_on_unresolvable_input(self._select_training_mode, n_deletion_lines=-1)
 
+        self._backend.set_training_mode(mode_selection)
         print('\n', end='')
-        return mode_selection
 
     def _display_instructions(self):
         clear_screen()
-        centered_print(f"{DEFAULT_VERTICAL_VIEW_OFFSET * 2}Document comprises {self._backend.n_training_items:,d} sentences.\n\n")
+        centered_print(f"{DEFAULT_VERTICAL_VIEW_OFFSET * 2}Document comprises {self._backend.n_training_items:,d} sentences.")
 
-        indentation = get_max_line_length_based_indentation(self._training_options.instructions)
-        for i, line in enumerate(self._training_options.instructions):
+        if self._backend.forename_converter.forenames_convertible:
+            centered_print(f'Employing {self._backend.forename_converter.demonym} forenames.')
+        print()
+
+        instructions = ["Enter"] + self._training_options.instructions
+        indentation = get_max_line_length_based_indentation(instructions)
+        for i, line in enumerate(instructions):
             print(indentation, line)
 
             if i == 2:
@@ -134,30 +137,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Training
     # -----------------
-    @property
-    def _tts_available_and_enabled(self) -> bool:
-        return self._backend.tts.available and self._tts_enabled
-
-    def _remove_audio_file(self):
-        os.remove(self._audio_file_path)
-        self._audio_file_path = None
-
-    def _pending_output(self):
-        print(f"{self._TRAINING_LOOP_INDENTATION}pending... ")
-
-    def _process_sentence_pair(self) -> Optional[str]:
-        if (sentence_pair := self._backend.get_training_item()) is None:
-            return None
-
-        # try to convert forenames, output reference language sentence
-        reference_sentence, translation = self._backend.forename_converter(sentence_pair)
-        self._buffer_print(f'{self._TRAINING_LOOP_INDENTATION}{reference_sentence}')
-        self._pending_output()
-
-        return translation
-
     def _run_training(self):
-        translation = self._process_sentence_pair()
+        translation = self._process_procured_sentence_pair()
 
         while translation is not None:
             # get tts audio file if available
@@ -166,12 +147,15 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
             # get response, execute selected option if applicable
             if (response := resolve_input(input('$'), options=self._training_options.keywords + [''])) is not None:
+
+                # ----OPTION SELECTED----
                 if len(response):
                     self._training_options[response].execute()
 
                     if type(self._training_options[response]) is Exit:
                         return
 
+                # ----ENTER-STROKE----
                 else:
                     # erase pending... + entered option identifier
                     erase_lines(2)
@@ -193,9 +177,30 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     if self._n_trained_items >= 5:
                         self._buffer_print.partially_redo_buffer_content(n_deletion_lines=3)
 
-                    translation = self._process_sentence_pair()
+                    translation = self._process_procured_sentence_pair()
 
             else:
                 indissolubility_output("Couldn't resolve input", sleep_duration=0.8, n_deletion_lines=2)
 
         print('\nSentence data file depleted')
+
+    def _process_procured_sentence_pair(self) -> Optional[str]:
+        """ Returns:
+                translation of procured sentence pair, None in case of depleted item iterator """
+
+        if (sentence_pair := self._backend.get_training_item()) is None:
+            return None
+
+        # try to convert forenames, output reference language sentence
+        reference_sentence, translation = self._backend.forename_converter(sentence_pair)
+        self._buffer_print(f'{self._TRAINING_LOOP_INDENTATION}{reference_sentence}')
+        self._pending_output()
+
+        return translation
+
+    def _remove_audio_file(self):
+        os.remove(self._audio_file_path)
+        self._audio_file_path = None
+
+    def _pending_output(self):
+        print(f"{self._TRAINING_LOOP_INDENTATION}pending... ")

@@ -13,13 +13,14 @@ class GoogleOp(ABC):
     def __init__(self, language_2_identifier: Dict[str, str]):
         """ Args:
                 language_2_identifier: uppercase language to lowercase identifier,
-                                       e.g. {'Afrikaans': 'af', 'Albanian': 'sq', ...} """
+                    e.g. {'Afrikaans': 'af', 'Albanian': 'sq', ...} """
 
         assert next(iter(language_2_identifier.keys())).istitle()
 
-        self._language_2_identifier = language_2_identifier
+        self._language_2_identifier: Dict[str, str] = language_2_identifier
+        self._cached_language_repr_2_identifier: Dict[str, str] = {}
 
-    def get_identifier(self, query_language: str) -> Optional[str]:
+    def _get_identifier(self, query_language: str) -> Optional[str]:
         """ Args:
                 query_language: written out language in english as title,
                                 e.g. Spanish
@@ -31,10 +32,18 @@ class GoogleOp(ABC):
 
         if (identifier := self._language_2_identifier.get(query_language)) is not None:
             return identifier
+
+        if (cached_identifier := self._cached_language_repr_2_identifier.get(query_language)) is not None:
+            return cached_identifier
+
         for _language, identifier in self._language_2_identifier.items():
             if _language.startswith(query_language):
+                self._cached_language_repr_2_identifier[query_language] = identifier
                 return identifier
         return None
+
+    def available_for(self, language: str) -> bool:
+        return self._get_identifier(language) is not None
 
     def get_dialect_choices(self, query_language: str) -> Optional[Dict[str, str]]:
         """ Returns:

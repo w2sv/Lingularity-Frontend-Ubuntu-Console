@@ -1,0 +1,1670 @@
+{
+    "Afrikaans": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "afr-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "South_Africa",
+            "Namibia"
+        ],
+        "translations": {
+            "letsGo": "Kom ons gaan!",
+            "defaultForenames": [
+                "Tom",
+                "Maria"
+            ],
+            "constitutionQuery": [
+                "Hoe gaan dit met jou {}?",
+                "Wat gaan aan {}?"
+            ]
+        }
+    },
+    "Albanian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "sqi-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Italy",
+            "Albania",
+            "Romania",
+            "Kosovo",
+            "Croatia",
+            "Montenegro",
+            "North_Macedonia",
+            "Serbia"
+        ],
+        "translations": {
+            "letsGo": "Shkojme!",
+            "defaultForenames": [
+                "Tom",
+                "Maria"
+            ],
+            "constitutionQuery": [
+                "Si jeni {}",
+                "Çfarë ka {}i?"
+            ]
+        }
+    },
+    "Algerian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "arq-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [],
+        "translations": {}
+    },
+    "Arabic": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "ara-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Algeria"
+        ],
+        "translations": {
+            "letsGo": "لنذهب!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "كيف حالك {}",
+                "ما الأمر يا {}؟"
+            ]
+        }
+    },
+    "Assamese": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "asm-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "India"
+        ],
+        "translations": {}
+    },
+    "Azerbaijani": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "aze-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Azerbaijan",
+            "Russia"
+        ],
+        "translations": {
+            "letsGo": "Gedək!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "{} necesen",
+                "{} nədir?"
+            ]
+        }
+    },
+    "Basque": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "eus-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Basque_Country"
+        ],
+        "translations": {
+            "letsGo": "Goazen!",
+            "defaultForenames": [
+                "Tom",
+                "Maria"
+            ],
+            "constitutionQuery": [
+                "Zer moduz zaude {}?",
+                "Zer gertatzen da {}?"
+            ]
+        }
+    },
+    "Belarusian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "bel-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Belarus",
+            "Poland"
+        ],
+        "translations": {
+            "letsGo": "Пойдзем!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Як ты {}?",
+                "Што там {}?"
+            ]
+        }
+    },
+    "Bengali": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "ben-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Bangladesh"
+        ],
+        "translations": {
+            "letsGo": "চলো যাই!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "কেমন আছেন {}?",
+                "কি খবর {}?"
+            ]
+        }
+    },
+    "Berber": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "ber-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [],
+        "translations": {}
+    },
+    "Bosnian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "bos-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Kosovo",
+            "Bosnia_and_Herzegovina",
+            "Croatia",
+            "Montenegro",
+            "North_Macedonia",
+            "Serbia",
+            "Slovenia"
+        ],
+        "translations": {
+            "letsGo": "Idemo!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Kako si {}",
+                "Šta ima, {}?"
+            ]
+        }
+    },
+    "Bulgarian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "bul-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [],
+        "translations": {
+            "letsGo": "Да тръгваме!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Как си {}?",
+                "Какво има, {}?"
+            ]
+        }
+    },
+    "Burmese": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "mya-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Myanmar"
+        ],
+        "translations": {}
+    },
+    "Cantonese": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "yue-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Hong_Kong",
+            "Macau"
+        ],
+        "translations": {}
+    },
+    "Catalan": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "cat-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [],
+        "translations": {
+            "letsGo": "Som-hi!",
+            "defaultForenames": [
+                "Tom",
+                "Maria"
+            ],
+            "constitutionQuery": [
+                "Com estàs {}?",
+                "Què passa {}?"
+            ]
+        }
+    },
+    "Cebuano": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "ceb-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [],
+        "translations": {
+            "letsGo": "Mangadto ta!",
+            "defaultForenames": [
+                "Tom",
+                "Maria"
+            ],
+            "constitutionQuery": [
+                "Kumusta ka {}?",
+                "Unsa na {}?"
+            ]
+        }
+    },
+    "Central": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "dtp-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [],
+        "translations": {}
+    },
+    "Chavacano": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "cbk-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [],
+        "translations": {}
+    },
+    "Chinese": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "cmn-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "China"
+        ],
+        "translations": {
+            "letsGo": "我们走吧！",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "{}，你好吗？",
+                "{}怎么了？"
+            ]
+        }
+    },
+    "Chuvash": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "chv-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Russia"
+        ],
+        "translations": {}
+    },
+    "Croatian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "hrv-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Czech_Republic",
+            "Italy",
+            "Hungary",
+            "Slovakia",
+            "Croatia",
+            "Montenegro",
+            "Bosnia_and_Herzegovina",
+            "Serbia",
+            "Austria"
+        ],
+        "translations": {
+            "letsGo": "Idemo!",
+            "defaultForenames": [
+                "Tom",
+                "Marijo"
+            ],
+            "constitutionQuery": [
+                "Kako si ti {}?",
+                "Što ima, {}?"
+            ]
+        }
+    },
+    "Czech": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "ces-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Czech_Republic",
+            "Romania",
+            "Slovakia",
+            "Poland",
+            "Croatia",
+            "Bosnia_and_Herzegovina",
+            "Austria"
+        ],
+        "translations": {
+            "letsGo": "Pojďme!",
+            "defaultForenames": [
+                "Tom",
+                "Mary"
+            ],
+            "constitutionQuery": [
+                "Jak se máš {}u?",
+                "Co se děje, {}e?"
+            ]
+        }
+    },
+    "Danish": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "dan-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Denmark",
+            "Greenland",
+            "Germany",
+            "the_Faroe_Islands",
+            "Nordic_Council_2016"
+        ],
+        "translations": {
+            "letsGo": "Lad os gå!",
+            "defaultForenames": [
+                "Tom",
+                "Mary"
+            ],
+            "constitutionQuery": [
+                "Hvordan har du det med {}?",
+                "Hvad sker der {}?"
+            ]
+        }
+    },
+    "Dutch": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "nld-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Suriname",
+            "Netherlands",
+            "Belgium"
+        ],
+        "translations": {
+            "letsGo": "Laten we gaan!",
+            "defaultForenames": [
+                "Tom",
+                "Maria"
+            ],
+            "constitutionQuery": [
+                "Hoe gaat het, {}?",
+                "Hoe gaat het, {}?"
+            ]
+        }
+    },
+    "Estonian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "est-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Estonia"
+        ],
+        "translations": {
+            "letsGo": "Lähme!",
+            "defaultForenames": [
+                "Tom",
+                "Maarja"
+            ],
+            "constitutionQuery": [
+                "Kuidas {}il läheb?",
+                "Mis {}iga on?"
+            ]
+        }
+    },
+    "Finnish": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "fin-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Sweden",
+            "Finland",
+            "Karelia",
+            "Russia"
+        ],
+        "translations": {
+            "letsGo": "Mennään!",
+            "defaultForenames": [
+                "Tom",
+                "Mary"
+            ],
+            "constitutionQuery": [
+                "Kuinka voit {}?",
+                "Mitä {} tekee?"
+            ]
+        }
+    },
+    "French": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "fra-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Central African Republic",
+            "Rwanda",
+            "Benin",
+            "Togo",
+            "Switzerland",
+            "Monaco",
+            "Chad",
+            "Seychelles",
+            "Djibouti",
+            "Madagascar",
+            "Niger",
+            "DR Congo",
+            "Congo",
+            "Canada",
+            "Belgium",
+            "Comoros",
+            "Cameroon",
+            "Luxembourg",
+            "Vanuatu",
+            "Guinea",
+            "Equatorial Guinea",
+            "Gabon",
+            "Burundi",
+            "Burkina Faso",
+            "Mali",
+            "Senegal",
+            "France",
+            "Ivory Coast",
+            "Haiti"
+        ],
+        "translations": {
+            "letsGo": "Allons-y!",
+            "defaultForenames": [
+                "À M",
+                "Marie"
+            ],
+            "constitutionQuery": [
+                "Comment vas-tu {}?",
+                "Quoi de neuf {}?"
+            ]
+        }
+    },
+    "Galician": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "glg-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Galicia"
+        ],
+        "translations": {
+            "letsGo": "Imos!",
+            "defaultForenames": [
+                "Tom",
+                "María"
+            ],
+            "constitutionQuery": [
+                "Como estás {}?",
+                "Que pasa {}?"
+            ]
+        }
+    },
+    "Georgian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "kat-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Georgia"
+        ],
+        "translations": {
+            "letsGo": "Წავედით!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "როგორ ხარ {}?",
+                "რა ხდება {}?"
+            ]
+        }
+    },
+    "German": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "deu-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Luxembourg",
+            "Switzerland",
+            "Germany",
+            "Liechtenstein",
+            "Austria",
+            "Belgium"
+        ],
+        "translations": {
+            "letsGo": "Lass uns gehen!",
+            "defaultForenames": [
+                "Tom",
+                "Maria"
+            ],
+            "constitutionQuery": [
+                "Wie geht es dir {}?",
+                "Was ist los, {}?"
+            ]
+        }
+    },
+    "Greek": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "ell-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [],
+        "translations": {
+            "letsGo": "Πάμε!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Πώς είσαι ο Τομ;",
+                "Τι συμβαίνει ο Τομ;"
+            ]
+        }
+    },
+    "Hebrew": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "heb-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "South_Africa",
+            "Poland",
+            "Israel"
+        ],
+        "translations": {
+            "letsGo": "בוא נלך!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "מה שלומך {}?",
+                "מה קורה {}?"
+            ]
+        }
+    },
+    "Hindi": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "hin-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "India",
+            "South_Africa"
+        ],
+        "translations": {
+            "letsGo": "चलो चलते हैं!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "आप कैसे हैं {}?",
+                "क्या हो रहा है {}?"
+            ]
+        }
+    },
+    "Hungarian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "hun-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Romania",
+            "Vojvodina",
+            "Ukraine",
+            "Hungary",
+            "Slovakia",
+            "Croatia",
+            "Serbia",
+            "Austria",
+            "Slovenia"
+        ],
+        "translations": {
+            "letsGo": "Gyerünk!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Hogy vagy {}?",
+                "Mi van {}?"
+            ]
+        }
+    },
+    "Icelandic": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "isl-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Iceland"
+        ],
+        "translations": {
+            "letsGo": "Förum!",
+            "defaultForenames": [
+                "Tom",
+                "María"
+            ],
+            "constitutionQuery": [
+                "Hvernig hefurðu það {}?",
+                "Hvað er að {}?"
+            ]
+        }
+    },
+    "Ilocano": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "ilo-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Philippines"
+        ],
+        "translations": {}
+    },
+    "Indonesian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "ind-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Indonesia"
+        ],
+        "translations": {
+            "letsGo": "Ayo pergi!",
+            "defaultForenames": [
+                "Tom",
+                "Mary"
+            ],
+            "constitutionQuery": [
+                "Bagaimana kabarmu {}?",
+                "Ada apa {}?"
+            ]
+        }
+    },
+    "Italian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "ita-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Italy",
+            "Vatican City",
+            "San Marino",
+            "Switzerland"
+        ],
+        "translations": {
+            "letsGo": "Andiamo!",
+            "defaultForenames": [
+                "Tom",
+                "Maria"
+            ],
+            "constitutionQuery": [
+                "Come stai {}?",
+                "Che succede {}?"
+            ]
+        }
+    },
+    "Japanese": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "jpn-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Japan"
+        ],
+        "translations": {
+            "letsGo": "行こう！",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "{}お元気ですか？",
+                "{}はどうしたの？"
+            ]
+        }
+    },
+    "Kabyle": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "kab-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [],
+        "translations": {}
+    },
+    "Kannada": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "kan-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "India"
+        ],
+        "translations": {
+            "letsGo": "ಹೋಗೋಣ!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "ನೀವು {} ಹೇಗಿದ್ದೀರಿ?",
+                "{} ಏನಿದೆ?"
+            ]
+        }
+    },
+    "Kapampangan": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "pam-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [],
+        "translations": {}
+    },
+    "Khasi": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "kha-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [],
+        "translations": {}
+    },
+    "Khmer": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "khm-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Cambodia"
+        ],
+        "translations": {
+            "letsGo": "តោះ​ទៅ!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "តើអ្នក{}សុខយ៉ាងម៉េច?",
+                "តើមានអ្វីកើតឡើងលោក {}?"
+            ]
+        }
+    },
+    "Korean": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "kor-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "South_Korea",
+            "China",
+            "Russia",
+            "North_Korea"
+        ],
+        "translations": {
+            "letsGo": "가자!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "{}은 어때?",
+                "무슨 일이야 {}?"
+            ]
+        }
+    },
+    "Kurdish": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "kur-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Iraq"
+        ],
+        "translations": {
+            "letsGo": "De em herin!",
+            "defaultForenames": [
+                "Tom",
+                "Meryem"
+            ],
+            "constitutionQuery": [
+                "Tu çawa yî {}?",
+                "{} çi ye?"
+            ]
+        }
+    },
+    "Latvian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "lvs-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Latvia"
+        ],
+        "translations": {
+            "letsGo": "Ejam!",
+            "defaultForenames": [
+                "Toms",
+                "Marija"
+            ],
+            "constitutionQuery": [
+                "Kā tev iet?",
+                "Kas notiek {}?"
+            ]
+        }
+    },
+    "Lithuanian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "lit-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Poland",
+            "Lithuania"
+        ],
+        "translations": {
+            "letsGo": "Eime!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Kaip tu {}?",
+                "Ką {}?"
+            ]
+        }
+    },
+    "Low": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "nds-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [],
+        "translations": {}
+    },
+    "Macedonian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "mkd-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Albania",
+            "Romania",
+            "Bosnia_and_Herzegovina",
+            "North_Macedonia",
+            "Serbia"
+        ],
+        "translations": {
+            "letsGo": "Да одиме!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Како си ти {}?",
+                "Што е со {}?"
+            ]
+        }
+    },
+    "Malay": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "zsm-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [],
+        "translations": {
+            "letsGo": "Mari pergi!",
+            "defaultForenames": [
+                "Tom",
+                "Maria"
+            ],
+            "constitutionQuery": [
+                "Apa khabar {}?",
+                "Ada apa dengan {}?"
+            ]
+        }
+    },
+    "Malayalam": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "mal-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "India"
+        ],
+        "translations": {
+            "letsGo": "നമുക്ക് പോകാം!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "എങ്ങനെയുണ്ട് {}?",
+                "{} എന്താണ്?"
+            ]
+        }
+    },
+    "Maori": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "mri-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "New Zealand"
+        ],
+        "translations": {
+            "letsGo": "Haere tatou!",
+            "defaultForenames": [
+                "Tom",
+                "Meri"
+            ],
+            "constitutionQuery": [
+                "Kei te pēhea koe?",
+                "Kei te aha a {}?"
+            ]
+        }
+    },
+    "Marathi": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "mar-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "India"
+        ],
+        "translations": {
+            "letsGo": "चल जाऊया!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "तू कसा आहेस?",
+                "{} काय चाललंय?"
+            ]
+        }
+    },
+    "Naga": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "nst-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [],
+        "translations": {}
+    },
+    "North": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "max-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [],
+        "translations": {}
+    },
+    "Norwegian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "nob-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Norway"
+        ],
+        "translations": {
+            "letsGo": "La oss gå!",
+            "defaultForenames": [
+                "Tom",
+                "Mary"
+            ],
+            "constitutionQuery": [
+                "Hvordan har du det med {}?",
+                "Hva skjer {}?"
+            ]
+        }
+    },
+    "Persian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "pes-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [],
+        "translations": {
+            "letsGo": "بیا بریم!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "حال تو چطوره؟",
+                "چه خبر از {}؟"
+            ]
+        }
+    },
+    "Polish": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "pol-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Czech_Republic",
+            "Ukraine",
+            "Slovakia",
+            "Hungary",
+            "Poland",
+            "Lithuania"
+        ],
+        "translations": {
+            "letsGo": "Chodźmy!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Jak się masz {}?",
+                "Co słychać {}?"
+            ]
+        }
+    },
+    "Portuguese": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "por-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Angola",
+            "East Timor",
+            "Mozambique",
+            "Guinea-Bissau",
+            "Portugal",
+            "Brazil",
+            "São Tomé and Príncipe",
+            "Equatorial Guinea",
+            "Cape Verde"
+        ],
+        "translations": {
+            "letsGo": "Vamos!",
+            "defaultForenames": [
+                "Tom",
+                "Maria"
+            ],
+            "constitutionQuery": [
+                "Como você está {}?",
+                "E aí, {}?"
+            ]
+        }
+    },
+    "Romani": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "rom-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [],
+        "translations": {
+            "letsGo": "Sa mergem!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Ce mai faci {}?",
+                "Ce-i cu {}?"
+            ]
+        }
+    },
+    "Romanian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "ron-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Romania",
+            "Vojvodina",
+            "Ukraine",
+            "Hungary",
+            "Moldova"
+        ],
+        "translations": {
+            "letsGo": "Sa mergem!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Ce mai faci {}?",
+                "Ce-i cu {}?"
+            ]
+        }
+    },
+    "Russian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "rus-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Kazakhstan",
+            "Belarus",
+            "Turkmenistan",
+            "Transnistria",
+            "Autonomous Republic of Crimea",
+            "Uzbekistan",
+            "Gagauzia",
+            "Tajikistan",
+            "Ukraine",
+            "Kyrgyzstan",
+            "Russia",
+            "Moldova"
+        ],
+        "translations": {
+            "letsGo": "Пошли!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Как ты {}?",
+                "Что случилось, {}?"
+            ]
+        }
+    },
+    "Serbian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "srp-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Serbia"
+        ],
+        "translations": {
+            "letsGo": "Идемо!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Како си {}",
+                "Шта има, {}?"
+            ]
+        }
+    },
+    "Slovak": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "slk-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Czech_Republic",
+            "Vojvodina",
+            "Hungary",
+            "Slovakia",
+            "Poland"
+        ],
+        "translations": {
+            "letsGo": "Poďme!",
+            "defaultForenames": [
+                "Tom",
+                "Mary"
+            ],
+            "constitutionQuery": [
+                "Ako sa máš {}?",
+                "Čo sa deje, {}?"
+            ]
+        }
+    },
+    "Slovenian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "slv-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Italy",
+            "Austria",
+            "Slovenia"
+        ],
+        "translations": {
+            "letsGo": "Pojdimo!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Kako si {}?",
+                "Kaj je {}?"
+            ]
+        }
+    },
+    "Spanish": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "spa-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Dominican Republic",
+            "Colombia",
+            "Spain",
+            "El Salvador",
+            "Guatemala",
+            "Uruguay",
+            "Chile",
+            "Honduras",
+            "Paraguay",
+            "Bolivia",
+            "Peru",
+            "Argentina",
+            "Equatorial Guinea",
+            "Cuba",
+            "Mexico",
+            "Ecuador",
+            "Costa Rica",
+            "Panama",
+            "Nicaragua",
+            "Venezuela"
+        ],
+        "translations": {
+            "letsGo": "¡Vamonos!",
+            "defaultForenames": [
+                "Tom",
+                "María"
+            ],
+            "constitutionQuery": [
+                "¿Cómo estás {}?",
+                "¿Qué pasa {}?"
+            ]
+        }
+    },
+    "Swedish": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "swe-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Sweden",
+            "Finland",
+            "%C3%85land",
+            "Nordic_Council_2016"
+        ],
+        "translations": {
+            "letsGo": "Nu går vi!",
+            "defaultForenames": [
+                "Tom",
+                "Mary"
+            ],
+            "constitutionQuery": [
+                "Hur mår du {}?",
+                "Vad händer {}?"
+            ]
+        }
+    },
+    "Tagalog": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "tgl-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Philippines"
+        ],
+        "translations": {}
+    },
+    "Tamil": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "tam-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "India",
+            "Singapore",
+            "Sri_Lanka"
+        ],
+        "translations": {
+            "letsGo": "போகலாம்!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "நீங்கள் எப்படி {}?",
+                "{} என்ன?"
+            ]
+        }
+    },
+    "Tatar": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "tat-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Russia"
+        ],
+        "translations": {}
+    },
+    "Telugu": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "tel-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "India"
+        ],
+        "translations": {
+            "letsGo": "వెళ్దాం!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "మీరు ఎలా ఉన్నారు {}?",
+                "{} ఏమిటి?"
+            ]
+        }
+    },
+    "Thai": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "tha-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Thailand"
+        ],
+        "translations": {
+            "letsGo": "ไปกันเถอะ!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "เป็นไงบ้าง{}",
+                "ว่าไง{}?"
+            ]
+        }
+    },
+    "Turkish": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "tur-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Turkish_Republic_of_Northern_Cyprus",
+            "Cyprus",
+            "Turkey"
+        ],
+        "translations": {
+            "letsGo": "Hadi gidelim!",
+            "defaultForenames": [
+                "Tom",
+                "Mary"
+            ],
+            "constitutionQuery": [
+                "Nasılsın {}?",
+                "Ne haber {}?"
+            ]
+        }
+    },
+    "Turkmen": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "tuk-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [
+            "Afghanistan",
+            "Turkmenistan"
+        ],
+        "translations": {}
+    },
+    "Ukrainian": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "ukr-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Ukraine"
+        ],
+        "translations": {
+            "letsGo": "Ходімо!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Як ти {}е?",
+                "Що там {}е?"
+            ]
+        }
+    },
+    "Urdu": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "urd-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Pakistan"
+        ],
+        "translations": {
+            "letsGo": "چلو!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "آپ کیسے ہیں {}؟",
+                "{} کیا ہو رہا ہے؟"
+            ]
+        }
+    },
+    "Uyghur": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "uig-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "China"
+        ],
+        "translations": {
+            "letsGo": "ماڭايلى!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "{} قانداقراق؟",
+                "{} نېمە بولدى؟"
+            ]
+        }
+    },
+    "Vietnamese": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "vie-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": false
+        },
+        "countriesEmployedIn": [
+            "Vietnam"
+        ],
+        "translations": {
+            "letsGo": "Đi nào!",
+            "defaultForenames": null,
+            "constitutionQuery": [
+                "Bạn khỏe không {}?",
+                "Chuyện gì vậy {}?"
+            ]
+        }
+    },
+    "Waray": {
+        "sentenceDataDownloadLinks": {
+            "tatoebaProject": "war-eng.zip"
+        },
+        "properties": {
+            "isAgglutinative": false,
+            "usesLatinScript": true
+        },
+        "countriesEmployedIn": [],
+        "translations": {}
+    }
+}

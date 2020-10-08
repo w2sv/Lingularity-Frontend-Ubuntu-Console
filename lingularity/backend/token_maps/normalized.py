@@ -8,8 +8,8 @@ import numpy as np
 import nltk
 import spacy
 
-from lingularity.backend.trainers.token_maps.base import TokenMap
-from lingularity.backend.trainers.token_maps.unnormalized import UnnormalizedTokenMap
+from lingularity.backend.token_maps import TokenMap
+from lingularity.backend.token_maps import UnnormalizedTokenMap
 from lingularity.backend.utils.spacy import LANGUAGE_2_CODE
 
 

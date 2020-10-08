@@ -1,0 +1,2339 @@
+{
+    "%C3%85land": null,
+    "Afghanistan": null,
+    "Albania": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Noel",
+                "Joel",
+                "Mateo",
+                "Ergi",
+                "Luis",
+                "Aron",
+                "Samuel",
+                "Roan",
+                "Roel",
+                "Xhoel"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Amelia",
+                "Ajla",
+                "Melisa",
+                "Amelija",
+                "Klea",
+                "Sara",
+                "Kejsi",
+                "Noemi",
+                "Alesia",
+                "Leandr"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Albanian"
+    },
+    "Algeria": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Mohamed",
+                "Abdelkader",
+                "Ahmed",
+                "Mohammed",
+                "Ali",
+                "Rachid",
+                "Said",
+                "Brahim",
+                "Omar",
+                "Djame"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Fatima",
+                "Sara",
+                "Fatiha",
+                "Aicha",
+                "Fatma",
+                "Amina",
+                "Meriem",
+                "Karima",
+                "Kheira",
+                "Nadi"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Algerian"
+    },
+    "Angola": null,
+    "Argentina": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Santiago",
+                "Mateo",
+                "Juan",
+                "Matías",
+                "Nicolás",
+                "Benjamín",
+                "Pedro",
+                "Tomás",
+                "Thiago",
+                "Santino"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Sofía",
+                "María",
+                "Lucía",
+                "Martina",
+                "Catalina",
+                "Elena",
+                "Emilia",
+                "Valentina",
+                "Paula",
+                "Zoe"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Argentine"
+    },
+    "Austria": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Lukas",
+                "Maximilian",
+                "Jakob",
+                "David",
+                "Tobias",
+                "Paul",
+                "Jonas",
+                "Felix",
+                "Alexander",
+                "Elias"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Anna",
+                "Hannah",
+                "Sophia",
+                "Emma",
+                "Marie",
+                "Lena",
+                "Sarah",
+                "Sophie",
+                "Laura",
+                "Mia"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Austrian"
+    },
+    "Autonomous Republic of Crimea": null,
+    "Azerbaijan": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Yusif",
+                "Ughur",
+                "Ali",
+                "Huseyn",
+                "Mahammad",
+                "Murad",
+                "Omar",
+                "Raul",
+                "Aykhan",
+                "Tuna"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Zahra",
+                "Zeynab",
+                "Maryam",
+                "Malak",
+                "Aylin",
+                "Fatima",
+                "Nuray",
+                "Nilay",
+                "Inji",
+                "Daniz"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Azerbaijani"
+    },
+    "Bangladesh": null,
+    "Basque_Country": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Markel",
+                "Aimar",
+                "Jon",
+                "Ibai",
+                "Julen",
+                "Ander",
+                "Unax",
+                "Oier",
+                "Mikel",
+                "Iker"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Ane",
+                "June",
+                "Nahia",
+                "Irati",
+                "Laia",
+                "Nora",
+                "Izaro",
+                "Lucía",
+                "Malen",
+                "Uxue"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": null
+    },
+    "Belarus": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Artsiom",
+                "Mikhail",
+                "Maksim",
+                "Ivan",
+                "Roman",
+                "Aleksandr",
+                "Danyl"
+            ],
+            "originalSpelling": [
+                "Артем",
+                "Михаил",
+                "Максим",
+                "Иван",
+                "Роман",
+                "Александр",
+                "Даниил"
+            ]
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Sofiya",
+                "Marya",
+                "Polina",
+                "Eva",
+                "Anna",
+                "Darya",
+                "Kseniya",
+                "Alisa"
+            ],
+            "originalSpelling": [
+                "София",
+                "Мария",
+                "Полина",
+                "Ева",
+                "Анна",
+                "Дария",
+                "Ксенія",
+                "Алиса"
+            ]
+        },
+        "demonym": "Belarusian"
+    },
+    "Belgium": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Lucas",
+                "Louis",
+                "Noah",
+                "Nathan",
+                "Adam",
+                "Arthur",
+                "Mohamed",
+                "Victor",
+                "Mathis",
+                "Liam"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Emma",
+                "Louise",
+                "Olivia",
+                "Elise",
+                "Alice",
+                "Juliette",
+                "Mila",
+                "Lucie",
+                "Marie",
+                "Camille"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Belgian"
+    },
+    "Benin": null,
+    "Bolivia": null,
+    "Bosnia_and_Herzegovina": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Ahmed",
+                "Daris",
+                "Amar",
+                "Davud",
+                "Adin",
+                "Hamza",
+                "Harun",
+                "Vedad",
+                "Imran",
+                "Tarik"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Amina",
+                "Merjem",
+                "Sara",
+                "Asja",
+                "Lamija",
+                "Ema",
+                "Emina",
+                "Hana",
+                "Lejla",
+                "Esma"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Bosnian"
+    },
+    "Brazil": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Enzo",
+                "João",
+                "Pedro",
+                "João",
+                "João",
+                "Davi",
+                "Davi"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Maria",
+                "Maria",
+                "Maria",
+                "Maria",
+                "Maria",
+                "Ana",
+                "Maria",
+                "Ana"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Brazilian"
+    },
+    "Burkina Faso": null,
+    "Burundi": null,
+    "Cambodia": null,
+    "Cameroon": null,
+    "Canada": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Noah",
+                "Liam",
+                "Jackson",
+                "Lucas",
+                "Logan",
+                "Benjamin",
+                "Jacob",
+                "William",
+                "Oliver",
+                "James"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Olivia",
+                "Emma",
+                "Charlotte",
+                "Sophia",
+                "Aria",
+                "Ava",
+                "Chloe",
+                "Zoey",
+                "Abigail",
+                "Amili"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Canadian"
+    },
+    "Cape Verde": null,
+    "Central African Republic": null,
+    "Chad": null,
+    "Chile": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Agustín",
+                "Benjamín",
+                "Vicente",
+                "Mateo",
+                "Martín",
+                "Matías",
+                "Alonso",
+                "Tomás",
+                "Maximiliano",
+                "Joaquín"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Sofía",
+                "Emilia",
+                "Isidora",
+                "Florencia",
+                "Maite",
+                "Josefa",
+                "Amanda",
+                "Antonella",
+                "Agustina",
+                "Martina"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Chilean"
+    },
+    "China": {
+        "maleForenames": {
+            "latinSpelling": [
+                "安 An"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "爱 Ai"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Chinese"
+    },
+    "Colombia": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Santiago",
+                "Juan David",
+                "Juan José",
+                "Andrés Felipe",
+                "Samuel",
+                "Sebastián",
+                "Matías",
+                "Alejandro",
+                "Nicolás",
+                "Jerónimo"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Mariana",
+                "Valentina",
+                "Isabella",
+                "Sofía",
+                "Valeria",
+                "María José",
+                "Gabriela",
+                "Sara",
+                "Salomé",
+                "Daniela"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Colombian"
+    },
+    "Comoros": null,
+    "Congo": null,
+    "Costa Rica": null,
+    "Croatia": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Luka",
+                "David",
+                "Ivan",
+                "Jakov",
+                "Marko",
+                "Petar",
+                "Filip",
+                "Matej",
+                "Mateo",
+                "Leon"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Mia",
+                "Lucija",
+                "Sara",
+                "Ana",
+                "Ema",
+                "Petra",
+                "Lana",
+                "Nika",
+                "Marta",
+                "Elena"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Croatian"
+    },
+    "Cuba": null,
+    "Cyprus": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Andreas",
+                "Georgios",
+                "Konstantinos",
+                "Christos",
+                "Nikolaos",
+                "Michalis",
+                "Panagiotis",
+                "Ioannis",
+                "Marios",
+                "Dimitrios"
+            ],
+            "originalSpelling": [
+                "Ανδρέας",
+                "Γεώργιος",
+                "Κωνσταντίνος",
+                "Χρήστος",
+                "Νικόλαος",
+                "Μιχάλης",
+                "Παναγιώτης",
+                "Ιωάννης",
+                "Μάριος",
+                "Δημήτριος"
+            ]
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Maria",
+                "Eleni",
+                "Androula",
+                "Georgia",
+                "Panagiota",
+                "Anna",
+                "Christina",
+                "Katerina",
+                "Ioanna",
+                "Kyriaki"
+            ],
+            "originalSpelling": [
+                "Μαρία",
+                "Ελένη",
+                "Ανδρούλα",
+                "Γεωργία",
+                "Παναγιώτα",
+                "Άννα",
+                "Χριστίνα",
+                "Κατερίνα",
+                "Ιωάννα",
+                "Κυριακή"
+            ]
+        },
+        "demonym": "Cypriot"
+    },
+    "Czech_Republic": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Jakub",
+                "Jan",
+                "Tomáš",
+                "David",
+                "Adam",
+                "Matyáš",
+                "Filip",
+                "Vojtěch",
+                "Ondřej",
+                "Lukáš"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Eliška",
+                "Tereza",
+                "Anna",
+                "Adéla",
+                "Natálie",
+                "Sofie",
+                "Kristýna",
+                "Karolína",
+                "Viktorie",
+                "Barbora"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Czech"
+    },
+    "DR Congo": null,
+    "Denmark": {
+        "maleForenames": {
+            "latinSpelling": [
+                "William",
+                "Noah",
+                "Oscar",
+                "Lucas",
+                "Victor",
+                "Malthe",
+                "Oliver",
+                "Alfred",
+                "Carl",
+                "Valdemar"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Ida",
+                "Emma",
+                "Alma",
+                "Ella",
+                "Sofia",
+                "Freja",
+                "Josefine",
+                "Clara",
+                "Anna",
+                "Karla"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Danish"
+    },
+    "Djibouti": null,
+    "Dominican Republic": null,
+    "East Timor": null,
+    "Ecuador": null,
+    "El Salvador": null,
+    "Equatorial Guinea": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Manuel",
+                "Juan",
+                "Antonio",
+                "José"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "María del Carmen",
+                "Isabel",
+                "María Teresa",
+                "Esperanza",
+                "Milagrosa"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Equatoguinean"
+    },
+    "Estonia": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Rasmus",
+                "Robin",
+                "Oliver",
+                "Maksim",
+                "Robert",
+                "Martin",
+                "Kaspar",
+                "Oskar",
+                "Henri",
+                "Markus"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Sofia",
+                "Eliise",
+                "Maria",
+                "Sandra",
+                "Laura",
+                "Lenna",
+                "Anna"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Estonian"
+    },
+    "Finland": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Leo",
+                "Elias",
+                "Oliver",
+                "Eino",
+                "Väinö",
+                "Eeli",
+                "Noel",
+                "Leevi",
+                "Onni",
+                "Hugo"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Aino",
+                "Aada",
+                "Sofia",
+                "Eevi",
+                "Olivia",
+                "Lilja",
+                "Helmi",
+                "Ellen",
+                "Emilia",
+                "Ella"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Finn"
+    },
+    "France": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Gabriel",
+                "Louis",
+                "Raphaël",
+                "Jules",
+                "Adam",
+                "Lucas",
+                "Léo",
+                "Hugo",
+                "Arthur",
+                "Nathan"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Emma",
+                "Louise",
+                "Jade",
+                "Alice",
+                "Chloé",
+                "Lina",
+                "Mila",
+                "Léa",
+                "Manon",
+                "Rose"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "French"
+    },
+    "Gabon": null,
+    "Gagauzia": null,
+    "Galicia": null,
+    "Georgia": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Giorgi",
+                "Nikoloz",
+                "Andria",
+                "Gabrieli",
+                "Luka",
+                "Saba",
+                "Davit",
+                "Aleksandre"
+            ],
+            "originalSpelling": [
+                "გიორგი",
+                "ნიკოლოზი",
+                "ანდრია",
+                "გაბრიელი",
+                "ლუკა",
+                "საბა",
+                "დავითი",
+                "ალექსანდრე"
+            ]
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Mariami",
+                "Barbare",
+                "Elene",
+                "Anastasia",
+                "Nino",
+                "Nia",
+                "Ana",
+                "Elizaveta"
+            ],
+            "originalSpelling": [
+                "მარიამი",
+                "ბარბარე",
+                "ელენე",
+                "ანასტასია",
+                "ნინო",
+                "ნია",
+                "ანა",
+                "ელიზავეტა"
+            ]
+        },
+        "demonym": null
+    },
+    "Germany": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Ben",
+                "Jonas",
+                "Leon",
+                "Elias",
+                "Finn",
+                "Noah",
+                "Paul",
+                "Luis",
+                "Lukas",
+                "Luca"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Mia",
+                "Emma",
+                "Hannah",
+                "Sofia",
+                "Anna",
+                "Emilia",
+                "Lina",
+                "Marie",
+                "Lena",
+                "Mila"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "German"
+    },
+    "Greenland": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Malik",
+                "Aputsiaq",
+                "Minik",
+                "Hans",
+                "Inunnguaq",
+                "Kristian",
+                "Nuka",
+                "Salik",
+                "Peter",
+                "Inu"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Ivaana",
+                "Pipaluk",
+                "Nivi",
+                "Paninnguaq",
+                "Ivalu",
+                "Naasunnguaq",
+                "Julie",
+                "Ane",
+                "Isabella",
+                "Kimmerna"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Greenlander"
+    },
+    "Guatemala": null,
+    "Guinea": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Manuel",
+                "Juan",
+                "Antonio",
+                "José"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "María del Carmen",
+                "Isabel",
+                "María Teresa",
+                "Esperanza",
+                "Milagrosa"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Guinean"
+    },
+    "Guinea-Bissau": null,
+    "Haiti": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Stevenson",
+                "Stanley",
+                "Samuel",
+                "Peterson",
+                "Daniel",
+                "Wilson",
+                "Jameson",
+                "Evens",
+                "Ricardo",
+                "Emmanue"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Widelene",
+                "Mirlande",
+                "Islande",
+                "Lovelie",
+                "Judeline",
+                "Angeline",
+                "Esther",
+                "Chedeline",
+                "Jessica",
+                "Rose-Merlin"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Haitian"
+    },
+    "Honduras": null,
+    "Hong_Kong": null,
+    "Hungary": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Bence",
+                "Máté",
+                "Levente",
+                "Ádám",
+                "Dávid",
+                "Dániel",
+                "Marcell",
+                "Balázs",
+                "Milán",
+                "Dominik"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Hanna",
+                "Anna",
+                "Jázmin",
+                "Lili",
+                "Zsófia",
+                "Emma",
+                "Luca",
+                "Boglárka",
+                "Zoé",
+                "Nóra"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Hungarian"
+    },
+    "Iceland": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Aron",
+                "Alexander",
+                "Viktor",
+                "Kristján",
+                "Jón",
+                "Gunnar",
+                "Benedikt"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Margrét",
+                "Anna",
+                "Emma",
+                "Ísabella",
+                "Eva",
+                "Hekla",
+                "Emilía"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Icelander"
+    },
+    "India": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Aarav",
+                "Reyansh",
+                "Mohammad",
+                "Vivaan",
+                "Ayaan",
+                "Vihaan",
+                "Atharv",
+                "Sai",
+                "Advik",
+                "Arjun"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Aadya",
+                "Diya",
+                "Saanvi",
+                "Amaira",
+                "Angel",
+                "Myra",
+                "Aaradhya",
+                "Anaya",
+                "Riya",
+                "Shanay"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Indian"
+    },
+    "Indonesia": null,
+    "Iraq": null,
+    "Israel": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Ori",
+                "David",
+                "Ariel",
+                "Noam",
+                "Eitan",
+                "Yosef",
+                "Itai",
+                "Daniel",
+                "Yonatan",
+                "Lav"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Tamar",
+                "Avigail",
+                "Adele",
+                "Noa",
+                "Shira",
+                "Talia",
+                "Yael",
+                "Sarah",
+                "Lia",
+                "Esther"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Israeli"
+    },
+    "Italy": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Leonardo",
+                "Francesco",
+                "Alessandro",
+                "Lorenzo",
+                "Mattia",
+                "Andrea",
+                "Gabriele",
+                "Riccardo",
+                "Tommaso",
+                "Edoardo"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Sofia",
+                "Giulia",
+                "Aurora",
+                "Alice",
+                "Ginevra",
+                "Emma",
+                "Giorgia",
+                "Greta",
+                "Beatrice",
+                "Anna"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Italian"
+    },
+    "Ivory Coast": null,
+    "Japan": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Sō",
+                "Itsuki",
+                "Ren",
+                "Hinata",
+                "Asahi",
+                "Sōta",
+                "Yuuma",
+                "Arata",
+                "Ryō",
+                "Yūto"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Sakura",
+                "Riko",
+                "Aoi",
+                "Wakana",
+                "Sakura",
+                "Rin",
+                "Anna",
+                "Himari",
+                "Yuna",
+                "Kaed"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": null
+    },
+    "Karelia": null,
+    "Kazakhstan": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Yerasyl",
+                "Alikhan",
+                "Nürasyl",
+                "Nürislam",
+                "Sanzhar",
+                "Artyom",
+                "Mïras",
+                "Aisültan",
+                "Arsen",
+                "Amïr"
+            ],
+            "originalSpelling": [
+                "Ерacыл",
+                "Алиxан",
+                "Нұрасыл",
+                "Нұрислам",
+                "Санжар",
+                "Артём",
+                "Мирас",
+                "Айсұлтан",
+                "Арсен",
+                "Амир"
+            ]
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Ayzere",
+                "Inzhu",
+                "Ayaru",
+                "Käwsar",
+                "Ayşa",
+                "Aruzhan",
+                "Amïna",
+                "Ayaulym",
+                "Sezim"
+            ],
+            "originalSpelling": [
+                "Айзeрe",
+                "Інжу",
+                "Айару",
+                "Кәусар",
+                "Айша",
+                "Аружан",
+                "Амина",
+                "Аяулым",
+                "Сезім"
+            ]
+        },
+        "demonym": "Kazakhstani"
+    },
+    "Kosovo": null,
+    "Kyrgyzstan": null,
+    "Latvia": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Roberts",
+                "Markuss",
+                "Artjoms",
+                "Ralfs",
+                "Gustavs",
+                "Maksims",
+                "Artūrs",
+                "Aleksandrs",
+                "Emīls",
+                "Daniels"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Sofija",
+                "Emīlija",
+                "Alise",
+                "Anna",
+                "Marta",
+                "Viktorija",
+                "Elizabete",
+                "Estere",
+                "Anastasija",
+                "Paula"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Latvian"
+    },
+    "Liechtenstein": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Benjamin",
+                "Jonas",
+                "David"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Anna"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Liechtensteiner"
+    },
+    "Lithuania": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Lukas",
+                "Matas",
+                "Nojus",
+                "Dominykas",
+                "Jokūbas",
+                "Emilis",
+                "Jonas",
+                "Kajus",
+                "Gabrielius",
+                "Dovydas"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Emilija",
+                "Austėja",
+                "Viltė",
+                "Gabija",
+                "Liepa",
+                "Kamilė",
+                "Lėja",
+                "Ugnė",
+                "Ema",
+                "Urtė"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Lithuanian"
+    },
+    "Luxembourg": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Gabriel",
+                "Leo",
+                "Luca",
+                "Noah",
+                "David",
+                "Tom",
+                "Ben"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Emma",
+                "Lara",
+                "Zoé",
+                "Amy",
+                "Sarah",
+                "Charlotte",
+                "Emily"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Luxembourger"
+    },
+    "Macau": null,
+    "Madagascar": null,
+    "Mali": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Mamadou",
+                "Moussa",
+                "Mahamadou",
+                "Adama",
+                "Bakary",
+                "Abdoulaye",
+                "Modibo",
+                "Oumar",
+                "Sekou",
+                "Souleyman"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Fatoumata",
+                "Mariam",
+                "Aminata",
+                "Hawa",
+                "Awa",
+                "Oumou",
+                "Djeneba",
+                "Bintou",
+                "Fanta",
+                "Kadiato"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Malian"
+    },
+    "Mexico": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Santiago",
+                "Mateo",
+                "Matías",
+                "Diego",
+                "Sebastián",
+                "Nicolás",
+                "Miguel"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Ximena",
+                "Valentina",
+                "María",
+                "María"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Mexican"
+    },
+    "Moldova": {
+        "maleForenames": {
+            "latinSpelling": [
+                "David",
+                "Maxim",
+                "Alexandru",
+                "Artiom",
+                "Ion",
+                "Bogdan",
+                "Daniel",
+                "Matthew",
+                "Nikita",
+                "Michael"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Sofia",
+                "Anastasia",
+                "Daria",
+                "Victoria",
+                "Alexandra",
+                "Evelina",
+                "Amelia",
+                "Andreea",
+                "Valeria",
+                "Gabriela"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Moldovan"
+    },
+    "Monaco": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Gabriel",
+                "Alexandre",
+                "Lucas",
+                "Ethan",
+                "Aaron"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Victoria",
+                "Giulia",
+                "Chloé",
+                "Emma",
+                "Anna"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Monacan"
+    },
+    "Montenegro": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Nikola",
+                "Marko",
+                "Dragan",
+                "Miloš",
+                "Zoran",
+                "Milan",
+                "Aleksandar",
+                "Ivan",
+                "Petar",
+                "Luka"
+            ],
+            "originalSpelling": [
+                "Никола",
+                "Марко",
+                "Драган",
+                "Милош",
+                "Зоран",
+                "Милан",
+                "Александар",
+                "Иван",
+                "Петар",
+                "Лука"
+            ]
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Jelena",
+                "Milica",
+                "Marija",
+                "Ivana",
+                "Milena",
+                "Ana",
+                "Dragana",
+                "Radmila",
+                "Vesna",
+                "Ljiljana"
+            ],
+            "originalSpelling": [
+                "Јелена",
+                "Милица",
+                "Марија",
+                "Ивана",
+                "Милена",
+                "Ана",
+                "Драгана",
+                "Радмила",
+                "Весна",
+                "Љиљана"
+            ]
+        },
+        "demonym": "Montenegrin"
+    },
+    "Mozambique": null,
+    "Myanmar": null,
+    "Namibia": null,
+    "Netherlands": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Daan",
+                "Noah",
+                "Sem",
+                "Lucas",
+                "Jesse",
+                "Finn",
+                "Milan",
+                "Max",
+                "Levi",
+                "Luuk"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Anna"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Netherlands"
+    },
+    "New Zealand": null,
+    "Nicaragua": null,
+    "Niger": null,
+    "Nordic_Council_2016": null,
+    "North_Korea": null,
+    "North_Macedonia": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Aleksandar",
+                "Zoran",
+                "Nikola",
+                "Goran",
+                "Dragan",
+                "Dejan",
+                "Petar",
+                "Igor",
+                "Ilija",
+                "Stefan"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Marija",
+                "Elena",
+                "Biljana",
+                "Vesna",
+                "Snezana",
+                "Violeta",
+                "Aleksandra",
+                "Suzana",
+                "Katerina",
+                "Ivana"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Macedonian"
+    },
+    "Norway": {
+        "maleForenames": {
+            "latinSpelling": [
+                "William",
+                "Oskar",
+                "Lucas",
+                "Mathias",
+                "Filip",
+                "Oliver",
+                "Jakob",
+                "Emil",
+                "Noah",
+                "Aksel"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Nora",
+                "Emma",
+                "Sara",
+                "Sofie",
+                "Sofia",
+                "Maja",
+                "Olivia",
+                "Ella",
+                "Ingrid",
+                "Emilie"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Norwegian"
+    },
+    "Pakistan": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Mohammad",
+                "Ali",
+                "Hussain",
+                "Omar",
+                "Bilal",
+                "Usman",
+                "Zahid",
+                "Shahid",
+                "Saqib",
+                "Nomaa"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Fatima",
+                "Fozia",
+                "Bismah",
+                "Sobia",
+                "Farrah",
+                "Maryam",
+                "Farzana",
+                "Ayesha",
+                "Sakeena",
+                "Zainab"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Pakistani"
+    },
+    "Panama": null,
+    "Paraguay": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Ramón",
+                "Juan",
+                "José",
+                "Antonio",
+                "Carlos",
+                "Daniel",
+                "Luis",
+                "Javier",
+                "David",
+                "Césa"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "María",
+                "Elizabeth",
+                "Beatriz",
+                "Ramona",
+                "Liz",
+                "Concepción",
+                "Carolina",
+                "Mabel",
+                "Raquel",
+                "Noemí"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Paraguayan"
+    },
+    "Peru": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Luis",
+                "José",
+                "Alexander",
+                "David",
+                "Angel",
+                "Carlos",
+                "Sebastián",
+                "Daniel",
+                "Jesús",
+                "Juan"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "María",
+                "Valentina",
+                "Camila",
+                "Fernanda",
+                "Milagros",
+                "Luz",
+                "Abigail",
+                "Ariana",
+                "Luciana",
+                "Alexandra"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Peruvian"
+    },
+    "Philippines": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Nathaniel",
+                "Gabriel",
+                "James",
+                "Francis",
+                "Joshua",
+                "Jacob",
+                "Angelo",
+                "Daniel",
+                "Alexander",
+                "John"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Angel",
+                "Althea",
+                "Princess",
+                "Ashley",
+                "Samantha",
+                "Sophia",
+                "Andrea",
+                "Angela",
+                "Janine",
+                "Sofia"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Filipino"
+    },
+    "Poland": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Antoni",
+                "Jakub",
+                "Jan",
+                "Szymon",
+                "Aleksander",
+                "Franciszek",
+                "Filip",
+                "Mikołaj",
+                "Wojciech",
+                "Kacper"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Zuzanna",
+                "Julia",
+                "Lena",
+                "Maja",
+                "Hanna",
+                "Zofia",
+                "Amelia",
+                "Alicja",
+                "Aleksandra",
+                "Natalia"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Polish"
+    },
+    "Portugal": {
+        "maleForenames": {
+            "latinSpelling": [
+                "João",
+                "Martim",
+                "Rodrigo",
+                "Santiago",
+                "Francisco",
+                "Afonso",
+                "Tomás",
+                "Miguel",
+                "Guilherme",
+                "Gabriel"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Maria",
+                "Leonor",
+                "Matilde",
+                "Beatriz",
+                "Carolina",
+                "Mariana",
+                "Ana",
+                "Inês",
+                "Margarida",
+                "Sofia"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Portuguese"
+    },
+    "Romania": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Andrei",
+                "David",
+                "Alexandru",
+                "Gabriel",
+                "Mihai",
+                "Cristian",
+                "Ștefan",
+                "Luca",
+                "Ionuț",
+                "Darius"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Maria",
+                "Elena",
+                "Ioana",
+                "Andreea",
+                "Sofia",
+                "Alexandra",
+                "Antonia",
+                "Daria",
+                "Ana",
+                "Gabriela"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Romanian"
+    },
+    "Russia": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Alexander",
+                "Maxim",
+                "Artyom",
+                "Mikhail",
+                "Daniil",
+                "Ivan",
+                "Dmitry",
+                "Kirill",
+                "Andrey",
+                "Yegor"
+            ],
+            "originalSpelling": [
+                "Александр",
+                "Максим",
+                "Артём",
+                "Михаил",
+                "Даниил",
+                "Иван",
+                "Дмитрий",
+                "Кирилл",
+                "Андрей",
+                "Егор"
+            ]
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Sofiya",
+                "Mariya",
+                "Anna",
+                "Anastasiya",
+                "Yelizaveta",
+                "Polina",
+                "Alisa",
+                "Darya",
+                "Alexandra"
+            ],
+            "originalSpelling": [
+                "София",
+                "Мария",
+                "Анна",
+                "Анастасия",
+                "Елизавета",
+                "Полина",
+                "Алиса",
+                "Дарья",
+                "Александра"
+            ]
+        },
+        "demonym": "Russian"
+    },
+    "Rwanda": null,
+    "San Marino": null,
+    "Senegal": null,
+    "Serbia": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Dragan",
+                "Milan",
+                "Aleksandar",
+                "Zoran",
+                "Nikola",
+                "Miloš",
+                "Marko",
+                "Goran",
+                "Dušan",
+                "Dejan"
+            ],
+            "originalSpelling": [
+                "Драган",
+                "Милан",
+                "Александар",
+                "Зоран",
+                "Никола",
+                "Милош",
+                "Марко",
+                "Горан",
+                "Душан",
+                "Дејан"
+            ]
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Milica",
+                "Jelena",
+                "Marija",
+                "Mirjana",
+                "Dragana",
+                "Snežana",
+                "Ljiljana",
+                "Ivana",
+                "Ana",
+                "Gordana"
+            ],
+            "originalSpelling": [
+                "Милица",
+                "Јелена",
+                "Марија",
+                "Мирјана",
+                "Драгана",
+                "Снежана",
+                "Љиљана",
+                "Ивана",
+                "Ана",
+                "Гордана"
+            ]
+        },
+        "demonym": "Serbian"
+    },
+    "Seychelles": null,
+    "Singapore": null,
+    "Slovakia": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Jakub",
+                "Adam",
+                "Samuel",
+                "Lukáš",
+                "Martin",
+                "Tomáš",
+                "Michal",
+                "Filip",
+                "Matej",
+                "Matúš"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Sofia",
+                "Nina",
+                "Natália",
+                "Nela",
+                "Viktória",
+                "Ema",
+                "Laura",
+                "Michaela",
+                "Kristína",
+                "Simona"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Slovak"
+    },
+    "Slovenia": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Luka",
+                "Jakob",
+                "Mark",
+                "Filip",
+                "Nik",
+                "Tim",
+                "Jaka",
+                "Žan",
+                "Jan",
+                "Lovro"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Zala",
+                "Eva",
+                "Ema",
+                "Lara",
+                "Sara",
+                "Maša",
+                "Mia",
+                "Ana",
+                "Neža",
+                "Zoj"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Slovene"
+    },
+    "South_Africa": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Junior",
+                "Blessing",
+                "Gift",
+                "Bandile",
+                "Prince",
+                "Siyabonga",
+                "Melokuhle",
+                "Lethabo",
+                "Banele",
+                "Samkel"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Precious",
+                "Princess",
+                "Angel",
+                "Amahle",
+                "Minenhle",
+                "Thandolwethu",
+                "Melokuhle",
+                "Blessing",
+                "Faith",
+                "Lesed"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "South"
+    },
+    "South_Korea": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Min-jun",
+                "Seo-jun",
+                "Joo-won",
+                "Ye-jun",
+                "Shi-woo",
+                "Jun-seo",
+                "Do-yoon",
+                "Hyun-woo",
+                "Gun-woo",
+                "Ji-hoon"
+            ],
+            "originalSpelling": [
+                "민준",
+                "서준",
+                "주원",
+                "예준",
+                "시우",
+                "준서",
+                "도윤",
+                "현우",
+                "건우",
+                "지훈"
+            ]
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Seo-yeon",
+                "Seo-yun",
+                "Ji-woo",
+                "Seo-hyeon",
+                "Min-seo",
+                "Yun-seo",
+                "Chae-won",
+                "Ha-yoon",
+                "Ji-ah",
+                "Eun-seo"
+            ],
+            "originalSpelling": [
+                "서연",
+                "서윤",
+                "지우",
+                "서현",
+                "민서",
+                "윤서",
+                "채원",
+                "하윤",
+                "지아",
+                "은서"
+            ]
+        },
+        "demonym": "South"
+    },
+    "Spain": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Hugo",
+                "Daniel",
+                "Martín",
+                "Pablo",
+                "Alejandro",
+                "Lucas",
+                "Álvaro",
+                "Adrián",
+                "Mateo",
+                "David"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Lucía",
+                "Martina",
+                "María",
+                "Sofía",
+                "Paula",
+                "Daniela",
+                "Valeria",
+                "Alba",
+                "Julia",
+                "Noa"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Spanish"
+    },
+    "Sri_Lanka": null,
+    "Suriname": null,
+    "Sweden": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Oscar",
+                "Lucas",
+                "William",
+                "Liam",
+                "Oliver",
+                "Hugo",
+                "Alexander",
+                "Elias",
+                "Charlie",
+                "Noah"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Alice",
+                "Lilly",
+                "Maja",
+                "Elsa",
+                "Ella",
+                "Alicia",
+                "Olivia",
+                "Julia",
+                "Ebba",
+                "Wilma"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Swede"
+    },
+    "Switzerland": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Noah",
+                "Liam",
+                "Gabriel",
+                "Luca",
+                "Leon",
+                "Elias",
+                "David",
+                "Samuel",
+                "Louis",
+                "Julian"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Mia",
+                "Emma",
+                "Elena",
+                "Sofia",
+                "Lena",
+                "Emilia",
+                "Lara",
+                "Anna",
+                "Laura",
+                "Mila"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Swiss"
+    },
+    "São Tomé and Príncipe": null,
+    "Tajikistan": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Muhammad",
+                "Yusuf",
+                "Abdullo",
+                "Abubakr"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Sumayah",
+                "Asiya",
+                "Oisha",
+                "Googoosh",
+                "Anohito",
+                "Indira"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Tajikistani"
+    },
+    "Thailand": null,
+    "Togo": null,
+    "Transnistria": null,
+    "Turkey": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Yusuf",
+                "Berat",
+                "Mustafa",
+                "Emir",
+                "Ahmet",
+                "Ömer",
+                "Mehmet",
+                "Muhammed",
+                "Emirhan",
+                "Eymen"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Zeynep",
+                "Elif",
+                "Ecrin",
+                "Yağmur",
+                "Azra",
+                "Zehra",
+                "Nisanur",
+                "Ela",
+                "Belinay",
+                "Nehi"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Turk"
+    },
+    "Turkish_Republic_of_Northern_Cyprus": null,
+    "Turkmenistan": null,
+    "Ukraine": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Artem",
+                "Matviy",
+                "Maksym",
+                "David",
+                "Nikita",
+                "Mykhailo",
+                "Daniil",
+                "Bohdan",
+                "Andriy",
+                "Oleksandr"
+            ],
+            "originalSpelling": [
+                "Артем",
+                "Матвій",
+                "Максим",
+                "Давид",
+                "Нікіта",
+                "Михайло",
+                "Данііл",
+                "Богдан",
+                "Андрій",
+                "Олександр"
+            ]
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Sofiya",
+                "Anastasiya",
+                "Anna",
+                "Mariya",
+                "Alisa",
+                "Viktoriya",
+                "Veronika",
+                "Polina",
+                "Luna"
+            ],
+            "originalSpelling": [
+                "Софія",
+                "Анастасія",
+                "Анна",
+                "Марія",
+                "Аліса",
+                "Вікторія",
+                "Вероніка",
+                "Поліна",
+                "Луна"
+            ]
+        },
+        "demonym": "Ukrainian"
+    },
+    "Uruguay": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Agustín",
+                "Matías",
+                "Santiago",
+                "Nicolás",
+                "Martín",
+                "Bruno",
+                "Francisco",
+                "Rodrigo",
+                "Mateo",
+                "Joaquín"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Florencia",
+                "Lucía",
+                "Agustina",
+                "Valentina",
+                "Camila",
+                "Julia",
+                "Sofía",
+                "Abril",
+                "Ana Paula",
+                "Micaela"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Uruguayan"
+    },
+    "Uzbekistan": null,
+    "Vanuatu": null,
+    "Vatican City": null,
+    "Venezuela": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Sebastián",
+                "Santiago",
+                "Samuel",
+                "Diego",
+                "Gabriel",
+                "Alejandro",
+                "Diego",
+                "Daniel",
+                "Juan"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Camila",
+                "Isabella",
+                "Sofía",
+                "Victoria",
+                "Valentina",
+                "Valeria",
+                "Nicole",
+                "Samantha",
+                "Mariana",
+                "Antonella"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Venezuelan"
+    },
+    "Vietnam": null,
+    "Vojvodina": null,
+    "the_Faroe_Islands": null
+}

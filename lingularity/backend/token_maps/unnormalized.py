@@ -3,7 +3,7 @@ from typing import List, Set, Optional
 import numpy as np
 from tqdm import tqdm
 
-from lingularity.backend.trainers.token_maps.base import TokenMap
+from lingularity.backend.token_maps import TokenMap
 from lingularity.backend.utils.strings import get_meaningful_tokens, is_digit_free
 
 
@@ -42,7 +42,7 @@ class UnnormalizedTokenMap(TokenMap):
 
         print('Procuring proper nouns...')
         for sentence_pair in tqdm(sentence_data):
-            proper_noun_candidates = set.intersection(*map(lambda sentence: set(get_meaningful_tokens(sentence)), sentence_pair))
+            proper_noun_candidates = set.intersection(*map(get_meaningful_tokens, sentence_pair))
             for candidate in proper_noun_candidates:
                 if candidate.istitle() and len(candidate) > 1:
                     proper_nouns.add(candidate.lower())
