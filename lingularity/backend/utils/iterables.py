@@ -12,3 +12,7 @@ def iterables_intersection(sets: Iterable[Set[Any]]) -> Set[Any]:
 
 def windowed(iterable: Iterable[Any], n: int) -> Iterable[Tuple[Any]]:
     return zip(*(islice(vert_iterable, i, None) for i, vert_iterable in enumerate(tee(iterable, n))))
+
+
+def longest_value(iterable: Iterable[Any]) -> Any:
+    return sorted(iterable, key=len, reverse=True)[0]

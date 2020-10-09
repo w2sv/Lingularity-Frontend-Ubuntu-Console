@@ -2,7 +2,8 @@ import os
 from functools import cached_property
 from typing import Optional, List, Iterator, Iterable, Set
 from collections import Counter
-from itertools import chain
+from itertools import chain, islice
+from bisect import insort
 
 import numpy as np
 from more_itertools import unzip
@@ -11,8 +12,8 @@ from tqdm import tqdm
 
 from lingularity.backend.ops.data_mining.downloading import download_sentence_data
 from lingularity.backend import BASE_LANGUAGE_DATA_PATH
-from lingularity.backend.utils.strings import get_meaningful_tokens, is_of_latin_script, strip_special_characters
-from lingularity.backend.utils.iterables import windowed
+from lingularity.backend.utils.strings import get_meaningful_tokens, is_of_latin_script, strip_special_characters, find_common_start
+from lingularity.backend.utils.iterables import windowed, longest_value
 
 
 class SentenceData(np.ndarray):
@@ -97,26 +98,44 @@ class SentenceData(np.ndarray):
 
     def _deduce_forename_translations_non_latin_script_language(self, forename: str) -> List[str]:
         def continuous_substrings(string: str, lengths: Optional[Iterable[int]] = None) -> Iterator[str]:
+            """
+                Args:
+                    string: string to extract substrings from
+                    lengths: Iterable of desired substring lengths,
+                        may contain lengths > len(string) which will be automatically ignored
+
+                Returns:
+                    Iterator of entirety of continuous substrings of min length = 2 comprised by string
+                    sorted with respect to their lengths, e.g.:
+                        continuous_substrings('path') -> Iterator[
+                            'pa', 'at', 'th',
+                            'pat', 'ath',
+                            'path'
+                        ] """
+
             if lengths is None:
                 lengths = range(2, len(string) + 1)
+            else:
+                lengths = filter(lambda val: val > 1, lengths)
 
             return map(''.join, chain.from_iterable(map(lambda length: windowed(string, length), lengths)))
 
-        translations, translation_lengths = (set() for _ in range(2))
+        translation_candidates, translation_lengths = (set() for _ in range(2))
         forename_comprising_sentence_substrings_cache: List[Set[str]] = []
         for english_sentence, foreign_language_sentence in tqdm(zip(self.english_sentences, self.foreign_language_sentences)):
             if forename in get_meaningful_tokens(english_sentence, apostrophe_splitting=True):
                 foreign_language_sentence = strip_special_characters(foreign_language_sentence, include_dash=True, include_apostrophe=True)
 
                 # skip sentences possessing substring already being confirmed as substring
-                if len(translations.intersection(continuous_substrings(foreign_language_sentence, lengths=translation_lengths))):
+                if len((intersection := translation_candidates.intersection(continuous_substrings(foreign_language_sentence, lengths=translation_lengths)))):
+                    print(translation_candidates, intersection)
                     continue
 
                 sentence_substrings = set(continuous_substrings(foreign_language_sentence))
                 for i, forename_comprising_sentence_substrings in enumerate(forename_comprising_sentence_substrings_cache):
                     if len((substring_intersection := sentence_substrings.intersection(forename_comprising_sentence_substrings))):
                         forename_translation = sorted(substring_intersection, key=len, reverse=True)[0]
-                        translations.add(forename_translation)
+                        translation_candidates.add(forename_translation)
                         translation_lengths.add(len(forename_translation))
 
                         del forename_comprising_sentence_substrings_cache[i]
@@ -124,7 +143,16 @@ class SentenceData(np.ndarray):
                 else:
                     forename_comprising_sentence_substrings_cache.append(sentence_substrings)
 
-        return list(translations)
+        return list(translation_candidates)
+
+    def _strip_overlaps(self, sorted_candidate_list: List[str]):
+        for i, candidate in enumerate(sorted_candidate_list):
+            longest_overlap = longest_value(map(find_common_start, *islice(sorted_candidate_list, i+1, None)))
+            if len(longest_overlap):
+                stripped_candidate_list = list(filter(lambda candidate: longest_overlap not in candidate, sorted_candidate_list))
+                insort(stripped_candidate_list, longest_overlap)
+                return self.strip_overlaps(stripped_candidate_list)
+        return sorted_candidate_list
 
     # -------------------
     # Columns
@@ -170,7 +198,7 @@ class SentenceData(np.ndarray):
 
 
 if __name__ == '__main__':
-    s = SentenceData('Japanese')
+    s = SentenceData('Chinese')
 
     translation = s.deduce_forename_translations('Tom')
     print(translation)

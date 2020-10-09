@@ -1,7 +1,8 @@
-from typing import List, Optional, Set, Iterable
+from typing import List, Optional, Set, Iterator, Iterable
 import re
 import unicodedata
 
+from .iterables import longest_value
 
 APOSTROPHES = "'’"
 
@@ -109,6 +110,19 @@ def find_common_start(*string: str) -> str:
     return common_start
 
 
+def find_longest_continuous_partial_overlap(strings: Iterable[str]) -> str:
+    def substrings_from_start(string) -> Iterator[str]:
+        for i in range(1, len(string) + 1):
+            yield string[:i]
+
+    longest_continuous_partial_overlap = ''
+    substrings_list = list(map(lambda string: set(substrings_from_start(string)), strings))
+    for i, substrings in enumerate(substrings_list):
+        for comparison in substrings_list[i+1:]:
+            longest_continuous_partial_overlap = longest_value([longest_continuous_partial_overlap, longest_value(substrings & comparison | {''})])
+    return longest_continuous_partial_overlap
+
+
 # ---------------
 # Classification
 # ---------------
@@ -123,3 +137,7 @@ def is_of_latin_script(string: str, trim=True) -> bool:
         string = strip_special_characters(string, include_apostrophe=True, include_dash=True).strip(' ')
 
     return len(_to_ascii(string)) / len(string) > (MIN_LATIN_CHARACTER_PERCENTAGE / 100)
+
+
+if __name__ == '__main__':
+    print(find_longest_continuous_overlap(['メアリーが', 'トムは', 'トムはメアリーを', 'メアリー', 'トムはマリ', 'いた', 'メアリーは']))
