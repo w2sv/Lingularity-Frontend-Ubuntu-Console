@@ -1,6 +1,6 @@
-from typing import Dict, Any, Callable, List, Optional
+from typing import Dict, Any, Union, List
 import json
-from collections import defaultdict, OrderedDict
+import collections
 from functools import partial
 
 from tqdm import tqdm
@@ -10,16 +10,23 @@ from . import METADATA_DIR_PATH
 from lingularity.backend.trainers.base.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.metadata.types import LanguageMetadata, CountryMetadata
 from lingularity.backend.trainers.base import SentenceData
-from lingularity.backend.ops.data_mining.scraping import (scrape_sentence_data_download_links,
-                                                          scrape_countries_language_employed_in,
-                                                          scrape_popular_forenames, scrape_demonym)
 from lingularity.backend.ops.google.translation import google_translator
 from lingularity.backend.utils.strings import replace_multiple
+from lingularity.backend.ops.data_mining.scraping import (
+    scrape_sentence_data_download_links,
+    scrape_countries_language_employed_in,
+    scrape_popular_forenames, scrape_demonym
+)
 
 
 def _save_as_json(data: Dict[Any, Any], file_name: str):
     with open(f'{METADATA_DIR_PATH}/{file_name}.json', 'w', encoding='utf-8') as write_file:
         json.dump(data, write_file, ensure_ascii=False, indent=4)
+
+
+def _load_json(file_name: str) -> Dict[Any, Any]:
+    with open(f'{METADATA_DIR_PATH}/{file_name}.json', 'r', encoding='utf-8') as read_file:
+        return json.load(read_file)
 
 
 def _mine_metadata():
@@ -31,7 +38,7 @@ def _mine_metadata():
         language_sub_dict = language_metadata[language]
 
         # set sentence data download links
-        language_sub_dict['sentenceDataDownloadLinks'] = defaultdict(lambda: {})
+        language_sub_dict['sentenceDataDownloadLinks'] = collections.defaultdict(lambda: {})
         language_sub_dict['sentenceDataDownloadLinks']['tatoebaProject'] = download_link
 
         # set generic properties
@@ -85,23 +92,38 @@ def _mine_and_set_translations(language: str, sentence_data: SentenceData):
 
 
 def _get_default_forename_translations(sentence_data: SentenceData, language: str) -> Dict[str, List[str]]:
+    MIN_FORENAME_TRANSLATION_TRANSLATION_FORENAME_LEVENSHTEIN_SCORE = 0.55
+
     forename_2_translations = {}
     for forename, translations in zip(DEFAULT_FORENAMES, sentence_data.deduce_forename_translations()):
-        translations = set(filter(lambda translation: levenshtein(forename, google_translator.translate(translation, dest='English', src=language)) >= 0.45, translations))
+        translations = set(filter(lambda translation: levenshtein(forename, google_translator.translate(translation, dest='English', src=language)) >= MIN_FORENAME_TRANSLATION_TRANSLATION_FORENAME_LEVENSHTEIN_SCORE, translations))
         translations.add(google_translator.translate(forename, dest=language, src='English'))
         forename_2_translations[forename] = sorted(translations)
 
     return forename_2_translations
 
 
+def _correct_metadata(metadata: Union[LanguageMetadata, CountryMetadata], file_name: str):
+    correction_data = _load_json(f'correction/{file_name}')
+    for meta_key, sub_dict in correction_data.items():
+        for sub_key, value in sub_dict.items():
+            if isinstance(value, collections.abc.Mapping):
+                metadata[meta_key][sub_key] = {**(metadata[meta_key][sub_key] or {}), **value}
+            else:
+                metadata[meta_key][sub_key] = value
+
+
 if __name__ == '__main__':
-    language_metadata: LanguageMetadata = defaultdict(lambda: {})
+    language_metadata: LanguageMetadata = collections.defaultdict(lambda: {})
     country_metadata: CountryMetadata = {}
 
     _mine_metadata()
 
     # sort country metadata for legibility
-    country_metadata = OrderedDict(sorted(country_metadata.items()))
+    country_metadata = {k: v for k, v in sorted(country_metadata.items())}
 
-    _save_as_json(language_metadata, file_name='languages')
-    _save_as_json(country_metadata, file_name='countries')
+    # correct country metadata
+    _correct_metadata(country_metadata, 'country')
+
+    _save_as_json(language_metadata, file_name='language')
+    _save_as_json(country_metadata, file_name='country')

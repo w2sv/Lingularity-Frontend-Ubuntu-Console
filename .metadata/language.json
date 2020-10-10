@@ -7,8 +7,8 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "South_Africa",
-            "Namibia"
+            "Namibia",
+            "South_Africa"
         ],
         "translations": {
             "letsGo": "Kom ons gaan!",
@@ -43,14 +43,14 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Albania",
-            "Serbia",
-            "North_Macedonia",
-            "Kosovo",
             "Romania",
-            "Croatia",
+            "Serbia",
+            "Albania",
             "Montenegro",
-            "Italy"
+            "Italy",
+            "North_Macedonia",
+            "Croatia",
+            "Kosovo"
         ],
         "translations": {
             "letsGo": "Shkojme!",
@@ -66,9 +66,7 @@
                 ],
                 "Mary": [
                     "Maria",
-                    "Marian",
-                    "Marisë",
-                    "Meri"
+                    "Marisë"
                 ],
                 "Alice": [
                     "Alisa"
@@ -108,7 +106,6 @@
                     "طوم"
                 ],
                 "John": [
-                    "جون",
                     "يوحنا"
                 ],
                 "Mary": [
@@ -153,7 +150,6 @@
                 "Tom": [
                     "Tom",
                     "Toma",
-                    "Tomas",
                     "Tomla",
                     "Tomu",
                     "Tomun",
@@ -163,7 +159,6 @@
                     "John"
                 ],
                 "Mary": [
-                    "Mariyə",
                     "Mary",
                     "Meri",
                     "Məryəm"
@@ -196,7 +191,6 @@
                     "Tomek",
                     "Tomem",
                     "Tomen",
-                    "Tomeri",
                     "Tomi"
                 ],
                 "John": [
@@ -304,27 +298,26 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Montenegro",
-            "Bosnia_and_Herzegovina",
             "Serbia",
+            "Bosnia_and_Herzegovina",
+            "Montenegro",
+            "Slovenia",
             "North_Macedonia",
-            "Kosovo",
             "Croatia",
-            "Slovenia"
+            "Kosovo"
         ],
         "translations": {
             "letsGo": "Idemo!",
             "defaultForenames": {
                 "Tom": [
                     "Tom",
-                    "Toma",
                     "Tomu"
                 ],
                 "John": [
                     "John"
                 ],
                 "Mary": [
-                    "Mariji",
+                    "Mariju",
                     "Mary"
                 ],
                 "Alice": [
@@ -390,8 +383,8 @@
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
-            "Hong_Kong",
-            "Macau"
+            "Macau",
+            "Hong_Kong"
         ],
         "translations": {}
     },
@@ -497,11 +490,13 @@
                     "湯姆"
                 ],
                 "John": [
+                    "約翰",
                     "约翰"
                 ],
                 "Mary": [
                     "Mary",
-                    "玛丽"
+                    "玛丽",
+                    "瑪麗"
                 ],
                 "Alice": [
                     "爱丽丝"
@@ -533,24 +528,22 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Czech_Republic",
-            "Bosnia_and_Herzegovina",
             "Serbia",
-            "Hungary",
-            "Slovakia",
-            "Croatia",
+            "Czech_Republic",
             "Austria",
+            "Hungary",
             "Montenegro",
-            "Italy"
+            "Slovakia",
+            "Italy",
+            "Bosnia_and_Herzegovina",
+            "Croatia"
         ],
         "translations": {
             "letsGo": "Idemo!",
             "defaultForenames": {
                 "Tom": [
                     "Tom",
-                    "Toma",
                     "Tomom",
-                    "Tomova",
                     "Tomu"
                 ],
                 "John": [
@@ -582,13 +575,13 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Czech_Republic",
-            "Bosnia_and_Herzegovina",
-            "Slovakia",
-            "Romania",
-            "Croatia",
             "Poland",
-            "Austria"
+            "Romania",
+            "Austria",
+            "Czech_Republic",
+            "Slovakia",
+            "Bosnia_and_Herzegovina",
+            "Croatia"
         ],
         "translations": {
             "letsGo": "Pojďme!",
@@ -598,8 +591,7 @@
                     "Tom",
                     "Tome",
                     "Tomem",
-                    "Tomovu",
-                    "Tomáš",
+                    "Tomáše",
                     "Tomův"
                 ],
                 "John": [
@@ -616,7 +608,7 @@
                     "Marii",
                     "Marií",
                     "Mary",
-                    "Maryiny"
+                    "Maryina"
                 ],
                 "Alice": [
                     "Alice",
@@ -638,18 +630,16 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Nordic_Council_2016",
-            "Greenland",
             "Denmark",
+            "Nordic_Council_2016",
+            "Faroe_Islands",
             "Germany",
-            "Faroe_Islands"
+            "Greenland"
         ],
         "translations": {
             "letsGo": "Lad os gå!",
             "defaultForenames": {
                 "Tom": [
-                    "Rom",
-                    "Thomas",
                     "Tom",
                     "Toms"
                 ],
@@ -663,7 +653,8 @@
                     "Marys"
                 ],
                 "Alice": [
-                    "Alice"
+                    "Alice",
+                    "Alices"
                 ]
             },
             "constitutionQuery": [
@@ -680,15 +671,14 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
+            "Belgium",
             "Netherlands",
-            "Suriname",
-            "Belgium"
+            "Suriname"
         ],
         "translations": {
             "letsGo": "Laten we gaan!",
             "defaultForenames": {
                 "Tom": [
-                    "Thomas",
                     "Tok",
                     "Tom",
                     "Tomo",
@@ -697,8 +687,6 @@
                     "Tom”"
                 ],
                 "John": [
-                    "Jan",
-                    "Johannes",
                     "Johano",
                     "John",
                     "Johns"
@@ -735,9 +723,7 @@
                 "Tom": [
                     "Tom",
                     "Tomi",
-                    "Tomiga",
-                    "Tomil",
-                    "Tomist"
+                    "Tomil"
                 ],
                 "John": [
                     "John"
@@ -746,7 +732,6 @@
                     "Maarja",
                     "Mari",
                     "Maria",
-                    "Marile",
                     "Mary",
                     "Maryga",
                     "Maryt"
@@ -769,9 +754,9 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
+            "Karelia",
             "Finland",
             "Russia",
-            "Karelia",
             "Sweden"
         ],
         "translations": {
@@ -780,44 +765,29 @@
                 "Tom": [
                     "Tim",
                     "Tom",
-                    "Tomhan",
                     "Tomi",
-                    "Tomii",
+                    "Tomia",
                     "Tomil",
-                    "Tomin",
-                    "Tomipa",
-                    "Tomist",
                     "Tomko",
                     "Tommi",
                     "Tom”",
                     "Ton",
-                    "Tuomas",
-                    "Tuomon",
+                    "Tuomo",
                     "”Tom",
                     "”Tom”"
                 ],
                 "John": [
                     "John",
-                    "Johnille",
-                    "Johnin",
-                    "Johnista",
-                    "Joni",
-                    "Joniin",
-                    "Jounia"
+                    "Johnin"
                 ],
                 "Mary": [
-                    "Maaria",
-                    "Marika",
-                    "Marin",
-                    "Marjan",
+                    "Mari”",
                     "Marjo",
-                    "Marjut",
                     "Mary",
                     "Marya",
-                    "Marylle",
+                    "Marylla",
                     "Maryn",
-                    "Maryssä",
-                    "Marysta",
+                    "Maryssa",
                     "Maryä"
                 ],
                 "Alice": [
@@ -839,41 +809,40 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Congo",
-            "Chad",
-            "Rwanda",
-            "Central African Republic",
-            "Madagascar",
             "Guinea",
-            "Monaco",
-            "Ivory Coast",
-            "Cameroon",
-            "Canada",
+            "Benin",
             "Burundi",
-            "Switzerland",
-            "Mali",
-            "Togo",
-            "Senegal",
-            "Niger",
+            "Chad",
             "Comoros",
-            "Gabon",
+            "Belgium",
+            "Monaco",
+            "Congo",
+            "Burkina Faso",
+            "Ivory Coast",
+            "Togo",
+            "Niger",
+            "Djibouti",
+            "Canada",
             "Seychelles",
+            "France",
+            "Mali",
+            "Central African Republic",
+            "Luxembourg",
+            "Haiti",
+            "Switzerland",
+            "Gabon",
             "Vanuatu",
             "DR Congo",
-            "Haiti",
             "Equatorial Guinea",
-            "France",
-            "Djibouti",
-            "Belgium",
-            "Luxembourg",
-            "Benin",
-            "Burkina Faso"
+            "Senegal",
+            "Cameroon",
+            "Rwanda",
+            "Madagascar"
         ],
         "translations": {
             "letsGo": "Allons-y!",
             "defaultForenames": {
                 "Tom": [
-                    "Thomas",
                     "Tom",
                     "Toma",
                     "Tome",
@@ -884,7 +853,7 @@
                 ],
                 "Mary": [
                     "Maria",
-                    "Marion",
+                    "Marie",
                     "Mary"
                 ],
                 "Alice": [
@@ -893,7 +862,7 @@
             },
             "constitutionQuery": [
                 "Comment vas-tu {}?",
-                "Quoi de neuf {}?"
+                "What's up {}?"
             ]
         }
     },
@@ -914,18 +883,18 @@
                     "Tom"
                 ],
                 "John": [
-                    "Xoán"
+                    "John"
                 ],
                 "Mary": [
                     "María"
                 ],
                 "Alice": [
-                    "Alicia"
+                    "Alice"
                 ]
             },
             "constitutionQuery": [
-                "Como estás {}?",
-                "Que pasa {}?"
+                "How are you {}?",
+                "What's up {}?"
             ]
         }
     },
@@ -940,7 +909,7 @@
             "Georgia"
         ],
         "translations": {
-            "letsGo": "Წავედით!",
+            "letsGo": "Let's go!",
             "defaultForenames": {
                 "Tom": [
                     "ტომ"
@@ -949,15 +918,15 @@
                     "იოანე"
                 ],
                 "Mary": [
-                    "მარი",
-                    "მარიამი"
+                    "Mary",
+                    "მარი"
                 ],
                 "Alice": [
-                    "ალისა"
+                    "Alice"
                 ]
             },
             "constitutionQuery": [
-                "როგორ ხარ {}?",
+                "How are you {}?",
                 "რა ხდება {}?"
             ]
         }
@@ -970,24 +939,19 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
+            "Luxembourg",
+            "Austria",
+            "Germany",
             "Switzerland",
             "Belgium",
-            "Germany",
-            "Luxembourg",
-            "Liechtenstein",
-            "Austria"
+            "Liechtenstein"
         ],
         "translations": {
-            "letsGo": "Lass uns gehen!",
+            "letsGo": "Let's go!",
             "defaultForenames": {
                 "Tom": [
-                    "Koma",
-                    "Rom",
                     "Tam",
-                    "Thomas",
                     "Tom",
-                    "Tomaso",
-                    "Tomate",
                     "Tomi",
                     "Tomm",
                     "Tomme",
@@ -999,25 +963,14 @@
                     "Johann",
                     "Johannes",
                     "John",
-                    "Johns",
-                    "Sohn",
-                    "Sohns"
+                    "Johns"
                 ],
                 "Mary": [
-                    "Bar",
-                    "Farm",
-                    "Mail",
                     "Maria",
-                    "Maria—",
-                    "Maries",
-                    "Mark",
                     "Mary",
                     "Marys",
                     "Mary–",
-                    "Mord",
-                    "Park",
-                    "Party",
-                    "Sari"
+                    "Party"
                 ],
                 "Alice": [
                     "Alice"
@@ -1042,11 +995,11 @@
             "defaultForenames": {
                 "Tom": [
                     "Tom",
-                    "Θωμά",
                     "Κάποιος"
                 ],
                 "John": [
-                    "Γιάννης"
+                    "Γιάννης",
+                    "Τζον"
                 ],
                 "Mary": [
                     "Μαίρη",
@@ -1070,12 +1023,12 @@
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
-            "South_Africa",
+            "Poland",
             "Israel",
-            "Poland"
+            "South_Africa"
         ],
         "translations": {
-            "letsGo": "בוא נלך!",
+            "letsGo": "Let's go!",
             "defaultForenames": {
                 "Tom": [
                     "טום",
@@ -1106,8 +1059,8 @@
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
-            "South_Africa",
-            "India"
+            "India",
+            "South_Africa"
         ],
         "translations": {
             "letsGo": "चलो चलते हैं!",
@@ -1127,7 +1080,7 @@
             },
             "constitutionQuery": [
                 "तुम कैसे हो {}?",
-                "What's up {}?"
+                "क्या हो रहा है {}?"
             ]
         }
     },
@@ -1139,57 +1092,51 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Ukraine",
+            "Romania",
             "Serbia",
+            "Austria",
+            "Ukraine",
             "Hungary",
             "Slovakia",
-            "Romania",
+            "Slovenia",
             "Croatia",
-            "Vojvodina",
-            "Austria",
-            "Slovenia"
+            "Vojvodina"
         ],
         "translations": {
             "letsGo": "Gyerünk!",
             "defaultForenames": {
                 "Tom": [
                     "Tom",
-                    "Tomban",
-                    "Tomhoz",
+                    "Tomba",
                     "Tomin",
-                    "Tomira",
                     "Tomié",
-                    "Tomnak",
-                    "Tomnál",
                     "Tomon",
                     "Tomot",
+                    "Tomra",
                     "Tomé"
                 ],
                 "John": [
                     "John",
-                    "Johnnak",
+                    "Johnnal",
                     "Johnra",
                     "Johnt",
+                    "Johntól",
                     "János"
                 ],
                 "Mary": [
-                    "Maca",
-                    "Marcsi",
                     "Mari",
-                    "Marika",
-                    "Marin",
+                    "Maria",
+                    "Maris",
                     "Marit",
                     "Marié",
                     "Mary",
                     "Maryben",
                     "Maryhez",
-                    "Marynak",
+                    "Marynek",
                     "Maryre",
                     "Maryt",
-                    "Maryval",
+                    "Maryvel",
                     "Maryé",
-                    "Maryért",
-                    "Meri",
                     "Mári"
                 ],
                 "Alice": [
@@ -1234,7 +1181,7 @@
             },
             "constitutionQuery": [
                 "Hvernig hefurðu það {}?",
-                "Hvað er að {}?"
+                "What's up {}?"
             ]
         }
     },
@@ -1264,9 +1211,7 @@
             "letsGo": "Ayo pergi!",
             "defaultForenames": {
                 "Tom": [
-                    "Bom",
-                    "Tom",
-                    "Tomlah"
+                    "Tom"
                 ],
                 "John": [
                     "John"
@@ -1294,17 +1239,15 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Switzerland",
             "Vatican City",
             "San Marino",
+            "Switzerland",
             "Italy"
         ],
         "translations": {
             "letsGo": "Andiamo!",
             "defaultForenames": {
                 "Tom": [
-                    "Roma",
-                    "Thomas",
                     "To",
                     "Tom",
                     "Tomi",
@@ -1341,10 +1284,9 @@
             "Japan"
         ],
         "translations": {
-            "letsGo": "行こう！",
+            "letsGo": "Let's go!",
             "defaultForenames": {
                 "Tom": [
-                    "Tom",
                     "トム"
                 ],
                 "John": [
@@ -1387,7 +1329,7 @@
             "letsGo": "ಹೋಗೋಣ!",
             "defaultForenames": {
                 "Tom": [
-                    "ಟಾಮ",
+                    "Tom",
                     "ಟಾಮ್"
                 ],
                 "John": [
@@ -1401,8 +1343,8 @@
                 ]
             },
             "constitutionQuery": [
-                "ನೀವು {}್ ಹೇಗಿದ್ದೀರಿ?",
-                "{}್ ಏನಿದೆ?"
+                "ನೀವು {} ಹೇಗಿದ್ದೀರಿ?",
+                "{} ಏನಿದೆ?"
             ]
         }
     },
@@ -1444,7 +1386,7 @@
                     "ថម។"
                 ],
                 "John": [
-                    "John"
+                    "ចន"
                 ],
                 "Mary": [
                     "ម៉ារី"
@@ -1467,21 +1409,17 @@
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
-            "South_Korea",
             "China",
+            "North_Korea",
             "Russia",
-            "North_Korea"
+            "South_Korea"
         ],
         "translations": {
-            "letsGo": "Let's go!",
+            "letsGo": "가자!",
             "defaultForenames": {
                 "Tom": [
                     "Tom",
                     "톰",
-                    "톰도",
-                    "톰만",
-                    "톰에게",
-                    "톰은",
                     "톰을",
                     "톰의",
                     "톰이"
@@ -1522,7 +1460,8 @@
                     "John"
                 ],
                 "Mary": [
-                    "Mary"
+                    "Mary",
+                    "Meryem"
                 ],
                 "Alice": [
                     "Alice"
@@ -1530,7 +1469,7 @@
             },
             "constitutionQuery": [
                 "Tu {} çawa yî?",
-                "What's up {}?"
+                "{} çi ye?"
             ]
         }
     },
@@ -1557,16 +1496,16 @@
                     "Džons"
                 ],
                 "Mary": [
-                    "Mariju",
-                    "Mary"
+                    "Marija",
+                    "Mariju"
                 ],
                 "Alice": [
-                    "Alice"
+                    "Alise"
                 ]
             },
             "constitutionQuery": [
                 "Kā tev iet?",
-                "What's up {}?"
+                "Kas notiek {}?"
             ]
         }
     },
@@ -1578,20 +1517,18 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Lithuania",
-            "Poland"
+            "Poland",
+            "Lithuania"
         ],
         "translations": {
-            "letsGo": "Eime!",
+            "letsGo": "Let's go!",
             "defaultForenames": {
                 "Tom": [
-                    "Tom",
                     "Tomas",
                     "Tomo",
                     "Tomu",
                     "Tomui",
-                    "Tomą",
-                    "Tuomet"
+                    "Tomą"
                 ],
                 "John": [
                     "Jonas"
@@ -1605,8 +1542,8 @@
                 ]
             },
             "constitutionQuery": [
-                "Kaip tu {}as?",
-                "Ką {}as?"
+                "Kaip tu {}?",
+                "Ką {}?"
             ]
         }
     },
@@ -1628,11 +1565,11 @@
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
-            "Albania",
-            "Bosnia_and_Herzegovina",
+            "Romania",
             "Serbia",
-            "North_Macedonia",
-            "Romania"
+            "Bosnia_and_Herzegovina",
+            "Albania",
+            "North_Macedonia"
         ],
         "translations": {
             "letsGo": "Да одиме!",
@@ -1645,6 +1582,7 @@
                     "Он"
                 ],
                 "Mary": [
+                    "Мари",
                     "Марија",
                     "Мери"
                 ],
@@ -1703,11 +1641,11 @@
             "letsGo": "നമുക്ക് പോകാം!",
             "defaultForenames": {
                 "Tom": [
-                    "ടോ",
-                    "ടോം"
+                    "Tom",
+                    "ടോ"
                 ],
                 "John": [
-                    "ജോൺ"
+                    "John"
                 ],
                 "Mary": [
                     "മേരി"
@@ -1717,7 +1655,7 @@
                 ]
             },
             "constitutionQuery": [
-                "How are you {}?",
+                "എങ്ങനെയുണ്ട് {}ം?",
                 "{}ം എന്താണ്?"
             ]
         }
@@ -1733,12 +1671,13 @@
             "New Zealand"
         ],
         "translations": {
-            "letsGo": "Let's go!",
+            "letsGo": "Haere tatou!",
             "defaultForenames": {
                 "Tom": [
                     "Tom"
                 ],
                 "John": [
+                    "Hoani",
                     "John"
                 ],
                 "Mary": [
@@ -1750,7 +1689,7 @@
                 ]
             },
             "constitutionQuery": [
-                "Kei te pēhea koe?",
+                "How are you {}?",
                 "Kei te aha a {}?"
             ]
         }
@@ -1772,6 +1711,7 @@
                     "टॉम"
                 ],
                 "John": [
+                    "John",
                     "जॉन"
                 ],
                 "Mary": [
@@ -1822,7 +1762,6 @@
             "letsGo": "La oss gå!",
             "defaultForenames": {
                 "Tom": [
-                    "Thomas",
                     "Tom",
                     "Tomi",
                     "Toms"
@@ -1864,7 +1803,6 @@
                     "جان"
                 ],
                 "Mary": [
-                    "مری",
                     "مریم"
                 ],
                 "Alice": [
@@ -1872,7 +1810,7 @@
                 ]
             },
             "constitutionQuery": [
-                "How are you {}?",
+                "حال تو چطوره؟",
                 "چه خبر از {}؟"
             ]
         }
@@ -1885,26 +1823,25 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
+            "Poland",
             "Czech_Republic",
             "Ukraine",
-            "Lithuania",
             "Hungary",
             "Slovakia",
-            "Poland"
+            "Lithuania"
         ],
         "translations": {
-            "letsGo": "Chodźmy!",
+            "letsGo": "Let's go!",
             "defaultForenames": {
                 "Tom": [
-                    "Tomasz",
                     "Tomek",
                     "Tomem",
                     "Tomie",
                     "Tomka",
-                    "Tomku",
-                    "Ton"
+                    "Tomku"
                 ],
                 "John": [
+                    "Jan",
                     "John",
                     "Johna",
                     "Johnem",
@@ -1917,7 +1854,7 @@
                     "Marią",
                     "Marię",
                     "Mary",
-                    "Marysią"
+                    "Marysia"
                 ],
                 "Alice": [
                     "Alice",
@@ -1938,23 +1875,21 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Equatorial Guinea",
             "Guinea-Bissau",
+            "Equatorial Guinea",
+            "East Timor",
+            "Cape Verde",
             "Brazil",
             "Mozambique",
-            "Portugal",
-            "Cape Verde",
-            "East Timor",
             "Angola",
-            "São Tomé and Príncipe"
+            "São Tomé and Príncipe",
+            "Portugal"
         ],
         "translations": {
-            "letsGo": "Vamos!",
+            "letsGo": "Let's go!",
             "defaultForenames": {
                 "Tom": [
-                    "Thomas",
                     "Tom",
-                    "Tomás",
                     "Tomé"
                 ],
                 "John": [
@@ -1967,15 +1902,14 @@
                     "Marie",
                     "Marilyn",
                     "Mark",
-                    "Marry",
-                    "Park"
+                    "Marry"
                 ],
                 "Alice": [
                     "Alice"
                 ]
             },
             "constitutionQuery": [
-                "How are you {}?",
+                "Como você está {}?",
                 "E aí, {}?"
             ]
         }
@@ -1996,7 +1930,6 @@
                     "Tomes"
                 ],
                 "John": [
-                    "Ioan",
                     "John",
                     "Johnes"
                 ],
@@ -2010,7 +1943,7 @@
             },
             "constitutionQuery": [
                 "Ce mai faci {}?",
-                "What's up {}?"
+                "Ce-i cu {}?"
             ]
         }
     },
@@ -2022,18 +1955,17 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Ukraine",
-            "Moldova",
-            "Hungary",
             "Romania",
-            "Vojvodina"
+            "Ukraine",
+            "Hungary",
+            "Vojvodina",
+            "Moldova"
         ],
         "translations": {
-            "letsGo": "Sa mergem!",
+            "letsGo": "Let's go!",
             "defaultForenames": {
                 "Tom": [
-                    "Tom",
-                    "Toma"
+                    "Tom"
                 ],
                 "John": [
                     "Ioan",
@@ -2062,36 +1994,36 @@
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
+            "Russia",
+            "Gagauzia",
+            "Turkmenistan",
             "Kyrgyzstan",
             "Ukraine",
-            "Turkmenistan",
+            "Tajikistan",
             "Belarus",
+            "Uzbekistan",
             "Autonomous Republic of Crimea",
             "Kazakhstan",
-            "Moldova",
             "Transnistria",
-            "Tajikistan",
-            "Uzbekistan",
-            "Gagauzia",
-            "Russia"
+            "Moldova"
         ],
         "translations": {
             "letsGo": "Пошли!",
             "defaultForenames": {
                 "Tom": [
-                    "Том",
-                    "Фом"
+                    "Том"
                 ],
                 "John": [
                     "Джон"
                 ],
                 "Mary": [
-                    "Ма",
+                    "Mary",
                     "Мэри"
                 ],
                 "Alice": [
                     "Алис",
-                    "Алиса"
+                    "Алиса",
+                    "Элис"
                 ]
             },
             "constitutionQuery": [
@@ -2125,7 +2057,6 @@
                 "Mary": [
                     "Marij",
                     "Meri",
-                    "ari",
                     "Мари",
                     "Мери"
                 ],
@@ -2147,10 +2078,10 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
+            "Poland",
             "Czech_Republic",
             "Hungary",
             "Slovakia",
-            "Poland",
             "Vojvodina"
         ],
         "translations": {
@@ -2159,16 +2090,16 @@
                 "Tom": [
                     "Tom",
                     "Tomom",
-                    "Tomovi",
-                    "Tomáš"
+                    "Tomov",
+                    "Tomáša"
                 ],
                 "John": [
-                    "John"
+                    "Ján"
                 ],
                 "Mary": [
                     "Mary",
-                    "Marynej",
-                    "Maryno"
+                    "Maryna",
+                    "Marynej"
                 ],
                 "Alice": [
                     "Alica",
@@ -2189,8 +2120,8 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Austria",
             "Slovenia",
+            "Austria",
             "Italy"
         ],
         "translations": {
@@ -2198,12 +2129,10 @@
             "defaultForenames": {
                 "Tom": [
                     "Tom",
-                    "Toma",
-                    "Tomova",
                     "Tomu"
                 ],
                 "John": [
-                    "John"
+                    "Janez"
                 ],
                 "Mary": [
                     "Mary"
@@ -2214,7 +2143,7 @@
             },
             "constitutionQuery": [
                 "Kako si {}?",
-                "Kaj je {}?"
+                "What's up {}?"
             ]
         }
     },
@@ -2226,34 +2155,32 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Venezuela",
-            "Paraguay",
-            "Guatemala",
-            "Bolivia",
-            "Colombia",
-            "Dominican Republic",
-            "Spain",
             "El Salvador",
-            "Honduras",
-            "Peru",
-            "Chile",
-            "Argentina",
-            "Uruguay",
-            "Nicaragua",
-            "Mexico",
             "Cuba",
-            "Panama",
-            "Equatorial Guinea",
+            "Spain",
+            "Mexico",
+            "Chile",
             "Costa Rica",
-            "Ecuador"
+            "Peru",
+            "Guatemala",
+            "Honduras",
+            "Bolivia",
+            "Nicaragua",
+            "Panama",
+            "Dominican Republic",
+            "Uruguay",
+            "Equatorial Guinea",
+            "Argentina",
+            "Colombia",
+            "Ecuador",
+            "Venezuela",
+            "Paraguay"
         ],
         "translations": {
             "letsGo": "¡Vamonos!",
             "defaultForenames": {
                 "Tom": [
-                    "Roma",
                     "Tom",
-                    "Tomás",
                     "Ton",
                     "Tum"
                 ],
@@ -2262,14 +2189,12 @@
                     "Juan"
                 ],
                 "Mary": [
-                    "Lady",
                     "Mari",
                     "Maria",
                     "Marie",
                     "Marilyn",
                     "Maru",
-                    "María",
-                    "Park"
+                    "María"
                 ],
                 "Alice": [
                     "Alice",
@@ -2290,13 +2215,13 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
+            "Finland",
             "Nordic_Council_2016",
             "%C3%85land",
-            "Finland",
             "Sweden"
         ],
         "translations": {
-            "letsGo": "Let's go!",
+            "letsGo": "Nu går vi!",
             "defaultForenames": {
                 "Tom": [
                     "Tom",
@@ -2342,8 +2267,8 @@
         },
         "countriesEmployedIn": [
             "Sri_Lanka",
-            "India",
-            "Singapore"
+            "Singapore",
+            "India"
         ],
         "translations": {
             "letsGo": "போகலாம்!",
@@ -2458,20 +2383,15 @@
             "Turkey"
         ],
         "translations": {
-            "letsGo": "Let's go!",
+            "letsGo": "Hadi gidelim!",
             "defaultForenames": {
                 "Tom": [
-                    "Johm",
-                    "Roma",
-                    "Thomas",
                     "Tm",
                     "Tom",
                     "Toma",
-                    "Tomdur",
+                    "Tomas",
                     "Tomi",
                     "Tomla",
-                    "Tomluk",
-                    "Tomsuz",
                     "Tomu",
                     "Tomun",
                     "Tomve",
@@ -2484,7 +2404,6 @@
                     "Johnla"
                 ],
                 "Mary": [
-                    "Lady",
                     "Macy",
                     "Mar",
                     "Maria",
@@ -2496,7 +2415,6 @@
                     "Maryye",
                     "May",
                     "Meary",
-                    "Meri",
                     "Merry",
                     "Mery",
                     "Meryem"
@@ -2506,7 +2424,7 @@
                 ]
             },
             "constitutionQuery": [
-                "Nasılsın {}?",
+                "How are you {}?",
                 "Ne haber {}?"
             ]
         }
@@ -2519,8 +2437,8 @@
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Afghanistan",
-            "Turkmenistan"
+            "Turkmenistan",
+            "Afghanistan"
         ],
         "translations": {}
     },
@@ -2585,7 +2503,7 @@
             },
             "constitutionQuery": [
                 "آپ کیسے ہیں {}؟",
-                "What's up {}?"
+                "{} کیا ہو رہا ہے؟"
             ]
         }
     },
@@ -2617,7 +2535,7 @@
                 ]
             },
             "constitutionQuery": [
-                "{} قانداقراق؟",
+                "How are you {}?",
                 "{} نېمە بولدى؟"
             ]
         }

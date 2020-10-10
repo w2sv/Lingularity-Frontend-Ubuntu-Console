@@ -15,7 +15,7 @@
                 "Roel",
                 "Xhoel"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -30,7 +30,7 @@
                 "Alesia",
                 "Leandr"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Albanian"
     },
@@ -48,7 +48,7 @@
                 "Omar",
                 "Djame"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -63,7 +63,7 @@
                 "Kheira",
                 "Nadi"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Algerian"
     },
@@ -82,7 +82,7 @@
                 "Thiago",
                 "Santino"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -97,7 +97,7 @@
                 "Paula",
                 "Zoe"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Argentine"
     },
@@ -115,7 +115,7 @@
                 "Alexander",
                 "Elias"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -130,7 +130,7 @@
                 "Laura",
                 "Mia"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Austrian"
     },
@@ -149,7 +149,7 @@
                 "Aykhan",
                 "Tuna"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -164,7 +164,7 @@
                 "Inji",
                 "Daniz"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Azerbaijani"
     },
@@ -183,7 +183,7 @@
                 "Mikel",
                 "Iker"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -198,7 +198,7 @@
                 "Malen",
                 "Uxue"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": null
     },
@@ -213,7 +213,7 @@
                 "Aleksandr",
                 "Danyl"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "Артем",
                 "Михаил",
                 "Максим",
@@ -234,7 +234,7 @@
                 "Kseniya",
                 "Alisa"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "София",
                 "Мария",
                 "Полина",
@@ -261,7 +261,7 @@
                 "Mathis",
                 "Liam"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -276,7 +276,7 @@
                 "Marie",
                 "Camille"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Belgian"
     },
@@ -296,7 +296,7 @@
                 "Imran",
                 "Tarik"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -311,7 +311,7 @@
                 "Lejla",
                 "Esma"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Bosnian"
     },
@@ -323,14 +323,14 @@
                 "Pedro",
                 "Davi"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
                 "Maria",
                 "Ana"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Brazilian"
     },
@@ -352,7 +352,7 @@
                 "Oliver",
                 "James"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -367,7 +367,7 @@
                 "Abigail",
                 "Amili"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Canadian"
     },
@@ -388,7 +388,7 @@
                 "Maximiliano",
                 "Joaquín"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -403,22 +403,106 @@
                 "Agustina",
                 "Martina"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Chilean"
     },
     "China": {
         "maleForenames": {
             "latinSpelling": [
-                "安 An"
+                "An",
+                "Bo",
+                "Cheng",
+                "Feng",
+                "Gang",
+                "Guo",
+                "Hui",
+                "Jian",
+                "Jie",
+                "Kang",
+                "Liang",
+                "Ning",
+                "Peng",
+                "Tao",
+                "Wei",
+                "Yong",
+                "Wen"
             ],
-            "originalSpelling": []
+            "nativeSpelling": [
+                "安",
+                "波",
+                "成",
+                "德",
+                "东",
+                "峰",
+                "刚",
+                "国",
+                "辉",
+                "健",
+                "杰",
+                "康",
+                "亮",
+                "宁",
+                "鹏 ",
+                "涛",
+                "伟",
+                "勇",
+                "文"
+            ]
         },
         "femaleForenames": {
             "latinSpelling": [
-                "爱 Ai"
+                "Ai",
+                "Bi",
+                "Cai",
+                "Dan",
+                "Fang",
+                "Hong",
+                "Hui",
+                "Juan",
+                "Lan",
+                "Li",
+                "Li",
+                "Lian",
+                "Na",
+                "Ni",
+                "Qian",
+                "Qiong",
+                "Shan",
+                "Shu",
+                "Ting",
+                "Xia",
+                "Xian",
+                "Yan",
+                "Yung",
+                "Zhen"
             ],
-            "originalSpelling": []
+            "nativeSpelling": [
+                "爱",
+                "碧",
+                "彩",
+                "丹",
+                "芳",
+                "红",
+                "惠",
+                "娟",
+                "兰",
+                "莉",
+                "丽",
+                "莲",
+                "娜",
+                "妮",
+                "倩",
+                "琼",
+                "珊",
+                "淑",
+                "婷",
+                "霞",
+                "娴",
+                "嫣",
+                "云",
+                "贞"
+            ]
         },
         "demonym": "Chinese"
     },
@@ -436,7 +520,7 @@
                 "Nicolás",
                 "Jerónimo"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -451,7 +535,7 @@
                 "Salomé",
                 "Daniela"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Colombian"
     },
@@ -472,7 +556,7 @@
                 "Mateo",
                 "Leon"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -487,7 +571,7 @@
                 "Marta",
                 "Elena"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Croatian"
     },
@@ -506,7 +590,7 @@
                 "Marios",
                 "Dimitrios"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "Ανδρέας",
                 "Γεώργιος",
                 "Κωνσταντίνος",
@@ -532,7 +616,7 @@
                 "Ioanna",
                 "Kyriaki"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "Μαρία",
                 "Ελένη",
                 "Ανδρούλα",
@@ -561,7 +645,7 @@
                 "Ondřej",
                 "Lukáš"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -576,7 +660,7 @@
                 "Viktorie",
                 "Barbora"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Czech"
     },
@@ -595,7 +679,7 @@
                 "Carl",
                 "Valdemar"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -610,7 +694,7 @@
                 "Anna",
                 "Karla"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Danish"
     },
@@ -627,7 +711,7 @@
                 "Antonio",
                 "José"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -637,7 +721,7 @@
                 "Esperanza",
                 "Milagrosa"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Equatoguinean"
     },
@@ -655,7 +739,7 @@
                 "Henri",
                 "Markus"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -667,7 +751,7 @@
                 "Lenna",
                 "Anna"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Estonian"
     },
@@ -679,7 +763,7 @@
                 "Aron",
                 "Dávid"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -689,7 +773,7 @@
                 "Elsa",
                 "Isabella"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Faroese"
     },
@@ -707,7 +791,7 @@
                 "Onni",
                 "Hugo"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -722,7 +806,7 @@
                 "Emilia",
                 "Ella"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Finn"
     },
@@ -740,7 +824,7 @@
                 "Arthur",
                 "Nathan"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -755,7 +839,7 @@
                 "Manon",
                 "Rose"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "French"
     },
@@ -774,7 +858,7 @@
                 "Davit",
                 "Aleksandre"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "გიორგი",
                 "ნიკოლოზი",
                 "ანდრია",
@@ -796,7 +880,7 @@
                 "Ana",
                 "Elizaveta"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "მარიამი",
                 "ბარბარე",
                 "ელენე",
@@ -807,7 +891,7 @@
                 "ელიზავეტა"
             ]
         },
-        "demonym": null
+        "demonym": "Georgian"
     },
     "Germany": {
         "maleForenames": {
@@ -823,7 +907,7 @@
                 "Lukas",
                 "Luca"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -838,7 +922,7 @@
                 "Lena",
                 "Mila"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "German"
     },
@@ -856,7 +940,7 @@
                 "Peter",
                 "Inu"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -871,7 +955,7 @@
                 "Isabella",
                 "Kimmerna"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Greenlander"
     },
@@ -884,7 +968,7 @@
                 "Antonio",
                 "José"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -894,7 +978,7 @@
                 "Esperanza",
                 "Milagrosa"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Guinean"
     },
@@ -913,7 +997,7 @@
                 "Ricardo",
                 "Emmanue"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -928,7 +1012,7 @@
                 "Jessica",
                 "Rose-Merlin"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Haitian"
     },
@@ -948,7 +1032,7 @@
                 "Milán",
                 "Dominik"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -963,7 +1047,7 @@
                 "Zoé",
                 "Nóra"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Hungarian"
     },
@@ -978,7 +1062,7 @@
                 "Gunnar",
                 "Benedikt"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -990,7 +1074,7 @@
                 "Hekla",
                 "Emilía"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Icelander"
     },
@@ -1008,7 +1092,7 @@
                 "Advik",
                 "Arjun"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1023,7 +1107,7 @@
                 "Riya",
                 "Shanay"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Indian"
     },
@@ -1043,7 +1127,7 @@
                 "Yonatan",
                 "Lav"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1058,7 +1142,7 @@
                 "Lia",
                 "Esther"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Israeli"
     },
@@ -1076,7 +1160,7 @@
                 "Tommaso",
                 "Edoardo"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1091,7 +1175,7 @@
                 "Beatrice",
                 "Anna"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Italian"
     },
@@ -1110,7 +1194,18 @@
                 "Ryō",
                 "Yūto"
             ],
-            "originalSpelling": []
+            "nativeSpelling": [
+                "そう",
+                "いつき",
+                "レン",
+                "ひなた",
+                "あさひ",
+                "そうた",
+                "ゆうま",
+                "荒田",
+                "りょう",
+                "ゆうとう"
+            ]
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1124,7 +1219,17 @@
                 "Yuna",
                 "Kaed"
             ],
-            "originalSpelling": []
+            "nativeSpelling": [
+                "さくら",
+                "リコ",
+                "葵",
+                "わかな",
+                "凛",
+                "アンナ",
+                "ひまり",
+                "ゆうな",
+                "カエデ"
+            ]
         },
         "demonym": null
     },
@@ -1143,7 +1248,7 @@
                 "Arsen",
                 "Amïr"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "Ерacыл",
                 "Алиxан",
                 "Нұрасыл",
@@ -1168,7 +1273,7 @@
                 "Ayaulym",
                 "Sezim"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "Айзeрe",
                 "Інжу",
                 "Айару",
@@ -1198,7 +1303,7 @@
                 "Emīls",
                 "Daniels"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1213,7 +1318,7 @@
                 "Anastasija",
                 "Paula"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Latvian"
     },
@@ -1224,13 +1329,13 @@
                 "Jonas",
                 "David"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
                 "Anna"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Liechtensteiner"
     },
@@ -1248,7 +1353,7 @@
                 "Gabrielius",
                 "Dovydas"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1263,7 +1368,7 @@
                 "Ema",
                 "Urtė"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Lithuanian"
     },
@@ -1278,7 +1383,7 @@
                 "Tom",
                 "Ben"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1290,7 +1395,7 @@
                 "Charlotte",
                 "Emily"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Luxembourger"
     },
@@ -1310,7 +1415,7 @@
                 "Sekou",
                 "Souleyman"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1325,7 +1430,7 @@
                 "Fanta",
                 "Kadiato"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Malian"
     },
@@ -1340,7 +1445,7 @@
                 "Nicolás",
                 "Miguel"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1348,7 +1453,7 @@
                 "Valentina",
                 "María"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Mexican"
     },
@@ -1366,7 +1471,7 @@
                 "Nikita",
                 "Michael"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1381,7 +1486,7 @@
                 "Valeria",
                 "Gabriela"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Moldovan"
     },
@@ -1394,7 +1499,7 @@
                 "Ethan",
                 "Aaron"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1404,7 +1509,7 @@
                 "Emma",
                 "Anna"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Monacan"
     },
@@ -1422,7 +1527,7 @@
                 "Petar",
                 "Luka"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "Никола",
                 "Марко",
                 "Драган",
@@ -1448,7 +1553,7 @@
                 "Vesna",
                 "Ljiljana"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "Јелена",
                 "Милица",
                 "Марија",
@@ -1480,13 +1585,24 @@
                 "Levi",
                 "Luuk"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
-                "Anna"
+                "Anna",
+                "Emma",
+                "Tess",
+                "Sophie",
+                "Julia",
+                "Zoë",
+                "Evi",
+                "Mila",
+                "Sara",
+                "Eva",
+                "Fenna",
+                "Lotte"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Netherlands"
     },
@@ -1509,7 +1625,7 @@
                 "Ilija",
                 "Stefan"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1524,7 +1640,7 @@
                 "Katerina",
                 "Ivana"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Macedonian"
     },
@@ -1542,7 +1658,7 @@
                 "Noah",
                 "Aksel"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1557,7 +1673,7 @@
                 "Ingrid",
                 "Emilie"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Norwegian"
     },
@@ -1575,7 +1691,7 @@
                 "Saqib",
                 "Nomaa"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1590,7 +1706,7 @@
                 "Sakeena",
                 "Zainab"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Pakistani"
     },
@@ -1609,7 +1725,7 @@
                 "David",
                 "Césa"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1624,7 +1740,7 @@
                 "Raquel",
                 "Noemí"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Paraguayan"
     },
@@ -1642,7 +1758,7 @@
                 "Jesús",
                 "Juan"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1657,7 +1773,7 @@
                 "Luciana",
                 "Alexandra"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Peruvian"
     },
@@ -1675,7 +1791,7 @@
                 "Alexander",
                 "John"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1690,7 +1806,7 @@
                 "Janine",
                 "Sofia"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Filipino"
     },
@@ -1708,7 +1824,7 @@
                 "Wojciech",
                 "Kacper"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1723,7 +1839,7 @@
                 "Aleksandra",
                 "Natalia"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Polish"
     },
@@ -1741,7 +1857,7 @@
                 "Guilherme",
                 "Gabriel"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1756,7 +1872,7 @@
                 "Margarida",
                 "Sofia"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Portuguese"
     },
@@ -1774,7 +1890,7 @@
                 "Ionuț",
                 "Darius"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1789,7 +1905,7 @@
                 "Ana",
                 "Gabriela"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Romanian"
     },
@@ -1807,7 +1923,7 @@
                 "Andrey",
                 "Yegor"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "Александр",
                 "Максим",
                 "Артём",
@@ -1832,7 +1948,7 @@
                 "Darya",
                 "Alexandra"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "София",
                 "Мария",
                 "Анна",
@@ -1863,7 +1979,7 @@
                 "Dušan",
                 "Dejan"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "Драган",
                 "Милан",
                 "Александар",
@@ -1889,7 +2005,7 @@
                 "Ana",
                 "Gordana"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "Милица",
                 "Јелена",
                 "Марија",
@@ -1920,7 +2036,7 @@
                 "Matej",
                 "Matúš"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1935,7 +2051,7 @@
                 "Kristína",
                 "Simona"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Slovak"
     },
@@ -1953,7 +2069,7 @@
                 "Jan",
                 "Lovro"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -1968,7 +2084,7 @@
                 "Neža",
                 "Zoj"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Slovene"
     },
@@ -1986,7 +2102,7 @@
                 "Banele",
                 "Samkel"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -2001,7 +2117,7 @@
                 "Faith",
                 "Lesed"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "South"
     },
@@ -2019,7 +2135,7 @@
                 "Gun-woo",
                 "Ji-hoon"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "민준",
                 "서준",
                 "주원",
@@ -2045,7 +2161,7 @@
                 "Ji-ah",
                 "Eun-seo"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "서연",
                 "서윤",
                 "지우",
@@ -2074,7 +2190,7 @@
                 "Mateo",
                 "David"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -2089,7 +2205,7 @@
                 "Julia",
                 "Noa"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Spanish"
     },
@@ -2109,7 +2225,7 @@
                 "Charlie",
                 "Noah"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -2124,7 +2240,7 @@
                 "Ebba",
                 "Wilma"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Swede"
     },
@@ -2142,7 +2258,7 @@
                 "Louis",
                 "Julian"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -2157,7 +2273,7 @@
                 "Laura",
                 "Mila"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Swiss"
     },
@@ -2170,7 +2286,7 @@
                 "Abdullo",
                 "Abubakr"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -2181,7 +2297,7 @@
                 "Anohito",
                 "Indira"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Tajikistani"
     },
@@ -2202,7 +2318,7 @@
                 "Emirhan",
                 "Eymen"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -2217,7 +2333,7 @@
                 "Belinay",
                 "Nehi"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Turk"
     },
@@ -2237,7 +2353,7 @@
                 "Andriy",
                 "Oleksandr"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "Артем",
                 "Матвій",
                 "Максим",
@@ -2262,7 +2378,7 @@
                 "Polina",
                 "Luna"
             ],
-            "originalSpelling": [
+            "nativeSpelling": [
                 "Софія",
                 "Анастасія",
                 "Анна",
@@ -2290,7 +2406,7 @@
                 "Mateo",
                 "Joaquín"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -2305,7 +2421,7 @@
                 "Ana Paula",
                 "Micaela"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Uruguayan"
     },
@@ -2324,7 +2440,7 @@
                 "Daniel",
                 "Juan"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
@@ -2339,7 +2455,7 @@
                 "Mariana",
                 "Antonella"
             ],
-            "originalSpelling": []
+            "nativeSpelling": []
         },
         "demonym": "Venezuelan"
     },

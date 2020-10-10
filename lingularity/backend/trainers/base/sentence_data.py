@@ -5,7 +5,6 @@ from collections import Counter
 
 import numpy as np
 from textacy.similarity import levenshtein
-from tqdm import tqdm
 
 from lingularity.backend.ops.data_mining.downloading import download_sentence_data
 from lingularity.backend import BASE_LANGUAGE_DATA_PATH

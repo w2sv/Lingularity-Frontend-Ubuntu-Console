@@ -45,7 +45,7 @@ def _scrape_forenames(forename_possessing_row_index: int) -> Dict[str, List[str]
     BRACKETS = ['(', ')']
 
     possesses_foreign_transcription = False
-    forenames = {'latinSpelling': [], 'originalSpelling': []}
+    forenames = {'latinSpelling': [], 'nativeSpelling': []}
 
     while all(exit_element not in (row := popular_forenames_page_source[forename_possessing_row_index]) for exit_element in EXIT_ELEMENTS):
         truncated_row = row[5:] if 'href' in row else row[3:]  # <td><a href... -> a href...
