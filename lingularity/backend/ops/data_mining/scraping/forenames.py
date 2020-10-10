@@ -42,7 +42,7 @@ def _get_forename_block_preceding_row_indices(country: str) -> List[int]:
 
 def _scrape_forenames(forename_possessing_row_index: int) -> Dict[str, List[str]]:
     EXIT_ELEMENTS = ['sup class="reference"', '</td></tr>']
-    BRACKETS = ['(', ')']
+    BRACKETS = list('()')
 
     possesses_foreign_transcription = False
     forenames = {'latinSpelling': [], 'nativeSpelling': []}

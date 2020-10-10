@@ -18,7 +18,7 @@ _country_metadata: CountryMetadata = None
 
 
 if len(os.listdir(METADATA_DIR_PATH)):
-    language_metadata, _country_metadata = list(map(_load_metadata, ['languages', 'countries']))
+    language_metadata, _country_metadata = list(map(_load_metadata, ['language', 'country']))
 
 
 def get_forename_conversion_data(language: str) -> Optional[ForenameConversionData]:

@@ -9,6 +9,7 @@ from textacy.similarity import levenshtein
 from lingularity.backend.ops.data_mining.downloading import download_sentence_data
 from lingularity.backend import BASE_LANGUAGE_DATA_PATH
 from lingularity.backend.trainers.base.forename_conversion import DEFAULT_FORENAMES
+from lingularity.backend.utils.iterables import longest_value
 from lingularity.backend.utils.strings import (
     get_meaningful_tokens,
     is_of_latin_script,
@@ -92,26 +93,31 @@ class SentenceData(np.ndarray):
         return self._deduce_proper_noun_translations_non_latin_script_language
 
     def _deduce_proper_noun_translations_latin_script_language(self, proper_noun: str) -> Set[str]:
+        MIN_CANDIDATE_PN_LEVENSHTEIN = 0.5
+        MAX_FILTERED_CANDIDATE_CONFIRMED_TRANSLATION_LEVENSHTEIN = 0.8
+
         candidates = set()
         lowercase_words_cache = set()
 
         for english_sentence, foreign_language_sentence in zip(self.english_sentences, self.foreign_language_sentences):
             if proper_noun in get_meaningful_tokens(english_sentence, apostrophe_splitting=True):
                 for token in get_meaningful_tokens(foreign_language_sentence, apostrophe_splitting=True):
-                    if token.istitle() and levenshtein(proper_noun, token) >= 0.5:
+                    if token.istitle() and levenshtein(proper_noun, token) >= MIN_CANDIDATE_PN_LEVENSHTEIN:
                         candidates.add(token)
                     elif token.islower():
                         lowercase_words_cache.add(token)
 
         filtered_candidates = set()
         for candidate in filter(lambda candidate: candidate.lower() not in lowercase_words_cache, candidates):
-            if all(levenshtein_score <= 0.8 for levenshtein_score in map(lambda filtered_candidate: levenshtein(filtered_candidate, candidate), filtered_candidates)):
+            if all(levenshtein_score <= MAX_FILTERED_CANDIDATE_CONFIRMED_TRANSLATION_LEVENSHTEIN for levenshtein_score in map(lambda filtered_candidate: levenshtein(filtered_candidate, candidate), filtered_candidates)):
                 filtered_candidates.add(candidate)
 
         return filtered_candidates
 
     def _deduce_proper_noun_translations_non_latin_script_language(self, proper_noun: str) -> Set[str]:
         CANDIDATE_BAN_INDICATION = -1
+        MIN_CANDIDATE_CONFIRMATION_OCCURRENCE = 20
+        MAGIC_NUMBER = 3
 
         translation_candidates = set()
         translation_candidate_2_n_occurrences = Counter()
@@ -128,9 +134,9 @@ class SentenceData(np.ndarray):
 
                     if len(intersections) > 1:
                         n_occurrences = list(map(translation_candidate_2_n_occurrences.get, intersections))
-                        if any(occurrence >= 20 for occurrence in n_occurrences):
+                        if any(occurrence >= MIN_CANDIDATE_CONFIRMATION_OCCURRENCE for occurrence in n_occurrences):
                             for n_occurrence, candidate in zip(n_occurrences, intersections):
-                                if n_occurrence == 3:
+                                if n_occurrence == MAGIC_NUMBER:
                                     translation_candidates.remove(candidate)
                                     translation_candidate_2_n_occurrences[candidate] = CANDIDATE_BAN_INDICATION
 
@@ -138,7 +144,7 @@ class SentenceData(np.ndarray):
                     sentence_substrings = set(continuous_substrings(foreign_language_sentence))
                     for i, forename_comprising_sentence_substrings in enumerate(translation_comprising_sentence_substrings_cache):
                         if len((substring_intersection := sentence_substrings.intersection(forename_comprising_sentence_substrings))):
-                            forename_translation = sorted(substring_intersection, key=len, reverse=True)[0]
+                            forename_translation = longest_value(substring_intersection)
                             if translation_candidate_2_n_occurrences[forename_translation] != CANDIDATE_BAN_INDICATION:
                                 translation_candidates.add(forename_translation)
                                 translation_candidate_2_n_occurrences[forename_translation] += 1
@@ -200,4 +206,8 @@ class SentenceData(np.ndarray):
 
 
 if __name__ == '__main__':
-    print(SentenceData('Hebrew').deduce_forename_translations())
+    from time import time
+
+    t1 = time()
+    translations = SentenceData('Hebrew').deduce_forename_translations()
+    print(time() - t1)
