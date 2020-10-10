@@ -121,14 +121,13 @@ class SentenceData(np.ndarray):
 
         translation_candidates = set()
         translation_candidate_2_n_occurrences = Counter()
-        candidate_lengths = set()
         translation_comprising_sentence_substrings_cache: List[Set[str]] = []
         for english_sentence, foreign_language_sentence in zip(self.english_sentences, self.foreign_language_sentences):
             if proper_noun in get_meaningful_tokens(english_sentence, apostrophe_splitting=True):
                 foreign_language_sentence = strip_special_characters(foreign_language_sentence, include_dash=True, include_apostrophe=True).replace(' ', '')
 
                 # skip sentences possessing substring already being present in candidates list
-                if len((intersections := translation_candidates.intersection(continuous_substrings(foreign_language_sentence, lengths=candidate_lengths)))):
+                if len((intersections := translation_candidates.intersection(continuous_substrings(foreign_language_sentence, lengths=set(map(len, translation_candidates)))))):
                     for intersection in intersections:
                         translation_candidate_2_n_occurrences[intersection] += 1
 
@@ -148,12 +147,12 @@ class SentenceData(np.ndarray):
                             if translation_candidate_2_n_occurrences[forename_translation] != CANDIDATE_BAN_INDICATION:
                                 translation_candidates.add(forename_translation)
                                 translation_candidate_2_n_occurrences[forename_translation] += 1
-                                candidate_lengths.add(len(forename_translation))
 
                                 del translation_comprising_sentence_substrings_cache[i]
                                 break
                     else:
                         translation_comprising_sentence_substrings_cache.append(sentence_substrings)
+
         return self._strip_overlaps(translation_candidates)
 
     @staticmethod
@@ -210,4 +209,5 @@ if __name__ == '__main__':
 
     t1 = time()
     translations = SentenceData('Hebrew').deduce_forename_translations()
+    print(translations)
     print(time() - t1)
