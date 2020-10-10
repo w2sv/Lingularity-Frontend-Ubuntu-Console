@@ -1,6 +1,11 @@
+import socket
+
 from googletrans import LANGUAGES, Translator
 
 from . import GoogleOp
+
+
+socket.setdefaulttimeout(15 * 60)
 
 
 class GoogleTranslator(GoogleOp):
@@ -9,13 +14,13 @@ class GoogleTranslator(GoogleOp):
 
         self._translator = Translator()
 
-    def translate(self, text: str, src: str, dest: str) -> str:
+    def translate(self, text: str, dest: str, src: str) -> str:
         """ Args:
                 text: to be translated
                 src: titular source language
                 dest: titular destination language """
 
-        return self._translator.translate(text, *map(self._get_identifier, [src, dest])).text
+        return self._translator.translate(text, *map(self._get_identifier, [dest, src])).text
 
 
 google_translator = GoogleTranslator()

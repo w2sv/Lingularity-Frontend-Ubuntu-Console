@@ -1,19 +1,22 @@
 import os
 from functools import cached_property
-from typing import Optional, List, Iterator, Iterable, Set
+from typing import Optional, List, Set, Callable, Iterable
 from collections import Counter
-from itertools import chain, islice
-from bisect import insort
 
 import numpy as np
-from more_itertools import unzip
 from textacy.similarity import levenshtein
 from tqdm import tqdm
 
 from lingularity.backend.ops.data_mining.downloading import download_sentence_data
 from lingularity.backend import BASE_LANGUAGE_DATA_PATH
-from lingularity.backend.utils.strings import get_meaningful_tokens, is_of_latin_script, strip_special_characters, find_common_start
-from lingularity.backend.utils.iterables import windowed, longest_value
+from lingularity.backend.trainers.base.forename_conversion import DEFAULT_FORENAMES
+from lingularity.backend.utils.strings import (
+    get_meaningful_tokens,
+    is_of_latin_script,
+    strip_special_characters,
+    continuous_substrings,
+    longest_continuous_partial_overlap
+)
 
 
 class SentenceData(np.ndarray):
@@ -69,90 +72,90 @@ class SentenceData(np.ndarray):
     # -------------------
     # Translation(s) deduction
     # -------------------
-    def deduce_forename_translations(self, forename: str) -> List[str]:
-        if self.foreign_language_sentences.uses_latin_script:
-            return self._deduce_forename_translations_latin_script_language(forename)
-        return self._deduce_forename_translations_non_latin_script_language(forename)
+    def deduce_forename_translations(self) -> List[Set[str]]:
+        candidates_list: List[Set[str]] = []
 
-    def _deduce_forename_translations_latin_script_language(self, forename: str) -> List[str]:
-        candidates_2_occurrences = Counter()
+        for default_forename in DEFAULT_FORENAMES:
+            candidates_list.append(self._proper_noun_translation_deduction_method(default_forename))
+
+        for i, candidates in enumerate(candidates_list):
+            for candidate in candidates:
+                for j, alternating_forename_candidates in enumerate(candidates_list):
+                    if i != j:
+                        candidates_list[j] = set(filter(lambda alternating_forename_candidate: candidate not in alternating_forename_candidate, alternating_forename_candidates))
+
+        return candidates_list
+
+    @property
+    def _proper_noun_translation_deduction_method(self) -> Callable[[str], Set[str]]:
+        if self.foreign_language_sentences.uses_latin_script:
+            return self._deduce_proper_noun_translations_latin_script_language
+        return self._deduce_proper_noun_translations_non_latin_script_language
+
+    def _deduce_proper_noun_translations_latin_script_language(self, proper_noun: str) -> Set[str]:
+        candidates = set()
+        lowercase_words_cache = set()
 
         for english_sentence, foreign_language_sentence in zip(self.english_sentences, self.foreign_language_sentences):
-            if forename in get_meaningful_tokens(english_sentence, apostrophe_splitting=True):
-                for title_word in filter(lambda token: token.istitle(), get_meaningful_tokens(foreign_language_sentence, apostrophe_splitting=True)):
-                    candidates_2_occurrences[title_word] += 1
+            if proper_noun in get_meaningful_tokens(english_sentence, apostrophe_splitting=True):
+                for token in get_meaningful_tokens(foreign_language_sentence, apostrophe_splitting=True):
+                    if token.istitle() and levenshtein(proper_noun, token) >= 0.5:
+                        candidates.add(token)
+                    elif token.islower():
+                        lowercase_words_cache.add(token)
 
-                # return most common candidate if corresponding occurrences > 200% of sum(max_occurrences[1:4])
-                if len(candidates_2_occurrences) >= 4:
-                    most_common_candidates, occurrences = unzip(candidates_2_occurrences.most_common(4))
-                    if next(occurrences) / sum(occurrences) >= 2.0:
-                        return [next(most_common_candidates)]
-
-        filtered_candidates = []
-        for candidate, occurrences in candidates_2_occurrences.most_common():
-            if levenshtein(forename, candidate) >= 0.4:
-                if all(levenshtein_score <= 0.6 for levenshtein_score in map(lambda filtered_candidate: levenshtein(filtered_candidate, candidate), filtered_candidates)):
-                    filtered_candidates.append(candidate)
+        filtered_candidates = set()
+        for candidate in filter(lambda candidate: candidate.lower() not in lowercase_words_cache, candidates):
+            if all(levenshtein_score <= 0.8 for levenshtein_score in map(lambda filtered_candidate: levenshtein(filtered_candidate, candidate), filtered_candidates)):
+                filtered_candidates.add(candidate)
 
         return filtered_candidates
 
-    def _deduce_forename_translations_non_latin_script_language(self, forename: str) -> List[str]:
-        def continuous_substrings(string: str, lengths: Optional[Iterable[int]] = None) -> Iterator[str]:
-            """
-                Args:
-                    string: string to extract substrings from
-                    lengths: Iterable of desired substring lengths,
-                        may contain lengths > len(string) which will be automatically ignored
+    def _deduce_proper_noun_translations_non_latin_script_language(self, proper_noun: str) -> Set[str]:
+        CANDIDATE_BAN_INDICATION = -1
 
-                Returns:
-                    Iterator of entirety of continuous substrings of min length = 2 comprised by string
-                    sorted with respect to their lengths, e.g.:
-                        continuous_substrings('path') -> Iterator[
-                            'pa', 'at', 'th',
-                            'pat', 'ath',
-                            'path'
-                        ] """
+        translation_candidates = set()
+        translation_candidate_2_n_occurrences = Counter()
+        candidate_lengths = set()
+        translation_comprising_sentence_substrings_cache: List[Set[str]] = []
+        for english_sentence, foreign_language_sentence in zip(self.english_sentences, self.foreign_language_sentences):
+            if proper_noun in get_meaningful_tokens(english_sentence, apostrophe_splitting=True):
+                foreign_language_sentence = strip_special_characters(foreign_language_sentence, include_dash=True, include_apostrophe=True).replace(' ', '')
 
-            if lengths is None:
-                lengths = range(2, len(string) + 1)
-            else:
-                lengths = filter(lambda val: val > 1, lengths)
+                # skip sentences possessing substring already being present in candidates list
+                if len((intersections := translation_candidates.intersection(continuous_substrings(foreign_language_sentence, lengths=candidate_lengths)))):
+                    for intersection in intersections:
+                        translation_candidate_2_n_occurrences[intersection] += 1
 
-            return map(''.join, chain.from_iterable(map(lambda length: windowed(string, length), lengths)))
+                    if len(intersections) > 1:
+                        n_occurrences = list(map(translation_candidate_2_n_occurrences.get, intersections))
+                        if any(occurrence >= 20 for occurrence in n_occurrences):
+                            for n_occurrence, candidate in zip(n_occurrences, intersections):
+                                if n_occurrence == 3:
+                                    translation_candidates.remove(candidate)
+                                    translation_candidate_2_n_occurrences[candidate] = CANDIDATE_BAN_INDICATION
 
-        translation_candidates, translation_lengths = (set() for _ in range(2))
-        forename_comprising_sentence_substrings_cache: List[Set[str]] = []
-        for english_sentence, foreign_language_sentence in tqdm(zip(self.english_sentences, self.foreign_language_sentences)):
-            if forename in get_meaningful_tokens(english_sentence, apostrophe_splitting=True):
-                foreign_language_sentence = strip_special_characters(foreign_language_sentence, include_dash=True, include_apostrophe=True)
-
-                # skip sentences possessing substring already being confirmed as substring
-                if len((intersection := translation_candidates.intersection(continuous_substrings(foreign_language_sentence, lengths=translation_lengths)))):
-                    print(translation_candidates, intersection)
-                    continue
-
-                sentence_substrings = set(continuous_substrings(foreign_language_sentence))
-                for i, forename_comprising_sentence_substrings in enumerate(forename_comprising_sentence_substrings_cache):
-                    if len((substring_intersection := sentence_substrings.intersection(forename_comprising_sentence_substrings))):
-                        forename_translation = sorted(substring_intersection, key=len, reverse=True)[0]
-                        translation_candidates.add(forename_translation)
-                        translation_lengths.add(len(forename_translation))
-
-                        del forename_comprising_sentence_substrings_cache[i]
-                        break
                 else:
-                    forename_comprising_sentence_substrings_cache.append(sentence_substrings)
+                    sentence_substrings = set(continuous_substrings(foreign_language_sentence))
+                    for i, forename_comprising_sentence_substrings in enumerate(translation_comprising_sentence_substrings_cache):
+                        if len((substring_intersection := sentence_substrings.intersection(forename_comprising_sentence_substrings))):
+                            forename_translation = sorted(substring_intersection, key=len, reverse=True)[0]
+                            if translation_candidate_2_n_occurrences[forename_translation] != CANDIDATE_BAN_INDICATION:
+                                translation_candidates.add(forename_translation)
+                                translation_candidate_2_n_occurrences[forename_translation] += 1
+                                candidate_lengths.add(len(forename_translation))
 
-        return list(translation_candidates)
+                                del translation_comprising_sentence_substrings_cache[i]
+                                break
+                    else:
+                        translation_comprising_sentence_substrings_cache.append(sentence_substrings)
+        return self._strip_overlaps(translation_candidates)
 
-    def _strip_overlaps(self, sorted_candidate_list: List[str]):
-        for i, candidate in enumerate(sorted_candidate_list):
-            longest_overlap = longest_value(map(find_common_start, *islice(sorted_candidate_list, i+1, None)))
-            if len(longest_overlap):
-                stripped_candidate_list = list(filter(lambda candidate: longest_overlap not in candidate, sorted_candidate_list))
-                insort(stripped_candidate_list, longest_overlap)
-                return self.strip_overlaps(stripped_candidate_list)
-        return sorted_candidate_list
+    @staticmethod
+    def _strip_overlaps(translation_candidates: Iterable[str]) -> Set[str]:
+        if longest_partial_overlap := longest_continuous_partial_overlap(translation_candidates):
+            return SentenceData._strip_overlaps(list(filter(lambda candidate: longest_partial_overlap not in candidate, translation_candidates)) + [longest_partial_overlap])
+        return set(translation_candidates)
 
     # -------------------
     # Columns
@@ -198,10 +201,4 @@ class SentenceData(np.ndarray):
 
 
 if __name__ == '__main__':
-    s = SentenceData('Chinese')
-
-    translation = s.deduce_forename_translations('Tom')
-    print(translation)
-
-    translation = s.deduce_forename_translations('Mary')
-    print(translation)
+    print(SentenceData('Hebrew').deduce_forename_translations())

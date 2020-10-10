@@ -321,21 +321,12 @@
                 "Enzo",
                 "João",
                 "Pedro",
-                "João",
-                "João",
-                "Davi",
                 "Davi"
             ],
             "originalSpelling": []
         },
         "femaleForenames": {
             "latinSpelling": [
-                "Maria",
-                "Maria",
-                "Maria",
-                "Maria",
-                "Maria",
-                "Ana",
                 "Maria",
                 "Ana"
             ],
@@ -679,6 +670,28 @@
             "originalSpelling": []
         },
         "demonym": "Estonian"
+    },
+    "Faroe_Islands": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Benjamin",
+                "Liam",
+                "Aron",
+                "Dávid"
+            ],
+            "originalSpelling": []
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Eva",
+                "Emma",
+                "Maria",
+                "Elsa",
+                "Isabella"
+            ],
+            "originalSpelling": []
+        },
+        "demonym": "Faroese"
     },
     "Finland": {
         "maleForenames": {
@@ -1105,7 +1118,6 @@
                 "Riko",
                 "Aoi",
                 "Wakana",
-                "Sakura",
                 "Rin",
                 "Anna",
                 "Himari",
@@ -1334,7 +1346,6 @@
             "latinSpelling": [
                 "Ximena",
                 "Valentina",
-                "María",
                 "María"
             ],
             "originalSpelling": []
@@ -2310,7 +2321,6 @@
                 "Diego",
                 "Gabriel",
                 "Alejandro",
-                "Diego",
                 "Daniel",
                 "Juan"
             ],
@@ -2334,6 +2344,5 @@
         "demonym": "Venezuelan"
     },
     "Vietnam": null,
-    "Vojvodina": null,
-    "the_Faroe_Islands": null
+    "Vojvodina": null
 }

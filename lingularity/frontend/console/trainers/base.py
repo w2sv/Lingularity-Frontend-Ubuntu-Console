@@ -12,7 +12,7 @@ from lingularity.backend.trainers import TrainerBackend
 from lingularity.backend.trainers.vocable_trainer import VocableEntry
 from lingularity.backend.metadata import language_metadata
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.utils.strings import find_common_start, strip_multiple
+from lingularity.backend.utils.strings import common_start, strip_multiple
 from lingularity.frontend.console.utils.output import (BufferPrint, centered_print,
                                                        DEFAULT_VERTICAL_VIEW_OFFSET, clear_screen,
                                                        get_max_line_length_based_indentation)
@@ -121,7 +121,7 @@ class TrainerConsoleFrontend(ABC):
         centered_print('SELECT TEXT-TO-SPEECH LANGUAGE VARIETY\n\n')
 
         assert self._backend.tts.language_varieties is not None
-        common_start_length = len(find_common_start(*self._backend.tts.language_varieties))
+        common_start_length = len(common_start(self._backend.tts.language_varieties) or '')
         processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._backend.tts.language_varieties]
         indentation = get_max_line_length_based_indentation(processed_varieties)
         for variety in processed_varieties:

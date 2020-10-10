@@ -4,9 +4,9 @@ from collections import defaultdict, OrderedDict
 from functools import partial
 
 from tqdm import tqdm
+from textacy.similarity import levenshtein
 
 from . import METADATA_DIR_PATH
-
 from lingularity.backend.trainers.base.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.metadata.types import LanguageMetadata, CountryMetadata
 from lingularity.backend.trainers.base import SentenceData
@@ -38,7 +38,6 @@ def _mine_metadata():
         sentence_data = SentenceData(language)
 
         language_sub_dict['properties'] = {}
-        language_sub_dict['properties']['isAgglutinative'] = False
         language_sub_dict['properties']['usesLatinScript'] = sentence_data.foreign_language_sentences.uses_latin_script
 
         _mine_and_set_forename_conversion_data(language)
@@ -69,40 +68,30 @@ def _mine_and_set_translations(language: str, sentence_data: SentenceData):
 
     translation_sub_dict = {}
 
-    if google_translator.is_available_for(language):
+    if google_translator.available_for(language):
         translate = partial(google_translator.translate, src='English', dest=language)
 
         # lets go
         translation_sub_dict["letsGo"] = translate("Let's go!")
 
         # default forenames
-        translation_sub_dict["defaultForenames"] = _get_default_forename_translations(sentence_data, translation_function=translate)
+        translation_sub_dict["defaultForenames"] = _get_default_forename_translations(sentence_data, language)
 
         # constitution query
         constitution_queries = map(translate, [f"How are you {DEFAULT_FORENAMES[0]}?", f"What's up {DEFAULT_FORENAMES[0]}?"])
-        translation_sub_dict["constitutionQuery"] = list(map(lambda query: replace_multiple(query, strings=[forename_transcriptions[0], DEFAULT_FORENAMES[0]], replacement=FORENAME_PLACEHOLDER), constitution_queries))
+        translation_sub_dict["constitutionQuery"] = list(map(lambda query: replace_multiple(query, strings=translation_sub_dict["defaultForenames"]["Tom"] + [DEFAULT_FORENAMES[0]], replacement=FORENAME_PLACEHOLDER), constitution_queries))
 
     language_metadata[language]['translations'] = translation_sub_dict
 
 
-def _get_default_forename_translations(sentence_data: SentenceData, translation_function: Callable) -> List[Optional[str]]:
-    translations: List[Optional[str]] = []
+def _get_default_forename_translations(sentence_data: SentenceData, language: str) -> Dict[str, List[str]]:
+    forename_2_translations = {}
+    for forename, translations in zip(DEFAULT_FORENAMES, sentence_data.deduce_forename_translations()):
+        translations = set(filter(lambda translation: levenshtein(forename, google_translator.translate(translation, dest='English', src=language)) >= 0.45, translations))
+        translations.add(google_translator.translate(forename, dest=language, src='English'))
+        forename_2_translations[forename] = sorted(translations)
 
-    for forename_index, default_forename in enumerate(DEFAULT_FORENAMES):
-        default_forename_translation = None
-
-        if sentence_data.foreign_language_sentences.uses_latin_script and sentence_data.foreign_language_sentences.comprises_tokens(query_tokens=[default_forename]):
-            default_forename_translation = default_forename
-
-        elif sentence_data.foreign_language_sentences.comprises_tokens([google_translation := translation_function(default_forename)]):
-            default_forename_translation = google_translation
-
-        elif sentence_data_translation := sentence_data.deduce_forename_translations(default_forename) is not None:
-            default_forename_translation = sentence_data_translation
-
-        translations.append(default_forename_translation)
-
-    return translations
+    return forename_2_translations
 
 
 if __name__ == '__main__':

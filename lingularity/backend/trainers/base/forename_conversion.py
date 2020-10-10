@@ -4,7 +4,8 @@ from typing import Optional, List, Iterator
 from lingularity.backend.metadata import ForenameConversionData, get_forename_conversion_data, language_metadata
 
 
-DEFAULT_FORENAMES = ('Tom', 'Mary')
+DEFAULT_FORENAMES = ('Tom', 'John', 'Mary', 'Alice')
+_DEFAULT_SURNAME = 'Jackson'
 
 
 class ForenameConvertor:

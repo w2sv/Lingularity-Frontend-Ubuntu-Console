@@ -4,7 +4,6 @@
             "tatoebaProject": "afr-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
@@ -13,10 +12,23 @@
         ],
         "translations": {
             "letsGo": "Kom ons gaan!",
-            "defaultForenames": [
-                "Tom",
-                "Maria"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Toom"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Marie",
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Hoe gaan dit met jou {}?",
                 "Wat gaan aan {}?"
@@ -28,25 +40,40 @@
             "tatoebaProject": "sqi-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Italy",
             "Albania",
-            "Romania",
+            "Serbia",
+            "North_Macedonia",
             "Kosovo",
+            "Romania",
             "Croatia",
             "Montenegro",
-            "North_Macedonia",
-            "Serbia"
+            "Italy"
         ],
         "translations": {
             "letsGo": "Shkojme!",
-            "defaultForenames": [
-                "Tom",
-                "Maria"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Tomi",
+                    "Tomin",
+                    "Tomit"
+                ],
+                "John": [
+                    "Gjoni"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Marian",
+                    "Marisë",
+                    "Meri"
+                ],
+                "Alice": [
+                    "Alisa"
+                ]
+            },
             "constitutionQuery": [
                 "Si jeni {}",
                 "Çfarë ka {}i?"
@@ -58,7 +85,6 @@
             "tatoebaProject": "arq-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [],
@@ -69,7 +95,6 @@
             "tatoebaProject": "ara-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -77,7 +102,22 @@
         ],
         "translations": {
             "letsGo": "لنذهب!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "توم",
+                    "طوم"
+                ],
+                "John": [
+                    "جون",
+                    "يوحنا"
+                ],
+                "Mary": [
+                    "ماري"
+                ],
+                "Alice": [
+                    "أليس"
+                ]
+            },
             "constitutionQuery": [
                 "كيف حالك {}",
                 "ما الأمر يا {}؟"
@@ -89,7 +129,6 @@
             "tatoebaProject": "asm-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -102,16 +141,37 @@
             "tatoebaProject": "aze-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
-            "usesLatinScript": false
+            "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Azerbaijan",
-            "Russia"
+            "Russia",
+            "Azerbaijan"
         ],
         "translations": {
             "letsGo": "Gedək!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Toma",
+                    "Tomas",
+                    "Tomla",
+                    "Tomu",
+                    "Tomun",
+                    "Toy"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Mariyə",
+                    "Mary",
+                    "Meri",
+                    "Məryəm"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "{} necesen",
                 "{} nədir?"
@@ -123,7 +183,6 @@
             "tatoebaProject": "eus-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
@@ -131,10 +190,29 @@
         ],
         "translations": {
             "letsGo": "Goazen!",
-            "defaultForenames": [
-                "Tom",
-                "Maria"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Tomek",
+                    "Tomem",
+                    "Tomen",
+                    "Tomeri",
+                    "Tomi"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Marik",
+                    "Mary",
+                    "Maryk",
+                    "Maryri"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Zer moduz zaude {}?",
                 "Zer gertatzen da {}?"
@@ -146,7 +224,6 @@
             "tatoebaProject": "bel-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -155,7 +232,21 @@
         ],
         "translations": {
             "letsGo": "Пойдзем!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Том"
+                ],
+                "John": [
+                    "Джон"
+                ],
+                "Mary": [
+                    "Марыя",
+                    "Мэры"
+                ],
+                "Alice": [
+                    "Аліса"
+                ]
+            },
             "constitutionQuery": [
                 "Як ты {}?",
                 "Што там {}?"
@@ -167,7 +258,6 @@
             "tatoebaProject": "ben-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -175,7 +265,21 @@
         ],
         "translations": {
             "letsGo": "চলো যাই!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "টম",
+                    "টমকে"
+                ],
+                "John": [
+                    "জন"
+                ],
+                "Mary": [
+                    "মেরি"
+                ],
+                "Alice": [
+                    "এলিস"
+                ]
+            },
             "constitutionQuery": [
                 "কেমন আছেন {}?",
                 "কি খবর {}?"
@@ -187,8 +291,7 @@
             "tatoebaProject": "ber-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
-            "usesLatinScript": false
+            "usesLatinScript": true
         },
         "countriesEmployedIn": [],
         "translations": {}
@@ -198,21 +301,36 @@
             "tatoebaProject": "bos-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
-            "usesLatinScript": false
+            "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Kosovo",
-            "Bosnia_and_Herzegovina",
-            "Croatia",
             "Montenegro",
-            "North_Macedonia",
+            "Bosnia_and_Herzegovina",
             "Serbia",
+            "North_Macedonia",
+            "Kosovo",
+            "Croatia",
             "Slovenia"
         ],
         "translations": {
             "letsGo": "Idemo!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Toma",
+                    "Tomu"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Mariji",
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Kako si {}",
                 "Šta ima, {}?"
@@ -224,13 +342,28 @@
             "tatoebaProject": "bul-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [],
         "translations": {
             "letsGo": "Да тръгваме!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Том"
+                ],
+                "John": [
+                    "Джон"
+                ],
+                "Mary": [
+                    "Дева Мария",
+                    "Мари",
+                    "Мери"
+                ],
+                "Alice": [
+                    "Алис",
+                    "Алисс"
+                ]
+            },
             "constitutionQuery": [
                 "Как си {}?",
                 "Какво има, {}?"
@@ -242,7 +375,6 @@
             "tatoebaProject": "mya-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -255,7 +387,6 @@
             "tatoebaProject": "yue-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -269,16 +400,26 @@
             "tatoebaProject": "cat-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [],
         "translations": {
             "letsGo": "Som-hi!",
-            "defaultForenames": [
-                "Tom",
-                "Maria"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tom"
+                ],
+                "John": [
+                    "Joan"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alícia"
+                ]
+            },
             "constitutionQuery": [
                 "Com estàs {}?",
                 "Què passa {}?"
@@ -290,16 +431,26 @@
             "tatoebaProject": "ceb-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [],
         "translations": {
             "letsGo": "Mangadto ta!",
-            "defaultForenames": [
-                "Tom",
-                "Maria"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tom"
+                ],
+                "John": [
+                    "Juan"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Kumusta ka {}?",
                 "Unsa na {}?"
@@ -311,7 +462,6 @@
             "tatoebaProject": "dtp-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [],
@@ -322,7 +472,6 @@
             "tatoebaProject": "cbk-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [],
@@ -333,7 +482,6 @@
             "tatoebaProject": "cmn-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -341,7 +489,24 @@
         ],
         "translations": {
             "letsGo": "我们走吧！",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "tom",
+                    "汤姆",
+                    "湯姆"
+                ],
+                "John": [
+                    "约翰"
+                ],
+                "Mary": [
+                    "Mary",
+                    "玛丽"
+                ],
+                "Alice": [
+                    "爱丽丝"
+                ]
+            },
             "constitutionQuery": [
                 "{}，你好吗？",
                 "{}怎么了？"
@@ -353,7 +518,6 @@
             "tatoebaProject": "chv-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -366,26 +530,44 @@
             "tatoebaProject": "hrv-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
             "Czech_Republic",
-            "Italy",
+            "Bosnia_and_Herzegovina",
+            "Serbia",
             "Hungary",
             "Slovakia",
             "Croatia",
+            "Austria",
             "Montenegro",
-            "Bosnia_and_Herzegovina",
-            "Serbia",
-            "Austria"
+            "Italy"
         ],
         "translations": {
             "letsGo": "Idemo!",
-            "defaultForenames": [
-                "Tom",
-                "Marijo"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Toma",
+                    "Tomom",
+                    "Tomova",
+                    "Tomu"
+                ],
+                "John": [
+                    "Ivan",
+                    "John",
+                    "Johna"
+                ],
+                "Mary": [
+                    "Marijo",
+                    "Mariju",
+                    "Mary",
+                    "Marynu"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Kako si ti {}?",
                 "Što ima, {}?"
@@ -397,24 +579,51 @@
             "tatoebaProject": "ces-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
             "Czech_Republic",
-            "Romania",
-            "Slovakia",
-            "Poland",
-            "Croatia",
             "Bosnia_and_Herzegovina",
+            "Slovakia",
+            "Romania",
+            "Croatia",
+            "Poland",
             "Austria"
         ],
         "translations": {
             "letsGo": "Pojďme!",
-            "defaultForenames": [
-                "Tom",
-                "Mary"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tim",
+                    "Tom",
+                    "Tome",
+                    "Tomem",
+                    "Tomovu",
+                    "Tomáš",
+                    "Tomův"
+                ],
+                "John": [
+                    "Jan",
+                    "John",
+                    "Johna",
+                    "Johnem",
+                    "Johnovou",
+                    "Johnově",
+                    "Johnův"
+                ],
+                "Mary": [
+                    "Marie",
+                    "Marii",
+                    "Marií",
+                    "Mary",
+                    "Maryiny"
+                ],
+                "Alice": [
+                    "Alice",
+                    "Alici",
+                    "Alicí"
+                ]
+            },
             "constitutionQuery": [
                 "Jak se máš {}u?",
                 "Co se děje, {}e?"
@@ -426,24 +635,39 @@
             "tatoebaProject": "dan-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Denmark",
+            "Nordic_Council_2016",
             "Greenland",
+            "Denmark",
             "Germany",
-            "the_Faroe_Islands",
-            "Nordic_Council_2016"
+            "Faroe_Islands"
         ],
         "translations": {
             "letsGo": "Lad os gå!",
-            "defaultForenames": [
-                "Tom",
-                "Mary"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Rom",
+                    "Thomas",
+                    "Tom",
+                    "Toms"
+                ],
+                "John": [
+                    "John",
+                    "Johns"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Mary",
+                    "Marys"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
-                "Hvordan har du det med {}?",
+                "Hvordan har du det {}?",
                 "Hvad sker der {}?"
             ]
         }
@@ -453,20 +677,42 @@
             "tatoebaProject": "nld-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Suriname",
             "Netherlands",
+            "Suriname",
             "Belgium"
         ],
         "translations": {
             "letsGo": "Laten we gaan!",
-            "defaultForenames": [
-                "Tom",
-                "Maria"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Thomas",
+                    "Tok",
+                    "Tom",
+                    "Tomo",
+                    "Toms",
+                    "Tomás",
+                    "Tom”"
+                ],
+                "John": [
+                    "Jan",
+                    "Johannes",
+                    "Johano",
+                    "John",
+                    "Johns"
+                ],
+                "Mary": [
+                    "Mari",
+                    "Maria",
+                    "Marie",
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Hoe gaat het, {}?",
                 "Hoe gaat het, {}?"
@@ -478,7 +724,6 @@
             "tatoebaProject": "est-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
@@ -486,10 +731,30 @@
         ],
         "translations": {
             "letsGo": "Lähme!",
-            "defaultForenames": [
-                "Tom",
-                "Maarja"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Tomi",
+                    "Tomiga",
+                    "Tomil",
+                    "Tomist"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Maarja",
+                    "Mari",
+                    "Maria",
+                    "Marile",
+                    "Mary",
+                    "Maryga",
+                    "Maryt"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Kuidas {}il läheb?",
                 "Mis {}iga on?"
@@ -501,21 +766,65 @@
             "tatoebaProject": "fin-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Sweden",
             "Finland",
+            "Russia",
             "Karelia",
-            "Russia"
+            "Sweden"
         ],
         "translations": {
             "letsGo": "Mennään!",
-            "defaultForenames": [
-                "Tom",
-                "Mary"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tim",
+                    "Tom",
+                    "Tomhan",
+                    "Tomi",
+                    "Tomii",
+                    "Tomil",
+                    "Tomin",
+                    "Tomipa",
+                    "Tomist",
+                    "Tomko",
+                    "Tommi",
+                    "Tom”",
+                    "Ton",
+                    "Tuomas",
+                    "Tuomon",
+                    "”Tom",
+                    "”Tom”"
+                ],
+                "John": [
+                    "John",
+                    "Johnille",
+                    "Johnin",
+                    "Johnista",
+                    "Joni",
+                    "Joniin",
+                    "Jounia"
+                ],
+                "Mary": [
+                    "Maaria",
+                    "Marika",
+                    "Marin",
+                    "Marjan",
+                    "Marjo",
+                    "Marjut",
+                    "Mary",
+                    "Marya",
+                    "Marylle",
+                    "Maryn",
+                    "Maryssä",
+                    "Marysta",
+                    "Maryä"
+                ],
+                "Alice": [
+                    "Alice",
+                    "Alisa"
+                ]
+            },
             "constitutionQuery": [
                 "Kuinka voit {}?",
                 "Mitä {} tekee?"
@@ -527,46 +836,61 @@
             "tatoebaProject": "fra-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Central African Republic",
-            "Rwanda",
-            "Benin",
-            "Togo",
-            "Switzerland",
-            "Monaco",
-            "Chad",
-            "Seychelles",
-            "Djibouti",
-            "Madagascar",
-            "Niger",
-            "DR Congo",
             "Congo",
-            "Canada",
-            "Belgium",
-            "Comoros",
-            "Cameroon",
-            "Luxembourg",
-            "Vanuatu",
+            "Chad",
+            "Rwanda",
+            "Central African Republic",
+            "Madagascar",
             "Guinea",
-            "Equatorial Guinea",
-            "Gabon",
-            "Burundi",
-            "Burkina Faso",
-            "Mali",
-            "Senegal",
-            "France",
+            "Monaco",
             "Ivory Coast",
-            "Haiti"
+            "Cameroon",
+            "Canada",
+            "Burundi",
+            "Switzerland",
+            "Mali",
+            "Togo",
+            "Senegal",
+            "Niger",
+            "Comoros",
+            "Gabon",
+            "Seychelles",
+            "Vanuatu",
+            "DR Congo",
+            "Haiti",
+            "Equatorial Guinea",
+            "France",
+            "Djibouti",
+            "Belgium",
+            "Luxembourg",
+            "Benin",
+            "Burkina Faso"
         ],
         "translations": {
             "letsGo": "Allons-y!",
-            "defaultForenames": [
-                "À M",
-                "Marie"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Thomas",
+                    "Tom",
+                    "Toma",
+                    "Tome",
+                    "À M"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Marion",
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Comment vas-tu {}?",
                 "Quoi de neuf {}?"
@@ -578,7 +902,6 @@
             "tatoebaProject": "glg-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
@@ -586,10 +909,20 @@
         ],
         "translations": {
             "letsGo": "Imos!",
-            "defaultForenames": [
-                "Tom",
-                "María"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tom"
+                ],
+                "John": [
+                    "Xoán"
+                ],
+                "Mary": [
+                    "María"
+                ],
+                "Alice": [
+                    "Alicia"
+                ]
+            },
             "constitutionQuery": [
                 "Como estás {}?",
                 "Que pasa {}?"
@@ -601,7 +934,6 @@
             "tatoebaProject": "kat-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -609,7 +941,21 @@
         ],
         "translations": {
             "letsGo": "Წავედით!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "ტომ"
+                ],
+                "John": [
+                    "იოანე"
+                ],
+                "Mary": [
+                    "მარი",
+                    "მარიამი"
+                ],
+                "Alice": [
+                    "ალისა"
+                ]
+            },
             "constitutionQuery": [
                 "როგორ ხარ {}?",
                 "რა ხდება {}?"
@@ -621,23 +967,62 @@
             "tatoebaProject": "deu-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Luxembourg",
             "Switzerland",
+            "Belgium",
             "Germany",
+            "Luxembourg",
             "Liechtenstein",
-            "Austria",
-            "Belgium"
+            "Austria"
         ],
         "translations": {
             "letsGo": "Lass uns gehen!",
-            "defaultForenames": [
-                "Tom",
-                "Maria"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Koma",
+                    "Rom",
+                    "Tam",
+                    "Thomas",
+                    "Tom",
+                    "Tomaso",
+                    "Tomate",
+                    "Tomi",
+                    "Tomm",
+                    "Tomme",
+                    "Toms",
+                    "Tomás",
+                    "Tom–"
+                ],
+                "John": [
+                    "Johann",
+                    "Johannes",
+                    "John",
+                    "Johns",
+                    "Sohn",
+                    "Sohns"
+                ],
+                "Mary": [
+                    "Bar",
+                    "Farm",
+                    "Mail",
+                    "Maria",
+                    "Maria—",
+                    "Maries",
+                    "Mark",
+                    "Mary",
+                    "Marys",
+                    "Mary–",
+                    "Mord",
+                    "Park",
+                    "Party",
+                    "Sari"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Wie geht es dir {}?",
                 "Was ist los, {}?"
@@ -649,13 +1034,28 @@
             "tatoebaProject": "ell-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [],
         "translations": {
             "letsGo": "Πάμε!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Θωμά",
+                    "Κάποιος"
+                ],
+                "John": [
+                    "Γιάννης"
+                ],
+                "Mary": [
+                    "Μαίρη",
+                    "Μαρία"
+                ],
+                "Alice": [
+                    "Αλίκη"
+                ]
+            },
             "constitutionQuery": [
                 "Πώς είσαι ο Τομ;",
                 "Τι συμβαίνει ο Τομ;"
@@ -667,17 +1067,31 @@
             "tatoebaProject": "heb-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
             "South_Africa",
-            "Poland",
-            "Israel"
+            "Israel",
+            "Poland"
         ],
         "translations": {
             "letsGo": "בוא נלך!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "טום",
+                    "תום"
+                ],
+                "John": [
+                    "ג'ון",
+                    "יוחנן"
+                ],
+                "Mary": [
+                    "מרי"
+                ],
+                "Alice": [
+                    "אליס"
+                ]
+            },
             "constitutionQuery": [
                 "מה שלומך {}?",
                 "מה קורה {}?"
@@ -689,19 +1103,31 @@
             "tatoebaProject": "hin-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
-            "India",
-            "South_Africa"
+            "South_Africa",
+            "India"
         ],
         "translations": {
             "letsGo": "चलो चलते हैं!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "टॉम"
+                ],
+                "John": [
+                    "जॉन"
+                ],
+                "Mary": [
+                    "मैरी"
+                ],
+                "Alice": [
+                    "ऐलिस"
+                ]
+            },
             "constitutionQuery": [
-                "आप कैसे हैं {}?",
-                "क्या हो रहा है {}?"
+                "तुम कैसे हो {}?",
+                "What's up {}?"
             ]
         }
     },
@@ -710,23 +1136,66 @@
             "tatoebaProject": "hun-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
-            "usesLatinScript": false
+            "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Romania",
-            "Vojvodina",
             "Ukraine",
+            "Serbia",
             "Hungary",
             "Slovakia",
+            "Romania",
             "Croatia",
-            "Serbia",
+            "Vojvodina",
             "Austria",
             "Slovenia"
         ],
         "translations": {
             "letsGo": "Gyerünk!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Tomban",
+                    "Tomhoz",
+                    "Tomin",
+                    "Tomira",
+                    "Tomié",
+                    "Tomnak",
+                    "Tomnál",
+                    "Tomon",
+                    "Tomot",
+                    "Tomé"
+                ],
+                "John": [
+                    "John",
+                    "Johnnak",
+                    "Johnra",
+                    "Johnt",
+                    "János"
+                ],
+                "Mary": [
+                    "Maca",
+                    "Marcsi",
+                    "Mari",
+                    "Marika",
+                    "Marin",
+                    "Marit",
+                    "Marié",
+                    "Mary",
+                    "Maryben",
+                    "Maryhez",
+                    "Marynak",
+                    "Maryre",
+                    "Maryt",
+                    "Maryval",
+                    "Maryé",
+                    "Maryért",
+                    "Meri",
+                    "Mári"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Hogy vagy {}?",
                 "Mi van {}?"
@@ -738,7 +1207,6 @@
             "tatoebaProject": "isl-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
@@ -746,10 +1214,24 @@
         ],
         "translations": {
             "letsGo": "Förum!",
-            "defaultForenames": [
-                "Tom",
-                "María"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Toms"
+                ],
+                "John": [
+                    "John",
+                    "Jóhannes"
+                ],
+                "Mary": [
+                    "Mary",
+                    "María",
+                    "Maríu"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Hvernig hefurðu það {}?",
                 "Hvað er að {}?"
@@ -761,7 +1243,6 @@
             "tatoebaProject": "ilo-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
@@ -774,7 +1255,6 @@
             "tatoebaProject": "ind-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
@@ -782,10 +1262,24 @@
         ],
         "translations": {
             "letsGo": "Ayo pergi!",
-            "defaultForenames": [
-                "Tom",
-                "Mary"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Bom",
+                    "Tom",
+                    "Tomlah"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Marry",
+                    "Mary",
+                    "Marylah"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Bagaimana kabarmu {}?",
                 "Ada apa {}?"
@@ -797,24 +1291,42 @@
             "tatoebaProject": "ita-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Italy",
+            "Switzerland",
             "Vatican City",
             "San Marino",
-            "Switzerland"
+            "Italy"
         ],
         "translations": {
             "letsGo": "Andiamo!",
-            "defaultForenames": [
-                "Tom",
-                "Maria"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Roma",
+                    "Thomas",
+                    "To",
+                    "Tom",
+                    "Tomi",
+                    "Tomsi",
+                    "Tomás"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Macy",
+                    "Maria",
+                    "Marie",
+                    "Marilyn"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
-                "Come stai {}?",
-                "Che succede {}?"
+                "Come stai {}m?",
+                "Che succede {}m?"
             ]
         }
     },
@@ -823,7 +1335,6 @@
             "tatoebaProject": "jpn-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -831,7 +1342,21 @@
         ],
         "translations": {
             "letsGo": "行こう！",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "トム"
+                ],
+                "John": [
+                    "ジョン"
+                ],
+                "Mary": [
+                    "メアリー"
+                ],
+                "Alice": [
+                    "アリス"
+                ]
+            },
             "constitutionQuery": [
                 "{}お元気ですか？",
                 "{}はどうしたの？"
@@ -843,7 +1368,6 @@
             "tatoebaProject": "kab-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [],
@@ -854,7 +1378,6 @@
             "tatoebaProject": "kan-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -862,10 +1385,24 @@
         ],
         "translations": {
             "letsGo": "ಹೋಗೋಣ!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "ಟಾಮ",
+                    "ಟಾಮ್"
+                ],
+                "John": [
+                    "ಜಾನ್"
+                ],
+                "Mary": [
+                    "ಮೇರಿ"
+                ],
+                "Alice": [
+                    "ಆಲಿಸ್"
+                ]
+            },
             "constitutionQuery": [
-                "ನೀವು {} ಹೇಗಿದ್ದೀರಿ?",
-                "{} ಏನಿದೆ?"
+                "ನೀವು {}್ ಹೇಗಿದ್ದೀರಿ?",
+                "{}್ ಏನಿದೆ?"
             ]
         }
     },
@@ -874,7 +1411,6 @@
             "tatoebaProject": "pam-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [],
@@ -885,7 +1421,6 @@
             "tatoebaProject": "kha-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [],
@@ -896,7 +1431,6 @@
             "tatoebaProject": "khm-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -904,7 +1438,21 @@
         ],
         "translations": {
             "letsGo": "តោះ​ទៅ!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "ថម",
+                    "ថម។"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "ម៉ារី"
+                ],
+                "Alice": [
+                    "អាលីស"
+                ]
+            },
             "constitutionQuery": [
                 "តើអ្នក{}សុខយ៉ាងម៉េច?",
                 "តើមានអ្វីកើតឡើងលោក {}?"
@@ -916,7 +1464,6 @@
             "tatoebaProject": "kor-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -926,8 +1473,29 @@
             "North_Korea"
         ],
         "translations": {
-            "letsGo": "가자!",
-            "defaultForenames": null,
+            "letsGo": "Let's go!",
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "톰",
+                    "톰도",
+                    "톰만",
+                    "톰에게",
+                    "톰은",
+                    "톰을",
+                    "톰의",
+                    "톰이"
+                ],
+                "John": [
+                    "남자"
+                ],
+                "Mary": [
+                    "메리"
+                ],
+                "Alice": [
+                    "앨리스"
+                ]
+            },
             "constitutionQuery": [
                 "{}은 어때?",
                 "무슨 일이야 {}?"
@@ -939,7 +1507,6 @@
             "tatoebaProject": "kur-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
@@ -947,13 +1514,23 @@
         ],
         "translations": {
             "letsGo": "De em herin!",
-            "defaultForenames": [
-                "Tom",
-                "Meryem"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tom"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
-                "Tu çawa yî {}?",
-                "{} çi ye?"
+                "Tu {} çawa yî?",
+                "What's up {}?"
             ]
         }
     },
@@ -962,7 +1539,6 @@
             "tatoebaProject": "lvs-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
@@ -970,13 +1546,27 @@
         ],
         "translations": {
             "letsGo": "Ejam!",
-            "defaultForenames": [
-                "Toms",
-                "Marija"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Toma",
+                    "Tomam",
+                    "Toms",
+                    "Tomu"
+                ],
+                "John": [
+                    "Džons"
+                ],
+                "Mary": [
+                    "Mariju",
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Kā tev iet?",
-                "Kas notiek {}?"
+                "What's up {}?"
             ]
         }
     },
@@ -985,19 +1575,38 @@
             "tatoebaProject": "lit-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
-            "usesLatinScript": false
+            "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Poland",
-            "Lithuania"
+            "Lithuania",
+            "Poland"
         ],
         "translations": {
             "letsGo": "Eime!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Tomas",
+                    "Tomo",
+                    "Tomu",
+                    "Tomui",
+                    "Tomą",
+                    "Tuomet"
+                ],
+                "John": [
+                    "Jonas"
+                ],
+                "Mary": [
+                    "Marija",
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alisa"
+                ]
+            },
             "constitutionQuery": [
-                "Kaip tu {}?",
-                "Ką {}?"
+                "Kaip tu {}as?",
+                "Ką {}as?"
             ]
         }
     },
@@ -1006,7 +1615,6 @@
             "tatoebaProject": "nds-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [],
@@ -1017,19 +1625,33 @@
             "tatoebaProject": "mkd-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
             "Albania",
-            "Romania",
             "Bosnia_and_Herzegovina",
+            "Serbia",
             "North_Macedonia",
-            "Serbia"
+            "Romania"
         ],
         "translations": {
             "letsGo": "Да одиме!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Том"
+                ],
+                "John": [
+                    "Џон",
+                    "Он"
+                ],
+                "Mary": [
+                    "Марија",
+                    "Мери"
+                ],
+                "Alice": [
+                    "Алиса"
+                ]
+            },
             "constitutionQuery": [
                 "Како си ти {}?",
                 "Што е со {}?"
@@ -1041,16 +1663,26 @@
             "tatoebaProject": "zsm-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [],
         "translations": {
             "letsGo": "Mari pergi!",
-            "defaultForenames": [
-                "Tom",
-                "Maria"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tom"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Apa khabar {}?",
                 "Ada apa dengan {}?"
@@ -1062,7 +1694,6 @@
             "tatoebaProject": "mal-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -1070,10 +1701,24 @@
         ],
         "translations": {
             "letsGo": "നമുക്ക് പോകാം!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "ടോ",
+                    "ടോം"
+                ],
+                "John": [
+                    "ജോൺ"
+                ],
+                "Mary": [
+                    "മേരി"
+                ],
+                "Alice": [
+                    "ആലീസ്"
+                ]
+            },
             "constitutionQuery": [
-                "എങ്ങനെയുണ്ട് {}?",
-                "{} എന്താണ്?"
+                "How are you {}?",
+                "{}ം എന്താണ്?"
             ]
         }
     },
@@ -1082,18 +1727,28 @@
             "tatoebaProject": "mri-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
             "New Zealand"
         ],
         "translations": {
-            "letsGo": "Haere tatou!",
-            "defaultForenames": [
-                "Tom",
-                "Meri"
-            ],
+            "letsGo": "Let's go!",
+            "defaultForenames": {
+                "Tom": [
+                    "Tom"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Mary",
+                    "Meri"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Kei te pēhea koe?",
                 "Kei te aha a {}?"
@@ -1105,7 +1760,6 @@
             "tatoebaProject": "mar-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -1113,7 +1767,21 @@
         ],
         "translations": {
             "letsGo": "चल जाऊया!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "टॉम"
+                ],
+                "John": [
+                    "जॉन"
+                ],
+                "Mary": [
+                    "मॅरी",
+                    "मेरी"
+                ],
+                "Alice": [
+                    "Iceलिस"
+                ]
+            },
             "constitutionQuery": [
                 "तू कसा आहेस?",
                 "{} काय चाललंय?"
@@ -1125,7 +1793,6 @@
             "tatoebaProject": "nst-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [],
@@ -1136,7 +1803,6 @@
             "tatoebaProject": "max-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [],
@@ -1147,7 +1813,6 @@
             "tatoebaProject": "nob-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
@@ -1155,10 +1820,26 @@
         ],
         "translations": {
             "letsGo": "La oss gå!",
-            "defaultForenames": [
-                "Tom",
-                "Mary"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Thomas",
+                    "Tom",
+                    "Tomi",
+                    "Toms"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Mari",
+                    "Maria",
+                    "Mary",
+                    "Marys"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Hvordan har du det med {}?",
                 "Hva skjer {}?"
@@ -1170,15 +1851,28 @@
             "tatoebaProject": "pes-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [],
         "translations": {
             "letsGo": "بیا بریم!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "تام"
+                ],
+                "John": [
+                    "جان"
+                ],
+                "Mary": [
+                    "مری",
+                    "مریم"
+                ],
+                "Alice": [
+                    "آلیس"
+                ]
+            },
             "constitutionQuery": [
-                "حال تو چطوره؟",
+                "How are you {}?",
                 "چه خبر از {}؟"
             ]
         }
@@ -1188,20 +1882,48 @@
             "tatoebaProject": "pol-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
-            "usesLatinScript": false
+            "usesLatinScript": true
         },
         "countriesEmployedIn": [
             "Czech_Republic",
             "Ukraine",
-            "Slovakia",
+            "Lithuania",
             "Hungary",
-            "Poland",
-            "Lithuania"
+            "Slovakia",
+            "Poland"
         ],
         "translations": {
             "letsGo": "Chodźmy!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Tomasz",
+                    "Tomek",
+                    "Tomem",
+                    "Tomie",
+                    "Tomka",
+                    "Tomku",
+                    "Ton"
+                ],
+                "John": [
+                    "John",
+                    "Johna",
+                    "Johnem",
+                    "Johnie",
+                    "Johnowi"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Marii",
+                    "Marią",
+                    "Marię",
+                    "Mary",
+                    "Marysią"
+                ],
+                "Alice": [
+                    "Alice",
+                    "Alicja"
+                ]
+            },
             "constitutionQuery": [
                 "Jak się masz {}?",
                 "Co słychać {}?"
@@ -1213,28 +1935,47 @@
             "tatoebaProject": "por-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Angola",
-            "East Timor",
-            "Mozambique",
-            "Guinea-Bissau",
-            "Portugal",
-            "Brazil",
-            "São Tomé and Príncipe",
             "Equatorial Guinea",
-            "Cape Verde"
+            "Guinea-Bissau",
+            "Brazil",
+            "Mozambique",
+            "Portugal",
+            "Cape Verde",
+            "East Timor",
+            "Angola",
+            "São Tomé and Príncipe"
         ],
         "translations": {
             "letsGo": "Vamos!",
-            "defaultForenames": [
-                "Tom",
-                "Maria"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Thomas",
+                    "Tom",
+                    "Tomás",
+                    "Tomé"
+                ],
+                "John": [
+                    "John",
+                    "João"
+                ],
+                "Mary": [
+                    "Mari",
+                    "Maria",
+                    "Marie",
+                    "Marilyn",
+                    "Mark",
+                    "Marry",
+                    "Park"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
-                "Como você está {}?",
+                "How are you {}?",
                 "E aí, {}?"
             ]
         }
@@ -1244,16 +1985,32 @@
             "tatoebaProject": "rom-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
-            "usesLatinScript": false
+            "usesLatinScript": true
         },
         "countriesEmployedIn": [],
         "translations": {
             "letsGo": "Sa mergem!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Tomes"
+                ],
+                "John": [
+                    "Ioan",
+                    "John",
+                    "Johnes"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Ce mai faci {}?",
-                "Ce-i cu {}?"
+                "What's up {}?"
             ]
         }
     },
@@ -1262,19 +2019,35 @@
             "tatoebaProject": "ron-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
-            "usesLatinScript": false
+            "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Romania",
-            "Vojvodina",
             "Ukraine",
+            "Moldova",
             "Hungary",
-            "Moldova"
+            "Romania",
+            "Vojvodina"
         ],
         "translations": {
             "letsGo": "Sa mergem!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Toma"
+                ],
+                "John": [
+                    "Ioan",
+                    "John"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Mariei",
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Ce mai faci {}?",
                 "Ce-i cu {}?"
@@ -1286,26 +2059,41 @@
             "tatoebaProject": "rus-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
-            "Kazakhstan",
-            "Belarus",
+            "Kyrgyzstan",
+            "Ukraine",
             "Turkmenistan",
-            "Transnistria",
+            "Belarus",
             "Autonomous Republic of Crimea",
+            "Kazakhstan",
+            "Moldova",
+            "Transnistria",
+            "Tajikistan",
             "Uzbekistan",
             "Gagauzia",
-            "Tajikistan",
-            "Ukraine",
-            "Kyrgyzstan",
-            "Russia",
-            "Moldova"
+            "Russia"
         ],
         "translations": {
             "letsGo": "Пошли!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Том",
+                    "Фом"
+                ],
+                "John": [
+                    "Джон"
+                ],
+                "Mary": [
+                    "Ма",
+                    "Мэри"
+                ],
+                "Alice": [
+                    "Алис",
+                    "Алиса"
+                ]
+            },
             "constitutionQuery": [
                 "Как ты {}?",
                 "Что случилось, {}?"
@@ -1317,15 +2105,34 @@
             "tatoebaProject": "srp-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
             "Serbia"
         ],
         "translations": {
-            "letsGo": "Идемо!",
-            "defaultForenames": null,
+            "letsGo": "Let's go!",
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Том",
+                    "том"
+                ],
+                "John": [
+                    "Džon",
+                    "Јохн"
+                ],
+                "Mary": [
+                    "Marij",
+                    "Meri",
+                    "ari",
+                    "Мари",
+                    "Мери"
+                ],
+                "Alice": [
+                    "Алице"
+                ]
+            },
             "constitutionQuery": [
                 "Како си {}",
                 "Шта има, {}?"
@@ -1337,22 +2144,37 @@
             "tatoebaProject": "slk-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
             "Czech_Republic",
-            "Vojvodina",
             "Hungary",
             "Slovakia",
-            "Poland"
+            "Poland",
+            "Vojvodina"
         ],
         "translations": {
             "letsGo": "Poďme!",
-            "defaultForenames": [
-                "Tom",
-                "Mary"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Tomom",
+                    "Tomovi",
+                    "Tomáš"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Mary",
+                    "Marynej",
+                    "Maryno"
+                ],
+                "Alice": [
+                    "Alica",
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Ako sa máš {}?",
                 "Čo sa deje, {}?"
@@ -1364,17 +2186,32 @@
             "tatoebaProject": "slv-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
-            "usesLatinScript": false
+            "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Italy",
             "Austria",
-            "Slovenia"
+            "Slovenia",
+            "Italy"
         ],
         "translations": {
             "letsGo": "Pojdimo!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Toma",
+                    "Tomova",
+                    "Tomu"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Kako si {}?",
                 "Kaj je {}?"
@@ -1386,37 +2223,59 @@
             "tatoebaProject": "spa-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Dominican Republic",
+            "Venezuela",
+            "Paraguay",
+            "Guatemala",
+            "Bolivia",
             "Colombia",
+            "Dominican Republic",
             "Spain",
             "El Salvador",
-            "Guatemala",
-            "Uruguay",
-            "Chile",
             "Honduras",
-            "Paraguay",
-            "Bolivia",
             "Peru",
+            "Chile",
             "Argentina",
-            "Equatorial Guinea",
-            "Cuba",
-            "Mexico",
-            "Ecuador",
-            "Costa Rica",
-            "Panama",
+            "Uruguay",
             "Nicaragua",
-            "Venezuela"
+            "Mexico",
+            "Cuba",
+            "Panama",
+            "Equatorial Guinea",
+            "Costa Rica",
+            "Ecuador"
         ],
         "translations": {
             "letsGo": "¡Vamonos!",
-            "defaultForenames": [
-                "Tom",
-                "María"
-            ],
+            "defaultForenames": {
+                "Tom": [
+                    "Roma",
+                    "Tom",
+                    "Tomás",
+                    "Ton",
+                    "Tum"
+                ],
+                "John": [
+                    "John",
+                    "Juan"
+                ],
+                "Mary": [
+                    "Lady",
+                    "Mari",
+                    "Maria",
+                    "Marie",
+                    "Marilyn",
+                    "Maru",
+                    "María",
+                    "Park"
+                ],
+                "Alice": [
+                    "Alice",
+                    "Alicia"
+                ]
+            },
             "constitutionQuery": [
                 "¿Cómo estás {}?",
                 "¿Qué pasa {}?"
@@ -1428,21 +2287,34 @@
             "tatoebaProject": "swe-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Sweden",
-            "Finland",
+            "Nordic_Council_2016",
             "%C3%85land",
-            "Nordic_Council_2016"
+            "Finland",
+            "Sweden"
         ],
         "translations": {
-            "letsGo": "Nu går vi!",
-            "defaultForenames": [
-                "Tom",
-                "Mary"
-            ],
+            "letsGo": "Let's go!",
+            "defaultForenames": {
+                "Tom": [
+                    "Tom",
+                    "Toms"
+                ],
+                "John": [
+                    "John",
+                    "Johns"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Mary",
+                    "Marys"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Hur mår du {}?",
                 "Vad händer {}?"
@@ -1454,7 +2326,6 @@
             "tatoebaProject": "tgl-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
@@ -1467,20 +2338,34 @@
             "tatoebaProject": "tam-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
+            "Sri_Lanka",
             "India",
-            "Singapore",
-            "Sri_Lanka"
+            "Singapore"
         ],
         "translations": {
             "letsGo": "போகலாம்!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "டாம",
+                    "டாம்"
+                ],
+                "John": [
+                    "ஜான்"
+                ],
+                "Mary": [
+                    "மேரி",
+                    "்மேரிய"
+                ],
+                "Alice": [
+                    "ஆலிஸ்"
+                ]
+            },
             "constitutionQuery": [
-                "நீங்கள் எப்படி {}?",
-                "{} என்ன?"
+                "நீங்கள் எப்படி {}்?",
+                "{}் என்ன?"
             ]
         }
     },
@@ -1489,8 +2374,7 @@
             "tatoebaProject": "tat-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
-            "usesLatinScript": false
+            "usesLatinScript": true
         },
         "countriesEmployedIn": [
             "Russia"
@@ -1502,7 +2386,6 @@
             "tatoebaProject": "tel-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -1510,7 +2393,20 @@
         ],
         "translations": {
             "letsGo": "వెళ్దాం!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "టామ్"
+                ],
+                "John": [
+                    "జాన్"
+                ],
+                "Mary": [
+                    "మేరీ"
+                ],
+                "Alice": [
+                    "ఆలిస్"
+                ]
+            },
             "constitutionQuery": [
                 "మీరు ఎలా ఉన్నారు {}?",
                 "{} ఏమిటి?"
@@ -1522,7 +2418,6 @@
             "tatoebaProject": "tha-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -1530,7 +2425,20 @@
         ],
         "translations": {
             "letsGo": "ไปกันเถอะ!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "ทอม"
+                ],
+                "John": [
+                    "จอห์น"
+                ],
+                "Mary": [
+                    "แมรี่"
+                ],
+                "Alice": [
+                    "อลิซ"
+                ]
+            },
             "constitutionQuery": [
                 "เป็นไงบ้าง{}",
                 "ว่าไง{}?"
@@ -1542,20 +2450,61 @@
             "tatoebaProject": "tur-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
-            "Turkish_Republic_of_Northern_Cyprus",
             "Cyprus",
+            "Turkish_Republic_of_Northern_Cyprus",
             "Turkey"
         ],
         "translations": {
-            "letsGo": "Hadi gidelim!",
-            "defaultForenames": [
-                "Tom",
-                "Mary"
-            ],
+            "letsGo": "Let's go!",
+            "defaultForenames": {
+                "Tom": [
+                    "Johm",
+                    "Roma",
+                    "Thomas",
+                    "Tm",
+                    "Tom",
+                    "Toma",
+                    "Tomdur",
+                    "Tomi",
+                    "Tomla",
+                    "Tomluk",
+                    "Tomsuz",
+                    "Tomu",
+                    "Tomun",
+                    "Tomve",
+                    "Tomû",
+                    "Toom",
+                    "Yom"
+                ],
+                "John": [
+                    "John",
+                    "Johnla"
+                ],
+                "Mary": [
+                    "Lady",
+                    "Macy",
+                    "Mar",
+                    "Maria",
+                    "Marilyn",
+                    "Marry",
+                    "Mary",
+                    "Marynin",
+                    "Maryonu",
+                    "Maryye",
+                    "May",
+                    "Meary",
+                    "Meri",
+                    "Merry",
+                    "Mery",
+                    "Meryem"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Nasılsın {}?",
                 "Ne haber {}?"
@@ -1567,7 +2516,6 @@
             "tatoebaProject": "tuk-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [
@@ -1581,7 +2529,6 @@
             "tatoebaProject": "ukr-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -1589,7 +2536,21 @@
         ],
         "translations": {
             "letsGo": "Ходімо!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Том"
+                ],
+                "John": [
+                    "Джон"
+                ],
+                "Mary": [
+                    "Марі",
+                    "Мері"
+                ],
+                "Alice": [
+                    "Аліса"
+                ]
+            },
             "constitutionQuery": [
                 "Як ти {}е?",
                 "Що там {}е?"
@@ -1601,7 +2562,6 @@
             "tatoebaProject": "urd-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -1609,10 +2569,23 @@
         ],
         "translations": {
             "letsGo": "چلو!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "ٹام"
+                ],
+                "John": [
+                    "جان"
+                ],
+                "Mary": [
+                    "مریم"
+                ],
+                "Alice": [
+                    "ایلس"
+                ]
+            },
             "constitutionQuery": [
                 "آپ کیسے ہیں {}؟",
-                "{} کیا ہو رہا ہے؟"
+                "What's up {}?"
             ]
         }
     },
@@ -1621,7 +2594,6 @@
             "tatoebaProject": "uig-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": false
         },
         "countriesEmployedIn": [
@@ -1629,7 +2601,21 @@
         ],
         "translations": {
             "letsGo": "ماڭايلى!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "توم"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "مارىيە",
+                    "مەريەم"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "{} قانداقراق؟",
                 "{} نېمە بولدى؟"
@@ -1641,15 +2627,29 @@
             "tatoebaProject": "vie-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
-            "usesLatinScript": false
+            "usesLatinScript": true
         },
         "countriesEmployedIn": [
             "Vietnam"
         ],
         "translations": {
             "letsGo": "Đi nào!",
-            "defaultForenames": null,
+            "defaultForenames": {
+                "Tom": [
+                    "Tom"
+                ],
+                "John": [
+                    "John"
+                ],
+                "Mary": [
+                    "Maria",
+                    "Marry",
+                    "Mary"
+                ],
+                "Alice": [
+                    "Alice"
+                ]
+            },
             "constitutionQuery": [
                 "Bạn khỏe không {}?",
                 "Chuyện gì vậy {}?"
@@ -1661,7 +2661,6 @@
             "tatoebaProject": "war-eng.zip"
         },
         "properties": {
-            "isAgglutinative": false,
             "usesLatinScript": true
         },
         "countriesEmployedIn": [],

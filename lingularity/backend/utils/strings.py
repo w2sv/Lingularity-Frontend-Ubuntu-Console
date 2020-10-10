@@ -2,9 +2,12 @@ from typing import List, Optional, Set, Iterator, Iterable
 import re
 import unicodedata
 
-from .iterables import longest_value
+from itertools import chain
 
-APOSTROPHES = "'’"
+from lingularity.backend.utils.iterables import windowed, longest_value
+
+
+APOSTROPHES = "'’́́́́́́́́́́́́"
 
 
 # ---------------
@@ -59,7 +62,7 @@ def strip_accents(string: str) -> str:
 
 
 def strip_special_characters(string: str, include_apostrophe=False, include_dash=False) -> str:
-    special_characters = '"!#$%&()*+,./:;<=>?@[\]^_`{|}~»«。¡¿'
+    special_characters = '"„“!#$%&()*+,./:;<=>?@[\]^_`{|}~»«。¡¿'
 
     if include_apostrophe:
         special_characters += APOSTROPHES
@@ -100,27 +103,23 @@ def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> Set[str]:
     return set(filter(is_digit_free, tokens))
 
 
-def find_common_start(*string: str) -> str:
-    common_start = ''
-    for strings_i in zip(*string):
+def common_start(strings: Iterable[str]) -> Optional[str]:
+    buffer = ''
+    for strings_i in zip(strings):
         if len(set(strings_i)) == 1:
-            common_start += strings_i[0]
+            buffer += strings_i[0]
         else:
             break
-    return common_start
+    return [None, buffer][int(len(buffer))]
 
 
-def find_longest_continuous_partial_overlap(strings: Iterable[str]) -> str:
-    def substrings_from_start(string) -> Iterator[str]:
-        for i in range(1, len(string) + 1):
-            yield string[:i]
-
-    longest_continuous_partial_overlap = ''
-    substrings_list = list(map(lambda string: set(substrings_from_start(string)), strings))
+def longest_continuous_partial_overlap(strings: Iterable[str], min_length=2) -> Optional[str]:
+    buffer = ''
+    substrings_list = list(map(lambda string: set(_substrings_from_start(string)), strings))
     for i, substrings in enumerate(substrings_list):
-        for comparison in substrings_list[i+1:]:
-            longest_continuous_partial_overlap = longest_value([longest_continuous_partial_overlap, longest_value(substrings & comparison | {''})])
-    return longest_continuous_partial_overlap
+        for comparison in substrings_list[i + 1:]:
+            buffer = longest_value([buffer, longest_value(substrings & comparison | {''})])
+    return [None, buffer][int(len(buffer)) > min_length]
 
 
 # ---------------
@@ -134,10 +133,42 @@ def is_of_latin_script(string: str, trim=True) -> bool:
     MIN_LATIN_CHARACTER_PERCENTAGE = 80
 
     if trim:
-        string = strip_special_characters(string, include_apostrophe=True, include_dash=True).strip(' ')
+        string = strip_special_characters(string, include_apostrophe=True, include_dash=True).replace(' ', '')
 
     return len(_to_ascii(string)) / len(string) > (MIN_LATIN_CHARACTER_PERCENTAGE / 100)
 
 
+# ---------------
+# Substrings
+# ---------------
+def continuous_substrings(string: str, lengths: Optional[Iterable[int]] = None, min_length=2) -> Iterator[str]:
+    """
+        Args:
+            string: string to extract substrings from
+            lengths: Iterable of desired substring lengths,
+                may contain lengths > len(string) which will be automatically ignored
+
+        Returns:
+            Iterator of entirety of continuous substrings of min length = 2 comprised by string
+            sorted with respect to their lengths, e.g.:
+                continuous_substrings('path') -> Iterator[
+                    'pa', 'at', 'th',
+                    'pat', 'ath',
+                    'path'
+                ] """
+
+    if lengths is None:
+        lengths = range(min_length, len(string) + 1)
+    else:
+        lengths = filter(lambda val: val >= min_length, lengths)
+
+    return map(''.join, chain.from_iterable(map(lambda length: windowed(string, length), lengths)))
+
+
+def _substrings_from_start(string: str) -> Iterator[str]:
+    for i in range(1, len(string) + 1):
+        yield string[:i]
+
+
 if __name__ == '__main__':
-    print(find_longest_continuous_overlap(['メアリーが', 'トムは', 'トムはメアリーを', 'メアリー', 'トムはマリ', 'いた', 'メアリーは']))
+    print(longest_continuous_partial_overlap(['メアリーが', 'トムは', 'トムはメアリーを', 'メアリー', 'トムはマリ', 'いた', 'メアリーは']))
