@@ -1,12 +1,11 @@
 from typing import Dict, Union, Callable
 import requests
 
-from lingularity.frontend.console.welcome_screen.account_management import change_account
 from lingularity.utils.logging import enable_logging
 from lingularity.backend.database import MongoDBClient
 from lingularity.frontend.console.utils.output import clear_screen
-from lingularity.frontend.console.welcome_screen.account_management import log_in, retrieve_logged_in_user_from_disk
 from lingularity.frontend.console.welcome_screen import (
+    account_management,
     display_starting_screen,
     display_additional_information,
     display_constitution_query,
@@ -25,7 +24,7 @@ ELIGIBLE_ACTIONS: Dict[str, Union[type, Callable]] = {
     'sentence translation': SentenceTranslationTrainerConsoleFrontend,
     'vocabulary trainer': VocableTrainerConsoleFrontend,
     'add vocabulary': VocableAdderFrontend,
-    'change account': change_account
+    'change account': account_management.change_account
 }
 
 
@@ -33,7 +32,7 @@ def _complete_initialization():
     mongodb_client = MongoDBClient()
 
     # try to retrieve logged in user from disk
-    if (logged_in_user := retrieve_logged_in_user_from_disk()) is not None and logged_in_user in mongodb_client.usernames:
+    if (logged_in_user := account_management.retrieve_logged_in_user_from_disk()) is not None and logged_in_user in mongodb_client.usernames:
         mongodb_client.user = logged_in_user
 
     # initialize console
@@ -42,7 +41,7 @@ def _complete_initialization():
 
     # log_in if user not yet set
     if not mongodb_client.user_set:
-        mongodb_client = log_in(mongodb_client)
+        mongodb_client = account_management.log_in(mongodb_client)
 
     # display additional information, last session metrics if existent
     display_additional_information()

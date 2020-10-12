@@ -1,3 +1,5 @@
+# type: ignore
+
 from typing import Dict, Any, Union, List
 import json
 import collections

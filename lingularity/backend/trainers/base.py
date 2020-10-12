@@ -22,12 +22,11 @@ class TrainerBackend(ABC):
         mongodb_client.language = non_english_language
         self.mongodb_client = mongodb_client
 
-        self._item_iterator: Optional[Iterator[Any]] = None
-        self.n_training_items: Optional[int] = None
+        self._item_iterator: Iterator[Any]
+        self.n_training_items: int
 
         self.forename_converter = ForenameConvertor(self.language, train_english=train_english)
         self.tts = TTS(self.language, mongodb_client)
-        self.lets_go_translation: Optional[str] = None
 
     @property
     def locally_available_languages(self) -> List[str]:
@@ -59,7 +58,7 @@ class TrainerBackend(ABC):
 
     def _set_item_iterator(self, training_items: Sequence[Any]):
         self.n_training_items = len(training_items)
-        self._item_iterator: Iterator[Any] = self._get_item_iterator(training_items)
+        self._item_iterator = self._get_item_iterator(training_items)
 
     def _get_sentence_data(self) -> SentenceData:
         return SentenceData(self._non_english_language, self._train_english)

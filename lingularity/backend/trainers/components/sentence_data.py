@@ -1,13 +1,13 @@
+from typing import Optional, List, Set, Callable, Iterable, Counter, Iterator, Tuple
 import os
 from functools import cached_property
-from typing import Optional, List, Set, Callable, Iterable, Counter
 import collections
 
 import numpy as np
 from textacy.similarity import levenshtein
 
-from lingularity.backend.ops.data_mining.downloading import download_sentence_data
 from lingularity.backend import BASE_LANGUAGE_DATA_PATH
+from lingularity.backend.ops.data_mining.downloading import download_sentence_data
 from lingularity.backend.trainers.components.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.utils.iterables import longest_value
 from lingularity.backend.utils.strings import (
@@ -23,7 +23,7 @@ class SentenceData(np.ndarray):
     """ Abstraction of sentence pair data
 
         equals np.ndarray[List[List[str]], i.e. ndim == 2,
-        with, in case of _train_english being True:
+        with, in case of _train_english being False:
             SentenceData[:, 0] = english sentences,
             SentenceData[:, 1] = translations
         otherwise vice-versa """
@@ -99,7 +99,7 @@ class SentenceData(np.ndarray):
         candidates = set()
         lowercase_words_cache = set()
 
-        for english_sentence, foreign_language_sentence in zip(self.english_sentences, self.foreign_language_sentences):
+        for english_sentence, foreign_language_sentence in self._english_to_foreign_language_sentence_iterator:
             if proper_noun in get_meaningful_tokens(english_sentence, apostrophe_splitting=True):
                 for token in get_meaningful_tokens(foreign_language_sentence, apostrophe_splitting=True):
                     if token.istitle() and levenshtein(proper_noun, token) >= MIN_CANDIDATE_PN_LEVENSHTEIN:
@@ -122,7 +122,7 @@ class SentenceData(np.ndarray):
         translation_candidates: Set[str] = set()
         translation_candidate_2_n_occurrences: Counter[str] = collections.Counter()
         translation_comprising_sentence_substrings_cache: List[Set[str]] = []
-        for english_sentence, foreign_language_sentence in zip(self.english_sentences, self.foreign_language_sentences):
+        for english_sentence, foreign_language_sentence in self._english_to_foreign_language_sentence_iterator:
             if proper_noun in get_meaningful_tokens(english_sentence, apostrophe_splitting=True):
                 foreign_language_sentence = strip_special_characters(foreign_language_sentence, include_dash=True, include_apostrophe=True).replace(' ', '')
 
@@ -155,10 +155,14 @@ class SentenceData(np.ndarray):
 
         return self._strip_overlaps(translation_candidates)
 
+    @property
+    def _english_to_foreign_language_sentence_iterator(self) -> Iterator[Tuple[str, str]]:
+        return zip(self.english_sentences, self.foreign_language_sentences)  # type: ignore
+
     @staticmethod
     def _strip_overlaps(translation_candidates: Iterable[str]) -> Set[str]:
         if longest_partial_overlap := longest_continuous_partial_overlap(translation_candidates):
-            return SentenceData._strip_overlaps(list(filter(lambda candidate: longest_partial_overlap not in candidate, translation_candidates)) + [longest_partial_overlap])
+            return SentenceData._strip_overlaps(list(filter(lambda candidate: longest_partial_overlap not in candidate, translation_candidates)) + [longest_partial_overlap])  # type: ignore
         return set(translation_candidates)
 
     # -------------------

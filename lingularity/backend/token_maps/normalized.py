@@ -77,6 +77,7 @@ class LemmaMap(NormalizedTokenMap):
 
         if os.path.exists(self._save_path):
             self._map, self.occurrence_map = pickle.load(open(self._save_path, 'rb'))
+
             if load_normalizer:
                 self._model = self._get_model(language)
 

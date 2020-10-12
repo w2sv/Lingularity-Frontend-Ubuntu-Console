@@ -23,9 +23,13 @@ class _Translations(TypedDict):
     defaultForenames: DefaultForenamesTranslations
 
 
+class _Properties(TypedDict):
+    usesLatinScript: bool
+
+
 class _LanguageMetadataValue(TypedDict):
     sentenceDataDownloadLinks: Dict[str, str]
-    properties: Dict[str, str]
+    properties: _Properties
     countriesEmployedIn: List[str]
     translations: Dict[str, _Translations]
 

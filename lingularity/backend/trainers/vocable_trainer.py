@@ -9,7 +9,7 @@ import numpy as np
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.token_maps import get_token_map
-from lingularity.frontend.console.utils.date import n_days_ago
+from lingularity.backend.utils.date import n_days_ago
 
 
 class VocableEntry:

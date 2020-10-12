@@ -9,7 +9,7 @@ def get_token_map(sentence_data: np.ndarray, language: str, load_normalizer=True
     lowercase_language = language.lower()
 
     for cls in [LemmaMap, StemMap]:
-        if cls.is_available(lowercase_language):
+        if cls.is_available(lowercase_language):  # type: ignore
             return cls(sentence_data, lowercase_language, load_normalizer=load_normalizer)
 
     return UnnormalizedTokenMap(sentence_data)
