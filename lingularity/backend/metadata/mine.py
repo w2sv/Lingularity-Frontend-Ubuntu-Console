@@ -7,7 +7,7 @@ from tqdm import tqdm
 from textacy.similarity import levenshtein
 
 from . import METADATA_DIR_PATH
-from lingularity.backend.trainers.base.forename_conversion import DEFAULT_FORENAMES
+from lingularity.backend.trainers.components.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.metadata.types import LanguageMetadata, CountryMetadata
 from lingularity.backend.trainers.base import SentenceData
 from lingularity.backend.ops.google.translation import google_translator
@@ -60,9 +60,17 @@ def _mine_and_set_forename_conversion_data(language: str):
                 language_metadata[language]['countriesEmployedIn'].append(country)
 
                 if country_metadata.get(country, 'nil') == 'nil':
-                    if forename_conversion_data := scrape_popular_forenames(country):
-                        forename_conversion_data['demonym'] = scrape_demonym(country)
-                        country_metadata[country] = forename_conversion_data
+                    if (forenames := scrape_popular_forenames(country)) is not None:
+                        def get_spelling_map(gender_index: int):
+                            return {'latinSpelling': forenames[gender_index][0],
+                                    'nativeSpelling': forenames[gender_index][1]}
+
+                        country_metadata[country] = {
+                            'maleForenames': get_spelling_map(gender_index=0),
+                            'femaleForenames': get_spelling_map(gender_index=1),
+                            'demonym': scrape_demonym(country)
+                        }
+
                     else:
                         country_metadata[country] = None
 
@@ -86,7 +94,7 @@ def _mine_and_set_translations(language: str, sentence_data: SentenceData):
 
         # constitution query
         constitution_queries = map(translate, [f"How are you {DEFAULT_FORENAMES[0]}?", f"What's up {DEFAULT_FORENAMES[0]}?"])
-        translation_sub_dict["constitutionQuery"] = list(map(lambda query: replace_multiple(query, strings=translation_sub_dict["defaultForenames"]["Tom"] + [DEFAULT_FORENAMES[0]], replacement=FORENAME_PLACEHOLDER), constitution_queries))
+        translation_sub_dict["constitutionQuery"] = list(map(lambda query: replace_multiple(query, strings=sorted(translation_sub_dict["defaultForenames"]["Tom"], key=len, reverse=True) + [DEFAULT_FORENAMES[0]], replacement=FORENAME_PLACEHOLDER), constitution_queries))
 
     language_metadata[language]['translations'] = translation_sub_dict
 
@@ -114,8 +122,8 @@ def _correct_metadata(metadata: Union[LanguageMetadata, CountryMetadata], file_n
 
 
 if __name__ == '__main__':
-    language_metadata: LanguageMetadata = collections.defaultdict(lambda: {})
-    country_metadata: CountryMetadata = {}
+    language_metadata: LanguageMetadata = LanguageMetadata()
+    country_metadata: CountryMetadata = CountryMetadata()
 
     _mine_metadata()
 

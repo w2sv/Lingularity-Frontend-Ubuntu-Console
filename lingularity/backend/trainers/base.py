@@ -6,9 +6,9 @@ import numpy as np
 
 from lingularity.backend import BASE_LANGUAGE_DATA_PATH
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.trainers.base.forename_conversion import ForenameConvertor
-from lingularity.backend.trainers.base.sentence_data import SentenceData
-from lingularity.backend.trainers.base.tts import TTS
+from lingularity.backend.trainers.components.forename_conversion import ForenameConvertor
+from lingularity.backend.trainers.components.sentence_data import SentenceData
+from lingularity.backend.trainers.components.tts import TTS
 
 
 class TrainerBackend(ABC):
@@ -25,7 +25,7 @@ class TrainerBackend(ABC):
         self._item_iterator: Optional[Iterator[Any]] = None
         self.n_training_items: Optional[int] = None
 
-        self.forename_converter = ForenameConvertor(self.language)
+        self.forename_converter = ForenameConvertor(self.language, train_english=train_english)
         self.tts = TTS(self.language, mongodb_client)
         self.lets_go_translation: Optional[str] = None
 
@@ -54,7 +54,7 @@ class TrainerBackend(ABC):
     # ----------------
     @abstractmethod
     def set_item_iterator(self):
-        """ sets _item_iterator, n_training_items """
+        """ Sets item iterator, n training items """
         pass
 
     def _set_item_iterator(self, training_items: Sequence[Any]):

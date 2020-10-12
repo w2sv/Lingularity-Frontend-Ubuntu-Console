@@ -5,7 +5,7 @@
 <s>-  upload user data (vocabulary, vocabulary statistics, trainer usage data) to global data base</s>
 - incorporate buffer print into vocabulary training, linebreak resilience
 - write tests (mongodb, token maps)
-- welcome translation after authenticate
+- welcome translation after log_in
 - related word inference elaboration by means of word family data and some kind of english infinitiv deduction model/dataset
 - infer lingual capability level by appended vocabulary
 - mode/language specific dynamic occurrence frequency limits

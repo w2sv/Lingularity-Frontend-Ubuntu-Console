@@ -7,8 +7,12 @@ from lingularity.backend.trainers import VocableAdderBackend
 from lingularity.backend.database import MongoDBClient
 from lingularity.frontend.console.trainers import VocableTrainerConsoleFrontend
 from lingularity.frontend.console.utils.input_resolution import resolve_input, indissolubility_output
-from lingularity.frontend.console.utils.output import (clear_screen, get_max_line_length_based_indentation,
-                                                       DEFAULT_VERTICAL_VIEW_OFFSET, erase_lines)
+from lingularity.frontend.console.utils.output import (
+    clear_screen,
+    get_max_line_length_based_indentation,
+    DEFAULT_VERTICAL_VIEW_OFFSET,
+    erase_lines
+)
 
 
 class VocableAdderFrontend(VocableTrainerConsoleFrontend):
@@ -47,7 +51,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
     def _output_vocable_addition_confirmation(self):
         print(f'Added {self._latest_created_vocable_entry.line_repr}')
 
-    def run(self):
+    def run(self) -> bool:
         self._display_instructions()
 
         while True:
@@ -63,9 +67,11 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
 
                 # option execution
                 elif option is self.Option.Exit:
-                    return
+                    break
 
                 elif option is self.Option.AlterLatestVocableEntry:
                     n_printed_lines = self._alter_vocable_entry(self._latest_created_vocable_entry)
                     erase_lines(n_printed_lines + 1)
                     self._output_vocable_addition_confirmation()
+
+        return True

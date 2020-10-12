@@ -1,8 +1,7 @@
 from typing import List, Optional, Set, Iterator, Iterable
-import re
-import unicodedata
-
 from itertools import chain
+import unicodedata
+import re
 
 from lingularity.backend.utils.iterables import windowed, longest_value
 

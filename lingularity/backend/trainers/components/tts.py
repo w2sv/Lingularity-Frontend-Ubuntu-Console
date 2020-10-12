@@ -70,8 +70,7 @@ class TTS:
             assert self._language_variety_identifier is not None
             if (preset_playback_speed := self._mongodb_client.query_playback_speed(self._language_variety_identifier)) is not None:
                 return preset_playback_speed
-            else:
-                return 1.0
+            return 1.0
 
     def enter_playback_speed_change_into_database(self, playback_speed: float):
         assert self._language_variety_identifier is not None
@@ -98,6 +97,7 @@ class TTS:
                 # TODO: let function break on enter stroke by employing threading
                 pass
 
-    def clear_audio_file_dir(self):
-        for audio_file in os.listdir(self._AUDIO_FILE_PATH):
-            os.remove(f'{self._AUDIO_FILE_PATH}/{audio_file}')
+    @staticmethod
+    def clear_audio_file_dir():
+        for audio_file in os.listdir(TTS._AUDIO_FILE_PATH):
+            os.remove(f'{TTS._AUDIO_FILE_PATH}/{audio_file}')

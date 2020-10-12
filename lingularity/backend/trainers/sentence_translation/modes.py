@@ -1,4 +1,4 @@
-from typing import Union, Dict, Type, List
+from typing import Callable, Dict, Type, List
 from itertools import chain
 import operator as op
 from abc import ABC, abstractmethod
@@ -10,8 +10,6 @@ from lingularity.backend.token_maps import get_token_map
 
 
 class TrainingMode(ABC):
-	COMPARISON_FUNCTION = Union[op.ge, op.lt, op.gt, op.le]
-
 	def __init__(self, keyword: str, explanation: str):
 		self.keyword = keyword
 		self.explanation = explanation
@@ -21,7 +19,7 @@ class TrainingMode(ABC):
 		pass
 
 	@staticmethod
-	def _filter_sentence_data(sentence_data: SentenceData, language: str, comparison_function: COMPARISON_FUNCTION) -> SentenceData:
+	def _filter_sentence_data(sentence_data: SentenceData, language: str, comparison_function: Callable[[int, int], bool]) -> SentenceData:
 		token_map = get_token_map(sentence_data, language, load_normalizer=False)
 		token_occurrence_median = np.median(list(token_map.occurrence_map.values()))
 

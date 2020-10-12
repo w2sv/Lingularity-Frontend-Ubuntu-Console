@@ -1,7 +1,13 @@
-import random
 from typing import Optional, List, Iterator
+import random
+from collections.abc import Mapping
 
-from lingularity.backend.metadata import ForenameConversionData, get_forename_conversion_data, language_metadata
+from lingularity.backend.metadata import (
+    ReplacementForenames,
+    get_replacement_forenames,
+    language_metadata,
+    DefaultForenamesTranslations
+)
 
 
 DEFAULT_FORENAMES = ('Tom', 'John', 'Mary', 'Alice')
@@ -10,31 +16,31 @@ _DEFAULT_SURNAME = 'Jackson'
 
 class ForenameConvertor:
     def __init__(self, language: str, train_english: bool):
-        data: Optional[ForenameConversionData] = get_forename_conversion_data(language)
-        self.forenames_convertible: bool = bool(data)
+        replacement_forenames: Optional[ReplacementForenames] = get_replacement_forenames(language)
 
+        self._forenames_convertible: bool = bool(replacement_forenames)
         self._train_english: bool = train_english
+        self._default_forename_translations: Optional[DefaultForenamesTranslations] = language_metadata[language]['translations']['defaultForenames']
 
-        if self.forenames_convertible:
-            self.demonym: str = data.pop('demonym')
-            self._replacement_forenames: List[List[List[str]]] = [list(spelling_dict.values()) for spelling_dict in data.values()]
+        self._replacement_forenames: Optional[List[List[List[str]]]] = None
+        self.demonym: Optional[str] = None
 
-        self._employs_non_latin_characters = language_metadata[language]['employsNonLatinCharacters']
-        if self._employs_non_latin_characters:
-            self._default_forename_transcriptions: List[str] = language_metadata[language]['translations']['defaultForenames']
+        if replacement_forenames is not None:
+            self.demonym = replacement_forenames['demonym']
+            self._replacement_forenames = [list(gender_dict.values()) for gender_dict in replacement_forenames.values() if issubclass(Mapping, gender_dict)]
 
     def __call__(self, sentence_pair: List[str]) -> List[str]:
-        if self.forenames_convertible:
-            picked_forename_indices: List[Optional[int]] = [None, None]
+        if self._forenames_convertible:
+            picked_forename_indices: List[Optional[int]] = [None] * len(DEFAULT_FORENAMES)
             for i, sentence in enumerate(sentence_pair):
                 sentence_pair[i] = self._convert_sentence(sentence, is_english_sentence=not i, replacement_forename_indices=picked_forename_indices)
         return sentence_pair
 
     def _convert_sentence(self, sentence: str, is_english_sentence: bool, replacement_forename_indices: List[Optional[int]]) -> str:
-        spelling_index = int(not is_english_sentence and self._employs_non_latin_characters)
+        spelling_index = int(not is_english_sentence)
 
         fragments = sentence.split(' ')
-        for gender_index, default_name in enumerate([DEFAULT_FORENAMES, self._default_forename_transcriptions][spelling_index]):
+        for gender_index, default_name in enumerate([DEFAULT_FORENAMES, self._default_forename_translations][spelling_index]):
             for i, (fragment, convert) in enumerate(zip(fragments, self._forename_conversion_mask(fragments, default_name, is_english_sentence))):
                 if convert:
                     if replacement_forename_indices[gender_index] is None:

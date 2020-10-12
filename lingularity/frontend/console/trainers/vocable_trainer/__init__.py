@@ -3,15 +3,20 @@ from time import sleep
 
 import matplotlib.pyplot as plt
 
+from lingularity.backend.database import MongoDBClient
+from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend as Backend, VocableEntry
 from lingularity.frontend.console.trainers.vocable_trainer.options import *
 from lingularity.frontend.console.trainers.sentence_translation import SentenceTranslationTrainerConsoleFrontend
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, TrainingOptionCollection
-from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend as Backend, VocableEntry
-from lingularity.backend.database import MongoDBClient
-from lingularity.frontend.console.utils.output import (clear_screen, erase_lines, DEFAULT_VERTICAL_VIEW_OFFSET,
-                                                       centered_print, get_max_line_length_based_indentation)
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
+from lingularity.frontend.console.utils.output import (
+    clear_screen,
+    erase_lines,
+    DEFAULT_VERTICAL_VIEW_OFFSET,
+    centered_print,
+    get_max_line_length_based_indentation
+)
 
 
 class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
@@ -61,7 +66,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Run
     # -----------------
-    def run(self):
+    def run(self) -> bool:
         self._backend.set_item_iterator()
         self._display_new_vocabulary()
         self._display_instructions()
@@ -69,6 +74,8 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
         self._display_pie_chart()
         self._plot_training_history()
+
+        return False
 
     # -----------------
     # Pre training

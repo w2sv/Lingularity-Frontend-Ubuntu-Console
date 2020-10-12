@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict
+from typing import Optional, List
 
 from .utils import read_page_source
 from lingularity.backend.utils.strings import strip_multiple
@@ -9,7 +9,7 @@ _POPULAR_FORENAMES_PAGE_URL = 'http://en.wikipedia.org/wiki/List_of_most_popular
 popular_forenames_page_source: List[str] = str(read_page_source(_POPULAR_FORENAMES_PAGE_URL)).split('\n')
 
 
-def scrape_popular_forenames(country: str) -> Optional[Dict[str, Dict[str, List[str]]]]:
+def scrape_popular_forenames(country: str) -> Optional[List[List[List[str]]]]:
     """
         Returns:
             None in case of irretrievability of both popular male and female forenames, otherwise
@@ -21,12 +21,11 @@ def scrape_popular_forenames(country: str) -> Optional[Dict[str, Dict[str, List[
         return None
 
     first_forename_possessing_row_indices = [index + 1 for index in forename_block_initiating_row_indices]
-    forenames = list(map(_scrape_forenames, first_forename_possessing_row_indices))
-    return {'maleForenames': forenames[0], 'femaleForenames': forenames[1]}
+    return list(map(_scrape_forenames, first_forename_possessing_row_indices))
 
 
 def _get_forename_block_preceding_row_indices(country: str) -> List[int]:
-    forename_block_initiating_row_indices = []
+    forename_block_initiating_row_indices: List[int] = []
 
     for i, row in enumerate(popular_forenames_page_source):
         if country in row and (row.endswith(f'</a></sup></td>') or popular_forenames_page_source[i - 1] == '<tr>'):
@@ -40,12 +39,12 @@ def _get_forename_block_preceding_row_indices(country: str) -> List[int]:
     return forename_block_initiating_row_indices
 
 
-def _scrape_forenames(forename_possessing_row_index: int) -> Dict[str, List[str]]:
+def _scrape_forenames(forename_possessing_row_index: int) -> List[List[str]]:
     EXIT_ELEMENTS = ['sup class="reference"', '</td></tr>']
     BRACKETS = list('()')
 
     possesses_foreign_transcription = False
-    forenames = {'latinSpelling': [], 'nativeSpelling': []}
+    spelling_kinds: List[List[str]] = [[] for _ in range(2)]
 
     while all(exit_element not in (row := popular_forenames_page_source[forename_possessing_row_index]) for exit_element in EXIT_ELEMENTS):
         truncated_row = row[5:] if 'href' in row else row[3:]  # <td><a href... -> a href...
@@ -67,14 +66,14 @@ def _scrape_forenames(forename_possessing_row_index: int) -> Dict[str, List[str]
                 forename_transcriptions = [extracted_forename]
 
             for i, transcription in enumerate(forename_transcriptions):
-                forenames[list(forenames.keys())[i]].append(transcription)
+                spelling_kinds[i].append(transcription)
 
         forename_possessing_row_index += 1
 
-    for k, v in forenames.items():
-        forenames[k] = list(dict.fromkeys(filter(lambda candidate: 0 < len(candidate) < 20, (candidate.split(',')[0] for candidate in v))).keys())
+    for i, spellings in enumerate(spelling_kinds):
+        spelling_kinds[i] = list(dict.fromkeys(filter(lambda candidate: 0 < len(candidate) < 20, (candidate.split(',')[0] for candidate in spellings))))
 
-    return forenames
+    return spelling_kinds
 
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 import pymongo
 
-from lingularity.frontend.console.utils.date import datetag_today
+from lingularity.frontend.console.utils.date import todays_datetag
 from .document_types import LastSessionStatistics, VocableAttributes
 
 
@@ -42,6 +42,10 @@ class MongoDBClient:
         if self._user is not None:
             raise AttributeError('user ought not to be reassigned')
         self._user = value
+
+    @property
+    def user_set(self) -> bool:
+        return self.user is not None
 
     @property
     def language(self) -> Optional[str]:
@@ -107,8 +111,8 @@ class MongoDBClient:
 
         return self.user_data_base['general']
 
-    def initialize_user(self, email_address: str, password: str):
-        print(email_address, password)
+    def initialize_user(self, user: str, email_address: str, password: str):
+        self.user = user
         self.general_collection.insert_one({'_id': 'unique',
                                             'emailAddress': email_address,
                                             'password': password})
@@ -118,7 +122,7 @@ class MongoDBClient:
             filter={'_id': 'unique'},
             update={'$set': {'lastSession': {'trainer': trainer,
                                              'nFacedItems': faced_items,
-                                             'date': datetag_today(),
+                                             'date': todays_datetag(),
                                              'language': self._language}}},
             upsert=True
         )
@@ -156,7 +160,7 @@ class MongoDBClient:
         self.vocabulary_collection.find_one_and_update(
             filter={'_id': self._language, token: {'$exists': True}},
             update={'$inc': {f'{token}.tf': 1},
-                    '$set': {f'{token}.lfd': datetag_today(),
+                    '$set': {f'{token}.lfd': todays_datetag(),
                              f'{token}.s': new_score}},
             upsert=False
         )
@@ -192,7 +196,7 @@ class MongoDBClient:
     def inject_session_statistics(self, trainer_abbreviation: str, n_faced_items: int):
         self.training_chronic_collection.update_one(
             filter={'_id': self._language},
-            update={'$inc': {f'{datetag_today()}.{trainer_abbreviation}': n_faced_items}},
+            update={'$inc': {f'{todays_datetag()}.{trainer_abbreviation}': n_faced_items}},
             upsert=True
         )
 

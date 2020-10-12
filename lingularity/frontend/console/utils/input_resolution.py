@@ -12,29 +12,30 @@ def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
         return options_starting_on_input[0]
     elif _input in options_starting_on_input:
         return _input
-    else:
-        return None
+    return None
 
 
 def recurse_on_unresolvable_input(function: Callable, n_deletion_lines, *func_args):
-    return recurse_on_invalid_input(function=function,
-                                    message="Couldn't resolve input",
-                                    n_deletion_lines=n_deletion_lines,
-                                    func_args=func_args)
+    return recurse_on_invalid_input(
+        function=function,
+        message="Couldn't resolve input",
+        n_deletion_lines=n_deletion_lines,
+        args=func_args
+    )
 
 
 def recurse_on_invalid_input(function: Callable,
                              message: str,
                              n_deletion_lines: int,
                              sleep_duration=1.0,
-                             func_args: Optional[Tuple[Any, ...]] = None):
-    if func_args is None:
-        func_args = ()
+                             args: Optional[Tuple[Any, ...]] = None):
+    if args is None:
+        args = ()
 
     indissolubility_output(message, sleep_duration, n_deletion_lines)
 
     cursor.show()
-    return function(*func_args)
+    return function(*args)
 
 
 def indissolubility_output(message: str, sleep_duration: float, n_deletion_lines: int):

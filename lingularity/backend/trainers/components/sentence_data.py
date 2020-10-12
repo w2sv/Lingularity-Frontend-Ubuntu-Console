@@ -1,14 +1,14 @@
 import os
 from functools import cached_property
-from typing import Optional, List, Set, Callable, Iterable
-from collections import Counter
+from typing import Optional, List, Set, Callable, Iterable, Counter
+import collections
 
 import numpy as np
 from textacy.similarity import levenshtein
 
 from lingularity.backend.ops.data_mining.downloading import download_sentence_data
 from lingularity.backend import BASE_LANGUAGE_DATA_PATH
-from lingularity.backend.trainers.base.forename_conversion import DEFAULT_FORENAMES
+from lingularity.backend.trainers.components.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.utils.iterables import longest_value
 from lingularity.backend.utils.strings import (
     get_meaningful_tokens,
@@ -28,7 +28,7 @@ class SentenceData(np.ndarray):
             SentenceData[:, 1] = translations
         otherwise vice-versa """
 
-    _train_english: bool = None
+    _train_english: bool = False
 
     def __new__(cls, language: str, train_english=False):
         """ Downloads sentence data if necessary """
@@ -107,7 +107,7 @@ class SentenceData(np.ndarray):
                     elif token.islower():
                         lowercase_words_cache.add(token)
 
-        filtered_candidates = set()
+        filtered_candidates: Set[str] = set()
         for candidate in filter(lambda candidate: candidate.lower() not in lowercase_words_cache, candidates):
             if all(levenshtein_score <= MAX_FILTERED_CANDIDATE_CONFIRMED_TRANSLATION_LEVENSHTEIN for levenshtein_score in map(lambda filtered_candidate: levenshtein(filtered_candidate, candidate), filtered_candidates)):
                 filtered_candidates.add(candidate)
@@ -119,8 +119,8 @@ class SentenceData(np.ndarray):
         MIN_CANDIDATE_CONFIRMATION_OCCURRENCE = 20
         MAGIC_NUMBER = 3
 
-        translation_candidates = set()
-        translation_candidate_2_n_occurrences = Counter()
+        translation_candidates: Set[str] = set()
+        translation_candidate_2_n_occurrences: Counter[str] = collections.Counter()
         translation_comprising_sentence_substrings_cache: List[Set[str]] = []
         for english_sentence, foreign_language_sentence in zip(self.english_sentences, self.foreign_language_sentences):
             if proper_noun in get_meaningful_tokens(english_sentence, apostrophe_splitting=True):
@@ -132,7 +132,7 @@ class SentenceData(np.ndarray):
                         translation_candidate_2_n_occurrences[intersection] += 1
 
                     if len(intersections) > 1:
-                        n_occurrences = list(map(translation_candidate_2_n_occurrences.get, intersections))
+                        n_occurrences: List[int] = list(map(translation_candidate_2_n_occurrences.get, intersections))  # type: ignore
                         if any(occurrence >= MIN_CANDIDATE_CONFIRMATION_OCCURRENCE for occurrence in n_occurrences):
                             for n_occurrence, candidate in zip(n_occurrences, intersections):
                                 if n_occurrence == MAGIC_NUMBER:
@@ -167,7 +167,7 @@ class SentenceData(np.ndarray):
     class Column(np.ndarray):
         """ Abstraction of entirety of sentence data pertaining to one language
 
-            equals: np.ndarray[List[str]] """
+            equals: np.ndarray[str] """
 
         def __new__(cls, sentence_data_column: np.ndarray):
             return sentence_data_column.view(SentenceData.Column)

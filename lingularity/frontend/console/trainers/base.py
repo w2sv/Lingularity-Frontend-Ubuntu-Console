@@ -91,7 +91,10 @@ class TrainerConsoleFrontend(ABC):
     # Driver
     # -----------------
     @abstractmethod
-    def run(self):
+    def run(self) -> bool:
+        """ Returns:
+                reinitialize_program_flag """
+
         pass
 
     # -----------------

@@ -3,7 +3,7 @@ import os
 import random
 from typing import Optional, List
 
-from .types import ForenameConversionData, LanguageMetadata, CountryMetadata
+from .types import ReplacementForenames, LanguageMetadata, CountryMetadata, DefaultForenamesTranslations
 
 
 METADATA_DIR_PATH = f'{os.getcwd()}/.metadata'
@@ -13,15 +13,11 @@ def _load_metadata(file_name: str):
     return json.load(open(f'{METADATA_DIR_PATH}/{file_name}.json', 'r', encoding='utf-8'))
 
 
-language_metadata: LanguageMetadata = None
-_country_metadata: CountryMetadata = None
+language_metadata: LanguageMetadata = _load_metadata('language')
+_country_metadata: CountryMetadata = _load_metadata('country')
 
 
-if len(os.listdir(METADATA_DIR_PATH)):
-    language_metadata, _country_metadata = list(map(_load_metadata, ['language', 'country']))
-
-
-def get_forename_conversion_data(language: str) -> Optional[ForenameConversionData]:
+def get_replacement_forenames(language: str) -> Optional[ReplacementForenames]:
     countries_language_employed_in: Optional[List[str]] = language_metadata[language]['countriesEmployedIn']
 
     if countries_language_employed_in is None:

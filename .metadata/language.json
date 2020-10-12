@@ -1248,7 +1248,6 @@
             "letsGo": "Andiamo!",
             "defaultForenames": {
                 "Tom": [
-                    "To",
                     "Tom",
                     "Tomi",
                     "Tomsi",
@@ -1268,8 +1267,8 @@
                 ]
             },
             "constitutionQuery": [
-                "Come stai {}m?",
-                "Che succede {}m?"
+                "Come stai {}?",
+                "Che succede {}?"
             ]
         }
     },
