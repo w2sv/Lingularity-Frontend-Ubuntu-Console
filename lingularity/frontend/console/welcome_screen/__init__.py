@@ -56,7 +56,7 @@ def select_action(actions) -> Optional[str]:
     centered_print(input_message, ' ', end='')
 
     if (training_selection := resolve_input(input(''), list(actions.keys()))) is None:
-        return recurse_on_unresolvable_input(select_action, n_deletion_lines=4)
+        return recurse_on_unresolvable_input(select_action, 4, actions)
 
     clear_screen()
     return training_selection

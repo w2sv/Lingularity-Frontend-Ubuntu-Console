@@ -25,7 +25,7 @@ class ForenameConvertor:
             self.demonym = replacement_forenames_map['demonym']
             self._replacement_forenames = [list(gender_dict.values()) for gender_dict in replacement_forenames_map.values() if isinstance(gender_dict, Mapping)]
 
-        self._forenames_convertible: bool = bool(replacement_forenames_map)
+        self.forenames_convertible: bool = bool(replacement_forenames_map)
         self._train_english: bool = train_english
         self._default_forename_translations: List[List[str]]
 
@@ -35,7 +35,7 @@ class ForenameConvertor:
         self._uses_latin_script: bool = language_metadata[language]['properties']['usesLatinScript']
 
     def __call__(self, sentence_pair: List[str]) -> List[str]:
-        if self._forenames_convertible:
+        if self.forenames_convertible:
             if self._train_english:
                 sentence_pair = list(reversed(self._convert_sentence_pair(reversed(sentence_pair))))
             else:

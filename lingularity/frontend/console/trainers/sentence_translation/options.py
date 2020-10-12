@@ -54,7 +54,7 @@ class AlterLatestVocableEntry(SentenceTranslationOption):
 
 class Exit(SentenceTranslationOption):
     def __init__(self):
-        super().__init__('exit', 'to terminate program\n')
+        super().__init__('exit', 'to terminate program')
 
     def execute(self):
         self._backend.tts.clear_audio_file_dir()

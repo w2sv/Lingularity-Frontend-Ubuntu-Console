@@ -28,10 +28,6 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     def __init__(self, mongodb_client: MongoDBClient):
         super().__init__(Backend, mongodb_client)
 
-        # select tts language variety if applicable
-        if all([self._backend.tts.available, self._backend.tts.language_varieties, not self._backend.tts.language_variety_identifier_set]):
-            self._backend.tts.change_language_variety(variety=self._select_language_variety())
-
         # tts
         self._tts_enabled = self._backend.tts.query_enablement()
         self._playback_speed = self._backend.tts.query_playback_speed()
@@ -91,6 +87,10 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     # Driver
     # -----------------
     def run(self) -> bool:
+        # select tts language variety if applicable
+        if all([self._backend.tts.available, self._backend.tts.language_varieties, not self._backend.tts.language_variety_identifier_set]):
+            self._backend.tts.change_language_variety(variety=self._select_language_variety())
+
         self._select_training_mode()
         self._backend.set_item_iterator()
 
@@ -124,19 +124,19 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
     def _display_instructions(self):
         clear_screen()
-        centered_print(f"{DEFAULT_VERTICAL_VIEW_OFFSET * 2}Document comprises {self._backend.n_training_items:,d} sentences.")
+        centered_print(f"{DEFAULT_VERTICAL_VIEW_OFFSET}Document comprises {self._backend.n_training_items:,d} sentences.\n")
 
         if self._backend.forename_converter.forenames_convertible:
             centered_print(f'Employing {self._backend.forename_converter.demonym} forenames.')
         print()
 
-        instructions = ["Enter"] + self._training_options.instructions
+        instructions = ["      Enter:"] + self._training_options.instructions
         indentation = get_max_line_length_based_indentation(instructions)
         for i, line in enumerate(instructions):
             print(indentation, line)
 
-            if i == 2:
-                centered_print('Text-to-Speech Options\n')
+            if i == 3:
+                centered_print('\nText-to-Speech Options\n'.upper())
 
         # print let's go translation
         print('\n' * 2, end='')
