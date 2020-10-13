@@ -11,7 +11,8 @@ from lingularity.backend.resources import strings as string_resources
 
 from . import options
 from . import modes
-from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, TrainingOptionCollection
+from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
+from ..base import TrainingOptions
 from lingularity.frontend.console.utils.view import creates_new_view
 from lingularity.frontend.console.utils.input_resolution import (
     resolve_input,
@@ -35,7 +36,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._playback_speed: Optional[float] = self._backend.tts.query_playback_speed()
         self._audio_file_path: Optional[str] = None
 
-    def _get_training_options(self) -> TrainingOptionCollection:
+    def _get_training_options(self) -> TrainingOptions:
         options.SentenceTranslationOption.set_frontend_instance(self)
 
         option_classes = [options.AddVocabulary, options.AlterLatestVocableEntry, options.Exit]
@@ -46,7 +47,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         if self._backend.tts.language_varieties_available:
             option_classes += [options.ChangeTTSLanguageVariety]
 
-        return TrainingOptionCollection(option_classes)  # type: ignore
+        return TrainingOptions(option_classes)  # type: ignore
 
     # -----------------
     # Driver

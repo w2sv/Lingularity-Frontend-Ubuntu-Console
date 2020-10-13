@@ -9,7 +9,8 @@ from lingularity.backend.components import VocableEntry
 
 from lingularity.frontend.console.trainers.vocable_trainer.options import *
 from lingularity.frontend.console.trainers.sentence_translation import SentenceTranslationTrainerConsoleFrontend
-from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, TrainingOptionCollection
+from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
+from lingularity.frontend.console.trainers.base.options import TrainingOptions
 from lingularity.frontend.console.utils.view import creates_new_view
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
@@ -48,9 +49,9 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Training Options
     # -----------------
-    def _get_training_options(self) -> TrainingOptionCollection:
+    def _get_training_options(self) -> TrainingOptions:
         VocableTrainerOption.set_frontend_instance(self)
-        return TrainingOptionCollection([AddVocable, AlterLatestCreatedVocableEntry, AlterLatestFacedVocableEntry, Exit])
+        return TrainingOptions([AddVocable, AlterLatestCreatedVocableEntry, AlterLatestFacedVocableEntry, Exit])
 
     # -----------------
     # Training Property Selection

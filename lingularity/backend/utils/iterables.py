@@ -16,3 +16,7 @@ def windowed(iterable: Iterable[Any], n: int) -> Iterable[Tuple[Any]]:
 
 def longest_value(iterable: Iterable[Any]) -> Any:
     return sorted(iterable, key=len, reverse=True)[0]
+
+
+def unzip(nested_list: Iterable[Iterable[Any]]):
+    return zip(*nested_list)

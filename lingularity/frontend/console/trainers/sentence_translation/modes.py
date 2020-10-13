@@ -1,6 +1,7 @@
 from typing import *
 from itertools import starmap
 
+from lingularity.backend.utils.iterables import unzip
 from lingularity.backend.utils.strings import split_at_uppercase
 from lingularity.backend.trainers.sentence_translation import modes as mode_backends
 
@@ -18,7 +19,7 @@ _modes = list(starmap(TrainingMode, (
     (mode_backends.Random, 'just hit me with dem sentences'))))
 
 
-keywords, explanations = zip(*map(lambda mode: (mode.keyword, mode.explanation), _modes))
+keywords, explanations = unzip(map(lambda mode: (mode.keyword, mode.explanation), _modes))
 _keyword_2_mode = {mode.keyword: mode for mode in _modes}
 
 

@@ -10,7 +10,7 @@ from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.frontend.console.utils.output import centered_print, erase_lines
 from lingularity.frontend.console.utils.input_resolution import recurse_on_invalid_input
-from lingularity.frontend.console.trainers.base import TrainingOption
+from lingularity.frontend.console.trainers.base.options import TrainingOption
 
 
 class SentenceTranslationOption(TrainingOption, ABC):
@@ -120,5 +120,5 @@ class ChangeTTSLanguageVariety(SentenceTranslationOption):
 
         # redo previous terminal output
         self._display_instructions()
-        self._buffer_print.output_buffer_content()
+        self._buffer_print._output_buffer_content()
         self._pending_output()

@@ -5,7 +5,7 @@ from abc import ABC
 from time import sleep
 
 from lingularity.frontend.console.utils.output import centered_print, erase_lines
-from lingularity.frontend.console.trainers.base import TrainingOption
+from lingularity.frontend.console.trainers.base.options import TrainingOption
 
 
 class VocableTrainerOption(TrainingOption, ABC):

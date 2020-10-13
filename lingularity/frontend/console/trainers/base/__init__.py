@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, List, Type, Dict, Iterator
+from typing import Optional, Tuple, Type
 from abc import ABC, abstractmethod
 import time
 
@@ -11,58 +11,10 @@ from lingularity.backend.trainers import TrainerBackend
 from lingularity.backend.components import VocableEntry
 from lingularity.backend.metadata import language_metadata
 from lingularity.backend.database import MongoDBClient
+
 from lingularity.frontend.console.utils.output import BufferPrint, centered_print
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
-
-
-class TrainingOption(ABC):
-    _FRONTEND_INSTANCE = None
-
-    _VARIABLE_NAMES = ['keyword', '_explanation']
-
-    @staticmethod
-    @abstractmethod
-    def set_frontend_instance(instance):
-        pass
-
-    def __init__(self, keyword: str, explanation: str):
-        self.keyword = keyword
-        self._explanation = explanation
-
-    @property
-    def instruction(self) -> str:
-        return f"\t- '{self.keyword}' to {self._explanation}"
-
-    @abstractmethod
-    def execute(self):
-        pass
-
-    def __setattr__(self, key, value):
-        if key in TrainingOption.__dict__['_VARIABLE_NAMES']:
-            self.__dict__[key] = value
-
-        else:
-            assert hasattr(self._FRONTEND_INSTANCE, key)
-
-            setattr(self._FRONTEND_INSTANCE, key, value)
-
-    def __getattr__(self, item):
-        return getattr(self._FRONTEND_INSTANCE, item)
-
-
-class TrainingOptionCollection:
-    def __init__(self, option_classes: List[Type[TrainingOption]]):
-        options = [cls() for cls in option_classes]  # type: ignore
-
-        self.keywords = [option.keyword for option in options]
-        self.instructions = [option.instruction for option in options]
-        self._keyword_2_option: Dict[str, TrainingOption] = {option.keyword: option for option in options}
-
-    def __iter__(self) -> Iterator[TrainingOption]:
-        return iter(self._keyword_2_option.values())
-
-    def __getitem__(self, item: str) -> TrainingOption:
-        return self._keyword_2_option[item]
+from .options import TrainingOptions
 
 
 class TrainerConsoleFrontend(ABC):
@@ -73,13 +25,13 @@ class TrainerConsoleFrontend(ABC):
         self._backend: TrainerBackend = backend(non_english_language, train_english, mongodb_client)
 
         self._buffer_print: BufferPrint = BufferPrint()
-        self._training_options: TrainingOptionCollection = self._get_training_options()
+        self._training_options: TrainingOptions = self._get_training_options()
 
         self._n_trained_items: int = 0
         self._latest_created_vocable_entry: Optional[VocableEntry] = None
 
     @abstractmethod
-    def _get_training_options(self) -> TrainingOptionCollection:
+    def _get_training_options(self) -> TrainingOptions:
         pass
 
     # -----------------
