@@ -9,14 +9,12 @@ from lingularity.backend.utils.iterables import iterables_intersection, none_str
 
 
 class TokenMap(UserDict, ABC):
-    """
-    Interface for map classes comprising an association of
-        unique, LOWERCASE and RELEVANT tokens (unnormalized/normalized): str
-            to the
-        sentence indices corresponding to the bilateral sentence data in
-        which they occur, in either an inflected form (NormalizedTokenMaps)
-        or as they are(UnnormalizedTokenMap): List[int]
-    """
+    """ Interface for map classes comprising an association of
+          unique, LOWERCASE and RELEVANT tokens (unnormalized/normalized): str
+                to the
+          sentence indices corresponding to the bilateral sentence data in
+          which they occur, in either an inflected form (NormalizedTokenMaps)
+          or as they are(UnnormalizedTokenMap): List[int] """
 
     def __init__(self):
         super().__init__(dict=defaultdict(list))
@@ -25,7 +23,7 @@ class TokenMap(UserDict, ABC):
 
     @abstractmethod
     def _map_tokens(self, sentence_data: np.ndarray):
-        """ Sets both data and occurrence_map """
+        """ Sets both data and occurrence map """
         pass
 
     def _output_mapping_initialization_message(self):

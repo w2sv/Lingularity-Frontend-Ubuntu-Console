@@ -39,7 +39,7 @@ def _complete_initialization():
     clear_screen()
     display_starting_screen()
 
-    # log_in if user not yet set
+    # log in if user not yet set
     if not mongodb_client.user_set:
         mongodb_client = account_management.log_in(mongodb_client)
 
@@ -53,9 +53,9 @@ def _complete_initialization():
     action_selection: str = select_action(actions=ELIGIBLE_ACTIONS)
     action_executor = ELIGIBLE_ACTIONS[action_selection]
 
-    # run action
-    if hasattr(action_executor, 'run'):
-        reinitialize = action_executor(mongodb_client).run()
+    # __call__ action
+    if hasattr(action_executor, '__call__'):
+        reinitialize = action_executor(mongodb_client).__call__()
     else:
         reinitialize = action_executor(ELIGIBLE_ACTIONS)
 

@@ -6,7 +6,7 @@ from typing import Optional, List
 from .types import ReplacementForenames, LanguageMetadata, CountryMetadata, DefaultForenamesTranslations
 
 
-METADATA_DIR_PATH = f'{os.getcwd()}/.metadata'
+METADATA_DIR_PATH = f'{os.getcwd()}/lingularity/backend/resources/metadata'
 
 
 def _load_metadata(file_name: str):

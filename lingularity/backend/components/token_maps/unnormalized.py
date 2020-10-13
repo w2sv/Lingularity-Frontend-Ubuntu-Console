@@ -3,7 +3,7 @@ from typing import List, Set, Optional
 import numpy as np
 from tqdm import tqdm
 
-from lingularity.backend.token_maps import TokenMap
+from lingularity.backend.components.token_maps import TokenMap
 from lingularity.backend.utils.strings import get_meaningful_tokens, is_digit_free
 
 

@@ -5,18 +5,13 @@ import time
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
-import cursor
 from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.backend.trainers import TrainerBackend
-from lingularity.backend.trainers.vocable_trainer import VocableEntry
+from lingularity.backend.components import VocableEntry
 from lingularity.backend.metadata import language_metadata
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.utils.strings import common_start, strip_multiple
-from lingularity.frontend.console.utils.output import (BufferPrint, centered_print,
-                                                       DEFAULT_VERTICAL_VIEW_OFFSET, clear_screen,
-                                                       get_max_line_length_based_indentation)
-from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
+from lingularity.frontend.console.utils.output import BufferPrint, centered_print
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
 
 
@@ -74,7 +69,7 @@ class TrainerConsoleFrontend(ABC):
     SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'
 
     def __init__(self, backend: Type[TrainerBackend], mongodb_client: MongoDBClient):
-        non_english_language, train_english = self._select_language(mongodb_client)
+        non_english_language, train_english = self._select_training_language(mongodb_client)
         self._backend: TrainerBackend = backend(non_english_language, train_english, mongodb_client)
 
         self._buffer_print: BufferPrint = BufferPrint()
@@ -91,52 +86,26 @@ class TrainerConsoleFrontend(ABC):
     # Driver
     # -----------------
     @abstractmethod
-    def run(self) -> bool:
-        """ Returns:
-                reinitialize_program_flag """
+    def __call__(self) -> bool:
+        """ Invokes trainer frontend
 
+            Returns:
+                reinitialize program flag: bool """
         pass
 
     # -----------------
     # Pre Training
     # -----------------
     @abstractmethod
-    def _select_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
+    def _select_training_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
         pass
 
     @abstractmethod
-    def _display_instructions(self):
+    def _display_training_screen_header(self):
         pass
 
     def _output_lets_go(self):
-        if (translation := language_metadata[self._backend.language]['translations']['letsGo']) is not None:
-            output = translation
-        else:
-            output = "Let's go!"
-        centered_print(output, '\n' * 2)
-
-    def _select_language_variety(self) -> str:
-        """ Returns:
-                selected language variety: element of language_varieties """
-
-        clear_screen()
-        print(DEFAULT_VERTICAL_VIEW_OFFSET)
-        centered_print('SELECT TEXT-TO-SPEECH LANGUAGE VARIETY\n\n')
-
-        assert self._backend.tts.language_varieties is not None
-        common_start_length = len(common_start(self._backend.tts.language_varieties) or '')
-        processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._backend.tts.language_varieties]
-        indentation = get_max_line_length_based_indentation(processed_varieties)
-        for variety in processed_varieties:
-            print(indentation, variety)
-        print('')
-
-        cursor.show()
-        if (dialect_selection := resolve_input(input(indentation[:-5]), options=processed_varieties)) is None:
-            return recurse_on_unresolvable_input(self._select_language_variety, 1, self._backend.tts.language_varieties)
-        else:
-            cursor.hide()
-            return self._backend.tts.language_varieties[processed_varieties.index(dialect_selection)]
+        centered_print(language_metadata[self._backend.language]['translations']['letsGo'] or "Let's go!", '\n' * 2)
 
     # -----------------
     # Training
@@ -145,7 +114,7 @@ class TrainerConsoleFrontend(ABC):
     def _run_training(self):
         pass
 
-    def _get_new_vocable(self) -> int:
+    def _add_vocable(self) -> int:
         """ Returns:
                 number of printed lines """
 

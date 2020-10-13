@@ -1,15 +1,15 @@
-import os
-import pickle
-from abc import ABC, abstractmethod
 from typing import Optional, List
+from abc import ABC, abstractmethod
+import pickle
+import os
 
 from tqdm import tqdm
 import numpy as np
 import nltk
 import spacy
 
-from lingularity.backend.token_maps import TokenMap
-from lingularity.backend.token_maps import UnnormalizedTokenMap
+from lingularity.backend.components.token_maps import TokenMap
+from lingularity.backend.components.token_maps import UnnormalizedTokenMap
 from lingularity.backend.utils.spacy import LANGUAGE_2_CODE
 
 
@@ -76,7 +76,7 @@ class LemmaMap(NormalizedTokenMap):
         self._model = None
 
         if os.path.exists(self._save_path):
-            self._map, self.occurrence_map = pickle.load(open(self._save_path, 'rb'))
+            self.data, self.occurrence_map = pickle.load(open(self._save_path, 'rb'))
 
             if load_normalizer:
                 self._model = self._get_model(language)
@@ -128,7 +128,7 @@ class LemmaMap(NormalizedTokenMap):
 
     def _pickle_maps(self):
         with open(self._save_path, 'wb') as handle:
-            pickle.dump((dict(self._map), dict(self.occurrence_map)), handle, protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump((dict(self.data), dict(self.occurrence_map)), handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     # ------------------
     # Query

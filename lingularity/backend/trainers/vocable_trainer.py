@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Any
+from typing import List, Optional
 from collections import Counter
 from itertools import repeat, starmap
 from enum import Enum
@@ -8,99 +8,12 @@ import numpy as np
 
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.token_maps import get_token_map
-from lingularity.backend.utils.date import n_days_ago
-
-
-class VocableEntry:
-    """ wrapper for vocable vocable_entry dictionary of structure
-            {foreign_token: {tf: int},
-                            {lfd: Optional[str]},
-                            {s: float},
-                            {t: str}}
-
-        returned by mongodb, facilitating access to attributes, as well as
-        providing additional convenience functionality """
-
-    RawType = Dict[str, Dict[str, Any]]
-
-    @classmethod
-    def new(cls, vocable: str, translation: str):
-        return cls({vocable: {'tf': 0,
-                              'lfd': None,
-                              's': 0,
-                              't': translation}}, None)
-
-    def __init__(self, entry: RawType, reference_to_foreign: Optional[bool]):
-        self.entry = entry
-        self._reference_to_foreign = reference_to_foreign
-
-    def alter(self, new_vocable: str, new_translation: str):
-        self.entry[self.token]['t'] = new_translation
-        self.entry[new_vocable] = self.entry.pop(self.token)
-
-    # -----------------
-    # Token
-    # -----------------
-    @property
-    def token(self) -> str:
-        return next(iter(self.entry.keys()))
-
-    @property
-    def display_token(self) -> str:
-        return self.translation if not self._reference_to_foreign else self.token
-
-    # -----------------
-    # Translation
-    # -----------------
-    @property
-    def translation(self) -> str:
-        return self.entry[self.token]['t']
-
-    @property
-    def display_translation(self) -> str:
-        return self.translation if self._reference_to_foreign else self.token
-
-    # -----------------
-    # Additional properties
-    # -----------------
-    @property
-    def last_faced_date(self) -> Optional[str]:
-        return self.entry[self.token]['lfd']
-
-    @property
-    def score(self) -> float:
-        return self.entry[self.token]['s']
-
-    @score.setter
-    def score(self, value):
-        self.entry[self.token]['s'] = value
-
-    def update_score(self, increment: float):
-        self.score += increment
-
-    @property
-    def is_new(self) -> bool:
-        return self.last_faced_date is None
-
-    @property
-    def line_repr(self) -> str:
-        """ i.e. f'{token} - {translation}' """
-
-        return ' - '.join([self.token, self.translation])
-
-    @property
-    def is_perfected(self) -> bool:
-        if self.last_faced_date is None:
-            return False
-        else:
-            return self.score >= 5 and n_days_ago(self.last_faced_date) < 50
-
-    # -----------------
-    # Dunder(s)
-    # -----------------
-    def __str__(self):
-        return str(self.entry)
+from lingularity.backend.components import (
+    SentenceData,
+    VocableEntry,
+    TokenMap,
+    get_token_map
+)
 
 
 class VocableTrainerBackend(TrainerBackend):
@@ -108,11 +21,8 @@ class VocableTrainerBackend(TrainerBackend):
         super().__init__(non_english_language, train_english, mongodb_client)
 
         self._training_items: Optional[List[VocableEntry]] = None
-
-        self._sentence_data = self._get_sentence_data()
-        self.lets_go_translation = self._sentence_data.query_lets_go_translation()
-
-        self._token_2_sentence_indices = get_token_map(self._sentence_data, self.language, load_normalizer=True)
+        self._sentence_data: SentenceData = self._get_sentence_data()
+        self._token_2_sentence_indices: TokenMap = get_token_map(self._sentence_data, self.language, load_normalizer=True)
 
     @staticmethod
     def get_eligible_languages(mongodb_client: Optional[MongoDBClient]) -> List[str]:
@@ -129,7 +39,7 @@ class VocableTrainerBackend(TrainerBackend):
         return list(filter(lambda vocable_entry: not vocable_entry.is_perfected, entire_vocabulary))
 
     # ---------------
-    # Pre training
+    # Pre Training
     # ---------------
     def get_new_vocable_entries(self) -> List[VocableEntry]:
         assert self._training_items is not None

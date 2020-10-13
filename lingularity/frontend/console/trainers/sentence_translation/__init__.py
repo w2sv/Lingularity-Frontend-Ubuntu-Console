@@ -1,24 +1,27 @@
-import time
 from typing import Optional, Tuple
 from itertools import groupby
-import os
 import cursor
+import time
+import os
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend, modes
-from .options import *
+from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend
+from lingularity.backend.utils.strings import common_start, strip_multiple
+from lingularity.backend.resources import strings as string_resources
+
+from . import options
+from . import modes
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, TrainingOptionCollection
-from lingularity.frontend.console.utils.output import (
-    clear_screen,
-    erase_lines,
-    centered_print,
-    get_max_line_length_based_indentation,
-    DEFAULT_VERTICAL_VIEW_OFFSET
-)
+from lingularity.frontend.console.utils.view import creates_new_view
 from lingularity.frontend.console.utils.input_resolution import (
     resolve_input,
     recurse_on_unresolvable_input,
     indissolubility_output
+)
+from lingularity.frontend.console.utils.output import (
+    erase_lines,
+    centered_print,
+    get_max_line_length_based_indentation,
 )
 
 
@@ -28,75 +31,35 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     def __init__(self, mongodb_client: MongoDBClient):
         super().__init__(Backend, mongodb_client)
 
-        # tts
-        self._tts_enabled = self._backend.tts.query_enablement()
-        self._playback_speed = self._backend.tts.query_playback_speed()
+        self._tts_enabled: bool = self._backend.tts.query_enablement()
+        self._playback_speed: Optional[float] = self._backend.tts.query_playback_speed()
         self._audio_file_path: Optional[str] = None
 
-    @property
-    def _tts_available_and_enabled(self) -> bool:
-        return self._backend.tts.available and self._tts_enabled
-
-    def _select_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
-        """ Returns:
-                non-english language: str
-                _train_english: bool """
-
-        clear_screen()
-        eligible_languages = Backend.get_eligible_languages(mongodb_client)
-
-        centered_print(f'{DEFAULT_VERTICAL_VIEW_OFFSET}Eligible languages:\n'.upper())
-        starting_letter_grouped_languages = [', '.join(list(v)) for _, v in groupby(eligible_languages, lambda x: x[0])]
-        indentation = get_max_line_length_based_indentation(starting_letter_grouped_languages)
-
-        for language_group in starting_letter_grouped_languages:
-            print(indentation, language_group)
-
-        selection, train_english = resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Select language: '), eligible_languages), False
-        if selection is None:
-            return recurse_on_unresolvable_input(self._select_language, n_deletion_lines=-1)
-
-        elif selection == 'English':
-            eligible_languages.remove('English')
-            reference_language_validity = False
-
-            while not reference_language_validity:
-                reference_language = resolve_input(input('Enter desired reference language: \n\n'), eligible_languages)
-                if reference_language is None:
-                    print("Couldn't resolve input")
-                    time.sleep(1)
-                else:
-                    selection = reference_language
-                    train_english, reference_language_validity = [True]*2
-        return selection, train_english
-
     def _get_training_options(self) -> TrainingOptionCollection:
-        SentenceTranslationOption.set_frontend_instance(self)
+        options.SentenceTranslationOption.set_frontend_instance(self)
 
-        option_classes = [AddVocabulary, AlterLatestVocableEntry, Exit]
+        option_classes = [options.AddVocabulary, options.AlterLatestVocableEntry, options.Exit]
 
         if self._backend.tts.available:
-            option_classes += [EnableTTS, DisableTTS, ChangePlaybackSpeed]
+            option_classes += [options.EnableTTS, options.DisableTTS, options.ChangePlaybackSpeed]
 
         if self._backend.tts.language_varieties_available:
-            option_classes.append(ChangeTTSLanguageVariety)
+            option_classes += [options.ChangeTTSLanguageVariety]
 
         return TrainingOptionCollection(option_classes)  # type: ignore
 
     # -----------------
     # Driver
     # -----------------
-    def run(self) -> bool:
-        # select tts language variety if applicable
-        if all([self._backend.tts.available, self._backend.tts.language_varieties, not self._backend.tts.language_variety_identifier_set]):
-            self._backend.tts.change_language_variety(variety=self._select_language_variety())
+    def __call__(self) -> bool:
+        self._set_tts_language_variety_if_applicable()
 
-        self._select_training_mode()
+        self._set_training_mode()
         self._backend.set_item_iterator()
 
         cursor.hide()
 
-        self._display_instructions()
+        self._display_training_screen_header()
         self._run_training()
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
@@ -105,46 +68,133 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         return False
 
     # -----------------
-    # Pre training
+    # Training Property Selection
     # -----------------
-    def _select_training_mode(self):
-        clear_screen()
-        centered_print(f'{DEFAULT_VERTICAL_VIEW_OFFSET}TRAINING MODES\n')
+    @creates_new_view
+    def _select_training_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
+        """ Returns:
+                non-english language: str
+                train_english: bool """
 
+        train_english = False
+
+        # initialize view
+        centered_print(f'ELIGIBLE LANGUAGES:\n')
+
+        eligible_languages = Backend.get_eligible_languages(mongodb_client)
+
+        # display eligible languages in starting-letter-grouped manner
+        starting_letter_grouped_languages = [', '.join(list(v)) for _, v in groupby(eligible_languages, lambda x: x[0])]
+        indentation = get_max_line_length_based_indentation(starting_letter_grouped_languages)
+        for language_group in starting_letter_grouped_languages:
+            print(indentation, language_group)
+
+        # query desired language
+        if (selection := resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Select language: '), eligible_languages)) is None:
+            return recurse_on_unresolvable_input(self._select_training_language, n_deletion_lines=-1)
+
+        # query desired reference language if English selected
+        elif selection == string_resources.ENGLISH:
+            selection, train_english = None, True
+            eligible_languages.remove(string_resources.ENGLISH)
+
+            while selection is None:
+                if (selection := resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Select reference language: '), eligible_languages)) is None:
+                    indissolubility_output("Couldn't resolve input".upper(), n_deletion_lines=2, sleep_duration=1)
+
+        return selection, train_english
+
+    def _set_tts_language_variety_if_applicable(self):
+        """ Invokes variety selection method, forwards selected variety to backend """
+
+        if all([self._backend.tts.available, self._backend.tts.language_varieties, not self._backend.tts.language_variety_identifier_set]):
+            variety_selection = self._select_tts_language_variety()
+            self._backend.tts.change_language_variety(variety=variety_selection)
+
+    @creates_new_view
+    def _select_tts_language_variety(self) -> str:
+        """ Returns:
+                selected language variety: element of language_varieties """
+
+        # initialize view
+        centered_print('SELECT TEXT-TO-SPEECH LANGUAGE VARIETY\n\n')
+
+        assert self._backend.tts.language_varieties is not None
+
+        # display eligible varieties
+        common_start_length = len(common_start(self._backend.tts.language_varieties) or '')
+        processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._backend.tts.language_varieties]
+        indentation = get_max_line_length_based_indentation(processed_varieties)
+        for variety in processed_varieties:
+            print(indentation, variety)
+        print('')
+
+        # query variety
+        if (dialect_selection := resolve_input(input(indentation[:-5]), options=processed_varieties)) is None:
+            return recurse_on_unresolvable_input(self._select_tts_language_variety, 1, self._backend.tts.language_varieties)
+
+        return self._backend.tts.language_varieties[processed_varieties.index(dialect_selection)]
+
+    def _set_training_mode(self):
+        """ Invokes training mode selection method, forwards backend of selected mode to backend """
+
+        mode_selection = self._select_training_mode()
+        self._backend.set_training_mode(modes.__getitem__(mode_selection).backend)
+
+    @creates_new_view
+    def _select_training_mode(self) -> str:
+
+        # initialize view
+        centered_print('TRAINING MODES\n')
+
+        # display eligible modes
         indentation = get_max_line_length_based_indentation(modes.explanations)
         for keyword, explanation in zip(modes.keywords, modes.explanations):
             print(f'{indentation}{keyword.title()}:')
             print(f'{indentation}\t{explanation}\n')
 
+        # query desired mode
         if (mode_selection := resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: '), modes.keywords)) is None:
             return recurse_on_unresolvable_input(self._select_training_mode, n_deletion_lines=-1)
+        print('')
 
-        self._backend.set_training_mode(mode_selection)
-        print('\n', end='')
+        return mode_selection
 
-    def _display_instructions(self):
-        clear_screen()
-        centered_print(f"{DEFAULT_VERTICAL_VIEW_OFFSET}Document comprises {self._backend.n_training_items:,d} sentences.\n")
+    # -----------------
+    # Pre training
+    # -----------------
+    @creates_new_view
+    def _display_training_screen_header(self):
 
+        # initialize view
+        centered_print(f"Document comprises {self._backend.n_training_items:,d} sentences.\n")
+
+        # display picked country of replacement forename origin
         if self._backend.forename_converter.forenames_convertible:
             centered_print(f'Employing {self._backend.forename_converter.demonym} forenames.')
-        print()
+        print('')
 
+        # display instructions
         instructions = ["      Enter:"] + self._training_options.instructions
         indentation = get_max_line_length_based_indentation(instructions)
         for i, line in enumerate(instructions):
             print(indentation, line)
 
+            # display intermediate tts option header if applicable
             if i == 3:
                 centered_print('\nText-to-Speech Options\n'.upper())
 
-        # print let's go translation
+        # display let's go
         print('\n' * 2, end='')
         self._output_lets_go()
 
     # -----------------
     # Training
     # -----------------
+    @property
+    def _tts_available_and_enabled(self) -> bool:
+        return self._backend.tts.available and self._tts_enabled
+
     def _run_training(self):
         translation = self._process_procured_sentence_pair()
 
@@ -160,7 +210,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                 if len(response):
                     self._training_options[response].execute()
 
-                    if type(self._training_options[response]) is Exit:
+                    if type(self._training_options[response]) is options.Exit:
                         return
 
                 # ----ENTER-STROKE----
@@ -176,7 +226,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     # for some time to incentivise gleaning over translation
                     if self._tts_available_and_enabled:
                         self._backend.tts.play_audio_file(self._audio_file_path, self._playback_speed, suspend_program_for_duration=True)
-                        self._remove_audio_file()
+                        self._erase_audio_file()
                     else:
                         time.sleep(len(translation) * 0.05)
 
@@ -206,7 +256,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         return translation
 
-    def _remove_audio_file(self):
+    def _erase_audio_file(self):
         os.remove(self._audio_file_path)
         self._audio_file_path = None
 

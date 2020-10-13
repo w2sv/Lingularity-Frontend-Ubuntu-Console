@@ -6,7 +6,6 @@ from lingularity.backend.metadata import (
     ReplacementForenames,
     get_replacement_forenames,
     language_metadata,
-    DefaultForenamesTranslations
 )
 
 
@@ -99,5 +98,7 @@ if __name__ == '__main__':
         "Tomorrow Tom will freakin' school these fools, which will astonish Mary. John approved of that, which fascinated Alice.",
         "Domani Tom andrà a scuola con questi pazzi, che stupiranno Maria. John l'ha approvato, che affascinava Alice."
     ]
+
+    """ Lo scopo di Tom all'università è laurearsi. - Tom's purpose in college is to get a degree. """
 
     print(ForenameConvertor('Italian', train_english=True).__call__(sentence_pair))

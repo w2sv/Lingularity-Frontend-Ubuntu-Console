@@ -17,7 +17,7 @@ from lingularity.frontend.console.utils.output import (
 
 class VocableAdderFrontend(VocableTrainerConsoleFrontend):
     def __init__(self, mongodb_client: MongoDBClient):
-        non_english_language, train_english = self._select_language(mongodb_client)
+        non_english_language, train_english = self._select_training_language(mongodb_client)
 
         self._backend = VocableAdderBackend(non_english_language, mongodb_client)
 
@@ -25,13 +25,13 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
         Exit = 'exit'
         AlterLatestVocableEntry = 'alter'
 
-    def _display_instructions(self):
+    def _display_training_screen_header(self):
         clear_screen()
         print(DEFAULT_VERTICAL_VIEW_OFFSET * 2)
 
         instructions = (
             f"Press CTRL + C in order to select one of the following options:",
-            "\t  - 'exit' and return to trainer selection screen",
+            "\t  - 'exit' and return to trainer selection creates_new_view",
             "\t  - 'alter' the latest vocable entry"
         )
 
@@ -45,18 +45,17 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
         erase_lines(0)
         if (option_keyword := resolve_input(input('Enter option keyword: '), options=[op.value for op in self.Option])) is not None:
             return self.Option(option_keyword)
-        else:
-            return None
+        return None
 
     def _output_vocable_addition_confirmation(self):
         print(f'Added {self._latest_created_vocable_entry.line_repr}')
 
-    def run(self) -> bool:
-        self._display_instructions()
+    def __call__(self) -> bool:
+        self._display_training_screen_header()
 
         while True:
             try:
-                n_printed_lines = self._get_new_vocable()
+                n_printed_lines = self._add_vocable()
                 erase_lines(n_printed_lines)
                 self._output_vocable_addition_confirmation()
 
@@ -69,7 +68,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
                 elif option is self.Option.Exit:
                     break
 
-                elif option is self.Option.AlterLatestVocableEntry:
+                elif self._latest_created_vocable_entry is not None:
                     n_printed_lines = self._alter_vocable_entry(self._latest_created_vocable_entry)
                     erase_lines(n_printed_lines + 1)
                     self._output_vocable_addition_confirmation()

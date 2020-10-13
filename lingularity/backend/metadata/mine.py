@@ -9,7 +9,7 @@ from tqdm import tqdm
 from textacy.similarity import levenshtein
 
 from . import METADATA_DIR_PATH
-from lingularity.backend.trainers.components.forename_conversion import DEFAULT_FORENAMES
+from lingularity.backend.components import DEFAULT_FORENAMES
 from lingularity.backend.metadata.types import LanguageMetadata, CountryMetadata
 from lingularity.backend.trainers.base import SentenceData
 from lingularity.backend.ops.google.translation import google_translator

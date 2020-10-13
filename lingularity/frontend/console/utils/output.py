@@ -8,7 +8,10 @@ import shutil
 
 import numpy as np
 
+
 DEFAULT_VERTICAL_VIEW_OFFSET = '\n' * 2
+TERMINAL_LENGTH = int(shutil.get_terminal_size().columns)
+TAB_LENGTH = 4
 
 
 def clear_screen():
@@ -25,15 +28,22 @@ def erase_lines(n_lines: int):
     [_erase_previous_line() for _ in range(n_lines + 1)]
 
 
+def _output_length(string: str) -> int:
+    til_newline_substring = string[:string.find('\n')]
+    return len(til_newline_substring) + til_newline_substring.count('\t') * (TAB_LENGTH - 1)
+
+
+def _n_line_breaks(line: str) -> int:
+    return _output_length(line) // TERMINAL_LENGTH
+
+
 class BufferPrint:
     def __init__(self):
         self._buffer: Deque[str] = deque()
 
     @property
     def n_buffered_lines(self) -> int:
-        # TODO: add resilience regarding lines exceeding terminal length
-
-        return self._buffer.__len__() + sum(map(lambda line: line.count('\n'), self._buffer))
+        return len(self._buffer) + sum(map(lambda output: output.count('\n') + sum(_n_line_breaks(line) for line in output.split('\n')), self._buffer))
 
     def __call__(self, *args, **kwargs):
         self._buffer.append(''.join(args))
@@ -53,26 +63,25 @@ class BufferPrint:
 
 
 def _get_indentation(line_length: int) -> str:
-    terminal_columns = int(shutil.get_terminal_size().columns)
-    return " " * ((terminal_columns - line_length) // 2)
+    return " " * ((TERMINAL_LENGTH - line_length) // 2)
 
 
 def get_max_line_length_based_indentation(output_block: Sequence[str]) -> str:
-    return _get_indentation(len(output_block[np.argmax([len(l) for l in output_block])]))
+    return _get_indentation(len(output_block[int(np.argmax([len(line) for line in output_block]))]))
 
 
 def centered_print(*output: str, end='\n'):
     for i, output_element in enumerate(output):
         if '\n' in output_element:
-            if set(output_element).__len__() == 1:
+            if len(set(output_element)) == 1:
                 print(output_element, end='')
             else:
                 distinct_lines = output_element.split('\n')
                 indentation = _get_indentation(line_length=max((len(line) for line in distinct_lines)))
 
                 indented_output_block = map(lambda line: indentation + line, distinct_lines)
-                for l in indented_output_block:
-                    print(l)
+                for line in indented_output_block:
+                    print(line)
 
         else:
             print(_get_indentation(len(output_element)) + output_element, end=end if i == len(output) - 1 else '\n')

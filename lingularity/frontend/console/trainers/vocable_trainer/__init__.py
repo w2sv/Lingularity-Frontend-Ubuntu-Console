@@ -4,14 +4,16 @@ from time import sleep
 import matplotlib.pyplot as plt
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend as Backend, VocableEntry
+from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend as Backend
+from lingularity.backend.components import VocableEntry
+
 from lingularity.frontend.console.trainers.vocable_trainer.options import *
 from lingularity.frontend.console.trainers.sentence_translation import SentenceTranslationTrainerConsoleFrontend
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, TrainingOptionCollection
+from lingularity.frontend.console.utils.view import creates_new_view
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
 from lingularity.frontend.console.utils.output import (
-    clear_screen,
     erase_lines,
     DEFAULT_VERTICAL_VIEW_OFFSET,
     centered_print,
@@ -27,7 +29,34 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         self._latest_faced_vocable_entry: Optional[VocableEntry] = None
 
-    def _select_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
+    # -----------------
+    # Driver
+    # -----------------
+    def __call__(self) -> bool:
+        self._backend.set_item_iterator()
+        self._display_new_vocabulary_if_applicable()
+
+        self._display_training_screen_header()
+        self._run_training()
+
+        self._backend.enter_session_statistics_into_database(self._n_trained_items)
+        self._display_pie_chart()
+        self._plot_training_history()
+
+        return False
+
+    # -----------------
+    # Training Options
+    # -----------------
+    def _get_training_options(self) -> TrainingOptionCollection:
+        VocableTrainerOption.set_frontend_instance(self)
+        return TrainingOptionCollection([AddVocable, AlterLatestCreatedVocableEntry, AlterLatestFacedVocableEntry, Exit])
+
+    # -----------------
+    # Training Property Selection
+    # -----------------
+    @creates_new_view
+    def _select_training_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
         assert mongodb_client is not None
 
         if not (eligible_languages := Backend.get_eligible_languages(mongodb_client)):
@@ -36,7 +65,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         elif len(eligible_languages) == 1:
             return eligible_languages[0], False
 
-        centered_print(DEFAULT_VERTICAL_VIEW_OFFSET, 'ELIGIBLE LANGUAGES', DEFAULT_VERTICAL_VIEW_OFFSET)
+        centered_print('ELIGIBLE LANGUAGES', DEFAULT_VERTICAL_VIEW_OFFSET)
 
         indentation = get_max_line_length_based_indentation(eligible_languages)
         for language in sorted(eligible_languages):
@@ -45,60 +74,37 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         input_query_message = 'Enter desired language: '
         language_selection = resolve_input(input(f'\n{indentation[:-int(len(input_query_message) * 3/4)]}{input_query_message}'), eligible_languages)
         if language_selection is None:
-            return recurse_on_unresolvable_input(self._select_language, -1, mongodb_client)
+            return recurse_on_unresolvable_input(self._select_training_language, -1, mongodb_client)
         print('\n' * 2, end='')
+
         return language_selection, False  # TODO
 
     @staticmethod
+    @creates_new_view
     def _start_sentence_translation_trainer(mongodb_client: MongoDBClient):
-        print(DEFAULT_VERTICAL_VIEW_OFFSET)
         centered_print('You have to accumulate vocabulary by means of the SentenceTranslation™ TrainerBackend or manual amassment first.')
         sleep(3)
         centered_print('Initiating SentenceTranslation TrainerBackend...')
         sleep(2)
-        clear_screen()
-        return SentenceTranslationTrainerConsoleFrontend(mongodb_client).run()
-
-    def _get_training_options(self) -> TrainingOptionCollection:
-        VocableTrainerOption.set_frontend_instance(self)
-        return TrainingOptionCollection([AddVocable, AlterLatestCreatedVocableEntry, AlterLatestFacedVocableEntry, Exit])
+        return SentenceTranslationTrainerConsoleFrontend(mongodb_client).__call__()
 
     # -----------------
-    # Run
+    # Pre Training
     # -----------------
-    def run(self) -> bool:
-        self._backend.set_item_iterator()
-        self._display_new_vocabulary()
-        self._display_instructions()
-        self._run_training()
-        self._backend.enter_session_statistics_into_database(self._n_trained_items)
-        self._display_pie_chart()
-        self._plot_training_history()
-
-        return False
-
-    # -----------------
-    # Pre training
-    # -----------------
-    def _display_new_vocabulary(self):
-        clear_screen()
-
+    @creates_new_view
+    def _display_new_vocabulary_if_applicable(self):
         if (new_vocabulary := self._backend.get_new_vocable_entries()) is None:
             return
 
-        print(DEFAULT_VERTICAL_VIEW_OFFSET)
         centered_print('Would you like to see the vocabulary you recently added? (y)es/(n)o')
         centered_print(' ', end='')
         display_vocabulary = resolve_input(input(''), ['yes', 'no'])
         if display_vocabulary == 'yes':
             [print('\t', entry.line_repr) for entry in new_vocabulary]
-            print('\n')
-            input('Press any key to continue')
+            input('\n\nPress any key to continue')
 
-    def _display_instructions(self):
-        clear_screen()
-
-        print(DEFAULT_VERTICAL_VIEW_OFFSET * 2)
+    @creates_new_view
+    def _display_training_screen_header(self):
         centered_print(f'Found {self._backend.n_training_items} imperfect entries.\n\n')
 
         instructions = ["Enter: "] + self._training_options.instructions
@@ -109,7 +115,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             if i == 3:
                 print(f"{indentation}\t\tNote: distinct translations are to be separated by commas")
 
-        print()
+        print('')
         self._output_lets_go()
 
     # ------------------
@@ -156,7 +162,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 entry = self._backend.get_training_item()
 
     # -----------------
-    # Post training
+    # Post Training
     # -----------------
     @property
     def n_correct_responses(self) -> float:

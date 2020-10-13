@@ -6,9 +6,8 @@ import numpy as np
 
 from lingularity.backend import BASE_LANGUAGE_DATA_PATH
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.trainers.components.forename_conversion import ForenameConvertor
-from lingularity.backend.trainers.components.sentence_data import SentenceData
-from lingularity.backend.trainers.components.tts import TTS
+from lingularity.backend.components import ForenameConvertor, SentenceData, TTS
+from lingularity.backend.resources import strings as string_resources
 
 
 class TrainerBackend(ABC):
@@ -34,7 +33,7 @@ class TrainerBackend(ABC):
 
     @property
     def language(self):
-        return self._non_english_language if not self._train_english else 'English'
+        return self._non_english_language if not self._train_english else string_resources.ENGLISH
 
     @staticmethod
     @abstractmethod

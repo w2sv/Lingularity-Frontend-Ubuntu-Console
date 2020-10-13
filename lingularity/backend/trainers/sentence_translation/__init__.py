@@ -1,10 +1,11 @@
-from bisect import insort
 from typing import Optional, List, Type
+from bisect import insort
 
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.metadata import language_metadata
 from lingularity.backend.trainers import TrainerBackend
-from lingularity.backend.trainers.sentence_translation.modes import TrainingMode, keyword_2_training_mode
+from lingularity.backend.resources import strings as string_resources
+from .modes import TrainingMode
 
 
 class SentenceTranslationTrainerBackend(TrainerBackend):
@@ -13,13 +14,14 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 
         self._training_mode: Optional[Type[TrainingMode]] = None
 
-    def set_training_mode(self, training_mode_keyword: str):
-        self._training_mode = keyword_2_training_mode[training_mode_keyword]
+    def set_training_mode(self, training_mode: Type[TrainingMode]):
+        assert self._training_mode is None, "training mode shan't be reassigned"
+        self._training_mode = training_mode
 
     def set_item_iterator(self):
         assert self._training_mode is not None
 
-        # get sentence data, set lets go translation
+        # get sentence data
         sentence_data = self._get_sentence_data()
 
         # get mode filtered sentence data
@@ -30,5 +32,5 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
     @staticmethod
     def get_eligible_languages(mongodb_client: Optional[MongoDBClient] = None) -> List[str]:
         _eligible_languages = list(language_metadata.keys())
-        insort(_eligible_languages, 'English')
+        insort(_eligible_languages, string_resources.ENGLISH)
         return _eligible_languages
