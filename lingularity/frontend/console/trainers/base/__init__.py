@@ -109,23 +109,26 @@ class TrainerConsoleFrontend(ABC):
     def _plot_training_history(self):
         plt.style.use('dark_background')
 
+        # retrieve training history, pad nonexistent trainer item values
         training_history = self._backend.mongodb_client.query_training_chronic()
-        trained_sentences, trained_vocabulary = map(lambda abb: [date_dict[abb] if date_dict.get(abb) is not None else 0 for date_dict in training_history.values()], ['s', 'v'])
+        trained_sentences, trained_vocabulary = map(lambda trainer_abbreviation: [date_dict.get(trainer_abbreviation) or 0 for date_dict in training_history.values()], ['s', 'v'])
 
         # omit year, invert day & month for proper tick label display
         dates = ['-'.join(date.split('-')[1:][::-1]) for date in training_history.keys()]
 
+        # set up figure
         fig, ax = plt.subplots()
         fig.canvas.draw()
         fig.canvas.set_window_title("Way to go!")
 
+        # define plot
         x_range = np.arange(len(dates))
         ax.plot(x_range, trained_sentences, marker='.', markevery=list(x_range), color='r', label='sentences')
         ax.plot(x_range, trained_vocabulary, marker='.', markevery=list(x_range), color='y', label='vocable entries')
         ax.set_xticks(x_range)
         ax.set_xticklabels(dates, minor=False, rotation=45)
         ax.set_title(f'{self._backend.language} Training History')
-        ax.set_ylabel('n faced items')
+        ax.set_ylabel('faced items')
         ax.set_ylim(bottom=0)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
         ax.legend(loc='upper left')

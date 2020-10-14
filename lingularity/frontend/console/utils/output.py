@@ -10,7 +10,6 @@ import numpy as np
 
 
 DEFAULT_VERTICAL_VIEW_OFFSET = '\n' * 2
-TERMINAL_LENGTH = int(shutil.get_terminal_size().columns)
 TAB_LENGTH = 4
 
 
@@ -33,8 +32,12 @@ def _output_length(string: str) -> int:
     return len(til_newline_substring) + til_newline_substring.count('\t') * (TAB_LENGTH - 1)
 
 
+def _terminal_length() -> int:
+    return int(shutil.get_terminal_size().columns)
+
+
 def _n_line_breaks(line: str) -> int:
-    return _output_length(line) // TERMINAL_LENGTH
+    return _output_length(line) // _terminal_length()
 
 
 class BufferPrint:
@@ -63,7 +66,7 @@ class BufferPrint:
 
 
 def _get_indentation(line_length: int) -> str:
-    return " " * ((TERMINAL_LENGTH - line_length) // 2)
+    return " " * ((_terminal_length() - line_length) // 2)
 
 
 def get_max_line_length_based_indentation(output_block: Sequence[str]) -> str:

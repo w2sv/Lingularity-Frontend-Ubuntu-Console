@@ -227,7 +227,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     # for some time to incentivise gleaning over translation
                     if self._tts_available_and_enabled:
                         self._backend.tts.play_audio_file(self._audio_file_path, self._playback_speed, suspend_program_for_duration=True)
-                        self._erase_audio_file()
+                        self._remove_audio_file()
                     else:
                         time.sleep(len(translation) * 0.05)
 
@@ -257,7 +257,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         return translation
 
-    def _erase_audio_file(self):
+    def _remove_audio_file(self):
         os.remove(self._audio_file_path)
         self._audio_file_path = None
 

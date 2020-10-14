@@ -3,7 +3,7 @@ import datetime
 
 def todays_date_tag() -> str:
     """ Returns:
-            e.g. 2020-08-12 """
+            date tag, e.g. 2020-08-12 """
 
     return str(datetime.date.today())
 
