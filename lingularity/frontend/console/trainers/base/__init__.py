@@ -1,6 +1,7 @@
-from typing import Optional, Tuple, Type
+from typing import Optional, Tuple, Type, List
 from abc import ABC, abstractmethod
 import time
+import datetime
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -11,6 +12,7 @@ from lingularity.backend.trainers import TrainerBackend
 from lingularity.backend.components import VocableEntry
 from lingularity.backend.metadata import language_metadata
 from lingularity.backend.database import MongoDBClient
+from lingularity.backend.utils import date as date_utils
 
 from lingularity.frontend.console.utils.output import BufferPrint, centered_print
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
@@ -107,31 +109,50 @@ class TrainerConsoleFrontend(ABC):
     # Post Training
     # -----------------
     def _plot_training_history(self):
-        plt.style.use('dark_background')
+        DAY_DELTA = 14
+
+        plt.style.use('seaborn-darkgrid')
+
+        today = datetime.date.today()
+        earliest_date: datetime.date = (today - datetime.timedelta(days=DAY_DELTA))
 
         # retrieve training history, pad nonexistent trainer item values
         training_history = self._backend.mongodb_client.query_training_chronic()
-        trained_sentences, trained_vocabulary = map(lambda trainer_abbreviation: [date_dict.get(trainer_abbreviation) or 0 for date_dict in training_history.values()], ['s', 'v'])
+
+        starting_date = None
+        for training_date in training_history.keys():
+            if (converted_date := date_utils.string_date_2_datetime_type(training_date)) >= earliest_date:
+                starting_date = converted_date
+                break
+
+        dates: List[str] = []
+        while starting_date <= today:
+            dates.append(str(starting_date))
+            starting_date += datetime.timedelta(days=1)
+
+        trained_sentences, trained_vocabulary = map(lambda trainer_abbreviation: [training_history.get(date, {}).get(trainer_abbreviation) or 0 for date in dates], ['s', 'v'])
 
         # omit year, invert day & month for proper tick label display
-        dates = ['-'.join(date.split('-')[1:][::-1]) for date in training_history.keys()]
+        dates = ['-'.join(date.split('-')[1:][::-1]) for date in dates[:-1]] + ['today']
 
         # set up figure
         fig, ax = plt.subplots()
+        fig.set_size_inches(np.asarray([6.5, 6.5]))
         fig.canvas.draw()
         fig.canvas.set_window_title("Way to go!")
 
         # define plot
+        ax.set_title(f'{self._backend.language} Training History')
         x_range = np.arange(len(dates))
         ax.plot(x_range, trained_sentences, marker='.', markevery=list(x_range), color='r', label='sentences')
-        ax.plot(x_range, trained_vocabulary, marker='.', markevery=list(x_range), color='y', label='vocable entries')
+        ax.plot(x_range, trained_vocabulary, marker='.', markevery=list(x_range), color='g', label='vocable entries')
         ax.set_xticks(x_range)
         ax.set_xticklabels(dates, minor=False, rotation=45)
-        ax.set_title(f'{self._backend.language} Training History')
+        ax.set_xlabel('date')
         ax.set_ylabel('faced items')
         ax.set_ylim(bottom=0)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.legend(loc='upper left')
+        ax.legend(loc='upper right')
         center_matplotlib_windows()
         plt.show()
 

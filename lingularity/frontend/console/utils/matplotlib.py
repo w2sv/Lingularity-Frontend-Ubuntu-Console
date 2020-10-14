@@ -9,7 +9,7 @@ plt.rcParams['toolbar'] = 'None'
 
 def center_matplotlib_windows():
 	monitor = screeninfo.get_monitors()[0]
-	height, width = map(lambda attr: getattr(monitor, attr), ['height', 'width'])
+	height, width = monitor.height, monitor.width
 
 	dx, dy = 600, 600
 	window_manager = plt.get_current_fig_manager()
