@@ -4,8 +4,8 @@ from time import sleep
 import matplotlib.pyplot as plt
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend as Backend
 from lingularity.backend.components import VocableEntry
+from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend as Backend
 
 from lingularity.frontend.console.trainers.vocable_trainer.options import *
 from lingularity.frontend.console.trainers.sentence_translation import SentenceTranslationTrainerConsoleFrontend
@@ -190,8 +190,10 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         if not self._n_trained_items:
             return
 
-        correct_percentage = (self.n_correct_responses / self._n_trained_items) * 100
-        incorrect_percentage = 100 - correct_percentage
+        CENT = 100
+
+        correct_percentage = (self.n_correct_responses / self._n_trained_items) * CENT
+        incorrect_percentage = CENT - correct_percentage
 
         labels = ['Correct', 'Incorrect']
         explode = (0.1, 0)
@@ -199,7 +201,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         colors = ['g', 'r']
         try:
             def discard_futile_value(*iterables):
-                hundred_percent_index = [correct_percentage, incorrect_percentage].index(100)
+                hundred_percent_index = [correct_percentage, incorrect_percentage].index(CENT)
                 return ([i[hundred_percent_index]] for i in iterables)
 
             labels, explode, sizes, colors = discard_futile_value(labels, explode, sizes, colors)

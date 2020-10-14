@@ -49,6 +49,13 @@ class VocableTrainerBackend(TrainerBackend):
     # ---------------
     # Training
     # ---------------
+    def get_related_sentence_pairs(self, entry: str, n: int) -> Optional[List[List[str]]]:
+        if (sentence_indices := self._token_2_sentence_indices.query_sentence_indices(entry)) is None:
+            return None
+
+        sentence_indices = np.asarray(sentence_indices)
+        np.random.shuffle(sentence_indices)
+        return self._sentence_data[sentence_indices[:n]]  # type: ignore
 
     # ---------------
     # .Evaluation
@@ -82,14 +89,3 @@ class VocableTrainerBackend(TrainerBackend):
             return self.ResponseEvaluation.AlmostCorrect
         else:
             return self.ResponseEvaluation.Wrong
-
-    # ------------------
-    # .related sentences
-    # ------------------
-    def get_related_sentence_pairs(self, entry: str, n: int) -> Optional[List[List[str]]]:
-        if (sentence_indices := self._token_2_sentence_indices.query_sentence_indices(entry)) is None:
-            return None
-
-        sentence_indices = np.asarray(sentence_indices)
-        np.random.shuffle(sentence_indices)
-        return self._sentence_data[sentence_indices[:n]]  # type: ignore

@@ -68,7 +68,7 @@ class TrainerConsoleFrontend(ABC):
 
     def _add_vocable(self) -> int:
         """ Returns:
-                number of printed lines """
+                number of printed lines: int """
 
         vocable = input(f'Enter {self._backend.language} word/phrase: ')
         meanings = input('Enter meaning(s): ')
@@ -85,7 +85,7 @@ class TrainerConsoleFrontend(ABC):
 
     def _alter_vocable_entry(self, vocable_entry: VocableEntry) -> int:
         """ Returns:
-                n_printed_lines: int """
+                number of printed lines: int """
 
         old_line_repr = vocable_entry.line_repr
         KeyboardController().type(f'{old_line_repr}')
