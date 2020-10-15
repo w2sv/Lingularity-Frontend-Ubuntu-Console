@@ -11,7 +11,7 @@ from pynput.keyboard import Controller as KeyboardController
 from lingularity.backend.trainers import TrainerBackend
 from lingularity.backend.components import VocableEntry
 from lingularity.backend.metadata import language_metadata
-from lingularity.backend.database import MongoDBClient, TrainingChronic
+from lingularity.backend.database import MongoDBClient
 from lingularity.backend.utils import date as date_utils
 
 from lingularity.frontend.console.utils.output import RedoPrint, centered_print
@@ -94,7 +94,7 @@ class TrainerConsoleFrontend(ABC):
         new_entry_components = input('').split(' - ')
 
         if len(new_entry_components) != 2:
-            print('Invalid alteration')
+            centered_print('Invalid alteration')
             time.sleep(1)
             return 3
 
@@ -103,6 +103,7 @@ class TrainerConsoleFrontend(ABC):
 
         if vocable_entry.line_repr != old_line_repr:
             self._backend.mongodb_client.insert_altered_vocable_entry(old_vocable, vocable_entry)
+
         return 2
 
     # -----------------
@@ -152,6 +153,14 @@ class TrainerConsoleFrontend(ABC):
         plt.show()
 
     @staticmethod
+    def _get_plotting_dates(training_dates: Iterator[str], day_delta: int) -> Iterator[str]:
+        starting_date = TrainerConsoleFrontend._get_starting_date(training_dates, day_delta)
+
+        while starting_date <= date_utils.today:
+            yield str(starting_date)
+            starting_date += datetime.timedelta(days=1)
+
+    @staticmethod
     def _get_starting_date(training_dates: Iterator[str], day_delta: int) -> datetime.date:
         earliest_possible_date: datetime.date = (date_utils.today - datetime.timedelta(days=day_delta))
 
@@ -160,14 +169,6 @@ class TrainerConsoleFrontend(ABC):
                 return converted_date
 
         raise AttributeError
-
-    @staticmethod
-    def _get_plotting_dates(training_dates: Iterator[str], day_delta: int) -> Iterator[str]:
-        starting_date = TrainerConsoleFrontend._get_starting_date(training_dates, day_delta)
-
-        while starting_date <= date_utils.today:
-            yield str(starting_date)
-            starting_date += datetime.timedelta(days=1)
 
     # -----------------
     # Dunder(s)
