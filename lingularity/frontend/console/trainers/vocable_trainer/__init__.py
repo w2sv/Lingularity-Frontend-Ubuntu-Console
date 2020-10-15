@@ -55,7 +55,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Training Property Selection
     # -----------------
-    @view_creator
+    @view_creator()
     def _select_training_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
         assert mongodb_client is not None
 
@@ -80,7 +80,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         return language_selection, False  # TODO
 
     @staticmethod
-    @view_creator
+    @view_creator()
     def _start_sentence_translation_trainer(mongodb_client: MongoDBClient):
         centered_print('You have to accumulate vocabulary by means of the SentenceTranslation™ TrainerBackend or manual amassment first.')
         sleep(3)
@@ -91,7 +91,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Pre Training
     # -----------------
-    @view_creator
+    @view_creator()
     def _display_new_vocabulary_if_applicable(self):
         if (new_vocabulary := self._backend.get_new_vocable_entries()) is None:
             return
@@ -103,7 +103,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             [print('\t', entry.line_repr) for entry in new_vocabulary]
             input('\n\nPress any key to continue')
 
-    @view_creator
+    @view_creator()
     def _display_training_screen_header(self):
         centered_print(f'Found {self._backend.n_training_items} imperfect entries.\n\n')
 

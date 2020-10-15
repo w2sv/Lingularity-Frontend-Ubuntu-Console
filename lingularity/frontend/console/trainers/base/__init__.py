@@ -117,7 +117,7 @@ class TrainerConsoleFrontend(ABC):
         training_history = self._backend.mongodb_client.query_training_chronic()
 
         # get plotting dates
-        dates = list(self._get_plotting_dates(training_history, DAY_DELTA))
+        dates = list(self._get_plotting_dates(training_dates=iter(training_history.keys()), day_delta=DAY_DELTA))
 
         # query number of trained sentences, vocabulary entries at every stored date,
         # pad item values of asymmetrically item-value-beset dates
@@ -152,18 +152,18 @@ class TrainerConsoleFrontend(ABC):
         plt.show()
 
     @staticmethod
-    def _get_starting_date(training_history: TrainingChronic, day_delta: int) -> datetime.date:
+    def _get_starting_date(training_dates: Iterator[str], day_delta: int) -> datetime.date:
         earliest_possible_date: datetime.date = (date_utils.today - datetime.timedelta(days=day_delta))
 
-        for training_date in training_history.keys():
+        for training_date in training_dates:
             if (converted_date := date_utils.string_2_date(training_date)) >= earliest_possible_date:
                 return converted_date
 
         raise AttributeError
 
     @staticmethod
-    def _get_plotting_dates(training_history: TrainingChronic, day_delta: int) -> Iterator[str]:
-        starting_date = TrainerConsoleFrontend._get_starting_date(training_history, day_delta)
+    def _get_plotting_dates(training_dates: Iterator[str], day_delta: int) -> Iterator[str]:
+        starting_date = TrainerConsoleFrontend._get_starting_date(training_dates, day_delta)
 
         while starting_date <= date_utils.today:
             yield str(starting_date)
