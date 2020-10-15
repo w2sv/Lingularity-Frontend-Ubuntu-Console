@@ -1,6 +1,6 @@
 import datetime
 
-from lingularity.backend.utils.date import string_date_2_datetime_type
+from lingularity.backend.utils.date import string_2_date
 
 
 def date_repr(date: str) -> str:
@@ -9,7 +9,7 @@ def date_repr(date: str) -> str:
             'yesterday' if date equaling yesterday's date
             'the {DAY}th of {MONTH} {YEAR}' otherwise """
 
-    converted_date = string_date_2_datetime_type(date)
+    converted_date = string_2_date(date)
 
     if (today := datetime.datetime.today().date()) == converted_date:
         return 'today'

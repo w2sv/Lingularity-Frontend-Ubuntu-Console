@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Type, List
+from typing import Optional, Tuple, Type, List, Iterator
 from abc import ABC, abstractmethod
 import time
 import datetime
@@ -11,11 +11,11 @@ from pynput.keyboard import Controller as KeyboardController
 from lingularity.backend.trainers import TrainerBackend
 from lingularity.backend.components import VocableEntry
 from lingularity.backend.metadata import language_metadata
-from lingularity.backend.database import MongoDBClient
+from lingularity.backend.database import MongoDBClient, TrainingChronic
 from lingularity.backend.utils import date as date_utils
 
 from lingularity.frontend.console.utils.output import BufferPrint, centered_print
-from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
+from lingularity.frontend.console.utils import matplotlib as plt_utils
 from .options import TrainingOptions
 
 
@@ -108,53 +108,66 @@ class TrainerConsoleFrontend(ABC):
     # -----------------
     # Post Training
     # -----------------
-    def _plot_training_history(self):
+    def _plot_training_chronic(self):
         DAY_DELTA = 14
 
         plt.style.use('seaborn-darkgrid')
 
-        today = datetime.date.today()
-        earliest_date: datetime.date = (today - datetime.timedelta(days=DAY_DELTA))
-
-        # retrieve training history, pad nonexistent trainer item values
+        # query training history
         training_history = self._backend.mongodb_client.query_training_chronic()
 
-        starting_date = None
-        for training_date in training_history.keys():
-            if (converted_date := date_utils.string_date_2_datetime_type(training_date)) >= earliest_date:
-                starting_date = converted_date
-                break
+        # get plotting dates
+        dates = list(self._get_plotting_dates(training_history, DAY_DELTA))
 
-        dates: List[str] = []
-        while starting_date <= today:
-            dates.append(str(starting_date))
-            starting_date += datetime.timedelta(days=1)
-
+        # query number of trained sentences, vocabulary entries at every stored date,
+        # pad item values of asymmetrically item-value-beset dates
         trained_sentences, trained_vocabulary = map(lambda trainer_abbreviation: [training_history.get(date, {}).get(trainer_abbreviation) or 0 for date in dates], ['s', 'v'])
 
-        # omit year, invert day & month for proper tick label display
+        # omit year, invert day & month for proper tick label display, replace todays date with 'today'
         dates = ['-'.join(date.split('-')[1:][::-1]) for date in dates[:-1]] + ['today']
 
         # set up figure
         fig, ax = plt.subplots()
-        fig.set_size_inches(np.asarray([6.5, 6.5]))
+        fig.set_size_inches(np.asarray([6.5, 6]))
         fig.canvas.draw()
         fig.canvas.set_window_title("Way to go!")
 
         # define plot
         ax.set_title(f'{self._backend.language} Training History')
+
         x_range = np.arange(len(dates))
+
         ax.plot(x_range, trained_sentences, marker='.', markevery=list(x_range), color='r', label='sentences')
         ax.plot(x_range, trained_vocabulary, marker='.', markevery=list(x_range), color='g', label='vocable entries')
         ax.set_xticks(x_range)
         ax.set_xticklabels(dates, minor=False, rotation=45)
         ax.set_xlabel('date')
-        ax.set_ylabel('faced items')
+
         ax.set_ylim(bottom=0)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.legend(loc='upper right')
-        center_matplotlib_windows()
+        ax.set_ylabel('faced items')
+
+        ax.legend(loc=plt_utils.get_legend_location(trained_sentences, trained_vocabulary))
+        plt_utils.center_windows()
         plt.show()
+
+    @staticmethod
+    def _get_starting_date(training_history: TrainingChronic, day_delta: int) -> datetime.date:
+        earliest_possible_date: datetime.date = (date_utils.today - datetime.timedelta(days=day_delta))
+
+        for training_date in training_history.keys():
+            if (converted_date := date_utils.string_2_date(training_date)) >= earliest_possible_date:
+                return converted_date
+
+        raise AttributeError
+
+    @staticmethod
+    def _get_plotting_dates(training_history: TrainingChronic, day_delta: int) -> Iterator[str]:
+        starting_date = TrainerConsoleFrontend._get_starting_date(training_history, day_delta)
+
+        while starting_date <= date_utils.today:
+            yield str(starting_date)
+            starting_date += datetime.timedelta(days=1)
 
     # -----------------
     # Dunder(s)

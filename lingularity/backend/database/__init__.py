@@ -3,8 +3,8 @@ from dataclasses import dataclass
 
 import pymongo
 
-from lingularity.backend.utils.date import todays_date_tag
-from .document_types import LastSessionStatistics, VocableAttributes
+from lingularity.backend.utils.date import today
+from .document_types import LastSessionStatistics, VocableAttributes, TrainingChronic
 
 
 class MongoDBClient:
@@ -122,7 +122,7 @@ class MongoDBClient:
             filter={'_id': 'unique'},
             update={'$set': {'lastSession': {'trainer': trainer,
                                              'nFacedItems': faced_items,
-                                             'date': todays_date_tag(),
+                                             'date': str(today),
                                              'language': self._language}}},
             upsert=True
         )
@@ -160,7 +160,7 @@ class MongoDBClient:
         self.vocabulary_collection.find_one_and_update(
             filter={'_id': self._language, token: {'$exists': True}},
             update={'$inc': {f'{token}.tf': 1},
-                    '$set': {f'{token}.lfd': todays_date_tag(),
+                    '$set': {f'{token}.lfd': str(today),
                              f'{token}.s': new_score}},
             upsert=False
         )
@@ -196,11 +196,11 @@ class MongoDBClient:
     def inject_session_statistics(self, trainer_abbreviation: str, n_faced_items: int):
         self.training_chronic_collection.update_one(
             filter={'_id': self._language},
-            update={'$inc': {f'{todays_date_tag()}.{trainer_abbreviation}': n_faced_items}},
+            update={'$inc': {f'{str(today)}.{trainer_abbreviation}': n_faced_items}},
             upsert=True
         )
 
-    def query_training_chronic(self) -> Dict[str, Dict[str, int]]:
+    def query_training_chronic(self) -> TrainingChronic:
         training_chronic = next(iter(self.training_chronic_collection.find({'_id': self._language})))
         training_chronic.pop('_id')
         return training_chronic

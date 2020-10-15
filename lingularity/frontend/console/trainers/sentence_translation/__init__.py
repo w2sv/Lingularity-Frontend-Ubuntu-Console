@@ -64,7 +64,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._run_training()
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
-        self._plot_training_history()
+        self._plot_training_chronic()
 
         return False
 

@@ -1,3 +1,5 @@
+from typing import Dict
+
 from mypy_extensions import TypedDict
 
 
@@ -13,3 +15,6 @@ class VocableAttributes(TypedDict):
     tf: int
     s: float
     lfd: str
+
+
+TrainingChronic = Dict[str, Dict[str, int]]

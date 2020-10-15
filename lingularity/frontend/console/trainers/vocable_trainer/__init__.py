@@ -13,7 +13,7 @@ from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
 from lingularity.frontend.console.trainers.base.options import TrainingOptions
 from lingularity.frontend.console.utils.view import creates_new_view
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
-from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
+from lingularity.frontend.console.utils.matplotlib import center_windows
 from lingularity.frontend.console.utils.output import (
     erase_lines,
     DEFAULT_VERTICAL_VIEW_OFFSET,
@@ -42,7 +42,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
         self._display_pie_chart()
-        self._plot_training_history()
+        self._plot_training_chronic()
 
         return False
 
@@ -213,5 +213,5 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         ax.axis('equal')
         ax.set_title(self.performance_verdict)
         fig.canvas.set_window_title(f'You got {self.n_correct_responses}/{self._n_trained_items} right')
-        center_matplotlib_windows()
+        center_windows()
         plt.show()
