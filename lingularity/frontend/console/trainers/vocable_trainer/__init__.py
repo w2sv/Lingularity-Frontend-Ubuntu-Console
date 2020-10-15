@@ -11,14 +11,13 @@ from lingularity.frontend.console.trainers.vocable_trainer.options import *
 from lingularity.frontend.console.trainers.sentence_translation import SentenceTranslationTrainerConsoleFrontend
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
 from lingularity.frontend.console.trainers.base.options import TrainingOptions
-from lingularity.frontend.console.utils.view import creates_new_view
+from lingularity.frontend.console.utils.view import view_creator, DEFAULT_VERTICAL_VIEW_OFFSET
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
 from lingularity.frontend.console.utils.output import (
     erase_lines,
-    DEFAULT_VERTICAL_VIEW_OFFSET,
     centered_print,
-    get_max_line_length_based_indentation
+    centered_output_block_indentation
 )
 
 
@@ -56,7 +55,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Training Property Selection
     # -----------------
-    @creates_new_view
+    @view_creator
     def _select_training_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
         assert mongodb_client is not None
 
@@ -68,20 +67,20 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         centered_print('ELIGIBLE LANGUAGES', DEFAULT_VERTICAL_VIEW_OFFSET)
 
-        indentation = get_max_line_length_based_indentation(eligible_languages)
+        indentation = centered_output_block_indentation(eligible_languages)
         for language in sorted(eligible_languages):
             print(indentation, language)
 
         input_query_message = 'Enter desired language: '
         language_selection = resolve_input(input(f'\n{indentation[:-int(len(input_query_message) * 3/4)]}{input_query_message}'), eligible_languages)
         if language_selection is None:
-            return recurse_on_unresolvable_input(self._select_training_language, -1, mongodb_client)
+            return recurse_on_unresolvable_input(self._select_training_language, -1, args=(mongodb_client, ))
         print('\n' * 2, end='')
 
         return language_selection, False  # TODO
 
     @staticmethod
-    @creates_new_view
+    @view_creator
     def _start_sentence_translation_trainer(mongodb_client: MongoDBClient):
         centered_print('You have to accumulate vocabulary by means of the SentenceTranslation™ TrainerBackend or manual amassment first.')
         sleep(3)
@@ -92,7 +91,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Pre Training
     # -----------------
-    @creates_new_view
+    @view_creator
     def _display_new_vocabulary_if_applicable(self):
         if (new_vocabulary := self._backend.get_new_vocable_entries()) is None:
             return
@@ -104,13 +103,13 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             [print('\t', entry.line_repr) for entry in new_vocabulary]
             input('\n\nPress any key to continue')
 
-    @creates_new_view
+    @view_creator
     def _display_training_screen_header(self):
         centered_print(f'Found {self._backend.n_training_items} imperfect entries.\n\n')
 
         instructions = ["Enter: "] + self._training_options.instructions
 
-        indentation = get_max_line_length_based_indentation(instructions)
+        indentation = centered_output_block_indentation(instructions)
         for i, instruction_row in enumerate(instructions):
             print(f'{indentation}{instruction_row}')
             if i == 3:

@@ -13,7 +13,7 @@ from . import options
 from . import modes
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
 from ..base import TrainingOptions
-from lingularity.frontend.console.utils.view import creates_new_view
+from lingularity.frontend.console.utils.view import view_creator
 from lingularity.frontend.console.utils.input_resolution import (
     resolve_input,
     recurse_on_unresolvable_input,
@@ -22,7 +22,7 @@ from lingularity.frontend.console.utils.input_resolution import (
 from lingularity.frontend.console.utils.output import (
     erase_lines,
     centered_print,
-    get_max_line_length_based_indentation,
+    centered_output_block_indentation,
 )
 
 
@@ -71,7 +71,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Training Property Selection
     # -----------------
-    @creates_new_view
+    @view_creator(header='ELIGIBLE LANGUAGES')
     def _select_training_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
         """ Returns:
                 non-english language: str
@@ -79,14 +79,11 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         train_english = False
 
-        # initialize view
-        centered_print(f'ELIGIBLE LANGUAGES:\n')
-
         eligible_languages = Backend.get_eligible_languages(mongodb_client)
 
         # display eligible languages in starting-letter-grouped manner
         starting_letter_grouped_languages = [', '.join(list(v)) for _, v in groupby(eligible_languages, lambda x: x[0])]
-        indentation = get_max_line_length_based_indentation(starting_letter_grouped_languages)
+        indentation = centered_output_block_indentation(starting_letter_grouped_languages)
         for language_group in starting_letter_grouped_languages:
             print(indentation, language_group)
 
@@ -101,7 +98,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
             while selection is None:
                 if (selection := resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Select reference language: '), eligible_languages)) is None:
-                    indissolubility_output("Couldn't resolve input".upper(), n_deletion_lines=2, sleep_duration=1)
+                    indissolubility_output(n_deletion_lines=2)
 
         return selection, train_english
 
@@ -112,27 +109,24 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             variety_selection = self._select_tts_language_variety()
             self._backend.tts.change_language_variety(variety=variety_selection)
 
-    @creates_new_view
+    @view_creator(header='SELECT TEXT-TO-SPEECH LANGUAGE VARIETY')
     def _select_tts_language_variety(self) -> str:
         """ Returns:
                 selected language variety: element of language_varieties """
-
-        # initialize view
-        centered_print('SELECT TEXT-TO-SPEECH LANGUAGE VARIETY\n\n')
 
         assert self._backend.tts.language_varieties is not None
 
         # display eligible varieties
         common_start_length = len(common_start(self._backend.tts.language_varieties) or '')
         processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._backend.tts.language_varieties]
-        indentation = get_max_line_length_based_indentation(processed_varieties)
+        indentation = centered_output_block_indentation(processed_varieties)
         for variety in processed_varieties:
             print(indentation, variety)
         print('')
 
         # query variety
         if (dialect_selection := resolve_input(input(indentation[:-5]), options=processed_varieties)) is None:
-            return recurse_on_unresolvable_input(self._select_tts_language_variety, 1, self._backend.tts.language_varieties)
+            return recurse_on_unresolvable_input(self._select_tts_language_variety, 1)
 
         return self._backend.tts.language_varieties[processed_varieties.index(dialect_selection)]
 
@@ -142,14 +136,10 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         mode_selection = self._select_training_mode()
         self._backend.set_training_mode(modes.__getitem__(mode_selection).backend)
 
-    @creates_new_view
+    @view_creator(header='TRAINING MODES')
     def _select_training_mode(self) -> str:
-
-        # initialize view
-        centered_print('TRAINING MODES\n')
-
         # display eligible modes
-        indentation = get_max_line_length_based_indentation(modes.explanations)
+        indentation = centered_output_block_indentation(modes.explanations)
         for keyword, explanation in zip(modes.keywords, modes.explanations):
             print(f'{indentation}{keyword.title()}:')
             print(f'{indentation}\t{explanation}\n')
@@ -164,20 +154,20 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Pre training
     # -----------------
-    @creates_new_view
+    @view_creator(header=None)
     def _display_training_screen_header(self):
 
-        # initialize view
+        # display number of sentences comprised by filtered sentence data
         centered_print(f"Document comprises {self._backend.n_training_items:,d} sentences.\n")
 
-        # display picked country of replacement forename origin
+        # display picked country corresponding to replacement forenames
         if self._backend.forename_converter.forenames_convertible:
             centered_print(f'Employing {self._backend.forename_converter.demonym} forenames.')
         print('')
 
         # display instructions
         instructions = ["      Enter:"] + self._training_options.instructions
-        indentation = get_max_line_length_based_indentation(instructions)
+        indentation = centered_output_block_indentation(instructions)
         for i, line in enumerate(instructions):
             print(indentation, line)
 
@@ -234,12 +224,12 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     self._n_trained_items += 1
 
                     if self._n_trained_items >= 5:
-                        self._buffer_print.partially_redo_buffer_content(n_deletion_lines=3)
+                        self._buffer_print.redo_partially(n_deletion_lines=3)
 
                     translation = self._process_procured_sentence_pair()
 
             else:
-                indissolubility_output("Couldn't resolve input", sleep_duration=0.8, n_deletion_lines=2)
+                indissolubility_output(n_deletion_lines=2)
 
         print('\nSentence data file depleted')
 

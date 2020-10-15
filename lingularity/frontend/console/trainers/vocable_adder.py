@@ -9,10 +9,10 @@ from lingularity.frontend.console.trainers import VocableTrainerConsoleFrontend
 from lingularity.frontend.console.utils.input_resolution import resolve_input, indissolubility_output
 from lingularity.frontend.console.utils.output import (
     clear_screen,
-    get_max_line_length_based_indentation,
-    DEFAULT_VERTICAL_VIEW_OFFSET,
+    centered_output_block_indentation,
     erase_lines
 )
+from lingularity.frontend.console.utils.view import DEFAULT_VERTICAL_VIEW_OFFSET
 
 
 class VocableAdderFrontend(VocableTrainerConsoleFrontend):
@@ -31,11 +31,11 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
 
         instructions = (
             f"Press CTRL + C in order to select one of the following options:",
-            "\t  - 'exit' and return to trainer selection creates_new_view",
+            "\t  - 'exit' and return to trainer selection view_creator",
             "\t  - 'alter' the latest vocable entry"
         )
 
-        indentation = get_max_line_length_based_indentation(instructions)
+        indentation = centered_output_block_indentation(instructions)
         for instruction in instructions:
             print(f'{indentation}{instruction}')
 
@@ -61,7 +61,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
 
             except KeyboardInterrupt:
                 if (option := self._get_option_selection()) is None:
-                    indissolubility_output("Couldn't resolve option", sleep_duration=0.8, n_deletion_lines=2)
+                    indissolubility_output(n_deletion_lines=2, message="Couldn't resolve option")
                     cursor.show()
 
                 # option execution

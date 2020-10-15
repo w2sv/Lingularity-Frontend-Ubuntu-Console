@@ -12,7 +12,7 @@ from lingularity.backend.components import VocableEntry
 from lingularity.backend.metadata import language_metadata
 from lingularity.backend.database import MongoDBClient
 
-from lingularity.frontend.console.utils.output import BufferPrint, centered_print
+from lingularity.frontend.console.utils.output import RedoPrint, centered_print
 from lingularity.frontend.console.utils.matplotlib import center_matplotlib_windows
 from .options import TrainingOptions
 
@@ -24,7 +24,7 @@ class TrainerConsoleFrontend(ABC):
         non_english_language, train_english = self._select_training_language(mongodb_client)
         self._backend: TrainerBackend = backend(non_english_language, train_english, mongodb_client)
 
-        self._buffer_print: BufferPrint = BufferPrint()
+        self._buffer_print: RedoPrint = RedoPrint()
         self._training_options: TrainingOptions = self._get_training_options()
 
         self._n_trained_items: int = 0

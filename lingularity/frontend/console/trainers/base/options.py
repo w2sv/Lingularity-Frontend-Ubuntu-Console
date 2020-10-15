@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List, Type, Dict, Iterator
 
+from termcolor import colored
+
 from lingularity.backend.utils.iterables import unzip
 
 
@@ -20,7 +22,7 @@ class TrainingOption(ABC):
 
     @property
     def instruction(self) -> str:
-        return f"\t- '{self.keyword}' to {self._explanation}"
+        return f"\t  {colored(self.keyword, 'red')} to {self._explanation}"
 
     @abstractmethod
     def execute(self):

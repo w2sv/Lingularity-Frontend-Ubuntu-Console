@@ -1,18 +1,42 @@
-from typing import Deque, Sequence
+from typing import Deque, Sequence, Pattern
 import os
 import sys
 import platform
-from builtins import print as _print
 from collections import deque
 import shutil
+import re
 
-import numpy as np
-
-
-DEFAULT_VERTICAL_VIEW_OFFSET = '\n' * 2
-TAB_LENGTH = 4
+_TAB_OUTPUT_LENGTH = 4
 
 
+# ------------------
+# Utils
+# ------------------
+_ANSI_ESCAPE: Pattern[str] = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+
+
+def _ansi_escape_code_stripped(string: str) -> str:
+    """ Returns:
+            ANSI escape code stripped string. e.g. '[35mHello Görl![0m' -> 'Hello Görl!' """
+
+    return _ANSI_ESCAPE.sub('', string)
+
+
+def _output_length(string: str) -> int:
+    """ Returns:
+            length of terminal output which the passed string would produce """
+
+    til_newline_substring = string[:string.find('\n')]
+    return len(til_newline_substring) + til_newline_substring.count('\t') * (_TAB_OUTPUT_LENGTH - 1)
+
+
+def _terminal_length() -> int:
+    return int(shutil.get_terminal_size().columns)
+
+
+# ------------------
+# Clearing
+# ------------------
 def clear_screen():
     os.system('cls' if platform.system() == 'Windows' else 'clear')
 
@@ -27,70 +51,87 @@ def erase_lines(n_lines: int):
     [_erase_previous_line() for _ in range(n_lines + 1)]
 
 
-def _output_length(string: str) -> int:
-    til_newline_substring = string[:string.find('\n')]
-    return len(til_newline_substring) + til_newline_substring.count('\t') * (TAB_LENGTH - 1)
+# -----------------
+# Redoable Printing
+# -----------------
+class RedoPrint:
+    """ Class enabling (partial) redo of all previously
+        stored print elements """
 
-
-def _terminal_length() -> int:
-    return int(shutil.get_terminal_size().columns)
-
-
-def _n_line_breaks(line: str) -> int:
-    return _output_length(line) // _terminal_length()
-
-
-class BufferPrint:
     def __init__(self):
         self._buffer: Deque[str] = deque()
 
-    @property
-    def n_buffered_lines(self) -> int:
-        return len(self._buffer) + sum(map(lambda output: output.count('\n') + sum(_n_line_breaks(line) for line in output.split('\n')), self._buffer))
-
     def __call__(self, *args, **kwargs):
-        self._buffer.append(''.join(args))
-        _print(*args, **kwargs)
+        """ Buffer and display passed print elements """
 
-    def partially_redo_buffer_content(self, n_deletion_lines: int):
-        erase_lines(self.n_buffered_lines)
+        self._buffer.append(''.join(args))
+        print(*args, **kwargs)
+
+    def redo_partially(self, n_deletion_lines: int):
+        """ Remove the first n_deletion_lines buffer elements and redo remaining content """
+
+        erase_lines(self._n_buffered_terminal_rows)
 
         for _ in range(n_deletion_lines):
             self._buffer.popleft()
 
-        self._output_buffer_content()
+        self._redo()
 
-    def _output_buffer_content(self):
+    @property
+    def _n_buffered_terminal_rows(self) -> int:
+        """ Returns:
+                number of occupied terminal rows if currently stored buffer content
+                were to be displayed """
+
+        return len(self._buffer) + sum(map(lambda output: output.count('\n') + sum(self._n_additionally_occupied_terminal_rows(line) for line in output.split('\n')), self._buffer))
+
+    @staticmethod
+    def _n_additionally_occupied_terminal_rows(line: str) -> int:
+        return _output_length(line) // _terminal_length()
+
+    def _redo(self):
         for line in self._buffer:
             print(line)
 
 
-def _get_indentation(line_length: int) -> str:
-    return " " * ((_terminal_length() - line_length) // 2)
+# -----------------
+# Centered Printing
+# -----------------
+def centered_print(*print_elements: str, end='\n'):
+    for i, print_element in enumerate(print_elements):
+        if '\n' in print_element:
 
+            # print newlines if print_element exclusively comprised of them
+            if len(set(print_element)) == 1:
+                for new_line_char in print_element:
+                    print(new_line_char, end='')
 
-def get_max_line_length_based_indentation(output_block: Sequence[str]) -> str:
-    return _get_indentation(len(output_block[int(np.argmax([len(line) for line in output_block]))]))
-
-
-def centered_print(*output: str, end='\n'):
-    for i, output_element in enumerate(output):
-        if '\n' in output_element:
-            if len(set(output_element)) == 1:
-                print(output_element, end='')
+            # otherwise print writing in between newlines in uniformly indented manner
             else:
-                distinct_lines = output_element.split('\n')
-                indentation = _get_indentation(line_length=max((len(line) for line in distinct_lines)))
+                distinct_lines = print_element.split('\n')
+                indentation = centered_output_block_indentation(distinct_lines)
 
-                indented_output_block = map(lambda line: indentation + line, distinct_lines)
-                for line in indented_output_block:
-                    print(line)
+                for line in distinct_lines:
+                    print(indentation + line)
 
         else:
-            print(_get_indentation(len(output_element)) + output_element, end=end if i == len(output) - 1 else '\n')
+            print(_indentation(len(_ansi_escape_code_stripped(print_element))) + print_element, end=end if i == len(print_elements) - 1 else '\n')
 
 
-def get_centered_input_query_indentation(input_message: str) -> str:
+def centered_user_query_indentation(input_message: str) -> str:
     INPUT_SPACE_LENGTH = 8
 
-    return _get_indentation(len(input_message + ' ' * INPUT_SPACE_LENGTH))
+    return _indentation(len(input_message + ' ' * INPUT_SPACE_LENGTH))
+
+
+def centered_output_block_indentation(output_block: Sequence[str]) -> str:
+    """ Returns:
+            indentation determined by length of longest terminal output row comprised by output_block,
+            enabling centered positioning of the aforementioned row and the others to start on the same
+            terminal column, resulting in an uniform writing appearance """
+
+    return _indentation(max((len(line) for line in map(_ansi_escape_code_stripped, output_block))))
+
+
+def _indentation(line_length: int) -> str:
+    return " " * ((_terminal_length() - line_length) // 2)
