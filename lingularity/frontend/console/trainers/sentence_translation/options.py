@@ -24,7 +24,7 @@ class SentenceTranslationOption(TrainingOption, ABC):
         super().__init__(keyword, explanation)
 
     def _alter_tts_enablement(self, value: bool):
-        self._tts_enabled = value
+        self._tts.enabled = value
         self._backend.mongodb_client.set_tts_enablement(value)
         erase_lines(1)
 
@@ -93,7 +93,7 @@ class ChangePlaybackSpeed(SentenceTranslationOption):
             return 0.1 < playback_speed < 3
 
         print('Playback speed:\n\t', end='')
-        KeyboardController().type(str(self._playback_speed))
+        KeyboardController().type(str(self._tts.playback_speed))
         cursor.show()
 
         _recurse = partial(recurse_on_invalid_input, function=self._change_playback_speed, message='Invalid input', n_deletion_lines=3)
@@ -116,11 +116,11 @@ class ChangeTTSLanguageVariety(SentenceTranslationOption):
         super().__init__('variety', 'change text-to-speech language variety')
 
     def execute(self):
-        selected_variety = self._select_language_variety()
+        selected_variety = self._tts.select_language_variety()
         self._backend.tts.change_language_variety(selected_variety)
-        self._remove_audio_file()
+        self._tts.remove_audio_file()
 
         # redo previous terminal output
         self._display_instructions()
-        self._buffer_print._redo()
+        self._buffer_print.redo()
         self._pending_output()

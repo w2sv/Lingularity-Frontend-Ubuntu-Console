@@ -75,7 +75,11 @@ class RedoPrint:
         for _ in range(n_deletion_lines):
             self._buffer.popleft()
 
-        self._redo()
+        self.redo()
+
+    def redo(self):
+        for line in self._buffer:
+            print(line)
 
     @property
     def _n_buffered_terminal_rows(self) -> int:
@@ -88,10 +92,6 @@ class RedoPrint:
     @staticmethod
     def _n_additionally_occupied_terminal_rows(line: str) -> int:
         return _output_length(line) // _terminal_length()
-
-    def _redo(self):
-        for line in self._buffer:
-            print(line)
 
 
 # -----------------
