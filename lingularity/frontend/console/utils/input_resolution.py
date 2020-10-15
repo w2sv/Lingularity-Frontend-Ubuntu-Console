@@ -5,6 +5,9 @@ import cursor
 from lingularity.frontend.console.utils.output import clear_screen, erase_lines, centered_print
 
 
+INDISSOLUBILITY_MESSAGE = "Couldn't resolve input"
+
+
 def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
     options_starting_on_input = list(filter(lambda option: option.lower().startswith(_input.lower()), options))
 
@@ -15,15 +18,6 @@ def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
     return None
 
 
-def recurse_on_unresolvable_input(function: Callable, n_deletion_lines, *func_args):
-    return recurse_on_invalid_input(
-        function=function,
-        message="Couldn't resolve input",
-        n_deletion_lines=n_deletion_lines,
-        args=func_args
-    )
-
-
 def recurse_on_invalid_input(function: Callable,
                              message: str,
                              n_deletion_lines: int,
@@ -32,13 +26,12 @@ def recurse_on_invalid_input(function: Callable,
     if args is None:
         args = ()
 
-    indissolubility_output(message, sleep_duration, n_deletion_lines)
+    indissolubility_output(n_deletion_lines, message, sleep_duration)
 
-    cursor.show()
     return function(*args)
 
 
-def indissolubility_output(message: str, sleep_duration: float, n_deletion_lines: int):
+def indissolubility_output(n_deletion_lines: int, message=INDISSOLUBILITY_MESSAGE, sleep_duration=1.0):
     centered_print(message.upper())
     cursor.hide()
     time.sleep(sleep_duration)
@@ -47,3 +40,14 @@ def indissolubility_output(message: str, sleep_duration: float, n_deletion_lines
         clear_screen()
     else:
         erase_lines(n_deletion_lines)
+
+    cursor.show()
+
+
+def recurse_on_unresolvable_input(function: Callable, n_deletion_lines, args: Optional[Tuple[Any, ...]] = None):
+    return recurse_on_invalid_input(
+        function=function,
+        message=INDISSOLUBILITY_MESSAGE,
+        n_deletion_lines=n_deletion_lines,
+        args=args
+    )

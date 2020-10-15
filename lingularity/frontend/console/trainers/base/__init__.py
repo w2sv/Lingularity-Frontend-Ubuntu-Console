@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Type, List, Iterator
+from typing import Optional, Tuple, Type, Iterator
 from abc import ABC, abstractmethod
 import time
 import datetime
@@ -14,7 +14,7 @@ from lingularity.backend.metadata import language_metadata
 from lingularity.backend.database import MongoDBClient, TrainingChronic
 from lingularity.backend.utils import date as date_utils
 
-from lingularity.frontend.console.utils.output import BufferPrint, centered_print
+from lingularity.frontend.console.utils.output import RedoPrint, centered_print
 from lingularity.frontend.console.utils import matplotlib as plt_utils
 from .options import TrainingOptions
 
@@ -26,7 +26,7 @@ class TrainerConsoleFrontend(ABC):
         non_english_language, train_english = self._select_training_language(mongodb_client)
         self._backend: TrainerBackend = backend(non_english_language, train_english, mongodb_client)
 
-        self._buffer_print: BufferPrint = BufferPrint()
+        self._buffer_print: RedoPrint = RedoPrint()
         self._training_options: TrainingOptions = self._get_training_options()
 
         self._n_trained_items: int = 0

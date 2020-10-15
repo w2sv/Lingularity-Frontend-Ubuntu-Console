@@ -5,11 +5,13 @@ import sys
 import time
 
 import cursor
+from termcolor import colored
 
 from lingularity.backend.metadata import language_metadata
 from lingularity.frontend.console.utils.date import date_repr
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
-from lingularity.frontend.console.utils.output import clear_screen, centered_print, DEFAULT_VERTICAL_VIEW_OFFSET
+from lingularity.frontend.console.utils.output import clear_screen, centered_print
+from lingularity.frontend.console.utils.view import DEFAULT_VERTICAL_VIEW_OFFSET
 
 
 def display_starting_screen():
@@ -18,8 +20,8 @@ def display_starting_screen():
     time.sleep(0.1)
 
     banner = open(f'{os.getcwd()}/lingularity/frontend/console/resources/banner.txt', 'r').read()
-    centered_print(DEFAULT_VERTICAL_VIEW_OFFSET * 2, banner, '\n' * 2)
-    centered_print("W2SV", '\n')
+    centered_print(DEFAULT_VERTICAL_VIEW_OFFSET * 2, colored(banner, 'red'), '\n' * 2)
+    centered_print("W2SV", '\n\n')
 
 
 def exit_on_missing_internet_connection():
@@ -33,8 +35,8 @@ def exit_on_missing_internet_connection():
 
 def display_additional_information():
     centered_print("Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
-    centered_print("Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,")
-    centered_print("e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
+    # centered_print("Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,")
+    # centered_print("e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
 
 
 def display_constitution_query(username: str, latest_trained_language: Optional[str]):
@@ -47,7 +49,7 @@ def display_constitution_query(username: str, latest_trained_language: Optional[
 
 
 def display_last_session_conclusion(last_session_metrics: Dict[str, Any]):
-    centered_print(f"You faced {last_session_metrics['nFacedItems']} {last_session_metrics['language']} {'vocables' if last_session_metrics['trainer'] == 'v' else 'sentences'} during your last session {date_repr(last_session_metrics['date'])}\n\n")
+    centered_print(f"You faced {last_session_metrics['nFacedItems']} {last_session_metrics['language']} {'vocables' if last_session_metrics['trainer'] == 'v' else 'sentences'} during your last session {date_repr(last_session_metrics['date'])}\n\n\n")
 
 
 def select_action(actions) -> Optional[str]:
@@ -56,7 +58,7 @@ def select_action(actions) -> Optional[str]:
     centered_print(input_message, ' ', end='')
 
     if (training_selection := resolve_input(input(''), list(actions.keys()))) is None:
-        return recurse_on_unresolvable_input(select_action, 4, actions)
+        return recurse_on_unresolvable_input(select_action, n_deletion_lines=4, args=(actions, ))
 
     clear_screen()
     return training_selection

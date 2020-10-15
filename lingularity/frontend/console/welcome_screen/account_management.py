@@ -4,7 +4,7 @@ import os
 
 from lingularity.backend.database import MongoDBClient
 from lingularity.frontend.console.utils.input_resolution import recurse_on_invalid_input
-from lingularity.frontend.console.utils.output import get_centered_input_query_indentation, erase_lines, centered_print
+from lingularity.frontend.console.utils.output import centered_user_query_indentation, erase_lines, centered_print
 from lingularity.frontend.console.utils import credentials
 from lingularity.frontend.console.utils import fernet
 
@@ -29,7 +29,7 @@ def log_in(mongodb_client: MongoDBClient) -> MongoDBClient:
             user instantiated mongodb client """
 
     USER_NAME_QUERY = 'Enter user name: '
-    INDENTATION = get_centered_input_query_indentation(USER_NAME_QUERY)
+    INDENTATION = centered_user_query_indentation(USER_NAME_QUERY)
 
     # query username
     username = input(f'{INDENTATION}{USER_NAME_QUERY}')
