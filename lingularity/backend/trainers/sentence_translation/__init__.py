@@ -13,7 +13,7 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
     def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
         super().__init__(non_english_language, train_english, mongodb_client)
 
-        self.tts = TextToSpeech(self.language, mongodb_client)
+        TextToSpeech(self.language, mongodb_client)
         self._training_mode: Optional[Type[TrainingMode]] = None
 
     @property

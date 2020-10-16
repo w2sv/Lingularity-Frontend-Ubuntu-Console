@@ -39,8 +39,7 @@ class MongoDBClient:
 
     @user.setter
     def user(self, value: str):
-        if self._user is not None:
-            raise AttributeError('user ought not to be reassigned')
+        assert self._user is None, 'user ought not to be reassigned'
         self._user = value
 
     @property
@@ -53,8 +52,7 @@ class MongoDBClient:
 
     @language.setter
     def language(self, value: str):
-        if self._language is not None:
-            raise AttributeError('language ought not to be reassigned')
+        assert self._language is None, 'language ought not to be reassigned'
         self._language = value
 
     # --------------------
@@ -69,7 +67,7 @@ class MongoDBClient:
 
     @property
     def usernames(self) -> List[str]:
-        """ equals databases """
+        """ Equals databases """
 
         return self._cluster.list_database_names()
 
@@ -209,30 +207,30 @@ class MongoDBClient:
     # .Language Related
     # ------------------
     @property
-    def language_related_collection(self) -> pymongo.collection.Collection:
+    def language_metadata_collection(self) -> pymongo.collection.Collection:
         """ {_id: $language,
-            varietyIdentifier: {$language_variety: {playbackSpeed: float
-                                                               use: bool}}
-            enableTTS: bool} """
+            variety: {$language_variety: {playbackSpeed: float
+                                          use: bool}}
+            ttsEnabled: bool} """
 
-        return self.user_data_base['language_related']
+        return self.user_data_base['language_metadata']
 
     # ------------------
     # ..language variety usage
     # ------------------
     def set_language_variety_usage(self, variety_identifier: str, value: bool):
-        self.language_related_collection.update_one(filter={'_id': self._language},
-                                                    update={'$set': {f'varietyIdentifier.{variety_identifier}.use': value}},
-                                                    upsert=True)
+        self.language_metadata_collection.update_one(filter={'_id': self._language},
+                                                     update={'$set': {f'variety.{variety_identifier}.use': value}},
+                                                     upsert=True)
 
-    def query_language_variety_identifier(self) -> Optional[str]:
+    def query_language_variety(self) -> Optional[str]:
         """ assumes existence of varietyIdentifier sub dict in case of
             existence of language related collection """
 
-        if (dialect_dict := self.language_related_collection.find_one(filter={'_id': self._language})) is None:
+        if (dialect_dict := self.language_metadata_collection.find_one(filter={'_id': self._language})) is None:
             return None
 
-        for identifier, value_dict in dialect_dict['varietyIdentifier'].items():
+        for identifier, value_dict in dialect_dict['variety'].items():
             if value_dict['use']:
                 return identifier
         raise AttributeError
@@ -240,14 +238,14 @@ class MongoDBClient:
     # ------------------
     # ..playback speed
     # ------------------
-    def insert_playback_speed(self, variety_identifier: str, playback_speed: float):
-        self.language_related_collection.update_one(filter={'_id': self._language},
-                                                    update={'$set': {f'varietyIdentifier.{variety_identifier}.playbackSpeed': playback_speed}},
-                                                    upsert=True)
+    def insert_playback_speed(self, variety: str, playback_speed: float):
+        self.language_metadata_collection.update_one(filter={'_id': self._language},
+                                                     update={'$set': {f'variety.{variety}.playbackSpeed': playback_speed}},
+                                                     upsert=True)
 
-    def query_playback_speed(self, variety_identifier: str) -> Optional[float]:
+    def query_playback_speed(self, variety: str) -> Optional[float]:
         try:
-            return self.language_related_collection.find_one(filter={'_id': self._language})['varietyIdentifier'][variety_identifier]['playbackSpeed']
+            return self.language_metadata_collection.find_one(filter={'_id': self._language})['variety'][variety]['playbackSpeed']
         except (AttributeError, KeyError, TypeError):
             return None
 
@@ -255,14 +253,14 @@ class MongoDBClient:
     # ..tts enablement
     # ------------------
     def set_tts_enablement(self, value: bool):
-        self.language_related_collection.update_one(filter={'_id': self._language},
-                                                    update={'$set': {
-                                                        f'enableTTS': value}},
-                                                    upsert=True)
+        self.language_metadata_collection.update_one(filter={'_id': self._language},
+                                                     update={'$set': {
+                                                        f'ttsEnabled': value}},
+                                                     upsert=True)
 
     def query_tts_enablement(self):
         try:
-            return self.language_related_collection.find_one(filter={'_id': self._language}).get('enableTTS')
+            return self.language_metadata_collection.find_one(filter={'_id': self._language}).get('ttsEnabled')
         except AttributeError:
             return None
 

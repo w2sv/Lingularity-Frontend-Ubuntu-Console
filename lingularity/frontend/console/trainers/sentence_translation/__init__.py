@@ -5,6 +5,7 @@ import time
 
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend
+from lingularity.backend.components import TextToSpeech
 from lingularity.backend.resources import strings as string_resources
 from lingularity.backend.utils.strings import common_start, strip_multiple
 
@@ -28,6 +29,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     _TRAINING_LOOP_INDENTATION = ' ' * 16
 
     def __init__(self, mongodb_client: MongoDBClient):
+        self._tts = TextToSpeech.get_instance()
+
         super().__init__(Backend, mongodb_client)
 
     def _get_training_options(self) -> TrainingOptions:
@@ -35,10 +38,10 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         option_classes = [options.AddVocabulary, options.AlterLatestVocableEntry, options.Exit]
 
-        if self._backend.tts.available:
+        if self._tts.available:
             option_classes += [options.EnableTTS, options.DisableTTS, options.ChangePlaybackSpeed]
 
-        if bool(self._backend.tts.language_variety_choices):
+        if bool(self._tts.language_variety_choices):
             option_classes += [options.ChangeTTSLanguageVariety]
 
         return TrainingOptions(option_classes)  # type: ignore
@@ -119,21 +122,21 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         return mode_selection
 
     def _set_tts_language_variety_if_applicable(self):
-        """ Invokes variety selection method, forwards selected variety to backend """
+        """ Invokes variety selection method, forwards selected variety to tts """
 
-        if all([self._backend.tts.available, not self._backend.tts.language_variety, self._backend.tts.language_variety_choices]):
-            self._backend.tts.language_variety = self._select_tts_language_variety()
+        if all([self._tts.available, not self._tts.language_variety, self._tts.language_variety_choices]):
+            self._tts.language_variety = self._select_tts_language_variety()
 
     @view_creator(header='SELECT TEXT-TO-SPEECH LANGUAGE VARIETY')
     def _select_tts_language_variety(self) -> str:
         """ Returns:
                 selected language variety: element of language_variety_choices """
 
-        assert self._backend.tts.language_variety_choices is not None
+        assert self._tts.language_variety_choices is not None
 
         # display eligible varieties
-        common_start_length = len(common_start(self._backend.tts.language_variety_choices) or '')
-        processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._backend.tts.language_variety_choices]
+        common_start_length = len(common_start(self._tts.language_variety_choices) or '')
+        processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._tts.language_variety_choices]
         indentation = centered_output_block_indentation(processed_varieties)
 
         for variety in processed_varieties:
@@ -144,7 +147,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         if (dialect_selection := resolve_input(input(indentation[:-5]), options=processed_varieties)) is None:
             return recurse_on_unresolvable_input(self._select_tts_language_variety, 1)
 
-        return self._backend.tts.language_variety_choices[processed_varieties.index(dialect_selection)]
+        return self._tts.language_variety_choices[processed_varieties.index(dialect_selection)]
 
     # -----------------
     # Pre training
@@ -181,8 +184,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         translation = self._process_procured_sentence_pair()
 
         while translation is not None:
-            if bool(self._backend.tts) and not self._backend.tts.audio_file:
-                self._backend.tts.download_audio(translation)
+            if self._tts.employ() and self._tts.audio_file is None:
+                self._tts.download_audio_file(translation)
 
             # get response, execute selected option if applicable
             if (response := resolve_input(input('$'), options=self._training_options.keywords + [''])) is not None:
@@ -205,8 +208,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
                     # play tts audio if available, otherwise suspend program
                     # for some time to incentivise gleaning over translation
-                    if bool(self._backend.tts):
-                        self._backend.tts.play_audio()
+                    if self._tts.employ():
+                        self._tts.play_audio()
                     else:
                         time.sleep(len(translation) * 0.05)
 

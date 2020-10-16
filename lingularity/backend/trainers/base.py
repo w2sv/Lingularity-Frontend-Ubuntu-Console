@@ -85,7 +85,7 @@ class TrainerBackend(ABC):
     # Post training
     # -----------------
     def enter_session_statistics_into_database(self, n_trained_items: int):
-        update_args = (self.__str__(), n_trained_items)
+        update_args = (str(self), n_trained_items)
 
         self.mongodb_client.update_last_session_statistics(*update_args)
         self.mongodb_client.inject_session_statistics(*update_args)
@@ -95,9 +95,3 @@ class TrainerBackend(ABC):
     # -----------------
     def __str__(self):
         return self.__class__.__name__[0].lower()
-
-
-if __name__ == '__main__':
-    s = SentenceData('French')
-    print(s.foreign_language_sentences.uses_latin_script)
-    print(s.foreign_language_sentences.uses_latin_script)

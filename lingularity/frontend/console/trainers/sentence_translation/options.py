@@ -62,7 +62,7 @@ class EnableTTS(SentenceTranslationOption):
         super().__init__('enable', 'enable speech output')
 
     def execute(self):
-        self._backend.tts.enabled = True
+        self._tts.enabled = True
         erase_lines(1)
 
 
@@ -71,7 +71,7 @@ class DisableTTS(SentenceTranslationOption):
         super().__init__('disable', 'disable speech output')
 
     def execute(self):
-        self._backend.tts.enabled = False
+        self._tts.enabled = False
         erase_lines(1)
 
 
@@ -85,7 +85,7 @@ class ChangePlaybackSpeed(SentenceTranslationOption):
 
     def _change_playback_speed(self):
         print('Playback speed:\n\t', end='')
-        Keyboard().type(str(self._backend.tts.playback_speed))
+        Keyboard().type(str(self._tts.playback_speed))
         cursor.show()
 
         _recurse = partial(recurse_on_invalid_input, function=self._change_playback_speed, message='Invalid input', n_deletion_lines=3)
@@ -94,10 +94,10 @@ class ChangePlaybackSpeed(SentenceTranslationOption):
             altered_playback_speed = float(input())
             cursor.hide()
 
-            if not self._backend.tts.is_valid_playback_speed(altered_playback_speed):
+            if not self._tts.is_valid_playback_speed(altered_playback_speed):
                 return _recurse()
 
-            self._backend.tts.playback_speed = altered_playback_speed
+            self._tts.playback_speed = altered_playback_speed
 
         except ValueError:
             return _recurse()
@@ -109,7 +109,7 @@ class ChangeTTSLanguageVariety(SentenceTranslationOption):
 
     def execute(self):
         selected_variety = self._select_language_variety()
-        self._backend.tts.language_variety = selected_variety
+        self._tts.language_variety = selected_variety
 
         # redo previous terminal output
         self._display_instructions()
