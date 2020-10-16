@@ -4,12 +4,13 @@ from typing import Dict, Any, Union, List
 import json
 import collections
 from functools import partial
+import os
 
 from tqdm import tqdm
 from textacy.similarity import levenshtein
 
-from . import METADATA_DIR_PATH
-from lingularity.backend.components import DEFAULT_FORENAMES
+from lingularity.backend.resources import strings as string_resources
+from lingularity.backend.components.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.metadata.types import LanguageMetadata, CountryMetadata
 from lingularity.backend.trainers.base import SentenceData
 from lingularity.backend.ops.google.translation import google_translator
@@ -19,6 +20,9 @@ from lingularity.backend.ops.data_mining.scraping import (
     scrape_countries_language_employed_in,
     scrape_popular_forenames, scrape_demonym
 )
+
+
+METADATA_DIR_PATH = f'{os.getcwd()}/lingularity/backend/resources/metadata'
 
 
 def _save_as_json(data: Dict[Any, Any], file_name: str):
@@ -86,7 +90,7 @@ def _mine_and_set_translations(language: str, sentence_data: SentenceData):
     translation_sub_dict = {}
 
     if google_translator.available_for(language):
-        translate = partial(google_translator.translate, src='English', dest=language)
+        translate = partial(google_translator.translate, src=string_resources.ENGLISH, dest=language)
 
         # lets go
         translation_sub_dict["letsGo"] = translate("Let's go!")
@@ -106,9 +110,10 @@ def _get_default_forename_translations(sentence_data: SentenceData, language: st
 
     forename_2_translations = {}
     for forename, translations in zip(DEFAULT_FORENAMES, sentence_data.deduce_forename_translations()):
-        translations = set(filter(lambda translation: levenshtein(forename, google_translator.translate(translation, dest='English', src=language)) >= MIN_FORENAME_TRANSLATION_TRANSLATION_FORENAME_LEVENSHTEIN_SCORE, translations))
-        translations.add(google_translator.translate(forename, dest=language, src='English'))
-        forename_2_translations[forename] = sorted(translations)
+        translations = set(filter(lambda translation: levenshtein(forename, google_translator.translate(translation, dest=string_resources.ENGLISH, src=language)) >= MIN_FORENAME_TRANSLATION_TRANSLATION_FORENAME_LEVENSHTEIN_SCORE, translations))
+        translations.add(google_translator.translate(forename, dest=language, src=string_resources.ENGLISH))
+        translations.add(forename)
+        forename_2_translations[forename] = sorted(translations, key=len, reverse=True)
 
     return forename_2_translations
 
@@ -124,8 +129,10 @@ def _correct_metadata(metadata: Union[LanguageMetadata, CountryMetadata], file_n
 
 
 if __name__ == '__main__':
-    language_metadata: LanguageMetadata = LanguageMetadata()
-    country_metadata: CountryMetadata = CountryMetadata()
+    os.environ['MINING'] = "1"
+
+    language_metadata: LanguageMetadata = collections.defaultdict(lambda: {})
+    country_metadata: CountryMetadata = {}
 
     _mine_metadata()
 

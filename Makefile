@@ -28,3 +28,7 @@ install-webpage-env: _install-base-dependencies
 	conda env create -f webpage-environment.yml --prefix ./webpage-env
 	rm webpage-environment.yml
 
+# ----------Mining--------------
+
+mine-metadata:
+	python -m lingularity.backend.metadata.mine -Mine

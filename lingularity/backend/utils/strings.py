@@ -85,6 +85,10 @@ def split_at_uppercase(string: str) -> List[str]:
     return re.findall('[A-Z][a-z]*', string)
 
 
+def split_multiple(string: str, delimiters: List[str]) -> List[str]:
+    return replace_multiple(string, delimiters[:-1], delimiters[-1]).split(delimiters[-1])
+
+
 def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> Set[str]:
     """ Working Principle:
             - strip special characters, unicode remnants
@@ -104,12 +108,12 @@ def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> Set[str]:
 
 def common_start(strings: Iterable[str]) -> Optional[str]:
     buffer = ''
-    for strings_i in zip(strings):
+    for strings_i in zip(*strings):
         if len(set(strings_i)) == 1:
             buffer += strings_i[0]
         else:
             break
-    return [None, buffer][int(len(buffer))]
+    return [None, buffer][bool(len(buffer))]
 
 
 def longest_continuous_partial_overlap(strings: Iterable[str], min_length=2) -> Optional[str]:
@@ -118,7 +122,7 @@ def longest_continuous_partial_overlap(strings: Iterable[str], min_length=2) -> 
     for i, substrings in enumerate(substrings_list):
         for comparison in substrings_list[i + 1:]:
             buffer = longest_value([buffer, longest_value(substrings & comparison | {''})])
-    return [None, buffer][int(len(buffer)) > min_length]
+    return [None, buffer][len(buffer) > min_length]
 
 
 # ---------------
@@ -171,3 +175,4 @@ def _substrings_from_start(string: str) -> Iterator[str]:
 
 if __name__ == '__main__':
     print(longest_continuous_partial_overlap(['メアリーが', 'トムは', 'トムはメアリーを', 'メアリー', 'トムはマリ', 'いた', 'メアリーは']))
+    print(split_multiple("asdf'sadf safdcxvyXasdf", list("'X ")))

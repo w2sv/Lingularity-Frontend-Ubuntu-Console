@@ -108,10 +108,10 @@ class ChangeTTSLanguageVariety(SentenceTranslationOption):
         super().__init__('variety', 'change text-to-speech language variety')
 
     def execute(self):
-        selected_variety = self._select_language_variety()
+        selected_variety = self._select_tts_language_variety()
         self._tts.language_variety = selected_variety
 
         # redo previous terminal output
-        self._display_instructions()
+        self._display_training_screen_header_section()
         self._buffer_print.redo()
         self._pending_output()

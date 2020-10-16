@@ -28,7 +28,7 @@ def test_zip_download_link_parsing():
     ('Serbia', 'Serbian'),
     ('Austria', 'Austrian'),
     ('Monaco', 'Monacan'),
-    ('Uzbekistan', 'Uzbekistani'),
+    ('Uzbekistan', 'Uzbek'),
     ('Indogermanic', None)
 ])
 def test_demonyms_fetching(country, expected_demonym):
@@ -43,13 +43,13 @@ def test_demonyms_fetching(country, expected_demonym):
     ('Chinese', ['China']),
     ('Japanese', ['Japan']),
     ('Korean', ['South_Korea', 'Russia', 'China', 'North_Korea']),
-    ('Hebrew', ['Israel']),
+    ('Hebrew', ['Israel', 'South_Africa', 'Poland']),
     ('Urdu', ['Pakistan']),
     ('Pashto', ['Afghanistan']),
     ('Tagalog', ['Philippines']),
     ('Waray', None),
     ('Arabic', ['Algeria']),
-    ('Hungarian', ['Hungary', 'Croatia', 'Vojvodina', 'Austria', 'Serbia', 'Europe', 'Slovakia', 'Slovenia', 'Ukraine', 'Romania']),
+    ('Hungarian', ['Hungary', 'Croatia', 'Vojvodina', 'Austria', 'Serbia', 'Slovakia', 'Slovenia', 'Ukraine', 'Romania']),
     ('Serbian', ['Bosnia_and_Herzegovina', 'Hungary', 'Croatia', 'North_Macedonia', 'Serbia', 'Slovakia', 'Kosovo', 'Montenegro', 'Romania', 'Czech_Republic']),
 ])
 def test_language_corresponding_countries_fetching(language, expected_countries):

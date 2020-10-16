@@ -138,7 +138,6 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         common_start_length = len(common_start(self._tts.language_variety_choices) or '')
         processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._tts.language_variety_choices]
         indentation = centered_output_block_indentation(processed_varieties)
-
         for variety in processed_varieties:
             print(indentation, variety)
         print('')

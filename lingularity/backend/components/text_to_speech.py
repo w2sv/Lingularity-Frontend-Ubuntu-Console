@@ -75,7 +75,8 @@ class TextToSpeech(MonoStatePossessor):
 
             # delete possibly downloaded audio file pertaining to old variety in order to
             # trigger download of file pertaining to new one in subsequent training loop iteration
-            del self.audio_file
+            if self.audio_file is not None:
+                del self.audio_file
 
     # -----------------
     # Enablement

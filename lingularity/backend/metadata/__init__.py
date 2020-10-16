@@ -1,7 +1,8 @@
+from typing import Optional, List
 import json
 import os
 import random
-from typing import Optional, List
+import sys
 
 from .types import ReplacementForenames, LanguageMetadata, CountryMetadata, DefaultForenamesTranslations
 
@@ -10,6 +11,8 @@ METADATA_DIR_PATH = f'{os.getcwd()}/lingularity/backend/resources/metadata'
 
 
 def _load_metadata(file_name: str):
+    if 'Mine' in sys.argv:
+        return {}
     return json.load(open(f'{METADATA_DIR_PATH}/{file_name}.json', 'r', encoding='utf-8'))
 
 

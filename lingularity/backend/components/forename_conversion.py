@@ -2,6 +2,7 @@ from typing import Optional, List, Iterator, Sequence, Iterable
 import random
 from collections.abc import Mapping
 
+from lingularity.backend.utils.strings import split_multiple
 from lingularity.backend.metadata import (
     ReplacementForenames,
     get_replacement_forenames,
@@ -71,6 +72,7 @@ class ForenameConvertor:
 
     def _present_forename_translations(self, sentence_pair_fragments: List[List[str]]) -> List[Optional[str]]:
         present_forename_translations: List[Optional[str]] = [None] * len(DEFAULT_FORENAMES)
+
         for forename_index, (default_forename, forename_translations) in enumerate(zip(DEFAULT_FORENAMES, self._default_forename_translations)):
             if self._forename_comprised_by_fragments(default_forename, sentence_pair_fragments[0], is_foreign_language_sentence=False):
                 for forename_translation in forename_translations:
@@ -82,23 +84,32 @@ class ForenameConvertor:
 
     @staticmethod
     def _forename_comprised_by_fragments(forename: str, fragments: List[str], is_foreign_language_sentence: bool) -> bool:
-        return any(ForenameConvertor._fragment_conversion_mask(forename, fragments, is_foreign_language_sentence=is_foreign_language_sentence))
+        return any(ForenameConvertor._fragment_conversion_mask(forename, fragments, is_foreign_language_sentence))
 
     @staticmethod
-    def _fragment_conversion_mask(forename: str, sentence_fragments: List[str], is_foreign_language_sentence: bool) -> Iterator[bool]:
+    def _fragment_conversion_mask(
+            forename: str,
+            sentence_fragments: List[str],
+            is_foreign_language_sentence: bool) -> Iterator[bool]:
+
         for fragment in sentence_fragments:
-            if forename in fragment and (is_foreign_language_sentence or all(not char.isalpha() for char in fragment.replace(forename, ''))):
-                yield True
-            else:
-                yield False
+            yield forename in fragment and (is_foreign_language_sentence or fragment[:-1] == forename and fragment[-1] == 's' or split_multiple(fragment, delimiters=list("'?!.,"))[0] == forename)
 
 
 if __name__ == '__main__':
-    sentence_pair = [
-        "Tomorrow Tom will freakin' school these fools, which will astonish Mary. John approved of that, which fascinated Alice.",
-        "Domani Tom andrà a scuola con questi pazzi, che stupiranno Maria. John l'ha approvato, che affascinava Alice."
+    random.seed(69)
+
+    sps = [
+        ["Ask Tom.", "去问汤姆"],
+        ["Mary came in.", "瑪麗進來了。"],
+        ["Tom hugged Mary.", "汤姆拥抱了玛丽"],
+        ["Tom is ecstatic.", "汤姆兴奋不已。"],
+        ["Mary doesn't wear as much makeup as Alice.", "玛丽没有化爱丽丝那样浓的妆。"],
+        ["I don't believe Tom's version of the story.", "我不相信汤姆的说法。"]
     ]
 
-    """ Lo scopo di Tom all'università è laurearsi. - Tom's purpose in college is to get a degree. """
+    converter = ForenameConvertor('Chinese', train_english=False)
 
-    print(ForenameConvertor('Italian', train_english=True).__call__(sentence_pair))
+    for sp in sps:
+        res = converter(sp)
+        print(res)

@@ -665,6 +665,7 @@
         "demonym": "Czech"
     },
     "DR Congo": null,
+    "Dagestan": null,
     "Denmark": {
         "maleForenames": {
             "latinSpelling": [
@@ -1231,7 +1232,7 @@
                 "カエデ"
             ]
         },
-        "demonym": null
+        "demonym": "Japanese"
     },
     "Karelia": null,
     "Kazakhstan": {
@@ -2278,6 +2279,57 @@
         "demonym": "Swiss"
     },
     "São Tomé and Príncipe": null,
+    "Taiwan": {
+        "maleForenames": {
+            "latinSpelling": [
+                "Chia-hao",
+                "Chih-ming",
+                "Chun-chieh",
+                "Chien-hung",
+                "Chun-hung",
+                "Chih-hao",
+                "Chih-wei",
+                "Wen-Hsiung",
+                "Chin-lung"
+            ],
+            "nativeSpelling": [
+                "家豪",
+                "志明",
+                "俊傑",
+                "建宏",
+                "俊宏",
+                "志豪",
+                "志偉",
+                "文雄",
+                "金龍"
+            ]
+        },
+        "femaleForenames": {
+            "latinSpelling": [
+                "Shu-fen",
+                "Shu-hui",
+                "Mei-ling",
+                "Ya-ting",
+                "Mei-hui",
+                "Li-hua",
+                "Shu-chuan",
+                "Shu-chen",
+                "I-chun"
+            ],
+            "nativeSpelling": [
+                "淑芬",
+                "淑惠",
+                "美玲",
+                "雅婷",
+                "美惠",
+                "麗華",
+                "淑娟",
+                "淑貞",
+                "怡君"
+            ]
+        },
+        "demonym": "Taiwanese"
+    },
     "Tajikistan": {
         "maleForenames": {
             "latinSpelling": [
@@ -2307,16 +2359,16 @@
     "Turkey": {
         "maleForenames": {
             "latinSpelling": [
-                "Yusuf",
-                "Berat",
-                "Mustafa",
-                "Emir",
-                "Ahmet",
-                "Ömer",
-                "Mehmet",
-                "Muhammed",
-                "Emirhan",
-                "Eymen"
+                "Zeynep",
+                "Elif",
+                "Ecrin",
+                "Yağmur",
+                "Azra",
+                "Zehra",
+                "Nisanur",
+                "Ela",
+                "Belinay",
+                "Nehi"
             ],
             "nativeSpelling": []
         },
@@ -2460,5 +2512,6 @@
         "demonym": "Venezuelan"
     },
     "Vietnam": null,
-    "Vojvodina": null
+    "Vojvodina": null,
+    "the_Nordic_Council_2016": null
 }
