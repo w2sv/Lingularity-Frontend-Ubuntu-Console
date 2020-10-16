@@ -38,7 +38,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         if self._backend.tts.available:
             option_classes += [options.EnableTTS, options.DisableTTS, options.ChangePlaybackSpeed]
 
-        if bool(self._backend.tts.language_varieties):
+        if bool(self._backend.tts.language_variety_choices):
             option_classes += [options.ChangeTTSLanguageVariety]
 
         return TrainingOptions(option_classes)  # type: ignore
@@ -121,19 +121,19 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     def _set_tts_language_variety_if_applicable(self):
         """ Invokes variety selection method, forwards selected variety to backend """
 
-        if all([self._backend.tts.available, not self._backend.tts.language_variety, self._backend.tts.language_varieties]):
+        if all([self._backend.tts.available, not self._backend.tts.language_variety, self._backend.tts.language_variety_choices]):
             self._backend.tts.language_variety = self._select_tts_language_variety()
 
     @view_creator(header='SELECT TEXT-TO-SPEECH LANGUAGE VARIETY')
     def _select_tts_language_variety(self) -> str:
         """ Returns:
-                selected language variety: element of language_varieties """
+                selected language variety: element of language_variety_choices """
 
-        assert self._backend.tts.language_varieties is not None
+        assert self._backend.tts.language_variety_choices is not None
 
         # display eligible varieties
-        common_start_length = len(common_start(self._backend.tts.language_varieties) or '')
-        processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._backend.tts.language_varieties]
+        common_start_length = len(common_start(self._backend.tts.language_variety_choices) or '')
+        processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._backend.tts.language_variety_choices]
         indentation = centered_output_block_indentation(processed_varieties)
 
         for variety in processed_varieties:
@@ -144,7 +144,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         if (dialect_selection := resolve_input(input(indentation[:-5]), options=processed_varieties)) is None:
             return recurse_on_unresolvable_input(self._select_tts_language_variety, 1)
 
-        return self._backend.tts.language_varieties[processed_varieties.index(dialect_selection)]
+        return self._backend.tts.language_variety_choices[processed_varieties.index(dialect_selection)]
 
     # -----------------
     # Pre training

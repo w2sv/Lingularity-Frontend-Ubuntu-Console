@@ -62,7 +62,7 @@ class EnableTTS(SentenceTranslationOption):
         super().__init__('enable', 'enable speech output')
 
     def execute(self):
-        self._tts.enabled = True
+        self._backend.tts.enabled = True
         erase_lines(1)
 
 
@@ -71,7 +71,7 @@ class DisableTTS(SentenceTranslationOption):
         super().__init__('disable', 'disable speech output')
 
     def execute(self):
-        self._tts.enabled = False
+        self._backend.tts.enabled = False
         erase_lines(1)
 
 
@@ -80,24 +80,24 @@ class ChangePlaybackSpeed(SentenceTranslationOption):
         super().__init__('speed', 'change playback speed')
 
     def execute(self):
-        self._tts.change_playback_speed()
+        self._change_playback_speed()
         erase_lines(3)
 
-    def change_playback_speed(self):
+    def _change_playback_speed(self):
         print('Playback speed:\n\t', end='')
-        Keyboard().type(str(self._backend.playback_speed))
+        Keyboard().type(str(self._backend.tts.playback_speed))
         cursor.show()
 
-        _recurse = partial(recurse_on_invalid_input, function=self.change_playback_speed, message='Invalid input', n_deletion_lines=3)
+        _recurse = partial(recurse_on_invalid_input, function=self._change_playback_speed, message='Invalid input', n_deletion_lines=3)
 
         try:
             altered_playback_speed = float(input())
             cursor.hide()
 
-            if not self._backend.is_valid_playback_speed(altered_playback_speed):
+            if not self._backend.tts.is_valid_playback_speed(altered_playback_speed):
                 return _recurse()
 
-            self._backend.playback_speed = altered_playback_speed
+            self._backend.tts.playback_speed = altered_playback_speed
 
         except ValueError:
             return _recurse()
@@ -108,9 +108,8 @@ class ChangeTTSLanguageVariety(SentenceTranslationOption):
         super().__init__('variety', 'change text-to-speech language variety')
 
     def execute(self):
-        selected_variety = self._tts.select_language_variety()
-        self._backend.tts.change_language_variety(selected_variety)
-        self._tts.remove_audio_file()
+        selected_variety = self._select_language_variety()
+        self._backend.tts.language_variety = selected_variety
 
         # redo previous terminal output
         self._display_instructions()
