@@ -36,7 +36,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._backend.set_item_iterator()
         self._display_new_vocabulary_if_applicable()
 
-        self._display_training_screen_header()
+        self._display_training_screen_header_section()
         self._run_training()
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
@@ -104,7 +104,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             input('\n\nPress any key to continue')
 
     @view_creator()
-    def _display_training_screen_header(self):
+    def _display_training_screen_header_section(self):
         centered_print(f'Found {self._backend.n_training_items} imperfect entries.\n\n')
 
         instructions = ["Enter: "] + self._training_options.instructions

@@ -211,7 +211,7 @@ class MongoDBClient:
     @property
     def language_related_collection(self) -> pymongo.collection.Collection:
         """ {_id: $language,
-            varietyIdentifier: {$language_variety_identifier: {playbackSpeed: float
+            varietyIdentifier: {$language_variety: {playbackSpeed: float
                                                                use: bool}}
             enableTTS: bool} """
 

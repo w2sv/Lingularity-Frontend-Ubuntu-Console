@@ -55,7 +55,7 @@ class TrainerConsoleFrontend(ABC):
         pass
 
     @abstractmethod
-    def _display_training_screen_header(self):
+    def _display_training_screen_header_section(self):
         pass
 
     def _output_lets_go(self):

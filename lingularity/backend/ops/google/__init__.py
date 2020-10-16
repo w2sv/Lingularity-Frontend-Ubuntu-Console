@@ -50,7 +50,7 @@ class GoogleOp(ABC):
                 in case of >= 2 dialects/variations eligible:
                     {query_language_dialect: identifier}: Dict[str, str]
 
-                    e.g. {'French': 'fr', 'French (Canada)': 'fr-ca', 'French (France)': 'fr-fr'} for TTS
+                    e.g. {'French': 'fr', 'French (Canada)': 'fr-ca', 'French (France)': 'fr-fr'} for TextToSpeech
                 otherwise:
                     None """
 

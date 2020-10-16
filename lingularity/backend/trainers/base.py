@@ -6,7 +6,7 @@ import numpy as np
 
 from lingularity.backend import BASE_LANGUAGE_DATA_PATH
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.components import ForenameConvertor, SentenceData, TTS
+from lingularity.backend.components import ForenameConvertor, SentenceData
 from lingularity.backend.resources import strings as string_resources
 
 
@@ -25,7 +25,6 @@ class TrainerBackend(ABC):
         self.n_training_items: int
 
         self.forename_converter = ForenameConvertor(self.language, train_english=train_english)
-        self.tts = TTS(self.language, mongodb_client)
 
     @property
     def locally_available_languages(self) -> List[str]:

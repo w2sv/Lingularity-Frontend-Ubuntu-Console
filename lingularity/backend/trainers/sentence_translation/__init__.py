@@ -1,6 +1,7 @@
 from typing import Optional, List, Type
 from bisect import insort
 
+from lingularity.backend.components import TextToSpeech
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.metadata import language_metadata
 from lingularity.backend.trainers import TrainerBackend
@@ -12,11 +13,17 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
     def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
         super().__init__(non_english_language, train_english, mongodb_client)
 
+        self.tts = TextToSpeech(self.language, mongodb_client)
         self._training_mode: Optional[Type[TrainingMode]] = None
 
-    def set_training_mode(self, training_mode: Type[TrainingMode]):
+    @property
+    def training_mode(self) -> Optional[Type[TrainingMode]]:
+        return self._training_mode
+
+    @training_mode.setter
+    def training_mode(self, mode: Type[TrainingMode]):
         assert self._training_mode is None, "training mode shan't be reassigned"
-        self._training_mode = training_mode
+        self._training_mode = mode
 
     def set_item_iterator(self):
         assert self._training_mode is not None

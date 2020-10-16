@@ -6,10 +6,10 @@ from time import sleep
 from functools import partial
 
 import cursor
-from pynput.keyboard import Controller as KeyboardController
+from pynput.keyboard import Controller as Keyboard
 
-from lingularity.frontend.console.utils.output import centered_print, erase_lines
 from lingularity.frontend.console.utils.input_resolution import recurse_on_invalid_input
+from lingularity.frontend.console.utils.output import centered_print, erase_lines
 from lingularity.frontend.console.trainers.base.options import TrainingOption
 
 
@@ -22,11 +22,6 @@ class SentenceTranslationOption(TrainingOption, ABC):
 
     def __init__(self, keyword: str, explanation: str):
         super().__init__(keyword, explanation)
-
-    def _alter_tts_enablement(self, value: bool):
-        self._tts.enabled = value
-        self._backend.mongodb_client.set_tts_enablement(value)
-        erase_lines(1)
 
 
 class AddVocabulary(SentenceTranslationOption):
@@ -57,7 +52,6 @@ class Exit(SentenceTranslationOption):
         super().__init__('exit', 'terminate program')
 
     def execute(self):
-        self._backend.tts.clear_audio_file_dir()
         erase_lines(1)
         print(f'\nNumber of faced sentences: {self._n_trained_items}')
         cursor.show()
@@ -68,7 +62,8 @@ class EnableTTS(SentenceTranslationOption):
         super().__init__('enable', 'enable speech output')
 
     def execute(self):
-        self._alter_tts_enablement(value=True)
+        self._tts.enabled = True
+        erase_lines(1)
 
 
 class DisableTTS(SentenceTranslationOption):
@@ -76,8 +71,8 @@ class DisableTTS(SentenceTranslationOption):
         super().__init__('disable', 'disable speech output')
 
     def execute(self):
-        self._remove_audio_file()
-        self._alter_tts_enablement(value=False)
+        self._tts.enabled = False
+        erase_lines(1)
 
 
 class ChangePlaybackSpeed(SentenceTranslationOption):
@@ -85,28 +80,25 @@ class ChangePlaybackSpeed(SentenceTranslationOption):
         super().__init__('speed', 'change playback speed')
 
     def execute(self):
-        self._change_playback_speed()
+        self._tts.change_playback_speed()
         erase_lines(3)
 
-    def _change_playback_speed(self):
-        def is_valid(playback_speed: float) -> bool:
-            return 0.1 < playback_speed < 3
-
+    def change_playback_speed(self):
         print('Playback speed:\n\t', end='')
-        KeyboardController().type(str(self._tts.playback_speed))
+        Keyboard().type(str(self._backend.playback_speed))
         cursor.show()
 
-        _recurse = partial(recurse_on_invalid_input, function=self._change_playback_speed, message='Invalid input', n_deletion_lines=3)
+        _recurse = partial(recurse_on_invalid_input, function=self.change_playback_speed, message='Invalid input', n_deletion_lines=3)
 
         try:
             altered_playback_speed = float(input())
             cursor.hide()
 
-            if not is_valid(altered_playback_speed):
+            if not self._backend.is_valid_playback_speed(altered_playback_speed):
                 return _recurse()
 
-            self._playback_speed = altered_playback_speed
-            self._backend.tts.enter_playback_speed_change_into_database(altered_playback_speed)
+            self._backend.playback_speed = altered_playback_speed
+
         except ValueError:
             return _recurse()
 

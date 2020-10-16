@@ -25,7 +25,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
         Exit = 'exit'
         AlterLatestVocableEntry = 'alter'
 
-    def _display_training_screen_header(self):
+    def _display_training_screen_header_section(self):
         clear_screen()
         print(DEFAULT_VERTICAL_VIEW_OFFSET * 2)
 
@@ -51,7 +51,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
         print(f'Added {self._latest_created_vocable_entry.line_repr}')
 
     def __call__(self) -> bool:
-        self._display_training_screen_header()
+        self._display_training_screen_header_section()
 
         while True:
             try:
