@@ -1,14 +1,15 @@
-from typing import DefaultDict, Optional, List
+from typing import DefaultDict, Optional, List, Dict
 from abc import ABC, abstractmethod
-from collections import defaultdict, UserDict
+from collections import defaultdict
 
 import numpy as np
 
+from lingularity.utils import either
 from lingularity.backend.utils.strings import split_at_uppercase, get_meaningful_tokens, get_article_stripped_noun
 from lingularity.backend.utils.iterables import iterables_intersection, none_stripped
 
 
-class TokenMap(UserDict, ABC):
+class TokenMap(defaultdict, ABC):
     """ Interface for map classes comprising an association of
           unique, LOWERCASE and RELEVANT tokens (unnormalized/normalized): str
                 to the
@@ -16,18 +17,24 @@ class TokenMap(UserDict, ABC):
           which they occur, in either an inflected form (NormalizedTokenMaps)
           or as they are(UnnormalizedTokenMap): List[int] """
 
-    def __init__(self):
-        super().__init__(dict=defaultdict(list))
+    Type = Dict[str, List[int]]
+    OccurrenceMap = DefaultDict[str, int]
 
-        self.occurrence_map: DefaultDict[str, int] = defaultdict(lambda: 0)
+    def __init__(self, data: Optional[Type] = None, occurrence_map: Optional[OccurrenceMap] = None):
+        super().__init__(list, either(data, default={}))
+
+        self.occurrence_map: TokenMap.OccurrenceMap = either(occurrence_map, default=defaultdict(lambda: 0))
 
     @abstractmethod
     def _map_tokens(self, sentence_data: np.ndarray):
         """ Sets both data and occurrence map """
         pass
 
-    def _output_mapping_initialization_message(self):
+    def _display_mapping_initialization_message(self):
         print(f'Creating {" ".join(split_at_uppercase(self.__class__.__name__))}s...')
+
+    def _get_data(self) -> Dict[str, List[int]]:
+        return {**self}
 
     # ------------------
     # Sentence Index Query

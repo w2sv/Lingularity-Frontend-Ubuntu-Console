@@ -8,7 +8,7 @@ class _GenderForenames(TypedDict):
     nativeSpelling: Optional[List[str]]
 
 
-class ReplacementForenames(TypedDict):
+class SubstitutionForenamesMap(TypedDict):
     maleForenames: _GenderForenames
     femaleForenames: _GenderForenames
     demonym: Optional[str]
@@ -35,4 +35,4 @@ class _LanguageMetadataValue(TypedDict):
 
 
 LanguageMetadata = DefaultDict[str, _LanguageMetadataValue]
-CountryMetadata = Dict[str, Optional[ReplacementForenames]]
+CountryMetadata = Dict[str, Optional[SubstitutionForenamesMap]]

@@ -9,8 +9,7 @@ from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend a
 
 from lingularity.frontend.console.trainers.vocable_trainer.options import *
 from lingularity.frontend.console.trainers.sentence_translation import SentenceTranslationTrainerConsoleFrontend
-from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend
-from lingularity.frontend.console.trainers.base.options import TrainingOptions
+from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, TrainingOptions
 from lingularity.frontend.console.utils.view import view_creator, DEFAULT_VERTICAL_VIEW_OFFSET
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
 from lingularity.frontend.console.utils.matplotlib import center_windows
@@ -146,9 +145,12 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 print(f'{translation_query_output}{response} | {response_evaluation.name.upper()} {f"| Correct translation: {entry.display_translation}" if response_evaluation.name != "Perfect" else ""}{f" | New Score: {entry.score if entry.score % 1 != 0 else int(entry.score)}" if entry.score < 5 else "| Entry Perfected"}\n')
 
                 if (related_sentence_pairs := self._backend.get_related_sentence_pairs(entry.display_translation, n=2)) is not None:
-                    forename_converted_sentence_pairs = [reversed(self._backend.forename_converter(sentence_pair)) for sentence_pair in related_sentence_pairs]
-                    joined_sentence_pairs = [' - '.join(sentence_pair) for sentence_pair in forename_converted_sentence_pairs]
-                    [centered_print(joined_sentence_pair) for joined_sentence_pair in joined_sentence_pairs]
+                    if self._backend.forenames_convertible:
+                        related_sentence_pairs = map(self._backend.forename_converter, related_sentence_pairs)
+
+                    joined_sentence_pairs = (' - '.join(reversed(sentence_pair)) for sentence_pair in related_sentence_pairs)
+                    for sentence_pair in joined_sentence_pairs:
+                        centered_print(sentence_pair)
 
                 self._n_trained_items += 1
                 self._accumulated_score += response_evaluation.value
@@ -168,8 +170,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     def n_correct_responses(self) -> float:
         if int(self._accumulated_score) == self._accumulated_score:
             return int(self._accumulated_score)
-        else:
-            return self._accumulated_score
+        return self._accumulated_score
 
     @property
     def correctness_percentage(self) -> float:
@@ -189,10 +190,8 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         if not self._n_trained_items:
             return
 
-        CENT = 100
-
-        correct_percentage = (self.n_correct_responses / self._n_trained_items) * CENT
-        incorrect_percentage = CENT - correct_percentage
+        correct_percentage = (self.n_correct_responses / self._n_trained_items) * 100
+        incorrect_percentage = 100 - correct_percentage
 
         labels = ['Correct', 'Incorrect']
         explode = (0.1, 0)
@@ -200,7 +199,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         colors = ['g', 'r']
         try:
             def discard_futile_value(*iterables):
-                hundred_percent_index = [correct_percentage, incorrect_percentage].index(CENT)
+                hundred_percent_index = [correct_percentage, incorrect_percentage].index(100)
                 return ([i[hundred_percent_index]] for i in iterables)
 
             labels, explode, sizes, colors = discard_futile_value(labels, explode, sizes, colors)

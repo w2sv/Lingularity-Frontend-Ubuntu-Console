@@ -18,8 +18,7 @@ class UnnormalizedTokenMap(TokenMap):
 
     def _map_tokens(self, sentence_data: np.ndarray):
         proper_nouns = self._get_proper_nouns(sentence_data)
-
-        self._output_mapping_initialization_message()
+        self._display_mapping_initialization_message()
         for i, sentence in enumerate(tqdm(sentence_data[:, 1])):
             for token in (token.lower() for token in get_meaningful_tokens(sentence, self._apostrophe_splitting)):
                 if len(token) and is_digit_free(token) and token not in proper_nouns:

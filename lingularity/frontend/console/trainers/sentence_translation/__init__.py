@@ -161,7 +161,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         centered_print(f"Document comprises {self._backend.n_training_items:,d} sentences.\n")
 
         # display picked country corresponding to replacement forenames
-        if self._backend.forename_converter.forenames_convertible:
+        if self._backend.forenames_convertible:
             centered_print(f'Employing {self._backend.forename_converter.demonym} forenames.')
         print('')
 
@@ -232,7 +232,11 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             return None
 
         # try to convert forenames, output reference language sentence
-        reference_sentence, translation = self._backend.forename_converter(sentence_pair)
+        if self._backend.forenames_convertible:
+            reference_sentence, translation = self._backend.forename_converter(sentence_pair)  # type: ignore
+        else:
+            reference_sentence, translation = sentence_pair
+
         self._buffer_print(f'{self._TRAINING_LOOP_INDENTATION}{reference_sentence}')
         self._pending_output()
 

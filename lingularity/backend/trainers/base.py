@@ -24,7 +24,7 @@ class TrainerBackend(ABC):
         self._item_iterator: Iterator[Any]
         self.n_training_items: int
 
-        self.forename_converter = ForenameConvertor(self.language, train_english=train_english)
+        self.forename_converter: Optional[ForenameConvertor] = self._get_forename_converter()
 
     @property
     def locally_available_languages(self) -> List[str]:
@@ -38,6 +38,18 @@ class TrainerBackend(ABC):
     @abstractmethod
     def get_eligible_languages(mongodb_client: Optional[MongoDBClient]) -> List[str]:
         pass
+
+    # ----------------
+    # Forename Conversion
+    # ----------------
+    def _get_forename_converter(self) -> Optional[ForenameConvertor]:
+        if ForenameConvertor.available_for(self.language):
+            return ForenameConvertor(self.language, train_english=self._train_english)
+        return None
+
+    @property
+    def forenames_convertible(self) -> bool:
+        return self.forename_converter is not None
 
     # ----------------
     # Paths

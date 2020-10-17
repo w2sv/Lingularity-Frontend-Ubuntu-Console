@@ -10,13 +10,10 @@ import spacy
 
 from lingularity.backend.components.token_maps import TokenMap
 from lingularity.backend.components.token_maps import UnnormalizedTokenMap
-from lingularity.backend.utils.spacy import LANGUAGE_2_CODE
+from lingularity.backend.utils import spacy, data_storing
 
 
 class NormalizedTokenMap(TokenMap, ABC):
-    def __init__(self):
-        super().__init__()
-
     @staticmethod
     @abstractmethod
     def is_available(language: str) -> bool:
@@ -31,29 +28,25 @@ class StemMap(NormalizedTokenMap):
     def is_available(language: str) -> bool:
         return language in nltk.stem.SnowballStemmer.languages
 
-    def __init__(self, sentence_data: np.ndarray, language: str, *args):
+    def __init__(self, sentence_data: np.ndarray, language: str, *args, **kwargs):
         """ Args:
                 language: lowercase language """
 
         super().__init__()
 
-        self._stemmer: Optional[nltk.stem.SnowballStemmer] = nltk.stem.SnowballStemmer(language)
+        self._stemmer: nltk.stem.SnowballStemmer = nltk.stem.SnowballStemmer(language)
         self._map_tokens(sentence_data)
 
     def _map_tokens(self, sentence_data: np.ndarray):
-        assert self._stemmer is not None
-
         unnormalized_token_map = UnnormalizedTokenMap(sentence_data, apostrophe_splitting=True)
 
-        self._output_mapping_initialization_message()
+        self._display_mapping_initialization_message()
         for token, indices in tqdm(unnormalized_token_map.items(), total=unnormalized_token_map.__len__()):
             stem = self._stemmer.stem(token)
             self[stem].extend(indices)
             self.occurrence_map[stem] += len(indices)
 
     def query_sentence_indices(self, vocable_entry: str) -> Optional[List[int]]:
-        assert self._stemmer is not None
-
         length_sorted_stems = list(map(self._stemmer.stem, self._get_length_sorted_meaningful_tokens(vocable_entry)))
         return self._find_best_fit_sentence_indices(length_sorted_stems)
 
@@ -64,31 +57,33 @@ class LemmaMap(NormalizedTokenMap):
 
     @staticmethod
     def is_available(language: str) -> bool:
-        return language in LANGUAGE_2_CODE.keys()
+        return language in spacy.LANGUAGE_2_CODE.keys()
 
     def __init__(self, sentence_data: np.ndarray, language: str, load_normalizer=True):
         """ Args:
                 language: lowercase language """
 
-        super().__init__()
+        save_path = f'{os.getcwd()}/.language_data/{language.title()}/lemma_maps.pickle'
+        self._model: spacy.Model
 
-        self._save_path = f'{os.getcwd()}/.language_data/{language.title()}/lemma_maps.pickle'
-        self._model = None
+        if os.path.exists(save_path):
+            data, occurrence_map = data_storing.load_pickle(save_path)
 
-        if os.path.exists(self._save_path):
-            self.data, self.occurrence_map = pickle.load(open(self._save_path, 'rb'))
+            super().__init__(data=data, occurrence_map=occurrence_map)
 
             if load_normalizer:
                 self._model = self._get_model(language)
 
         else:
+            super().__init__()
+
             self._model = self._get_model(language)
             self._map_tokens(sentence_data)
-            self._pickle_maps()
+            self._pickle_maps(save_path)
 
     @staticmethod
-    def _get_model(language: str, retry=False):
-        model_name = f'{LANGUAGE_2_CODE[language]}_core_{"web" if retry else "news"}_md'
+    def _get_model(language: str, retry=False) -> spacy.Model:
+        model_name = f'{spacy.LANGUAGE_2_CODE[language]}_core_{"web" if retry else "news"}_md'
 
         def load_model():
             print('Loading model...')
@@ -112,12 +107,10 @@ class LemmaMap(NormalizedTokenMap):
             return load_model()
 
     def _map_tokens(self, sentence_data: np.ndarray):
-        assert self._model is not None
-
         unnormalized_token_map = UnnormalizedTokenMap(sentence_data, apostrophe_splitting=False)
 
-        self._output_mapping_initialization_message()
-        for chunk, indices in tqdm(unnormalized_token_map.items(), total=unnormalized_token_map.__len__()):
+        self._display_mapping_initialization_message()
+        for chunk, indices in tqdm(unnormalized_token_map.items(), total=len(unnormalized_token_map)):
             tokens = self._model(chunk)
             for token in tokens:
                 if token.pos_ not in self.IGNORE_POS_TYPES:
@@ -126,9 +119,8 @@ class LemmaMap(NormalizedTokenMap):
                     if token.pos_ in self.SENTENCE_TRANSLATION_MODE_MAPPING_INCLUSION_POS_TYPES:
                         self.occurrence_map[token.lemma_] += len(indices)
 
-    def _pickle_maps(self):
-        with open(self._save_path, 'wb') as handle:
-            pickle.dump((dict(self.data), dict(self.occurrence_map)), handle, protocol=pickle.HIGHEST_PROTOCOL)
+    def _pickle_maps(self, save_path: str):
+        data_storing.write_pickle(data=(dict(self._get_data()), dict(self.occurrence_map)), file_path=save_path)
 
     # ------------------
     # Query
@@ -139,7 +131,6 @@ class LemmaMap(NormalizedTokenMap):
                       'NUM': 4,
                       'AUX': 3, 'ADP': 3, 'PRON': 3}
 
-        assert self._model is not None
         tokens = self._model(vocable_entry)
 
         # remove tokens of REMOVE_POS_TYPE if tokens not solely comprised of them
