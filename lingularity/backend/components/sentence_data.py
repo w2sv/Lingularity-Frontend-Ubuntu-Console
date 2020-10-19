@@ -76,7 +76,7 @@ class SentenceData(np.ndarray):
         candidates_list: List[Set[str]] = []
 
         for default_forename in DEFAULT_FORENAMES:
-            candidates_list.append(self._proper_noun_translation_deduction_method(default_forename))
+            candidates_list.append(self._deduce_proper_noun_translation(default_forename))
 
         for i, candidates in enumerate(candidates_list):
             for candidate in candidates:
@@ -87,7 +87,7 @@ class SentenceData(np.ndarray):
         return candidates_list
 
     @property
-    def _proper_noun_translation_deduction_method(self) -> Callable[[str], Set[str]]:
+    def _deduce_proper_noun_translation(self) -> Callable[[str], Set[str]]:
         if self.foreign_language_sentences.uses_latin_script:
             return self._deduce_proper_noun_translations_latin_script_language
         return self._deduce_proper_noun_translations_non_latin_script_language

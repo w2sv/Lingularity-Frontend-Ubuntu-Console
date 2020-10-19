@@ -30,9 +30,8 @@ class UnnormalizedTokenMap(TokenMap):
         """ Working principle:
                 for each sentence pair:
                     - get set of intersection between tokens of english sentence and its translation
-                    - add tokens
-                        starting on an uppercase characters
-                        being either comprised of at least 2 characters or non-latin
+                    - add tokens starting on uppercase character being either comprised of at least 2 characters or
+                      non-latin
 
             Returns:
                 set of lowercase proper nouns """

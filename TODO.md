@@ -5,8 +5,29 @@
 - <s>enhancement of mode selection screen</s>
 - <s>mode/language specific dynamic occurrence frequency limits</s>
 - <s>related word inference elaboration by means of word family data and some kind of english infinitiv deduction model/dataset</s>
-- incorporate buffer print into vocabulary training, linebreak resilience
+- reincorporate english training
+- incorporate buffer print into vocabulary training, <s>linebreak resilience</s>
 - write tests (mongodb, token maps)
-- infer lingual capability level by appended vocabulary
-- english vocabulary training
 - add last session summary onto existing one in case of same language, date
+- enable doctests
+- tense/grammatical mode sentence translation training modes:
+    - tenses:
+        - simple past
+        - perfect
+        - past perfect
+        - simple present
+        - gerund (present, past)
+        - future
+        - future perfect
+        
+    - modes:
+        - imperative
+        - conditional I
+        - conditional II
+        - subjunctive where existent
+        
+    - constructs:
+        - negation
+        - prepositions
+        - conjunctions
+        

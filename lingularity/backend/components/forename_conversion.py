@@ -104,7 +104,7 @@ class ForenameConvertor:
                         first of which is the english forename, second the corresponding foreign language translation
                     with corresponding is_female_forename flag: bool
 
-            >>> sentence_pair_fragments = [['Tom', 'ate', 'Marys', 'tuna'], ['Tomás', 'mangiava', 'il', 'tonno', 'de', 'Maria.']]
+            >>> sentence_pair_fragments = [['Tom', 'ate', 'Marys', 'tuna.'], ['Tomás', 'mangiava', 'il', 'tonno', 'de', 'Maria.']]
             >>> list(ForenameConvertor('Italian', train_english=False)._contained_default_forename_pairs_with_gender(sentence_pair_fragments))
             [(('Tom', 'Tomás'), False), (('Mary', 'Maria'), True)]
             """
@@ -132,8 +132,7 @@ class ForenameConvertor:
 
         """ Returns:
                 boolean mask of length of fragments whose elements represent whether or not
-                the fragment corresponding to the respective element contain the passed forename
-                and are hence to be converted
+                the respective fragments contain the passed forename and are hence to be converted
 
                 >>> list(ForenameConvertor._forename_containment_mask('Tom', ["Tom's", "seriously", "messed", "up."], False))
                 [True, False, False False]

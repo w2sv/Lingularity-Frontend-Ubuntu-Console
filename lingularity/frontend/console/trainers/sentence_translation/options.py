@@ -29,7 +29,7 @@ class AddVocabulary(SentenceTranslationOption):
         super().__init__('vocabulary', 'add a vocable')
 
     def execute(self):
-        n_printed_lines = self._get_new_vocable()
+        n_printed_lines = self._add_vocable()
         erase_lines(n_printed_lines + 1)
 
 
