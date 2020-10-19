@@ -7,10 +7,11 @@ from lingularity.frontend.console.utils.output import clear_screen
 from lingularity.frontend.console.welcome_screen import (
     account_management,
     display_starting_screen,
-    display_additional_information,
+    display_sentence_data_reference,
     display_welcome_message,
     display_constitution_query,
     display_last_session_conclusion,
+    display_input_resolution_information,
     select_action,
     exit_on_missing_internet_connection
 )
@@ -42,10 +43,14 @@ def _complete_initialization():
 
     # log in if user not yet set
     if not mongodb_client.user_set:
-        mongodb_client = account_management.log_in(mongodb_client)
+        mongodb_client, is_new_user = account_management.log_in(mongodb_client)
+
+        # display input resolution information in case of creation of new account
+        if is_new_user:
+            display_input_resolution_information()
 
     # display additional information, last session metrics if existent
-    display_additional_information()
+    display_sentence_data_reference()
     if (last_session_metrics := mongodb_client.query_last_session_statistics()) is not None:
         display_constitution_query(mongodb_client.user, last_session_metrics['language'])
         display_last_session_conclusion(last_session_metrics=last_session_metrics)
@@ -56,11 +61,12 @@ def _complete_initialization():
     action_selection: str = select_action(actions=ELIGIBLE_ACTIONS)
     action_executor = ELIGIBLE_ACTIONS[action_selection]
 
-    # __call__ action
+    # instantiate trainer if action_executor one
     if isinstance(action_executor, type):
-        reinitialize = action_executor(mongodb_client).__call__()
-    else:
-        reinitialize = action_executor(ELIGIBLE_ACTIONS)
+        action_executor = action_executor(mongodb_client)
+
+    # run action
+    reinitialize = action_executor()
 
     if reinitialize:
         return _complete_initialization()

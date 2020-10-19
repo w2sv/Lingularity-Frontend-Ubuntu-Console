@@ -10,17 +10,18 @@ from termcolor import colored
 from lingularity.backend.metadata import language_metadata
 from lingularity.frontend.console.utils.date import date_repr
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
-from lingularity.frontend.console.utils.output import clear_screen, centered_print
-from lingularity.frontend.console.utils.view import DEFAULT_VERTICAL_VIEW_OFFSET
+from lingularity.frontend.console.utils.output import clear_screen, centered_print, erase_lines
+from lingularity.frontend.console.utils.view import DEFAULT_VERTICAL_VIEW_OFFSET, view_creator
 
 
+@view_creator()
 def display_starting_screen():
     clear_screen()
     os.system('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz && wmctrl -r :ACTIVE: -N "Lingularity - Acquire Languages the Litboy Way"')
     time.sleep(0.1)
 
     banner = open(f'{os.getcwd()}/lingularity/frontend/console/resources/banner.txt', 'r').read()
-    centered_print(DEFAULT_VERTICAL_VIEW_OFFSET * 2, colored(banner, 'red'), '\n' * 2)
+    centered_print(DEFAULT_VERTICAL_VIEW_OFFSET, colored(banner, 'red'), '\n' * 2)
     centered_print("W2SV", '\n\n')
 
 
@@ -33,15 +34,21 @@ def exit_on_missing_internet_connection():
     sys.exit(0)
 
 
-def display_additional_information():
+def display_sentence_data_reference():
     centered_print("Sentence data stemming from the Tatoeba Project to be found at http://www.manythings.org/anki", '\n' * 2)
-    # centered_print("Note: all requested inputs may be merely entered up to a point which allows for an unambigious identification of the intended choice,")
-    # centered_print("e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
+
+
+def display_input_resolution_information():
+    print('\n' * 4)
+    centered_print("All requested inputs may be entered in lowercase, as well as merely up to a point, which allows for an unambigious identification of the intended choice amongst the respectively possible options,")
+    centered_print("e.g. the input of 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
+    centered_print('Hit Enter to proceed', end='')
+    input()
+    erase_lines(10)
 
 
 def display_welcome_message(new_user: str):
-    # TODO
-    centered_print(f"Let's reach for lingularity, {new_user}!\n\n")
+    centered_print(f"Fancy seeing you here, {new_user}.\n\n")
 
 
 def display_constitution_query(username: str, latest_trained_language: str):

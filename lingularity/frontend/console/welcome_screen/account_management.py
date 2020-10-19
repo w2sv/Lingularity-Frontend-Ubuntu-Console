@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 from getpass import getpass
 import os
 
@@ -24,12 +24,15 @@ def _store_logged_in_user(username: str):
         user_encryption_file.write(fernet.encrypt(username))
 
 
-def log_in(mongodb_client: MongoDBClient) -> MongoDBClient:
+def log_in(mongodb_client: MongoDBClient) -> Tuple[MongoDBClient, bool]:
     """ Returns:
-            user instantiated mongodb client """
+            user instantiated mongodb client,
+            is_new_user flag """
 
     USER_NAME_QUERY = 'Enter user name: '
     INDENTATION = centered_user_query_indentation(USER_NAME_QUERY)
+
+    is_new_user = False
 
     # query username
     username = input(f'{INDENTATION}{USER_NAME_QUERY}')
@@ -45,6 +48,8 @@ def log_in(mongodb_client: MongoDBClient) -> MongoDBClient:
 
         password, password_input = mongodb_client.query_password(), query_password('Enter password: ')
         while password != password_input:
+            # TODO: find way to erase 'Enter password: ' query line, somehow infeasible by means of
+            #  erase_lines after first invocation
             erase_lines(1)
             password_input = query_password('Incorrect, try again: ')
         erase_lines(2)
@@ -53,13 +58,14 @@ def log_in(mongodb_client: MongoDBClient) -> MongoDBClient:
     else:
         erase_lines(1)
         _sign_up(username, mongodb_client, INDENTATION)
+        is_new_user = True
 
     # store encrypted user
     if not fernet.key_existent():
         fernet.write_key()
     _store_logged_in_user(username)
 
-    return mongodb_client
+    return mongodb_client, is_new_user
 
 
 def _sign_up(user: str, client: MongoDBClient, indentation: str, email_address: Optional[str] = None):
@@ -98,10 +104,9 @@ def _sign_up(user: str, client: MongoDBClient, indentation: str, email_address: 
     erase_lines(4)
 
 
-def change_account(eligible_actions) -> bool:
+def change_account() -> bool:
     """ Returns:
             program_reinitialization_flag """
 
     os.remove(USER_ENCRYPTION_FILE_PATH)
-    del eligible_actions['change account']
     return True
