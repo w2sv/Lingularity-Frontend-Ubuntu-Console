@@ -45,7 +45,7 @@ def display_welcome_message(new_user: str):
 
 
 def display_constitution_query(username: str, latest_trained_language: str):
-    if constitution_query_templates := language_metadata[latest_trained_language]['translations']['constitutionQuery']:
+    if constitution_query_templates := language_metadata[latest_trained_language]['translations'].get('constitutionQuery'):
         constitution_queries = map(lambda query: query.replace('{}', username), constitution_query_templates)
     else:
         constitution_queries = map(lambda query: query + f' {username}?', [f"What's up", f"How are you"])

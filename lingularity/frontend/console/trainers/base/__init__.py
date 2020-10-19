@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from pynput.keyboard import Controller as KeyboardController
 
+from lingularity.utils import either
 from lingularity.backend.trainers import TrainerBackend
 from lingularity.backend.components import VocableEntry
 from lingularity.backend.metadata import language_metadata
@@ -59,7 +60,7 @@ class TrainerConsoleFrontend(ABC):
         pass
 
     def _output_lets_go(self):
-        centered_print(language_metadata[self._backend.language]['translations']['letsGo'] or "Let's go!", '\n' * 2)
+        centered_print(either(language_metadata[self._backend.language]['translations'].get('letsGo'), default="Let's go!"), '\n' * 2)
 
     # -----------------
     # Training

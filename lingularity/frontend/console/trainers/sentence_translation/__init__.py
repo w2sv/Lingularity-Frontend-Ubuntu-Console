@@ -176,11 +176,12 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         instructions = ["      Enter:"] + self._training_options.instructions
         indentation = centered_output_block_indentation(instructions)
         for i, line in enumerate(instructions):
+            # display intermediate tts option header if applicable
+            if i == 4:
+                centered_print('\nText-to-Speech Options\n'.upper())
+
             print(indentation, line)
 
-            # display intermediate tts option header if applicable
-            if i == 3:
-                centered_print('\nText-to-Speech Options\n'.upper())
         print('\n' * 2, end='')
 
     # -----------------

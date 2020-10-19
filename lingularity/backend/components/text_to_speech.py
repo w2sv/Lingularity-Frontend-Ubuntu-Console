@@ -46,7 +46,7 @@ class TextToSpeech(MonoStatePossessor):
                     None if not """
 
         if self.language_variety_choices is None:
-            return language
+            return [None, language][google_tts.available_for(language)]
 
         return self._mongodb_client.query_language_variety()
 
