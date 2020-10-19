@@ -1,11 +1,9 @@
 from typing import Optional, List, Type
-from bisect import insort
 
 from lingularity.backend.components import TextToSpeech
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.metadata import language_metadata
 from lingularity.backend.trainers import TrainerBackend
-from lingularity.backend.resources import strings as string_resources
 from .modes import TrainingMode
 
 
@@ -38,6 +36,4 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
 
     @staticmethod
     def get_eligible_languages(mongodb_client: Optional[MongoDBClient] = None) -> List[str]:
-        _eligible_languages = list(language_metadata.keys())
-        insort(_eligible_languages, string_resources.ENGLISH)
-        return _eligible_languages
+        return list(language_metadata.keys())

@@ -18,7 +18,7 @@ class TrainerBackend(ABC):
         self._non_english_language = non_english_language
         self._train_english = train_english
 
-        mongodb_client.language = non_english_language
+        mongodb_client.language = self.language
         self.mongodb_client = mongodb_client
 
         self._item_iterator: Iterator[Any]
@@ -31,8 +31,8 @@ class TrainerBackend(ABC):
         return os.listdir(BASE_LANGUAGE_DATA_PATH)
 
     @property
-    def language(self):
-        return self._non_english_language if not self._train_english else string_resources.ENGLISH
+    def language(self) -> str:
+        return [self._non_english_language, string_resources.ENGLISH][self._train_english]
 
     @staticmethod
     @abstractmethod
@@ -43,8 +43,8 @@ class TrainerBackend(ABC):
     # Forename Conversion
     # ----------------
     def _get_forename_converter(self) -> Optional[ForenameConvertor]:
-        if ForenameConvertor.available_for(self.language):
-            return ForenameConvertor(self.language, train_english=self._train_english)
+        if ForenameConvertor.available_for(self._non_english_language):
+            return ForenameConvertor(self._non_english_language, train_english=self._train_english)
         return None
 
     @property

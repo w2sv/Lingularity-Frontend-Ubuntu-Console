@@ -39,17 +39,22 @@ def display_additional_information():
     # centered_print("e.g. 'it' suffices for selecting Italian since there's no other eligible language starting on 'it'", '\n' * 2)
 
 
-def display_constitution_query(username: str, latest_trained_language: Optional[str]):
-    if latest_trained_language is not None and (constitution_query_templates := language_metadata[latest_trained_language]['translations']['constitutionQuery']):
-        constitution_queries = map(lambda query: query.replace('{}', username.title()), constitution_query_templates)
+def display_welcome_message(new_user: str):
+    # TODO
+    centered_print(f"Let's reach for lingularity, {new_user}!\n\n")
+
+
+def display_constitution_query(username: str, latest_trained_language: str):
+    if constitution_query_templates := language_metadata[latest_trained_language]['translations']['constitutionQuery']:
+        constitution_queries = map(lambda query: query.replace('{}', username), constitution_query_templates)
     else:
-        constitution_queries = map(lambda query: query + f' {username.title()}?', [f"What's up", f"How are you"])
+        constitution_queries = map(lambda query: query + f' {username}?', [f"What's up", f"How are you"])
 
     centered_print(random.choice(list(constitution_queries)), '\n' * 2)
 
 
 def display_last_session_conclusion(last_session_metrics: Dict[str, Any]):
-    centered_print(f"You faced {last_session_metrics['nFacedItems']} {last_session_metrics['language']} {'vocables' if last_session_metrics['trainer'] == 'v' else 'sentences'} during your last session {date_repr(last_session_metrics['date'])}\n\n\n")
+    centered_print(f"You faced {last_session_metrics['nFacedItems']} {last_session_metrics['language']} {['sentences', 'vocables'][last_session_metrics['trainer'] == 'v']} during your last session {date_repr(last_session_metrics['date'])}\n\n\n")
 
 
 def select_action(actions) -> Optional[str]:

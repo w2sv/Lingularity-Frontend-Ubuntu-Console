@@ -30,7 +30,7 @@ def _get_forename_block_preceding_row_indices(country: str) -> List[int]:
     for i, row in enumerate(popular_forenames_page_source):
         if country in row and (row.endswith(f'</a></sup></td>') or popular_forenames_page_source[i - 1] == '<tr>'):
             if len(forename_block_initiating_row_indices):
-                if i - forename_block_initiating_row_indices[0] > 100:
+                if i - forename_block_initiating_row_indices[0] >= 13:
                     forename_block_initiating_row_indices.append(i)
                     break
             else:
@@ -42,7 +42,6 @@ def _get_forename_block_preceding_row_indices(country: str) -> List[int]:
 def _scrape_forenames(forename_possessing_row_index: int) -> List[List[str]]:
     EXIT_ELEMENTS = ['sup class="reference"', '</td></tr>']
     BRACKETS = list('()')
-
     possesses_foreign_transcription = False
     spelling_kinds: List[List[str]] = [[] for _ in range(2)]
 
@@ -80,5 +79,5 @@ if __name__ == '__main__':
     from time import time
 
     t1 = time()
-    print(scrape_popular_forenames('Estonia'))
+    print(scrape_popular_forenames('New Zealand'))
     print(f'took {time() - t1}s')

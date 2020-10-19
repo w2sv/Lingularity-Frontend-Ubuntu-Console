@@ -77,7 +77,7 @@ def _sign_up(user: str, client: MongoDBClient, indentation: str, email_address: 
                 message='Invalid email address',
                 n_deletion_lines=4,
                 function=_sign_up,
-                args=tuple(locals().values())
+                args=(user, client, indentation, None)
             )
 
         # TODO
@@ -91,7 +91,7 @@ def _sign_up(user: str, client: MongoDBClient, indentation: str, email_address: 
             message='Password must contain at least 5 characters',
             n_deletion_lines=5,
             function=_sign_up,
-            args=tuple(list(locals().values())[:-1] + [email_address])
+            args=(user, client, indentation, email_address)
         )
 
     client.initialize_user(user, email_address=email_address, password=password)

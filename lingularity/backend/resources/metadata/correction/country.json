@@ -147,5 +147,17 @@
         "Lotte"
       ]
     }
+  },
+  "New Zealand": {
+    "demonym": "Kiwi"
+  },
+  "South Africa": {
+    "demonym": "South African"
+  },
+  "Ireland": {
+    "demonym": "Irish"
+  },
+  "Northern Ireland": {
+    "demonym": "Northern Irish"
   }
 }

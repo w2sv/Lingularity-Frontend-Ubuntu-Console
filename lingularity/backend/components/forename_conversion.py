@@ -2,6 +2,7 @@ from typing import Optional, List, Iterator, Tuple, Iterable
 import random
 from collections.abc import Mapping
 
+from lingularity.backend.resources import strings as string_resources
 from lingularity.backend.utils.strings import split_multiple
 from lingularity.backend.metadata import (
     SubstitutionForenamesMap,
@@ -24,9 +25,10 @@ class ForenameConvertor:
 
         self._train_english: bool = train_english
 
-        substitution_forenames_map: SubstitutionForenamesMap = get_substitution_forenames_map(language)
+        substitution_forenames_map: SubstitutionForenamesMap = get_substitution_forenames_map([language, string_resources.ENGLISH][train_english])
 
         self.demonym: Optional[str] = substitution_forenames_map['demonym']
+        self.country: str = substitution_forenames_map['country']
         self._replacement_forenames: List[List[List[str]]] = self._unmap_replacement_forenames(substitution_forenames_map)
 
         self._default_forename_translations: List[List[str]] = self._unmap_default_forename_translations(language)

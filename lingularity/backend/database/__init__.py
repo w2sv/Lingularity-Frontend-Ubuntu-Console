@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 import pymongo
 
+from lingularity.backend.resources import strings as string_resources
 from lingularity.backend.utils.date import today
 from .document_types import LastSessionStatistics, VocableAttributes, TrainingChronic
 
@@ -73,7 +74,6 @@ class MongoDBClient:
 
     @property
     def user_data_base(self) -> pymongo.collection.Collection:
-        assert self._cluster is not None
         return self._cluster[self._user]
 
     # -------------------
@@ -131,7 +131,7 @@ class MongoDBClient:
     def query_last_session_statistics(self) -> Optional[LastSessionStatistics]:
         try:
             return self.general_collection.find_one({'_id': 'unique'})['lastSession']
-        except TypeError:
+        except KeyError:
             return None
 
     # ------------------
@@ -204,7 +204,7 @@ class MongoDBClient:
         return training_chronic
 
     # ------------------
-    # .Language Related
+    # .Language Metadata
     # ------------------
     @property
     def language_metadata_collection(self) -> pymongo.collection.Collection:
@@ -227,13 +227,15 @@ class MongoDBClient:
         """ assumes existence of varietyIdentifier sub dict in case of
             existence of language related collection """
 
-        if (dialect_dict := self.language_metadata_collection.find_one(filter={'_id': self._language})) is None:
+        if (language_metadata := self.language_metadata_collection.find_one(filter={'_id': self._language})) is None:
             return None
 
-        for identifier, value_dict in dialect_dict['variety'].items():
-            if value_dict['use']:
-                return identifier
-        raise AttributeError
+        elif variety_2_usage := language_metadata.get('variety'):
+            for identifier, value_dict in variety_2_usage.items():
+                if value_dict['use']:
+                    return identifier
+
+        return None
 
     # ------------------
     # ..playback speed
@@ -262,6 +264,21 @@ class MongoDBClient:
         try:
             return self.language_metadata_collection.find_one(filter={'_id': self._language}).get('ttsEnabled')
         except AttributeError:
+            return None
+
+    # ------------------
+    # ..english reference language
+    # ------------------
+    def set_reference_language(self, reference_language: str):
+        self.language_metadata_collection.update_one(filter={'_id': string_resources.ENGLISH},
+                                                     update={'$set': {
+                                                         f'referenceLanguage': reference_language}},
+                                                     upsert=True)
+
+    def query_reference_language(self) -> Optional[str]:
+        try:
+            return self.language_metadata_collection.find_one(filter={'_id': string_resources.ENGLISH})['referenceLanguage']
+        except TypeError:
             return None
 
 

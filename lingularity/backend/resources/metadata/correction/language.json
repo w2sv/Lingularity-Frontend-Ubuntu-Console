@@ -1,0 +1,29 @@
+{
+  "English": {
+    "sentenceDataDownloadLinks": {
+      "tatoebaProject": null
+    },
+    "properties": {
+      "usesLatinScript": true
+    },
+    "countriesEmployedIn": [
+        "South Africa",
+        "Australia",
+        "New Zealand",
+        "Wales",
+        "Scotland",
+        "United States",
+        "Ireland",
+        "Northern Ireland",
+        "Jamaica"
+    ],
+    "translations": {
+      "letsGo": "Let's go!",
+      "defaultForenames": {},
+      "constitutionQuery": [
+        "What's up {}?",
+        "How are you {}?"
+      ]
+    }
+  }
+}

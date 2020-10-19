@@ -90,12 +90,16 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         # query desired reference language if English selected
         elif selection == string_resources.ENGLISH:
-            selection, train_english = None, True
+            train_english, selection = True, mongodb_client.query_reference_language()
             eligible_languages.remove(string_resources.ENGLISH)
+
+            erase_lines(2)
 
             while selection is None:
                 if (selection := resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Select reference language: '), eligible_languages)) is None:
                     indissolubility_output(n_deletion_lines=2)
+                else:
+                    mongodb_client.set_reference_language(reference_language=selection)
 
         return selection, train_english
 
@@ -162,7 +166,10 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         # display picked country corresponding to replacement forenames
         if self._backend.forenames_convertible:
-            centered_print(f'Employing {self._backend.forename_converter.demonym} forenames.')
+            if demonym := self._backend.forename_converter.demonym:
+                centered_print(f'Employing {demonym} forenames.')
+            else:
+                centered_print(f'Employing forenames stemming from {self._backend.forename_converter.country}.')
         print('')
 
     def _display_instructions(self):

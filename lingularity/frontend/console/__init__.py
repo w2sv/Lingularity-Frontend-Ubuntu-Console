@@ -8,6 +8,7 @@ from lingularity.frontend.console.welcome_screen import (
     account_management,
     display_starting_screen,
     display_additional_information,
+    display_welcome_message,
     display_constitution_query,
     display_last_session_conclusion,
     select_action,
@@ -48,13 +49,15 @@ def _complete_initialization():
     if (last_session_metrics := mongodb_client.query_last_session_statistics()) is not None:
         display_constitution_query(mongodb_client.user, last_session_metrics['language'])
         display_last_session_conclusion(last_session_metrics=last_session_metrics)
+    else:
+        display_welcome_message(mongodb_client.user)
 
     # select action
     action_selection: str = select_action(actions=ELIGIBLE_ACTIONS)
     action_executor = ELIGIBLE_ACTIONS[action_selection]
 
     # __call__ action
-    if hasattr(action_executor, '__call__'):
+    if isinstance(action_executor, type):
         reinitialize = action_executor(mongodb_client).__call__()
     else:
         reinitialize = action_executor(ELIGIBLE_ACTIONS)

@@ -34,6 +34,7 @@ def get_substitution_forenames_map(language: str) -> SubstitutionForenamesMap:
     assert (countries_language_employed_in := _countries_language_employed_in(language)) is not None
     country = random.choice(_data_beset_countries(countries_language_employed_in))
     assert (substitution_forenames_map := _country_metadata[country]) is not None
+    substitution_forenames_map['country'] = country
     return substitution_forenames_map
 
 

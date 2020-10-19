@@ -5,17 +5,20 @@ from lingularity.backend.ops.data_mining.scraping.utils import read_page_source
 
 
 def _rectify_country_names(country_list: List[str]) -> Set[str]:
-    repr_2_actual = {'Mainland China': 'China',
+    REPR_2_ACTUAL = {'Mainland China': 'China',
                      'the_People%27s_Republic_of_China': 'China',
                      'Denmark_%28state%29': 'Denmark',
                      'Belgium_%28civil%29': 'Belgium',
-                     'New_Zealand': 'New Zealand'}
+                     'New_Zealand': 'New Zealand',
+                     'South_Africa': 'South Africa'}
+
+    BLACKLIST = {'%C3%85land', 'Europe'}
 
     for i, country in enumerate(country_list):
-        if (actual_country := repr_2_actual.get(country)) is not None:
+        if (actual_country := REPR_2_ACTUAL.get(country)) is not None:
             country_list[i] = actual_country
 
-        elif country == 'Europe':
+        elif country in BLACKLIST:
             country_list.remove(country)
 
         else:
@@ -53,3 +56,7 @@ def scrape_countries_language_employed_in(language: str) -> Optional[Set[str]]:
                 i += 1
             return _rectify_country_names(countries)
     return None
+
+
+if __name__ == '__main__':
+    print(scrape_countries_language_employed_in('English'))
