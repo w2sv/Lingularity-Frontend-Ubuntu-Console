@@ -5,9 +5,11 @@
 - <s>enhancement of mode selection screen</s>
 - <s>mode/language specific dynamic occurrence frequency limits</s>
 - <s>related word inference elaboration by means of word family data and some kind of english infinitiv deduction model/dataset</s>
-- reincorporate english training
-- incorporate buffer print into vocabulary training, <s>linebreak resilience</s>
-- write tests (mongodb, token maps)
+- <s>add linebreak resilience in buffer print</s>
+- <s>reincorporate english training in sentence translation</s>
+- incorporate buffer print into vocabulary training
+- reincorporate english training in vocable trainer
+- write tests (token maps, sentence data, forename conversion)
 - add last session summary onto existing one in case of same language, date
 - enable doctests
 - tense/grammatical mode sentence translation training modes:
