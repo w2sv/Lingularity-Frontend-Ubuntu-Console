@@ -24,8 +24,6 @@ def get_legend_location(*y_range: Sequence[float]) -> str:
 	assert len(set((len(_range) for _range in y_range))) == 1
 
 	range_length = len(y_range[0])
+	max_value_index = np.argmax(list(map(max, zip(*y_range))))
 
-	max_value_index_concatenated_values = np.argmax(list(chain(*y_range)))
-	max_value_index = max_value_index_concatenated_values - ((max_value_index_concatenated_values // (range_length - 1)) * range_length)
-
-	return ['upper right', 'upper left'][int(max_value_index > (range_length / 2))]
+	return ['upper right', 'upper left'][max_value_index > (range_length / 2)]
