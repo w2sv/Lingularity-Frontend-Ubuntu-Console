@@ -74,6 +74,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                 non-english language: str
                 train_english: bool """
 
+        assert mongodb_client is not None
+
         train_english = False
 
         eligible_languages = Backend.get_eligible_languages(mongodb_client)

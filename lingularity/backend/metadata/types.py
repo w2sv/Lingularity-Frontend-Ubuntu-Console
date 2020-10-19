@@ -12,6 +12,7 @@ class SubstitutionForenamesMap(TypedDict):
     maleForenames: _GenderForenames
     femaleForenames: _GenderForenames
     demonym: Optional[str]
+    country: str
 
 
 DefaultForenamesTranslations = Optional[Dict[str, List[str]]]
