@@ -73,15 +73,17 @@ class TrainerConsoleFrontend(ABC):
         """ Returns:
                 number of printed lines: int """
 
-        vocable = input(f'Enter {self._backend.language} word/phrase: ')
-        meanings = input('Enter meaning(s): ')
+        vocable_and_meaning = [None, None]
+        query_messages = [f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']
 
-        if not all([vocable, meanings]):
-            centered_print("Input field left unfilled")
-            time.sleep(1)
-            return 3
+        for i, query_message in enumerate(query_messages):
+            vocable_and_meaning[i] = input(query_message)
+            if not len(vocable_and_meaning[i]):
+                centered_print("Input field left unfilled")
+                time.sleep(1)
+                return 3
 
-        self._latest_created_vocable_entry = VocableEntry.new(vocable, meanings)
+        self._latest_created_vocable_entry = VocableEntry.new(*vocable_and_meaning)
         self._backend.mongodb_client.insert_vocable(self._latest_created_vocable_entry)
 
         return 2
@@ -113,45 +115,54 @@ class TrainerConsoleFrontend(ABC):
     def _plot_training_chronic(self):
         DAY_DELTA = 14
 
-        plt.style.use('seaborn-darkgrid')
+        plt.style.use('dark_background')
 
-        # query training history
+        TRAINER_INDEX = str(self) == 'v'
+
+        # query language training history
         training_history = self._backend.mongodb_client.query_training_chronic()
+        training_history = {date: trainer_dict[str(self)] for date, trainer_dict in training_history.items() if trainer_dict.get(str(self))}
 
         # get plotting dates
         dates = list(self._get_plotting_dates(training_dates=iter(training_history.keys()), day_delta=DAY_DELTA))
 
         # query number of trained sentences, vocabulary entries at every stored date,
         # pad item values of asymmetrically item-value-beset dates
-        trained_sentences, trained_vocabulary = map(lambda trainer_abbreviation: [training_history.get(date, {}).get(trainer_abbreviation) or 0 for date in dates], ['s', 'v'])
+        training_item_sequence = [training_history.get(date, 0) for date in dates]
 
         # omit year, invert day & month for proper tick label display, replace todays date with 'today'
         dates = ['-'.join(date.split('-')[1:][::-1]) for date in dates[:-1]] + ['today']
 
+        if len(dates) == 1:
+            dates = ['a.l.'] + dates
+            training_item_sequence = [0] + training_item_sequence
+
         # set up figure
         fig, ax = plt.subplots()
-        fig.set_size_inches(np.asarray([6.5, 6]))
+        fig.set_size_inches(np.asarray([6.5, 7]))
         fig.canvas.draw()
         fig.canvas.set_window_title("Way to go!")
 
         # define plot
         ax.set_title(f'{self._backend.language} Training History')
 
+        max_value_training_item = max(training_item_sequence)
         x_range = np.arange(len(dates))
 
-        ax.plot(x_range, trained_sentences, marker='.', markevery=list(x_range), color='r', label='sentences')
-        ax.plot(x_range, trained_vocabulary, marker='.', markevery=list(x_range), color='g', label='vocable entries')
+        ax.plot(x_range, training_item_sequence, marker=None, markevery=list(x_range), color=['r', 'b'][TRAINER_INDEX], linestyle='solid', label='sentences')
+
         ax.set_xticks(x_range)
         ax.set_xticklabels(dates, minor=False, rotation=45)
         ax.set_xlabel('date')
+        ax.set_xlim(left=0, right=len(x_range) + (DAY_DELTA / 2) * (1 - len(x_range) / DAY_DELTA))
 
-        ax.set_ylim(bottom=0)
+        ax.set_ylim(bottom=0, top=max_value_training_item + max_value_training_item * 0.3)
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.set_ylabel('faced items')
+        ax.set_ylabel(['# trained sentences', '# trained vocabulary'][TRAINER_INDEX])
 
-        ax.legend(loc=plt_utils.get_legend_location(trained_sentences, trained_vocabulary))
         plt_utils.center_windows()
-        plt.show()
+        plt.show(block=False)
+        plt.waitforbuttonpress(timeout=0)
 
     @staticmethod
     def _get_plotting_dates(training_dates: Iterator[str], day_delta: int) -> Iterator[str]:

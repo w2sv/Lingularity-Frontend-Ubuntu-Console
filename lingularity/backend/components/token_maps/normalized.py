@@ -9,7 +9,7 @@ import spacy
 
 from lingularity.backend.components.token_maps import TokenMap
 from lingularity.backend.components.token_maps import UnnormalizedTokenMap
-from lingularity.backend.utils import spacy, data_storing
+from lingularity.backend.utils import spacy as spacy_utils, data_storing
 
 
 class NormalizedTokenMap(TokenMap, ABC):
@@ -56,14 +56,14 @@ class LemmaMap(NormalizedTokenMap):
 
     @staticmethod
     def is_available(language: str) -> bool:
-        return language in spacy.LANGUAGE_2_CODE.keys()
+        return language in spacy_utils.LANGUAGE_2_CODE.keys()
 
     def __init__(self, sentence_data: np.ndarray, language: str, load_normalizer=True):
         """ Args:
                 language: lowercase language """
 
         save_path = f'{os.getcwd()}/.language_data/{language.title()}/lemma_maps.pickle'
-        self._model: spacy.Model
+        self._model: spacy_utils.Model
 
         if os.path.exists(save_path):
             data, occurrence_map = data_storing.load_pickle(save_path)
@@ -81,8 +81,8 @@ class LemmaMap(NormalizedTokenMap):
             self._pickle_maps(save_path)
 
     @staticmethod
-    def _get_model(language: str, retry=False) -> spacy.Model:
-        model_name = f'{spacy.LANGUAGE_2_CODE[language]}_core_{"web" if retry else "news"}_md'
+    def _get_model(language: str, retry=False) -> spacy_utils.Model:
+        model_name = f'{spacy_utils.LANGUAGE_2_CODE[language]}_core_{"web" if retry else "news"}_md'
 
         def load_model():
             print('Loading model...')

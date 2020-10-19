@@ -1,5 +1,4 @@
-from typing import Sequence
-from itertools import chain
+from typing import Iterable
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -20,10 +19,7 @@ def center_windows():
 	window_manager.window.wm_geometry(f"+{int(width/2 - dx/2)}+{int(height/2 - dy/2)}")
 
 
-def get_legend_location(*y_range: Sequence[float]) -> str:
-	assert len(set((len(_range) for _range in y_range))) == 1
+def get_legend_location(max_y_value_sequence: Iterable[float]) -> str:
+	max_value_index = np.argmax(max_y_value_sequence)
 
-	range_length = len(y_range[0])
-	max_value_index = np.argmax(list(map(max, zip(*y_range))))
-
-	return ['upper right', 'upper left'][max_value_index > (range_length / 2)]
+	return ['upper right', 'upper left'][max_value_index > (len(max_y_value_sequence) / 2)]
