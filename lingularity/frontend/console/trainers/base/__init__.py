@@ -141,7 +141,7 @@ class TrainerConsoleFrontend(ABC):
         fig.canvas.draw()
         fig.canvas.set_window_title(f'{self._backend.language} Training History')
 
-        ax.set_title(self._axis_title(item_scores), c='darkgoldenrod', fontsize=13)
+        ax.set_title(self._training_chronic_axis_title(item_scores), c='darkgoldenrod', fontsize=13)
 
         # define plot
         x_range = np.arange(len(dates))
@@ -163,7 +163,7 @@ class TrainerConsoleFrontend(ABC):
         plt_utils.center_window()
         plt_utils.close_window_on_button_press()
 
-    def _axis_title(self, item_scores: Sequence[int]) -> str:
+    def _training_chronic_axis_title(self, item_scores: Sequence[int]) -> str:
         if len(item_scores) == 2 and not item_scores[0]:
             return "Let's inflate that graph"
 
@@ -227,7 +227,7 @@ class TrainerConsoleFrontend(ABC):
             if (converted_date := date_utils.string_2_date(training_date)) >= earliest_possible_date:
                 return converted_date
 
-        raise BrokenPipeError
+        raise AttributeError
 
     # -----------------
     # Dunder(s)

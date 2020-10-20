@@ -182,22 +182,22 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         correctness_percentage = self._accumulated_score / self._n_trained_items * 100
         incorrectness_percentage = 100 - correctness_percentage
 
-        labels = ['Correct', 'Incorrect']
-        explode = (0.1, 0)
-        sizes = correctness_percentage, incorrectness_percentage
-        colors = ['g', 'r']
-        try:
-            def discard_futile_value(*iterables):
-                hundred_percent_index = [correctness_percentage, incorrectness_percentage].index(100)
-                return ([i[hundred_percent_index]] for i in iterables)
+        LABELS = ['Correct', 'Incorrect']
+        EXPLODE = [0.1, 0]
+        SIZES = [correctness_percentage, incorrectness_percentage]
+        COLORS = ['g', 'r']
 
-            labels, explode, sizes, colors = discard_futile_value(labels, explode, sizes, colors)
-        except ValueError:
-            pass
+        # discard plot attributes of opposing slice if either correctness percentage
+        # or incorrectness percentage = 100
+        for i, percentage in enumerate([incorrectness_percentage, correctness_percentage]):
+            if percentage == 100:
+                for plot_attributes in [LABELS, EXPLODE, SIZES, COLORS]:
+                    plot_attributes.pop(i)
+                break
 
         # define pie chart
         fig, ax = plt.subplots()
-        ax.pie(sizes, labels=labels, shadow=True, startangle=120, autopct='%1.1f%%', explode=explode, colors=colors)
+        ax.pie(SIZES, labels=LABELS, shadow=True, startangle=120, autopct='%1.1f%%', explode=EXPLODE, colors=COLORS)
         ax.set_title(self._performance_verdict(correctness_percentage))
         ax.axis('equal')
 
