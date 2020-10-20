@@ -2,7 +2,7 @@ from typing import Iterable, Optional, Callable, Tuple, Any
 import time
 import cursor
 
-from lingularity.frontend.console.utils.output import clear_screen, erase_lines, centered_print
+from lingularity.frontend.console.utils.terminal import clear_screen, erase_lines, centered_print
 
 
 INDISSOLUBILITY_MESSAGE = "Couldn't resolve input"

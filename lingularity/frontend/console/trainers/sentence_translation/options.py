@@ -9,7 +9,7 @@ import cursor
 from pynput.keyboard import Controller as Keyboard
 
 from lingularity.frontend.console.utils.input_resolution import recurse_on_invalid_input
-from lingularity.frontend.console.utils.output import centered_print, erase_lines
+from lingularity.frontend.console.utils.terminal import centered_print, erase_lines
 from lingularity.frontend.console.trainers.base.options import TrainingOption
 
 

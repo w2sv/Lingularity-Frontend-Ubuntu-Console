@@ -12,8 +12,8 @@ from lingularity.frontend.console.trainers.sentence_translation import SentenceT
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, TrainingOptions
 from lingularity.frontend.console.utils.view import view_creator, DEFAULT_VERTICAL_VIEW_OFFSET
 from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
-from lingularity.frontend.console.utils.matplotlib import center_windows
-from lingularity.frontend.console.utils.output import (
+from lingularity.frontend.console.utils import matplotlib as plt_utils
+from lingularity.frontend.console.utils.terminal import (
     erase_lines,
     centered_print,
     centered_output_block_indentation
@@ -39,7 +39,9 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._run_training()
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
-        self._display_pie_chart()
+
+        if self._n_trained_items:
+            self._display_pie_chart()
         self._plot_training_chronic()
 
         return False
@@ -166,50 +168,52 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Post Training
     # -----------------
-    @property
-    def n_correct_responses(self) -> float:
-        if int(self._accumulated_score) == self._accumulated_score:
-            return int(self._accumulated_score)
-        return self._accumulated_score
-
-    @property
-    def correctness_percentage(self) -> float:
-        return self._accumulated_score / self._n_trained_items * 100
-
-    @property
-    def performance_verdict(self) -> str:
+    @staticmethod
+    def _performance_verdict(correctness_percentage: float) -> str:
         return {
             0: 'You suck.',
             20: 'Get your shit together m8.',
             40: "You can't climb the ladder of success with your hands in your pockets.",
             60: "Keep hustlin' young blood.",
             80: 'Attayboy!',
-            100: '0361/2680494. Call me.'}[int(self.correctness_percentage) // 20 * 20]
+            100: '0361/2680494. Call me.'}[int(correctness_percentage) // 20 * 20]
 
     def _display_pie_chart(self):
-        if not self._n_trained_items:
-            return
-
-        correct_percentage = (self.n_correct_responses / self._n_trained_items) * 100
-        incorrect_percentage = 100 - correct_percentage
+        correctness_percentage = self._accumulated_score / self._n_trained_items * 100
+        incorrectness_percentage = 100 - correctness_percentage
 
         labels = ['Correct', 'Incorrect']
         explode = (0.1, 0)
-        sizes = correct_percentage, incorrect_percentage
+        sizes = correctness_percentage, incorrectness_percentage
         colors = ['g', 'r']
         try:
             def discard_futile_value(*iterables):
-                hundred_percent_index = [correct_percentage, incorrect_percentage].index(100)
+                hundred_percent_index = [correctness_percentage, incorrectness_percentage].index(100)
                 return ([i[hundred_percent_index]] for i in iterables)
 
             labels, explode, sizes, colors = discard_futile_value(labels, explode, sizes, colors)
         except ValueError:
             pass
 
+        # define pie chart
         fig, ax = plt.subplots()
         ax.pie(sizes, labels=labels, shadow=True, startangle=120, autopct='%1.1f%%', explode=explode, colors=colors)
+        ax.set_title(self._performance_verdict(correctness_percentage))
         ax.axis('equal')
-        ax.set_title(self.performance_verdict)
-        fig.canvas.set_window_title(f'You got {self.n_correct_responses}/{self._n_trained_items} right')
-        center_windows()
-        plt.show()
+
+        # remove decimal point from accumulated score if integer
+        accumulated_score = self._accumulated_score
+        if int(accumulated_score) == accumulated_score:
+            accumulated_score = int(accumulated_score)
+
+        fig.canvas.set_window_title(f'You got {accumulated_score}/{self._n_trained_items} right')
+        plt_utils.center_window()
+        plt_utils.close_window_on_button_press()
+
+    @property
+    def _item_name(self) -> str:
+        return 'vocable entry'
+
+    @property
+    def _pluralized_item_name(self) -> str:
+        return 'vocable entries'

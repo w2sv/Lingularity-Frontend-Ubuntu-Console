@@ -1,9 +1,11 @@
 from typing import Dict, Union, Callable
 import requests
 
+import pymongo
+
 from lingularity.utils.logging import enable_logging
 from lingularity.backend.database import MongoDBClient
-from lingularity.frontend.console.utils.output import clear_screen
+from lingularity.frontend.console.utils import terminal
 from lingularity.frontend.console.welcome_screen import (
     account_management,
     display_starting_screen,
@@ -33,12 +35,16 @@ ELIGIBLE_ACTIONS: Dict[str, Union[type, Callable]] = {
 def _complete_initialization():
     mongodb_client = MongoDBClient()
 
-    # try to retrieve logged in user from disk
-    if (logged_in_user := account_management.retrieve_logged_in_user_from_disk()) is not None and logged_in_user in mongodb_client.usernames:
-        mongodb_client.user = logged_in_user
+    try:
+        # try to retrieve logged in user from disk
+        if (logged_in_user := account_management.retrieve_logged_in_user_from_disk()) is not None and logged_in_user in mongodb_client.usernames:
+            mongodb_client.user = logged_in_user
+    except pymongo.errors.ServerSelectionTimeoutError:
+        # TODO: assert proper working
+        return _complete_initialization()
 
     # initialize console
-    clear_screen()
+    terminal.clear_screen()
     display_starting_screen()
 
     # log in if user not yet set

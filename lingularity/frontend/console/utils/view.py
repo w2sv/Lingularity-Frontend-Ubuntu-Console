@@ -1,7 +1,7 @@
 from typing import Optional
 from functools import wraps
 
-from lingularity.frontend.console.utils.output import clear_screen, centered_print
+from lingularity.frontend.console.utils.terminal import clear_screen, centered_print
 
 
 DEFAULT_VERTICAL_VIEW_OFFSET = '\n' * 2

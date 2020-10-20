@@ -18,7 +18,7 @@ from lingularity.frontend.console.utils.input_resolution import (
     recurse_on_unresolvable_input,
     indissolubility_output
 )
-from lingularity.frontend.console.utils.output import (
+from lingularity.frontend.console.utils.terminal import (
     erase_lines,
     centered_print,
     centered_output_block_indentation,
@@ -254,3 +254,14 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
     def _pending_output(self):
         print(f"{self._TRAINING_LOOP_INDENTATION}pending... ")
+
+    # -----------------
+    # Post Training
+    # -----------------
+    @property
+    def _item_name(self) -> str:
+        return 'sentence'
+
+    @property
+    def _pluralized_item_name(self) -> str:
+        return 'sentences'
