@@ -22,11 +22,16 @@ from lingularity.frontend.console.utils.terminal import (
     erase_lines,
     centered_print,
     centered_output_block_indentation,
+    RedoPrint
 )
+
+
+_redo_print = RedoPrint()
 
 
 class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     _TRAINING_LOOP_INDENTATION = ' ' * 16
+    _SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'
 
     def __init__(self, mongodb_client: MongoDBClient):
         self._tts = TextToSpeech.get_instance()
@@ -87,7 +92,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             print(indentation, language_group)
 
         # query desired language
-        if (selection := resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Select language: '), eligible_languages)) is None:
+        if (selection := resolve_input(input(f'{self._SELECTION_QUERY_OUTPUT_OFFSET}Select language: '), eligible_languages)) is None:
             return recurse_on_unresolvable_input(self._select_training_language, n_deletion_lines=-1)
 
         # query desired reference language if English selected
@@ -98,7 +103,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             erase_lines(2)
 
             while selection is None:
-                if (selection := resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Select reference language: '), eligible_languages)) is None:
+                if (selection := resolve_input(input(f'{self._SELECTION_QUERY_OUTPUT_OFFSET}Select reference language: '), eligible_languages)) is None:
                     indissolubility_output(n_deletion_lines=2)
                 else:
                     mongodb_client.set_reference_language(reference_language=selection)
@@ -121,7 +126,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
             print(f'{indentation}\t{explanation}\n')
 
         # query desired mode
-        if (mode_selection := resolve_input(input(f'{self.SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: '), modes.keywords)) is None:
+        if (mode_selection := resolve_input(input(f'{self._SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: '), modes.keywords)) is None:
             return recurse_on_unresolvable_input(self._select_training_mode, n_deletion_lines=-1)
         print('')
 
@@ -211,12 +216,12 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     # erase pending... + entered option identifier
                     erase_lines(2)
 
-                    # output translation
-                    self._buffer_print(f'{self._TRAINING_LOOP_INDENTATION}{translation}')
-                    self._buffer_print(f'{self._TRAINING_LOOP_INDENTATION}_______________')
+                    # output translation_field
+                    _redo_print(f'{self._TRAINING_LOOP_INDENTATION}{translation}')
+                    _redo_print(f'{self._TRAINING_LOOP_INDENTATION}_______________')
 
                     # play tts audio if available, otherwise suspend program
-                    # for some time to incentivise gleaning over translation
+                    # for some time to incentivise gleaning over translation_field
                     if self._tts.employ():
                         self._tts.play_audio()
                     else:
@@ -225,7 +230,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     self._n_trained_items += 1
 
                     if self._n_trained_items >= 5:
-                        self._buffer_print.redo_partially(n_deletion_lines=3)
+                        _redo_print.redo_partially(n_deletion_lines=3)
 
                     translation = self._process_procured_sentence_pair()
 
@@ -236,7 +241,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
     def _process_procured_sentence_pair(self) -> Optional[str]:
         """ Returns:
-                translation of procured sentence pair, None in case of depleted item iterator """
+                translation_field of procured sentence pair, None in case of depleted item iterator """
 
         if (sentence_pair := self._backend.get_training_item()) is None:
             return None
@@ -247,7 +252,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         else:
             reference_sentence, translation = sentence_pair
 
-        self._buffer_print(f'{self._TRAINING_LOOP_INDENTATION}{reference_sentence}')
+        _redo_print(f'{self._TRAINING_LOOP_INDENTATION}{reference_sentence}')
         self._pending_output()
 
         return translation

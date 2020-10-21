@@ -29,7 +29,7 @@ class UnnormalizedTokenMap(TokenMap):
     def _get_proper_nouns(sentence_data: np.ndarray) -> Set[str]:
         """ Working principle:
                 for each sentence pair:
-                    - get set of intersection between tokens of english sentence and its translation
+                    - get set of intersection between tokens of english sentence and its translation_field
                     - add tokens starting on uppercase character being either comprised of at least 2 characters or
                       non-latin
 

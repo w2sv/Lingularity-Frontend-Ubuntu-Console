@@ -1,8 +1,9 @@
-from typing import Deque, Sequence, Pattern
+from typing import Deque, Sequence, Pattern, Optional
+from abc import ABC
 import os
 import sys
 import platform
-from collections import deque
+from collections import deque, MutableSequence
 import shutil
 import re
 
@@ -17,7 +18,10 @@ _ANSI_ESCAPE: Pattern[str] = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])'
 
 def _ansi_escape_code_stripped(string: str) -> str:
     """ Returns:
-            ANSI escape code stripped string. e.g. '[35mHello Görl![0m' -> 'Hello Görl!' """
+            ANSI escape code stripped string
+
+        >>>_ansi_escape_code_stripped('[35mHello Görl![0m')
+        Hello Görl!"""
 
     return _ANSI_ESCAPE.sub('', string)
 
@@ -54,18 +58,58 @@ def erase_lines(n_lines: int):
 # -----------------
 # Redoable Printing
 # -----------------
-class RedoPrint:
+class LineCounter(ABC):
+    def __init__(self, buffer_container: MutableSequence):
+        self._buffer: MutableSequence = buffer_container
+        self._append_to_last_element: bool = False
+
+    @property
+    def _n_buffered_terminal_rows(self) -> int:
+        """ Returns:
+                number of occupied terminal rows if currently stored buffer content
+                were to be displayed """
+
+        return len(self._buffer) + sum(map(lambda output: output.count('\n') + sum(
+            self._n_additionally_occupied_terminal_rows(line) for line in output.split('\n')), self._buffer))
+
+    @staticmethod
+    def _n_additionally_occupied_terminal_rows(line: str) -> int:
+        return _output_length(line) // _terminal_length()
+
+    def __call__(self, *args, end='\n'):
+        """ Buffer and display passed print elements """
+
+        joined_output = ' '.join(args)
+
+        if self._append_to_last_element:
+            self._buffer[-1] += joined_output
+        else:
+            self._buffer.append(joined_output)
+
+        self._append_to_last_element = False
+
+        print(joined_output, end=end)
+
+        if '\n' not in end:
+            self._append_to_last_element = True
+
+
+class UndoPrint(LineCounter):
+    def __init__(self):
+        super().__init__(buffer_container=[])
+
+    def undo(self):
+        erase_lines(self._n_buffered_terminal_rows)
+        self._buffer.clear()
+        self._append_to_last_element = False
+
+
+class RedoPrint(LineCounter):
     """ Class enabling (partial) redo of all previously
         stored print elements """
 
     def __init__(self):
-        self._buffer: Deque[str] = deque()
-
-    def __call__(self, *args, **kwargs):
-        """ Buffer and display passed print elements """
-
-        self._buffer.append(''.join(args))
-        print(*args, **kwargs)
+        super().__init__(buffer_container=deque())
 
     def redo_partially(self, n_deletion_lines: int):
         """ Remove the first n_deletion_lines buffer elements and redo remaining content """
@@ -81,30 +125,20 @@ class RedoPrint:
         for line in self._buffer:
             print(line)
 
-    @property
-    def _n_buffered_terminal_rows(self) -> int:
-        """ Returns:
-                number of occupied terminal rows if currently stored buffer content
-                were to be displayed """
-
-        return len(self._buffer) + sum(map(lambda output: output.count('\n') + sum(self._n_additionally_occupied_terminal_rows(line) for line in output.split('\n')), self._buffer))
-
-    @staticmethod
-    def _n_additionally_occupied_terminal_rows(line: str) -> int:
-        return _output_length(line) // _terminal_length()
-
 
 # -----------------
 # Centered Printing
 # -----------------
-def centered_print(*print_elements: str, end='\n'):
+def centered_print(*print_elements: str, end='\n', line_counter: Optional[LineCounter] = None):
+    printer = [print, line_counter][bool(line_counter)]
+
     for i, print_element in enumerate(print_elements):
         if '\n' in print_element:
 
             # print newlines if print_element exclusively comprised of them
             if len(set(print_element)) == 1:
                 for new_line_char in print_element:
-                    print(new_line_char, end='')
+                    printer(new_line_char, end='')
 
             # otherwise print writing in between newlines in uniformly indented manner
             else:
@@ -112,10 +146,14 @@ def centered_print(*print_elements: str, end='\n'):
                 indentation = centered_output_block_indentation(distinct_lines)
 
                 for line in distinct_lines:
-                    print(indentation + line)
+                    printer(indentation + line)
 
         else:
-            print(_indentation(len(_ansi_escape_code_stripped(print_element))) + print_element, end=end if i == len(print_elements) - 1 else '\n')
+            printer(_centered_print_indentation(print_element) + print_element, end=end if i == len(print_elements) - 1 else '\n')
+
+
+def _centered_print_indentation(string: str) -> str:
+    return _indentation(len(_ansi_escape_code_stripped(string)))
 
 
 def centered_user_query_indentation(input_message: str) -> str:

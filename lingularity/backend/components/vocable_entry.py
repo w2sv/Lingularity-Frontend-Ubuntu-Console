@@ -76,7 +76,7 @@ class VocableEntry:
 
     @property
     def line_repr(self) -> str:
-        """ i.e. f'{token} - {translation}' """
+        """ i.e. f'{token} - {translation_field}' """
 
         return ' - '.join([self.token, self.translation])
 

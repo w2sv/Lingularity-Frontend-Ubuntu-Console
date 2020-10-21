@@ -140,7 +140,7 @@ class MongoDBClient:
     @property
     def vocabulary_collection(self) -> pymongo.collection.Collection:
         """ {'_id': language,
-             $target_language_token: {t: translation
+             $target_language_token: {t: translation_field
                                       tf: times_faced
                                       s: score
                                       lfd: last_faced_date}} """

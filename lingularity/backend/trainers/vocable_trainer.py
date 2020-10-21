@@ -1,13 +1,14 @@
-from typing import List, Optional
-from collections import Counter
+from typing import List, Optional, Sequence
 from itertools import repeat, starmap
-from enum import Enum
+from aenum import NoAliasEnum
+from functools import cached_property
 
 import unidecode
 import numpy as np
 
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
+from lingularity.backend.utils.strings import get_article_stripped_noun
 from lingularity.backend.components import (
     SentenceData,
     VocableEntry,
@@ -41,7 +42,8 @@ class VocableTrainerBackend(TrainerBackend):
     # ---------------
     # Pre Training
     # ---------------
-    def get_new_vocable_entries(self) -> List[VocableEntry]:
+    @cached_property
+    def new_vocable_entries(self) -> List[VocableEntry]:
         assert self._training_items is not None
 
         return list(filter(lambda entry: entry.is_new, self._training_items))
@@ -49,43 +51,80 @@ class VocableTrainerBackend(TrainerBackend):
     # ---------------
     # Training
     # ---------------
-    def get_related_sentence_pairs(self, entry: str, n: int) -> Optional[List[List[str]]]:
+    def related_sentence_pairs(self, entry: str, n: int) -> Sequence[Sequence[str]]:
         if (sentence_indices := self._token_2_sentence_indices.query_sentence_indices(entry)) is None:
-            return None
+            return []
 
         sentence_indices = np.asarray(sentence_indices)
         np.random.shuffle(sentence_indices)
-        return self._sentence_data[sentence_indices[:n]]  # type: ignore
+        return self._sentence_data[sentence_indices[:n]]
 
     # ---------------
     # .Evaluation
     # ---------------
-    class ResponseEvaluation(Enum):
+    class ResponseEvaluation(NoAliasEnum):
+        NoResponse = 0.0
         Wrong = 0.0
+        MissingArticle = 0.5
+        WrongArticle = 0.5
         AlmostCorrect = 0.5
         AccentError = 0.75
-        Perfect = 1.0
+        Correct = 1.0
 
-    def get_response_evaluation(self, response: str, translation: str) -> ResponseEvaluation:
-        distinct_translations = translation.split(',')
-        accent_pruned_translations = list(map(unidecode.unidecode, distinct_translations))
+    @staticmethod
+    def response_evaluation(response: str, translation: str) -> ResponseEvaluation:
+        response = response.strip(' ')
 
-        def tolerable_error():
-            def n_deviations(a: str, b: str) -> int:
-                def dict_value_sum(dictionary):
-                    return sum(list(dictionary.values()))
-                short, long = sorted([a, b], key=lambda string: len(string))
-                short_c, long_c = map(Counter, [short, long])  # type: ignore
-                return dict_value_sum(long_c - short_c)
+        if not len(response):
+            return VocableTrainerBackend.ResponseEvaluation.NoResponse
+        elif response == translation:
+            return VocableTrainerBackend.ResponseEvaluation.Correct
+        elif response == unidecode.unidecode(translation):
+            return VocableTrainerBackend.ResponseEvaluation.AccentError
+        elif VocableTrainerBackend._n_char_deviations(response, translation) <= VocableTrainerBackend._n_tolerable_char_deviations(translation):
+            return VocableTrainerBackend.ResponseEvaluation.AlmostCorrect
+        elif VocableTrainerBackend._article_missing(response, translation):
+            return VocableTrainerBackend.ResponseEvaluation.MissingArticle
+        elif VocableTrainerBackend._wrong_article(response, translation):
+            return VocableTrainerBackend.ResponseEvaluation.WrongArticle
+        return VocableTrainerBackend.ResponseEvaluation.Wrong
 
-            TOLERATED_CHAR_DEVIATIONS = 1
-            return any(n_deviations(response, translation) <= TOLERATED_CHAR_DEVIATIONS for translation in distinct_translations)
+    @staticmethod
+    def _wrong_article(response: str, translation: str) -> bool:
+        return len((contained_nouns := set(map(get_article_stripped_noun, [response, translation])))) == 1 and next(iter(contained_nouns))
 
-        if response in translation.split(','):
-            return self.ResponseEvaluation.Perfect
-        elif response in accent_pruned_translations:
-            return self.ResponseEvaluation.AccentError
-        elif tolerable_error():
-            return self.ResponseEvaluation.AlmostCorrect
-        else:
-            return self.ResponseEvaluation.Wrong
+    @staticmethod
+    def _article_missing(response: str, translation: str) -> bool:
+        return get_article_stripped_noun(translation) == response
+
+    @staticmethod
+    def _n_tolerable_char_deviations(translation: str) -> int:
+        N_ALLOWED_NON_WHITESPACE_CHARS_PER_DEVIATION = 4
+
+        return len(translation.replace(' ', '')) // N_ALLOWED_NON_WHITESPACE_CHARS_PER_DEVIATION
+
+    @staticmethod
+    def _n_char_deviations(response, translation) -> int:
+        n_deviations = 0
+
+        modified_response = response
+        for i in range(len(translation)):
+            try:
+                if modified_response[i] != translation[i]:
+                    n_deviations += 1
+
+                    if len(modified_response) < len(translation):
+                        modified_response = modified_response[:i] + ' ' + modified_response[i:]
+
+                    elif len(modified_response) > len(translation):
+                        modified_response = modified_response[:i] + modified_response[i+1:]
+            except IndexError:
+                n_deviations += len(translation) - len(response)
+                break
+
+        return n_deviations
+
+
+if __name__ == '__main__':
+    print(VocableTrainerBackend.response_evaluation(response='baretto', translation='il baretto'))
+    print(VocableTrainerBackend.response_evaluation(response='la baretto', translation='il baretto'))

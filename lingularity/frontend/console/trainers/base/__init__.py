@@ -21,13 +21,10 @@ from .options import TrainingOptions
 
 
 class TrainerConsoleFrontend(ABC):
-    SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'
-
     def __init__(self, backend: Type[TrainerBackend], mongodb_client: MongoDBClient):
         non_english_language, train_english = self._select_training_language(mongodb_client)
         self._backend: TrainerBackend = backend(non_english_language, train_english, mongodb_client)
 
-        self._buffer_print: RedoPrint = RedoPrint()
         self._training_options: TrainingOptions = self._get_training_options()
 
         self._n_trained_items: int = 0
@@ -74,9 +71,8 @@ class TrainerConsoleFrontend(ABC):
                 number of printed lines: int """
 
         vocable_and_meaning = []
-        query_messages = [f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']
 
-        for query_message in enumerate(query_messages):
+        for query_message in enumerate([f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']):
             field = input(query_message)
             if not len(field):
                 centered_print("INPUT FIELD LEFT UNFILLED")
@@ -137,11 +133,11 @@ class TrainerConsoleFrontend(ABC):
 
         # set up figure
         fig, ax = plt.subplots()
-        fig.set_size_inches(np.asarray([6.5, 7]))
+        # fig.set_size_inches(np.asarray([6.5, 7]))
         fig.canvas.draw()
         fig.canvas.set_window_title(f'{self._backend.language} Training History')
 
-        ax.set_title(self._training_chronic_axis_title(item_scores), c='darkgoldenrod', fontsize=13)
+        ax.set_title(self._training_chronic_axis_title(item_scores), c='darkgoldenrod', fontsize=11)
 
         # define plot
         x_range = np.arange(len(dates))
@@ -174,7 +170,7 @@ class TrainerConsoleFrontend(ABC):
             item_name = self._item_name
 
         if yesterday_exceedance_difference >= 0:
-            return f"You've exceeded yesterdays score by {yesterday_exceedance_difference + 1} {item_name}"
+            return f"Exceeded yesterdays score by {yesterday_exceedance_difference + 1} {item_name}"
         else:
             return f"{abs(yesterday_exceedance_difference)} {item_name} left to top yesterdays score"
 

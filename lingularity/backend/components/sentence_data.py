@@ -59,7 +59,7 @@ class SentenceData(np.ndarray):
     def query_translation(self, english_sentence: str, file_max_length_percentage: float = 1.0) -> Optional[str]:
         """
             Args:
-                 english_sentence: complete phrase including punctuation whose translation ought to be queried
+                 english_sentence: complete phrase including punctuation whose translation_field ought to be queried
                  file_max_length_percentage: percentage of sentence_data file length after exceeding which
                     the query process will be stopped for performance optimization purposes """
 

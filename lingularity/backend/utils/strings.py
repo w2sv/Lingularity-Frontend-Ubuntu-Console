@@ -75,9 +75,8 @@ def strip_special_characters(string: str, include_apostrophe=False, include_dash
 # Extraction
 # ---------------
 def get_article_stripped_noun(noun_candidate: str) -> Optional[str]:
-    parts = replace_multiple(noun_candidate, list(APOSTROPHES), replacement=' ').split(' ')
-    if len(parts) == 2 and len(parts[0]) < len(parts[1]):
-        return parts[1]
+    if contains_article(noun_candidate):
+        return split_multiple(noun_candidate, delimiters=list(APOSTROPHES) + [' '])[1]
     return None
 
 
@@ -139,6 +138,10 @@ def is_of_latin_script(string: str, trim=True) -> bool:
         string = strip_special_characters(string, include_apostrophe=True, include_dash=True).replace(' ', '')
 
     return len(_to_ascii(string)) / len(string) > (MIN_LATIN_CHARACTER_PERCENTAGE / 100)
+
+
+def contains_article(noun_candidate: str) -> bool:
+    return len((tokens := split_multiple(noun_candidate, delimiters=list(APOSTROPHES) + [' ']))) == 2 and len(tokens[0]) < len(tokens[1])
 
 
 # ---------------

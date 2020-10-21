@@ -21,7 +21,7 @@ class VocableTrainerOption(TrainingOption, ABC):
 
 class AddVocable(VocableTrainerOption):
     def __init__(self):
-        super().__init__('#vocable', 'add a new vocable')
+        super().__init__('vocable', 'add a new vocable')
 
     def execute(self):
         n_printed_lines = self._get_new_vocable()
@@ -41,7 +41,7 @@ class VocableModifier(VocableTrainerOption, ABC):
 
 class AlterLatestFacedVocableEntry(VocableModifier):
     def __init__(self):
-        super().__init__('#faced', 'alter the most recently FACED vocable entry')
+        super().__init__('faced', 'alter the most recently FACED vocable entry')
 
     def execute(self):
         self._modify_vocable_entry(self._latest_faced_vocable_entry, "Seriously?")
@@ -49,7 +49,7 @@ class AlterLatestFacedVocableEntry(VocableModifier):
 
 class AlterLatestCreatedVocableEntry(VocableModifier):
     def __init__(self):
-        super().__init__('#added', 'alter the most recently ADDED vocable entry')
+        super().__init__('added', 'alter the most recently ADDED vocable entry')
 
     def execute(self):
         self._modify_vocable_entry(self._latest_created_vocable_entry, "You haven't added any vocable during the current session")
@@ -57,7 +57,7 @@ class AlterLatestCreatedVocableEntry(VocableModifier):
 
 class Exit(VocableTrainerOption):
     def __init__(self):
-        super().__init__('#exit', 'terminate program\n')
+        super().__init__('exit', 'terminate program\n')
 
     def execute(self):
         erase_lines(1)

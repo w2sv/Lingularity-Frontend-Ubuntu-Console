@@ -103,7 +103,7 @@ class ForenameConvertor:
         """ Returns:
                 Iterator of
                     default forename pairs contained in sentence pair fragments: Tuple[str, str]
-                        first of which is the english forename, second the corresponding foreign language translation
+                        first of which is the english forename, second the corresponding foreign language translation_field
                     with corresponding is_female_forename flag: bool
 
             >>> sentence_pair_fragments = [['Tom', 'ate', 'Marys', 'tuna.'], ['Tomás', 'mangiava', 'il', 'tonno', 'de', 'Maria.']]

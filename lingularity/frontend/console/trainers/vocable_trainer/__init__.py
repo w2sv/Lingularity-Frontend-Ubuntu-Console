@@ -1,11 +1,13 @@
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 from time import sleep
 
 import matplotlib.pyplot as plt
+from termcolor import colored
 
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.components import VocableEntry
 from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend as Backend
+from lingularity.backend.utils.strings import split_at_uppercase
 
 from lingularity.frontend.console.trainers.vocable_trainer.options import *
 from lingularity.frontend.console.trainers.sentence_translation import SentenceTranslationTrainerConsoleFrontend
@@ -16,8 +18,12 @@ from lingularity.frontend.console.utils import matplotlib as plt_utils
 from lingularity.frontend.console.utils.terminal import (
     erase_lines,
     centered_print,
-    centered_output_block_indentation
+    centered_output_block_indentation,
+    UndoPrint
 )
+
+
+_undo_print = UndoPrint()
 
 
 class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
@@ -25,6 +31,8 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         super().__init__(Backend, mongodb_client)
 
         self._accumulated_score = 0.0
+        self._streak: int = 0
+        self._perfected_entries: List[VocableEntry] = []
 
         self._latest_faced_vocable_entry: Optional[VocableEntry] = None
 
@@ -33,7 +41,9 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     def __call__(self) -> bool:
         self._backend.set_item_iterator()
-        self._display_new_vocabulary_if_applicable()
+
+        # if len(self._backend.new_vocable_entries):
+        #     self._display_new_vocabulary_if_desired()
 
         self._display_training_screen_header_section()
         self._run_training()
@@ -42,7 +52,11 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         if self._n_trained_items:
             self._display_pie_chart()
+
         self._plot_training_chronic()
+
+        if len(self._perfected_entries):
+            self._display_perfected_entries()
 
         return False
 
@@ -93,77 +107,173 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # Pre Training
     # -----------------
     @view_creator()
-    def _display_new_vocabulary_if_applicable(self):
-        if (new_vocabulary := self._backend.get_new_vocable_entries()) is None:
-            return
-
-        centered_print('Would you like to see the vocabulary you recently added? (y)es/(n)o')
+    def _display_new_vocabulary_if_desired(self):
+        print(DEFAULT_VERTICAL_VIEW_OFFSET * 2)
+        centered_print('Would you like to see the vocable entries you recently created? (y)es/(n)o')
         centered_print(' ', end='')
-        display_vocabulary = resolve_input(input(''), ['yes', 'no'])
-        if display_vocabulary == 'yes':
-            [print('\t', entry.line_repr) for entry in new_vocabulary]
-            input('\n\nPress any key to continue')
+
+        if (input_resolution := resolve_input(input(''), ['yes', 'no'])) is None:
+            recurse_on_unresolvable_input(self._display_new_vocabulary_if_desired, n_deletion_lines=-1)
+
+        elif input_resolution == 'yes':
+            self._display_new_vocable_entries()
 
     @view_creator()
-    def _display_training_screen_header_section(self):
-        centered_print(f'Found {self._backend.n_training_items} imperfect entries.\n\n')
+    def _display_new_vocable_entries(self):
+        print(DEFAULT_VERTICAL_VIEW_OFFSET)
 
-        instructions = ["Enter: "] + self._training_options.instructions
+        line_reprs = list(map(lambda entry: entry.line_repr, self._backend.new_vocable_entries))
+        indentation = centered_output_block_indentation(line_reprs)
+        for line_repr in line_reprs:
+            print(indentation, line_repr)
+
+        centered_print(f'{DEFAULT_VERTICAL_VIEW_OFFSET}PRESS ANY KEY TO CONTINUE')
+        centered_print(' ', end='')
+        input()
+
+    # ------------------
+    # Training
+    # ------------------
+    @view_creator()
+    def _display_training_screen_header_section(self):
+        centered_print(f'Found {self._backend.n_training_items} imperfect entries\n\n')
+        centered_print("Hit Enter to proceed\n")
+
+        instructions = ["\tEnter: "] + self._training_options.instructions
 
         indentation = centered_output_block_indentation(instructions)
         for i, instruction_row in enumerate(instructions):
             print(f'{indentation}{instruction_row}')
             if i == 3:
-                print(f"{indentation}\t\tNote: distinct translations are to be separated by commas")
+                print(f"{indentation}\t\tNote: distinct translations are to be separated by commas\n")
 
         print('')
         self._output_lets_go()
 
-    # ------------------
-    # Training
-    # ------------------
     def _run_training(self):
-        INDENTATION = '\t' * 2
+        EVALUATION_2_COLOR = {
+             Backend.ResponseEvaluation.Wrong: 'red',
+             Backend.ResponseEvaluation.AccentError: 'yellow',
+             Backend.ResponseEvaluation.AlmostCorrect: 'yellow',
+             Backend.ResponseEvaluation.WrongArticle: 'cyan',
+             Backend.ResponseEvaluation.MissingArticle: 'cyan',
+             Backend.ResponseEvaluation.Correct: 'green'
+        }
 
-        entry: VocableEntry = self._backend.get_training_item()
+        INDENTATION = '\t' * 2
+        entry: Optional[VocableEntry] = self._backend.get_training_item()
 
         while entry is not None:
-            translation_query_output = f'{INDENTATION + entry.display_token} = '
-            print(translation_query_output, end='')
+            self._display_streak()
+            self._display_progress_bar()
 
+            # display vocable in reference language, query translation
+            translation_query_output = f'{INDENTATION + entry.display_token} = '
+            _undo_print(translation_query_output, end='')
             response = input()
-            if (option_selection := resolve_input(response, self._training_options.keywords)) is not None:
+
+            # evaluate response, update vocable score, enter update into database
+            response_evaluation = self._backend.response_evaluation(response, entry.display_translation)
+            entry.update_score(response_evaluation.value)
+            self._backend.mongodb_client.update_vocable_entry(entry.token, entry.score)
+
+            # erase query line, redo response
+            erase_lines(1)
+            _undo_print(translation_query_output, end='')
+
+            translation_output = f'{colored(entry.display_translation, "green")}'
+
+            if response_evaluation is Backend.ResponseEvaluation.NoResponse:
+                _undo_print(translation_output, end='')
+            else:
+                # display response evaluation in case of non-empty response
+                _undo_print(f'{response} | {colored(" ".join(split_at_uppercase(response_evaluation.name)).upper(), EVALUATION_2_COLOR[response_evaluation])}', end='')
+
+                # display correct translation in case of imperfect response
+                if response_evaluation is not Backend.ResponseEvaluation.Correct:
+                    _undo_print(f" | Correct translation: {translation_output}", end='')
+
+            # display new score in case of change having taken place
+            if response_evaluation not in [Backend.ResponseEvaluation.NoResponse, Backend.ResponseEvaluation.Wrong]:
+                if entry.score < 5:
+                    _undo_print(f" | New Score: {[int(entry.score), entry.score][bool(entry.score % 1)]}", end='')
+                else:
+                    self._perfected_entries.append(entry)
+                    _undo_print(" | Entry Perfected", end='')
+
+            _undo_print('\n')
+
+            # get related sentence pairs, convert forenames if feasible
+            related_sentence_pairs = self._backend.related_sentence_pairs(entry.display_translation, n=2)
+            if self._backend.forenames_convertible:
+                related_sentence_pairs = list(map(self._backend.forename_converter, related_sentence_pairs))
+
+            # display sentence pairs
+            for sentence_pair in related_sentence_pairs:
+                centered_print(' - '.join(reversed(sentence_pair)), line_counter=_undo_print)
+            _undo_print('')
+
+            # increment/reassign attributes
+            self._n_trained_items += 1
+            self._accumulated_score += response_evaluation.value
+            self._latest_faced_vocable_entry = entry
+            self._update_streak(response_evaluation)
+
+            # display absolute entry progress if n_trained_items divisible by 10
+            if not self._n_trained_items % 10 and self._n_trained_items != self._backend.n_training_items:
+                centered_print(f'\n{self._n_trained_items} Entries faced, {self._backend.n_training_items - self._n_trained_items} more to go\n', line_counter=_undo_print)
+            _undo_print('')
+
+            # query option/procedure, execute option if applicable
+            centered_print('$', end='', line_counter=_undo_print)
+            if (option_selection := resolve_input(input(), self._training_options.keywords)) is not None:
                 self._training_options[option_selection].execute()
                 if type(self._training_options[option_selection]) is Exit:
                     return
 
-            else:
-                response_evaluation = self._backend.get_response_evaluation(response, entry.display_translation)
-                entry.update_score(response_evaluation.value)
-                self._backend.mongodb_client.update_vocable_entry(entry.token, entry.score)
+            # clear screen part pertaining to current entry
+            _undo_print.undo()
 
-                print('')
-                erase_lines(2)
-                print(f'{translation_query_output}{response} | {response_evaluation.name.upper()} {f"| Correct translation: {entry.display_translation}" if response_evaluation.name != "Perfect" else ""}{f" | New Score: {entry.score if entry.score % 1 != 0 else int(entry.score)}" if entry.score < 5 else "| Entry Perfected"}\n')
+            entry = self._backend.get_training_item()
 
-                if (related_sentence_pairs := self._backend.get_related_sentence_pairs(entry.display_translation, n=2)) is not None:
-                    if self._backend.forenames_convertible:
-                        related_sentence_pairs = map(self._backend.forename_converter, related_sentence_pairs)
+    def _display_progress_bar(self):
+        BAR_LENGTH = 70
 
-                    joined_sentence_pairs = (' - '.join(reversed(sentence_pair)) for sentence_pair in related_sentence_pairs)
-                    for sentence_pair in joined_sentence_pairs:
-                        centered_print(sentence_pair)
+        percentage = self._n_trained_items / self._backend.n_training_items
 
-                self._n_trained_items += 1
-                self._accumulated_score += response_evaluation.value
-                self._latest_faced_vocable_entry = entry
+        completed_signs = '=' * int(BAR_LENGTH * percentage)
+        imminent_string = '-' * int(BAR_LENGTH - len(completed_signs))
+        centered_print(f"[{completed_signs}{imminent_string}]", end=' ', line_counter=_undo_print)
+        _undo_print(f'{int(round(percentage * 100))}%\n\n')
 
-                if not self._n_trained_items % 10 and self._n_trained_items != self._backend.n_training_items:
-                    centered_print(f'\n\n{self._n_trained_items} Entries faced, {self._backend.n_training_items - self._n_trained_items} more to go\n\n')
-                else:
-                    centered_print('\n-----------------------\n')
+    def _display_streak(self):
+        attrs = ['bold']
 
-                entry = self._backend.get_training_item()
+        if self._streak >= 2:
+            if 5 <= self._streak < 7:
+                attrs.append('blink')
+            if self._streak >= 7:
+                attrs.append('dark')
+
+            centered_print(f'Current streak: {colored(self._streak, "red", attrs=attrs)}', end='', line_counter=_undo_print)
+        _undo_print('\n\n')
+
+    def _update_streak(self, response_evaluation: Backend.ResponseEvaluation):
+        if response_evaluation in [Backend.ResponseEvaluation.WrongArticle,
+                                   Backend.ResponseEvaluation.MissingArticle,
+                                   Backend.ResponseEvaluation.AccentError,
+                                   Backend.ResponseEvaluation.AlmostCorrect,
+                                   Backend.ResponseEvaluation.Correct]:
+            self._streak += 1
+
+        else:
+            self._streak = 0
+
+    @view_creator('PERFECTED ENTRIES')
+    def _display_perfected_entries(self):
+        for entry in self._perfected_entries:
+            centered_print(entry.line_repr)
+        print('\n\n')
 
     # -----------------
     # Post Training
@@ -202,9 +312,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         ax.axis('equal')
 
         # remove decimal point from accumulated score if integer
-        accumulated_score = self._accumulated_score
-        if int(accumulated_score) == accumulated_score:
-            accumulated_score = int(accumulated_score)
+        accumulated_score = [int(self._accumulated_score), self._accumulated_score][bool(self._accumulated_score % 1)]
 
         fig.canvas.set_window_title(f'You got {accumulated_score}/{self._n_trained_items} right')
         plt_utils.center_window()
