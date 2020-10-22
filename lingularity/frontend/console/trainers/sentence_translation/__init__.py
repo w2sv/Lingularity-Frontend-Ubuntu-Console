@@ -33,10 +33,10 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     _TRAINING_LOOP_INDENTATION = ' ' * 16
     _SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'
 
-    def __init__(self, mongodb_client: MongoDBClient):
+    def __init__(self):
         self._tts = TextToSpeech.get_instance()
 
-        super().__init__(Backend, mongodb_client)
+        super().__init__(Backend)
 
     def _get_training_options(self) -> TrainingOptions:
         options.SentenceTranslationOption.set_frontend_instance(self)
@@ -74,12 +74,12 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     # Training Property Selection
     # -----------------
     @view_creator(header='ELIGIBLE LANGUAGES')
-    def _select_training_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
+    def _select_training_language(self) -> Tuple[str, bool]:
         """ Returns:
                 non-english language: str
                 train_english: bool """
 
-        assert mongodb_client is not None
+        mongodb_client = MongoDBClient.get_instance()
 
         train_english = False
 

@@ -8,10 +8,10 @@ from .modes import TrainingMode
 
 
 class SentenceTranslationTrainerBackend(TrainerBackend):
-    def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
-        super().__init__(non_english_language, train_english, mongodb_client)
+    def __init__(self, non_english_language: str, train_english: bool):
+        super().__init__(non_english_language, train_english)
 
-        TextToSpeech(self.language, mongodb_client)
+        TextToSpeech(self.language)
         self._training_mode: Optional[Type[TrainingMode]] = None
 
     @property

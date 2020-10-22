@@ -14,10 +14,10 @@ from lingularity.backend.utils.state_sharing import MonoStatePossessor
 class TextToSpeech(MonoStatePossessor):
     _AUDIO_FILE_PATH = f'{os.getcwd()}/.tts_audio_files'
 
-    def __init__(self, language: str, mongodb_client: MongoDBClient):
+    def __init__(self, language: str):
         super().__init__()
 
-        self._mongodb_client: MongoDBClient = mongodb_client
+        self._mongodb_client: MongoDBClient = MongoDBClient.get_instance()
 
         self.language_variety_choices: Optional[List[str]] = google_tts.get_variety_choices(language)
         self._language_variety: Optional[str] = self._get_language_variety(language)

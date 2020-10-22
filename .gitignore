@@ -6,8 +6,6 @@ __pycache__
 /.mypy_cache/
 
 # Data
-/.language_data/
-/oldstuff/
 *.mp3
 
 # Envs

@@ -5,7 +5,6 @@ import os
 from tqdm import tqdm
 import numpy as np
 import nltk
-import spacy
 
 from lingularity.backend.components.token_maps import TokenMap
 from lingularity.backend.components.token_maps import UnnormalizedTokenMap
@@ -17,7 +16,7 @@ class NormalizedTokenMap(TokenMap, ABC):
     @abstractmethod
     def is_available(language: str) -> bool:
         """ Args:
-                language: lowercase language """
+                language: titled language """
 
         pass
 
@@ -25,15 +24,15 @@ class NormalizedTokenMap(TokenMap, ABC):
 class StemMap(NormalizedTokenMap):
     @staticmethod
     def is_available(language: str) -> bool:
-        return language in nltk.stem.SnowballStemmer.languages
+        return language.lower() in nltk.stem.SnowballStemmer.languages
 
     def __init__(self, sentence_data: np.ndarray, language: str, *args, **kwargs):
         """ Args:
-                language: lowercase language """
+                language: titled language """
 
         super().__init__()
 
-        self._stemmer: nltk.stem.SnowballStemmer = nltk.stem.SnowballStemmer(language)
+        self._stemmer: nltk.stem.SnowballStemmer = nltk.stem.SnowballStemmer(language.lower())
         self._map_tokens(sentence_data)
 
     def _map_tokens(self, sentence_data: np.ndarray):
@@ -56,11 +55,11 @@ class LemmaMap(NormalizedTokenMap):
 
     @staticmethod
     def is_available(language: str) -> bool:
-        return language in spacy_utils.LANGUAGE_2_CODE.keys()
+        return language in spacy_utils.LANGUAGE_2_MODEL_IDENTIFIERS.keys()
 
     def __init__(self, sentence_data: np.ndarray, language: str, load_normalizer=True):
         """ Args:
-                language: lowercase language """
+                language: titled language """
 
         save_path = f'{os.getcwd()}/.language_data/{language.title()}/lemma_maps.pickle'
         self._model: spacy_utils.Model
@@ -71,39 +70,14 @@ class LemmaMap(NormalizedTokenMap):
             super().__init__(data=data, occurrence_map=occurrence_map)
 
             if load_normalizer:
-                self._model = self._get_model(language)
+                self._model = spacy_utils.load_model(language)
 
         else:
             super().__init__()
 
-            self._model = self._get_model(language)
+            self._model = spacy_utils.load_model(language)
             self._map_tokens(sentence_data)
             self._pickle_maps(save_path)
-
-    @staticmethod
-    def _get_model(language: str, retry=False) -> spacy_utils.Model:
-        model_name = f'{spacy_utils.LANGUAGE_2_CODE[language]}_core_{"web" if retry else "news"}_md'
-
-        def load_model():
-            print('Loading model...')
-            return spacy.load(model_name)
-
-        try:
-            return load_model()
-        except OSError:
-            # install os dependencies if required
-            relative_os_dependency_installation_file_path = f'os_dependencies/languages/{language}.sh'
-            if os.path.exists(f'{os.getcwd()}/{relative_os_dependency_installation_file_path}'):
-                os.system(f'bash {relative_os_dependency_installation_file_path}')
-
-            # try to download model
-            if os.system(f'python -m spacy download {model_name}') == 256:
-                if not retry:
-                    return LemmaMap._get_model(language, retry=True)
-                else:
-                    raise EnvironmentError("Couldn't download spacy model")
-
-            return load_model()
 
     def _map_tokens(self, sentence_data: np.ndarray):
         unnormalized_token_map = UnnormalizedTokenMap(sentence_data, apostrophe_splitting=False)
@@ -138,3 +112,6 @@ class LemmaMap(NormalizedTokenMap):
 
         pos_value_sorted_lemmas = [token.lemma_ for token in sorted(tokens, key=lambda t: POS_VALUES.get(t.pos_, 0))]
         return self._find_best_fit_sentence_indices(relevance_sorted_tokens=pos_value_sorted_lemmas)
+
+
+#TODO: deficiente

@@ -18,18 +18,16 @@ from .response_evaluation import (
 
 
 class VocableTrainerBackend(TrainerBackend):
-    def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
-        super().__init__(non_english_language, train_english, mongodb_client)
+    def __init__(self, non_english_language: str, train_english: bool):
+        super().__init__(non_english_language, train_english)
 
         self._training_items: Optional[List[VocableEntry]] = None
         self._sentence_data: SentenceData = self._get_sentence_data()
         self._token_2_sentence_indices: TokenMap = get_token_map(self._sentence_data, self.language, load_normalizer=True)
 
     @staticmethod
-    def get_eligible_languages(mongodb_client: Optional[MongoDBClient]) -> List[str]:
-        assert mongodb_client is not None
-
-        return mongodb_client.query_vocabulary_possessing_languages()
+    def get_eligible_languages() -> List[str]:
+        return MongoDBClient.get_instance().query_vocabulary_possessing_languages()
 
     def set_item_iterator(self):
         self._training_items = self._get_imperfect_vocable_entries()

@@ -21,3 +21,4 @@ dependencies:
     - gTTS==2.1.1
     - googletrans==3.0.0
     - textacy==0.10.1
+    - spacy

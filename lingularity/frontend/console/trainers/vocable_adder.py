@@ -16,10 +16,10 @@ from lingularity.frontend.console.utils.view import DEFAULT_VERTICAL_VIEW_OFFSET
 
 
 class VocableAdderFrontend(VocableTrainerConsoleFrontend):
-    def __init__(self, mongodb_client: MongoDBClient):
-        non_english_language, train_english = self._select_training_language(mongodb_client)
+    def __init__(self):
+        non_english_language, train_english = self._select_training_language()
 
-        self._backend = VocableAdderBackend(non_english_language, mongodb_client)
+        self._backend = VocableAdderBackend(non_english_language)
 
     class Option(Enum):
         Exit = 'exit'

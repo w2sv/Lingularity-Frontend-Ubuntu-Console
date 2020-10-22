@@ -11,15 +11,12 @@ from lingularity.backend.resources import strings as string_resources
 
 
 class TrainerBackend(ABC):
-    def __init__(self, non_english_language: str, train_english: bool, mongodb_client: MongoDBClient):
-        if not os.path.exists(BASE_LANGUAGE_DATA_PATH):
-            os.mkdir(BASE_LANGUAGE_DATA_PATH)
-
+    def __init__(self, non_english_language: str, train_english: bool):
         self._non_english_language = non_english_language
         self._train_english = train_english
 
-        mongodb_client.language = self.language
-        self.mongodb_client = mongodb_client
+        self.mongodb_client = MongoDBClient.get_instance()
+        self.mongodb_client.language = self.language
 
         self._item_iterator: Iterator[Any]
         self.n_training_items: int
@@ -36,7 +33,7 @@ class TrainerBackend(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_eligible_languages(mongodb_client: Optional[MongoDBClient]) -> List[str]:
+    def get_eligible_languages() -> List[str]:
         pass
 
     # ----------------
@@ -94,7 +91,7 @@ class TrainerBackend(ABC):
             return None
 
     # -----------------
-    # Post training
+    # Post Training
     # -----------------
     def enter_session_statistics_into_database(self, n_trained_items: int):
         update_args = (str(self), n_trained_items)

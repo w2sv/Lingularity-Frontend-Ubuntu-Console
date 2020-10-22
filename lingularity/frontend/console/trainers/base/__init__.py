@@ -21,9 +21,9 @@ from .options import TrainingOptions
 
 
 class TrainerConsoleFrontend(ABC):
-    def __init__(self, backend: Type[TrainerBackend], mongodb_client: MongoDBClient):
-        non_english_language, train_english = self._select_training_language(mongodb_client)
-        self._backend: TrainerBackend = backend(non_english_language, train_english, mongodb_client)
+    def __init__(self, backend: Type[TrainerBackend]):
+        non_english_language, train_english = self._select_training_language()
+        self._backend: TrainerBackend = backend(non_english_language, train_english)
 
         self._training_options: TrainingOptions = self._get_training_options()
 

@@ -4,7 +4,6 @@ from time import sleep
 import matplotlib.pyplot as plt
 from termcolor import colored
 
-from lingularity.backend.database import MongoDBClient
 from lingularity.backend.components import VocableEntry
 from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend as Backend, ResponseEvaluation
 from lingularity.backend.utils.strings import split_at_uppercase
@@ -28,8 +27,8 @@ _undo_print = UndoPrint()
 
 
 class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
-    def __init__(self, mongodb_client: MongoDBClient):
-        super().__init__(Backend, mongodb_client)
+    def __init__(self):
+        super().__init__(Backend)
 
         self._accumulated_score = 0.0
         self._streak: int = 0
@@ -76,11 +75,9 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # Training Property Selection
     # -----------------
     @view_creator()
-    def _select_training_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
-        assert mongodb_client is not None
-
-        if not (eligible_languages := Backend.get_eligible_languages(mongodb_client)):
-            return self._start_sentence_translation_trainer(mongodb_client)
+    def _select_training_language(self) -> Tuple[str, bool]:
+        if not (eligible_languages := Backend.get_eligible_languages()):
+            return self._start_sentence_translation_trainer()
 
         elif len(eligible_languages) == 1:
             return eligible_languages[0], False
@@ -94,19 +91,22 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         input_query_message = 'Enter desired language: '
         language_selection = resolve_input(input(f'\n{indentation[:-int(len(input_query_message) * 3/4)]}{input_query_message}'), eligible_languages)
         if language_selection is None:
-            return repeat(self._select_training_language, -1, args=(mongodb_client,))
+            return repeat(self._select_training_language, -1, args=())
         print('\n' * 2, end='')
 
         return language_selection, False  # TODO
 
     @staticmethod
     @view_creator()
-    def _start_sentence_translation_trainer(mongodb_client: MongoDBClient):
-        centered_print('You have to accumulate vocabulary by means of the SentenceTranslation™ TrainerBackend or manual amassment first.')
+    def _start_sentence_translation_trainer():
+        centered_print("""You have to accumulate vocabulary by means of the 
+        SentenceTranslation™ TrainerBackend or manual amassment first.""")
         sleep(3)
+
         centered_print('Initiating SentenceTranslation TrainerBackend...')
         sleep(2)
-        return SentenceTranslationTrainerConsoleFrontend(mongodb_client).__call__()
+
+        return SentenceTranslationTrainerConsoleFrontend().__call__()
 
     # -----------------
     # Pre Training

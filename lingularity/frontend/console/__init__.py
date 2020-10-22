@@ -69,7 +69,7 @@ def _complete_initialization():
 
     # instantiate trainer if action_executor one
     if isinstance(action_executor, type):
-        action_executor = action_executor(mongodb_client)
+        action_executor = action_executor()
 
     # run action
     reinitialize = action_executor()

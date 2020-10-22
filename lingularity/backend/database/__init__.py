@@ -4,12 +4,13 @@ from dataclasses import dataclass
 import pymongo
 
 # TODO: resolve circular import when importing VocableEntry
+from .document_types import LastSessionStatistics, VocableAttributes, TrainingChronic
 from lingularity.backend.resources import strings as string_resources
 from lingularity.backend.utils.date import today
-from .document_types import LastSessionStatistics, VocableAttributes, TrainingChronic
+from lingularity.backend.utils.state_sharing import MonoStatePossessor
 
 
-class MongoDBClient:
+class MongoDBClient(MonoStatePossessor):
     @dataclass(frozen=True)
     class Credentials:
         host: str
@@ -28,6 +29,8 @@ class MongoDBClient:
             return f'mongodb{"+srv" if srv_endpoint else ""}://{self.user}:{self.password}@{self.host}'
 
     def __init__(self, user: Optional[str] = None, language: Optional[str] = None):
+        super().__init__()
+
         self._user = user
         self._language = language
         self._cluster = pymongo.MongoClient(self.Credentials.default().client_endpoint(srv_endpoint=True), serverSelectionTimeoutMS=1_000)
