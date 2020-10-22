@@ -1,10 +1,11 @@
 __all__ = ['VocableTrainerOption', 'AddVocable', 'AlterLatestCreatedVocableEntry',
-           'AlterLatestFacedVocableEntry', 'Exit']
+           'AlterCurrentVocableEntry', 'Exit', 'DeleteVocableEntry']
 
 from abc import ABC
 from time import sleep
 
-from lingularity.frontend.console.utils.terminal import centered_print, erase_lines
+from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
+from lingularity.frontend.console.utils.terminal import centered_print, erase_lines, centered_input
 from lingularity.frontend.console.trainers.base.options import TrainingOption
 
 
@@ -28,36 +29,45 @@ class AddVocable(VocableTrainerOption):
         erase_lines(n_printed_lines + 1)
 
 
-class VocableModifier(VocableTrainerOption, ABC):
-    def _modify_vocable_entry(self, vocable_entry, message: str):
-        if vocable_entry is None:
-            centered_print(message)
+class AlterLatestCreatedVocableEntry(VocableTrainerOption):
+    def __init__(self):
+        super().__init__('wait', "rectify the vocable entry you've just created")
+
+    def execute(self):
+        if self._latest_created_vocable_entry is None:
+            centered_print("YOU HAVEN'T ADDED ANY ENTRY DURING THE CURRENT SESSION")
             sleep(1.5)
-            erase_lines(2)
-        else:
-            n_printed_lines = self._alter_vocable_entry(vocable_entry)
-            erase_lines(n_printed_lines)
+            erase_lines(1)
+
+        n_printed_lines = self._alter_vocable_entry(self._latest_created_vocable_entry)
+        erase_lines(n_printed_lines - 1)
 
 
-class AlterLatestFacedVocableEntry(VocableModifier):
+class AlterCurrentVocableEntry(VocableTrainerOption):
     def __init__(self):
-        super().__init__('faced', 'alter the most recently FACED vocable entry')
+        super().__init__('alter', 'alter the current vocable entry')
 
     def execute(self):
-        self._modify_vocable_entry(self._latest_faced_vocable_entry, "Seriously?")
+        n_printed_lines = self._alter_vocable_entry(self._current_vocable_entry)
+        erase_lines(n_printed_lines - 1)
 
 
-class AlterLatestCreatedVocableEntry(VocableModifier):
+class DeleteVocableEntry(VocableTrainerOption):
     def __init__(self):
-        super().__init__('added', 'alter the most recently ADDED vocable entry')
+        super().__init__('delete', 'delete the current vocable entry')
 
     def execute(self):
-        self._modify_vocable_entry(self._latest_created_vocable_entry, "You haven't added any vocable during the current session")
+        centered_print(f"Are you sure you want to irreversibly delete {self._current_vocable_entry.line_repr}? (y)es/(n)o")
+        if (input_resolution := resolve_input(centered_input(), options=['yes', 'no'])) is None:
+            return recurse_on_unresolvable_input(self.execute(), n_deletion_lines=2)
+        elif input_resolution == 'yes':
+            self._backend.mongodb_client.delete_vocable_entry(self._current_vocable_entry)
+        erase_lines(2)
 
 
 class Exit(VocableTrainerOption):
     def __init__(self):
-        super().__init__('exit', 'terminate program\n')
+        super().__init__('exit', 'terminate program')
 
     def execute(self):
         erase_lines(1)

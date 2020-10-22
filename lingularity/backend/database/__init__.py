@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 import pymongo
 
+# TODO: resolve circular import when importing VocableEntry
 from lingularity.backend.resources import strings as string_resources
 from lingularity.backend.utils.date import today
 from .document_types import LastSessionStatistics, VocableAttributes, TrainingChronic
@@ -152,6 +153,12 @@ class MongoDBClient:
             filter={'_id': self._language},
             update={'$set': vocable_entry.entry},
             upsert=True
+        )
+
+    def delete_vocable_entry(self, vocable_entry):
+        self.vocabulary_collection.update_one(
+            filter={'_id': self._language},
+            update={'$unset': vocable_entry.entry}
         )
 
     def update_vocable_entry(self, token: str, new_score: float):

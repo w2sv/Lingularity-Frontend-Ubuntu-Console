@@ -4,12 +4,13 @@ from typing import List, Type, Dict, Iterator
 from termcolor import colored
 
 from lingularity.backend.utils.iterables import unzip
+from lingularity.frontend.console.utils.terminal import tabulate
 
 
 class TrainingOption(ABC):
     _FRONTEND_INSTANCE = None
 
-    _VARIABLE_NAMES = ['keyword', '_explanation']
+    _VARIABLE_NAMES = ('keyword', '_explanation')
 
     @staticmethod
     @abstractmethod
@@ -45,13 +46,9 @@ class TrainingOptions:
     def __init__(self, option_classes: List[Type[TrainingOption]]):
         options = [cls() for cls in option_classes]  # type: ignore
 
-        keywords_instructions_iterator = map(list, unzip(map(lambda mode: (mode.keyword, mode.instruction), options)))
-        self.keywords = next(keywords_instructions_iterator)
-        self.instructions = next(keywords_instructions_iterator)
+        self.keywords: List[str] = [option.keyword for option in options]
+        self.instructions = self._
         self._keyword_2_option: Dict[str, TrainingOption] = {option.keyword: option for option in options}
-
-    def __iter__(self) -> Iterator[TrainingOption]:
-        return iter(self._keyword_2_option.values())
 
     def __getitem__(self, item: str) -> TrainingOption:
         return self._keyword_2_option[item]

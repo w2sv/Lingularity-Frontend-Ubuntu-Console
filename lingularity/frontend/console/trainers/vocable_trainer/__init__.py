@@ -34,7 +34,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._streak: int = 0
         self._perfected_entries: List[VocableEntry] = []
 
-        self._latest_faced_vocable_entry: Optional[VocableEntry] = None
+        self._current_vocable_entry: Optional[VocableEntry] = None
 
     # -----------------
     # Driver
@@ -65,7 +65,11 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     def _get_training_options(self) -> TrainingOptions:
         VocableTrainerOption.set_frontend_instance(self)
-        return TrainingOptions([AddVocable, AlterLatestCreatedVocableEntry, AlterLatestFacedVocableEntry, Exit])
+        return TrainingOptions([AddVocable,
+                                AlterLatestCreatedVocableEntry,
+                                AlterCurrentVocableEntry,
+                                DeleteVocableEntry,
+                                Exit])
 
     # -----------------
     # Training Property Selection
@@ -147,7 +151,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             if i == 3:
                 print(f"{indentation}\t\tNote: distinct translations are to be separated by commas\n")
 
-        print('')
+        print('\n')
         self._output_lets_go()
 
     def _run_training(self):
@@ -216,7 +220,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             # increment/reassign attributes
             self._n_trained_items += 1
             self._accumulated_score += response_evaluation.value
-            self._latest_faced_vocable_entry = entry
+            self._current_vocable_entry = entry
             self._update_streak(response_evaluation)
 
             # display absolute entry progress if n_trained_items divisible by 10

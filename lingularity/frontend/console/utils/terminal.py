@@ -1,4 +1,4 @@
-from typing import Deque, Sequence, Pattern, Optional
+from typing import List, Sequence, Pattern, Optional
 from abc import ABC
 import os
 import sys
@@ -131,6 +131,7 @@ class RedoPrint(LineCounter):
 # -----------------
 def centered_print(*print_elements: str, end='\n', line_counter: Optional[LineCounter] = None):
     printer = [print, line_counter][bool(line_counter)]
+    assert printer is not None
 
     for i, print_element in enumerate(print_elements):
         if '\n' in print_element:
@@ -149,17 +150,27 @@ def centered_print(*print_elements: str, end='\n', line_counter: Optional[LineCo
                     printer(indentation + line)
 
         else:
-            printer(_centered_print_indentation(print_element) + print_element, end=end if i == len(print_elements) - 1 else '\n')
+            printer(centered_print_indentation(print_element) + print_element, end=end if i == len(print_elements) - 1 else '\n')
 
 
-def _centered_print_indentation(string: str) -> str:
+def centered_print_indentation(string: str) -> str:
     return _indentation(len(_ansi_escape_code_stripped(string)))
 
 
-def centered_user_query_indentation(input_message: str) -> str:
+def centered_query_indentation(input_message: str) -> str:
     INPUT_SPACE_LENGTH = 8
 
     return _indentation(len(input_message + ' ' * INPUT_SPACE_LENGTH))
+
+
+def centered_input(input_message: str = '', expected_response_length: int = 0) -> str:
+    print(centered_print_indentation(input_message + '' * expected_response_length), end='')
+    return input()
+
+
+def tabulate(column1: Sequence[str], column2: Sequence[str]) -> List[str]:
+    max_length_first_column_element = max(map(len, column1))
+    return [f"{' ' * (max_length_first_column_element - len(column1[i]) + 1)}".join([column1[i], column2[i]]) for i in range(len(column1))]
 
 
 def centered_output_block_indentation(output_block: Sequence[str]) -> str:

@@ -15,7 +15,7 @@ from lingularity.backend.metadata import language_metadata
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.utils import date as date_utils
 
-from lingularity.frontend.console.utils.terminal import RedoPrint, centered_print
+from lingularity.frontend.console.utils.terminal import centered_print, centered_print_indentation
 from lingularity.frontend.console.utils import matplotlib as plt_utils
 from .options import TrainingOptions
 
@@ -89,18 +89,28 @@ class TrainerConsoleFrontend(ABC):
         """ Returns:
                 number of printed lines: int """
 
+        # store old properties for comparison, database identification
         old_line_repr = vocable_entry.line_repr
-        KeyboardController().type(f'{old_line_repr}')
+        old_vocable = vocable_entry.token
+
+        # type indented old representation
+        KeyboardController().type(f'{centered_print_indentation(old_line_repr)}{old_line_repr}')
+        # TODO: debug print(centering_indentation) into KeyboardController().type(old_line_repr)
+
+        # get new components, i.e. vocable + translation
         new_entry_components = input('').split(' - ')
 
+        # exit in case of invalid alteration
         if len(new_entry_components) != 2:
-            centered_print('Invalid alteration')
+            centered_print('INVALID ALTERATION')
             time.sleep(1)
             return 3
 
-        old_vocable = vocable_entry.token
+        # strip whitespaces, alter vocable entry
+        new_entry_components = map(lambda component: component.strip(' '), new_entry_components)
         vocable_entry.alter(*new_entry_components)
 
+        # insert altered entry into database in case of alteration actually having taken place
         if vocable_entry.line_repr != old_line_repr:
             self._backend.mongodb_client.insert_altered_vocable_entry(old_vocable, vocable_entry)
 
@@ -161,13 +171,10 @@ class TrainerConsoleFrontend(ABC):
 
     def _training_chronic_axis_title(self, item_scores: Sequence[int]) -> str:
         if len(item_scores) == 2 and not item_scores[0]:
-            return "Let's inflate that graph"
-
-        item_name = self._pluralized_item_name
+            return "Let's get that graph inflation goin'"
 
         yesterday_exceedance_difference = item_scores[-1] - item_scores[-2] + 1
-        if yesterday_exceedance_difference in [-1, 0]:
-            item_name = self._item_name
+        item_name = [self._pluralized_item_name, self._item_name][yesterday_exceedance_difference in [-1, 0]]
 
         if yesterday_exceedance_difference >= 0:
             return f"Exceeded yesterdays score by {yesterday_exceedance_difference + 1} {item_name}"

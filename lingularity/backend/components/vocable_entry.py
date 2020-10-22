@@ -18,9 +18,9 @@ class VocableEntry:
     @classmethod
     def new(cls, vocable: str, translation: str):
         return cls(entry={vocable: {'tf': 0,
-                              'lfd': None,
-                              's': 0,
-                              't': translation}}, reference_to_foreign=None)
+                                    'lfd': None,
+                                    's': 0,
+                                    't': translation}}, reference_to_foreign=None)
 
     def __init__(self, entry: RawType, reference_to_foreign: Optional[bool]):
         self.entry = entry
