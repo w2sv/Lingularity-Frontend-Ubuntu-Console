@@ -6,7 +6,7 @@ from termcolor import colored
 
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.components import VocableEntry
-from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend as Backend
+from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend as Backend, ResponseEvaluation
 from lingularity.backend.utils.strings import split_at_uppercase
 
 from lingularity.frontend.console.trainers.vocable_trainer.options import *
@@ -158,12 +158,12 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
     def _run_training(self):
         EVALUATION_2_COLOR = {
-             Backend.ResponseEvaluation.Wrong: 'red',
-             Backend.ResponseEvaluation.AccentError: 'yellow',
-             Backend.ResponseEvaluation.AlmostCorrect: 'yellow',
-             Backend.ResponseEvaluation.WrongArticle: 'cyan',
-             Backend.ResponseEvaluation.MissingArticle: 'cyan',
-             Backend.ResponseEvaluation.Correct: 'green'
+             ResponseEvaluation.Wrong: 'red',
+             ResponseEvaluation.AccentError: 'yellow',
+             ResponseEvaluation.AlmostCorrect: 'yellow',
+             ResponseEvaluation.WrongArticle: 'cyan',
+             ResponseEvaluation.MissingArticle: 'cyan',
+             ResponseEvaluation.Correct: 'green'
         }
 
         INDENTATION = '\t' * 2
@@ -189,18 +189,18 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
             translation_output = f'{colored(entry.display_translation, "green")}'
 
-            if response_evaluation is Backend.ResponseEvaluation.NoResponse:
+            if response_evaluation is ResponseEvaluation.NoResponse:
                 _undo_print(translation_output, end='')
             else:
                 # display response evaluation in case of non-empty response
                 _undo_print(f'{response} | {colored(" ".join(split_at_uppercase(response_evaluation.name)).upper(), EVALUATION_2_COLOR[response_evaluation])}', end='')
 
                 # display correct translation in case of imperfect response
-                if response_evaluation is not Backend.ResponseEvaluation.Correct:
+                if response_evaluation is not ResponseEvaluation.Correct:
                     _undo_print(f" | Correct translation: {translation_output}", end='')
 
             # display new score in case of change having taken place
-            if response_evaluation not in [Backend.ResponseEvaluation.NoResponse, Backend.ResponseEvaluation.Wrong]:
+            if response_evaluation not in [ResponseEvaluation.NoResponse, ResponseEvaluation.Wrong]:
                 if entry.score < 5:
                     _undo_print(f" | New Score: {[int(entry.score), entry.score][bool(entry.score % 1)]}", end='')
                 else:
@@ -267,12 +267,12 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             centered_print(f'Current streak: {colored(self._streak, "red", background, attrs=attrs)}', end='', line_counter=_undo_print)
         _undo_print('\n\n')
 
-    def _update_streak(self, response_evaluation: Backend.ResponseEvaluation):
-        if response_evaluation in [Backend.ResponseEvaluation.WrongArticle,
-                                   Backend.ResponseEvaluation.MissingArticle,
-                                   Backend.ResponseEvaluation.AccentError,
-                                   Backend.ResponseEvaluation.AlmostCorrect,
-                                   Backend.ResponseEvaluation.Correct]:
+    def _update_streak(self, response_evaluation: ResponseEvaluation):
+        if response_evaluation in [ResponseEvaluation.WrongArticle,
+                                   ResponseEvaluation.MissingArticle,
+                                   ResponseEvaluation.AccentError,
+                                   ResponseEvaluation.AlmostCorrect,
+                                   ResponseEvaluation.Correct]:
             self._streak += 1
 
         else:
