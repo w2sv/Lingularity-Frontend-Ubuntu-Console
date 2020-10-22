@@ -15,8 +15,8 @@ from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, T
 from lingularity.frontend.console.utils.view import view_creator
 from lingularity.frontend.console.utils.input_resolution import (
     resolve_input,
-    recurse_on_unresolvable_input,
-    indissolubility_output
+    repeat,
+    indicate_indissolubility
 )
 from lingularity.frontend.console.utils.terminal import (
     erase_lines,
@@ -93,7 +93,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         # query desired language
         if (selection := resolve_input(input(f'{self._SELECTION_QUERY_OUTPUT_OFFSET}Select language: '), eligible_languages)) is None:
-            return recurse_on_unresolvable_input(self._select_training_language, n_deletion_lines=-1)
+            return repeat(self._select_training_language, n_deletion_lines=-1)
 
         # query desired reference language if English selected
         elif selection == string_resources.ENGLISH:
@@ -104,7 +104,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
             while selection is None:
                 if (selection := resolve_input(input(f'{self._SELECTION_QUERY_OUTPUT_OFFSET}Select reference language: '), eligible_languages)) is None:
-                    indissolubility_output(n_deletion_lines=2)
+                    indicate_indissolubility(n_deletion_lines=2)
                 else:
                     mongodb_client.set_reference_language(reference_language=selection)
 
@@ -127,7 +127,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         # query desired mode
         if (mode_selection := resolve_input(input(f'{self._SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: '), modes.keywords)) is None:
-            return recurse_on_unresolvable_input(self._select_training_mode, n_deletion_lines=-1)
+            return repeat(self._select_training_mode, n_deletion_lines=-1)
         print('')
 
         return mode_selection
@@ -155,7 +155,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         # query variety
         if (dialect_selection := resolve_input(input(indentation[:-5]), options=processed_varieties)) is None:
-            return recurse_on_unresolvable_input(self._select_tts_language_variety, 1)
+            return repeat(self._select_tts_language_variety, 1)
 
         return self._tts.language_variety_choices[processed_varieties.index(dialect_selection)]
 
@@ -235,7 +235,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                     translation = self._process_procured_sentence_pair()
 
             else:
-                indissolubility_output(n_deletion_lines=2)
+                indicate_indissolubility(n_deletion_lines=2)
 
         print('\nSentence data file depleted')
 

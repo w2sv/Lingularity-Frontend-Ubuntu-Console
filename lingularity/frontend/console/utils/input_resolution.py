@@ -1,13 +1,19 @@
 from typing import Iterable, Optional, Callable, Tuple, Any
 import time
-import cursor
 
-from lingularity.frontend.console.utils.terminal import clear_screen, erase_lines, centered_print
+from lingularity.frontend.console.utils.terminal import (
+    clear_screen,
+    erase_lines,
+    centered_print,
+    cursor_hider
+)
+
+INDISSOLUBILITY_MESSAGE = "COULDN'T RESOLVE INPUT"
 
 
-INDISSOLUBILITY_MESSAGE = "Couldn't resolve input"
-
-
+# ------------------
+# Input Resolution
+# ------------------
 def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
     options_starting_on_input = list(filter(lambda option: option.lower().startswith(_input.lower()), options))
 
@@ -18,22 +24,14 @@ def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
     return None
 
 
-def recurse_on_invalid_input(function: Callable,
-                             message: str,
-                             n_deletion_lines: int,
-                             sleep_duration=1.0,
-                             args: Optional[Tuple[Any, ...]] = None):
-    if args is None:
-        args = ()
+@cursor_hider
+def indicate_indissolubility(n_deletion_lines: int, message=INDISSOLUBILITY_MESSAGE, sleep_duration=1.0):
+    """ - Display message communicating indissolubility reason,
+        - freeze program for sleep duration
+        - erase n_deletion_lines last terminal output lines or clear screen if n_deletion_lines = -1 """
 
-    indissolubility_output(n_deletion_lines, message, sleep_duration)
+    centered_print(message)
 
-    return function(*args)
-
-
-def indissolubility_output(n_deletion_lines: int, message=INDISSOLUBILITY_MESSAGE, sleep_duration=1.0):
-    centered_print(message.upper())
-    cursor.hide()
     time.sleep(sleep_duration)
 
     if n_deletion_lines == -1:
@@ -41,13 +39,26 @@ def indissolubility_output(n_deletion_lines: int, message=INDISSOLUBILITY_MESSAG
     else:
         erase_lines(n_deletion_lines)
 
-    cursor.show()
 
+# ------------------
+# Callable Repetition
+# ------------------
+def repeat(function: Callable,
+           n_deletion_lines: int,
+           message=INDISSOLUBILITY_MESSAGE,
+           sleep_duration=1.0,
+           args: Tuple[Any, ...] = ()):
 
-def recurse_on_unresolvable_input(function: Callable, n_deletion_lines, args: Optional[Tuple[Any, ...]] = None):
-    return recurse_on_invalid_input(
-        function=function,
-        message=INDISSOLUBILITY_MESSAGE,
-        n_deletion_lines=n_deletion_lines,
-        args=args
-    )
+    """ Args:
+            function: callable to be repeated
+            n_deletion_lines: terminal output lines to be deleted, if -1 screen will be cleared
+            message: message to be displayed, communicating mistake committed by user because of which
+                repetition had to be triggered
+            sleep_duration: program sleep duration in ms
+            args: function args which it will be provided with when being repeated
+        Returns:
+            result of function provided with args """
+
+    indicate_indissolubility(n_deletion_lines, message, sleep_duration)
+
+    return function(*args)

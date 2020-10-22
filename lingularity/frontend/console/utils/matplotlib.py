@@ -11,6 +11,8 @@ plt.rcParams['toolbar'] = 'None'  # disables toolbar
 
 
 def center_window():
+	# TODO: improve
+
 	monitor = screeninfo.get_monitors()[0]
 	height, width = monitor.height, monitor.width
 

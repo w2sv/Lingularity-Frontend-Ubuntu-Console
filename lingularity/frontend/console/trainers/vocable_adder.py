@@ -6,7 +6,7 @@ import cursor
 from lingularity.backend.trainers import VocableAdderBackend
 from lingularity.backend.database import MongoDBClient
 from lingularity.frontend.console.trainers import VocableTrainerConsoleFrontend
-from lingularity.frontend.console.utils.input_resolution import resolve_input, indissolubility_output
+from lingularity.frontend.console.utils.input_resolution import resolve_input, indicate_indissolubility
 from lingularity.frontend.console.utils.terminal import (
     clear_screen,
     centered_output_block_indentation,
@@ -61,7 +61,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
 
             except KeyboardInterrupt:
                 if (option := self._get_option_selection()) is None:
-                    indissolubility_output(n_deletion_lines=2, message="Couldn't resolve option")
+                    indicate_indissolubility(n_deletion_lines=2, message="Couldn't resolve option")
                     cursor.show()
 
                 # option execution

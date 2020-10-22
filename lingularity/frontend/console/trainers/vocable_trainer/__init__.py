@@ -13,13 +13,14 @@ from lingularity.frontend.console.trainers.vocable_trainer.options import *
 from lingularity.frontend.console.trainers.sentence_translation import SentenceTranslationTrainerConsoleFrontend
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, TrainingOptions
 from lingularity.frontend.console.utils.view import view_creator, DEFAULT_VERTICAL_VIEW_OFFSET
-from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
+from lingularity.frontend.console.utils.input_resolution import resolve_input, repeat
 from lingularity.frontend.console.utils import matplotlib as plt_utils
 from lingularity.frontend.console.utils.terminal import (
     erase_lines,
     centered_print,
     centered_output_block_indentation,
-    UndoPrint
+    UndoPrint,
+    centered_print_indentation
 )
 
 
@@ -93,7 +94,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         input_query_message = 'Enter desired language: '
         language_selection = resolve_input(input(f'\n{indentation[:-int(len(input_query_message) * 3/4)]}{input_query_message}'), eligible_languages)
         if language_selection is None:
-            return recurse_on_unresolvable_input(self._select_training_language, -1, args=(mongodb_client, ))
+            return repeat(self._select_training_language, -1, args=(mongodb_client,))
         print('\n' * 2, end='')
 
         return language_selection, False  # TODO
@@ -117,7 +118,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         centered_print(' ', end='')
 
         if (input_resolution := resolve_input(input(''), ['yes', 'no'])) is None:
-            recurse_on_unresolvable_input(self._display_new_vocabulary_if_desired, n_deletion_lines=-1)
+            repeat(self._display_new_vocabulary_if_desired, n_deletion_lines=-1)
 
         elif input_resolution == 'yes':
             self._display_new_vocable_entries()
@@ -143,13 +144,14 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         centered_print(f'Found {self._backend.n_training_items} imperfect entries\n\n')
         centered_print("Hit Enter to proceed\n")
 
-        instructions = ["\tEnter: "] + self._training_options.instructions
+        INSTRUCTION_HEAD = f"Enter:{' ' * 34}"
+        indentation = centered_print_indentation(INSTRUCTION_HEAD)
 
-        indentation = centered_output_block_indentation(instructions)
-        for i, instruction_row in enumerate(instructions):
-            print(f'{indentation}{instruction_row}')
-            if i == 3:
-                print(f"{indentation}\t\tNote: distinct translations are to be separated by commas\n")
+        print(f'{indentation}{INSTRUCTION_HEAD}')
+        for i, instruction_row in enumerate(self._training_options.instructions):
+            print(f'{indentation}  {instruction_row}')
+            if i == 2:
+                print(f"\n{indentation}    NOTE: distinct translations are to be delimited by ', '\n")
 
         print('\n')
         self._output_lets_go()
@@ -254,12 +256,15 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         attrs = ['bold']
 
         if self._streak >= 2:
-            if 5 <= self._streak < 7:
-                attrs.append('blink')
-            if self._streak >= 7:
-                attrs.append('dark')
+            background = None
 
-            centered_print(f'Current streak: {colored(self._streak, "red", attrs=attrs)}', end='', line_counter=_undo_print)
+            if self._streak >= 5:
+                attrs.append('blink')
+
+                if self._streak >= 7:
+                    background = ['on_green', 'on_yellow', 'on_blue', 'on_cyan', 'on_white'][min((self._streak - 7) // 2, 4)]
+
+            centered_print(f'Current streak: {colored(self._streak, "red", background, attrs=attrs)}', end='', line_counter=_undo_print)
         _undo_print('\n\n')
 
     def _update_streak(self, response_evaluation: Backend.ResponseEvaluation):

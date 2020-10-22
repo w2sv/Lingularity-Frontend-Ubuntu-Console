@@ -1,6 +1,6 @@
 from typing import Optional, Tuple, Type, Iterator, Sequence
 from abc import ABC, abstractmethod
-import time
+from time import sleep
 import datetime
 
 import numpy as np
@@ -76,7 +76,7 @@ class TrainerConsoleFrontend(ABC):
             field = input(query_message)
             if not len(field):
                 centered_print("INPUT FIELD LEFT UNFILLED")
-                time.sleep(1)
+                sleep(1)
                 return 3
             vocable_and_meaning.append(field)
 
@@ -103,12 +103,12 @@ class TrainerConsoleFrontend(ABC):
         # exit in case of invalid alteration
         if len(new_entry_components) != 2:
             centered_print('INVALID ALTERATION')
-            time.sleep(1)
+            sleep(1)
             return 3
 
         # strip whitespaces, alter vocable entry
-        new_entry_components = map(lambda component: component.strip(' '), new_entry_components)
-        vocable_entry.alter(*new_entry_components)
+        stripped_new_entry_components = map(lambda component: component.strip(' '), new_entry_components)
+        vocable_entry.alter(*stripped_new_entry_components)
 
         # insert altered entry into database in case of alteration actually having taken place
         if vocable_entry.line_repr != old_line_repr:

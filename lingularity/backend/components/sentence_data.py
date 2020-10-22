@@ -157,7 +157,7 @@ class SentenceData(np.ndarray):
 
     @property
     def _english_to_foreign_language_sentence_iterator(self) -> Iterator[Tuple[str, str]]:
-        return zip(self.english_sentences, self.foreign_language_sentences)  # type: ignore
+        return zip(self.english_sentences, self.foreign_language_sentences)
 
     @staticmethod
     def _strip_overlaps(translation_candidates: Iterable[str]) -> Set[str]:

@@ -1,16 +1,16 @@
 from abc import ABC, abstractmethod
-from typing import List, Type, Dict, Iterator
+from typing import List, Type, Dict
 
 from termcolor import colored
 
 from lingularity.backend.utils.iterables import unzip
-from lingularity.frontend.console.utils.terminal import tabulate
+from lingularity.frontend.console.utils.terminal import allign
 
 
 class TrainingOption(ABC):
     _FRONTEND_INSTANCE = None
 
-    _VARIABLE_NAMES = ('keyword', '_explanation')
+    _ALLOWED_VARIABLE_NAMES = ('keyword', 'explanation')
 
     @staticmethod
     @abstractmethod
@@ -19,18 +19,14 @@ class TrainingOption(ABC):
 
     def __init__(self, keyword: str, explanation: str):
         self.keyword = keyword
-        self._explanation = explanation
-
-    @property
-    def instruction(self) -> str:
-        return f"\t  {colored(self.keyword, 'red')} to {self._explanation}"
+        self.explanation = explanation
 
     @abstractmethod
     def execute(self):
         pass
 
     def __setattr__(self, key, value):
-        if key in TrainingOption.__dict__['_VARIABLE_NAMES']:
+        if key in TrainingOption.__dict__['_ALLOWED_VARIABLE_NAMES']:
             self.__dict__[key] = value
 
         else:
@@ -42,13 +38,14 @@ class TrainingOption(ABC):
         return getattr(self._FRONTEND_INSTANCE, item)
 
 
-class TrainingOptions:
+class TrainingOptions(dict):
+    RawType = Dict[str, TrainingOption]
+
     def __init__(self, option_classes: List[Type[TrainingOption]]):
-        options = [cls() for cls in option_classes]  # type: ignore
+        super().__init__({option.keyword: option for option in [cls() for cls in option_classes]})  # type: ignore
 
-        self.keywords: List[str] = [option.keyword for option in options]
-        self.instructions = self._
-        self._keyword_2_option: Dict[str, TrainingOption] = {option.keyword: option for option in options}
+        self.keywords: List[str] = [option.keyword for option in self.values()]
+        self.instructions: List[str] = self._compose_instruction()
 
-    def __getitem__(self, item: str) -> TrainingOption:
-        return self._keyword_2_option[item]
+    def _compose_instruction(self) -> List[str]:
+        return allign(*unzip(map(lambda option: (colored(option.keyword, 'red'), f'to {option.explanation}'), self.values())))

@@ -6,7 +6,7 @@ dependencies:
   - python=3.8
   - pip=20.0.2
   - pytest=6.0.2
-  - mypy=0.770
+  - mypy
   - numpy=1.18.1
   - requests=2.23.0
   - unidecode=1.1.1

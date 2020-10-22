@@ -8,7 +8,7 @@ from functools import partial
 import cursor
 from pynput.keyboard import Controller as Keyboard
 
-from lingularity.frontend.console.utils.input_resolution import recurse_on_invalid_input
+from lingularity.frontend.console.utils.input_resolution import repeat
 from lingularity.frontend.console.utils.terminal import centered_print, erase_lines
 from lingularity.frontend.console.trainers.base.options import TrainingOption
 
@@ -88,7 +88,7 @@ class ChangePlaybackSpeed(SentenceTranslationOption):
         Keyboard().type(str(self._tts.playback_speed))
         cursor.show()
 
-        _recurse = partial(recurse_on_invalid_input, function=self._change_playback_speed, message='Invalid input', n_deletion_lines=3)
+        _recurse = partial(repeat, function=self._change_playback_speed, message='Invalid input', n_deletion_lines=3)
 
         try:
             altered_playback_speed = float(input())

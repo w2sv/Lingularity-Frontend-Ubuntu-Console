@@ -3,7 +3,7 @@ from getpass import getpass
 import os
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.frontend.console.utils.input_resolution import recurse_on_invalid_input
+from lingularity.frontend.console.utils.input_resolution import repeat
 from lingularity.frontend.console.utils.terminal import centered_query_indentation, erase_lines, centered_print
 from lingularity.frontend.console.utils import credentials
 from lingularity.frontend.console.utils import fernet
@@ -37,7 +37,7 @@ def log_in(mongodb_client: MongoDBClient) -> Tuple[MongoDBClient, bool]:
     # query username
     username = input(f'{INDENTATION}{USER_NAME_QUERY}')
     if credentials.invalid_username(username):
-        return recurse_on_invalid_input(log_in, message='Empty username is not allowed', n_deletion_lines=2)
+        return repeat(log_in, n_deletion_lines=2, message='Empty username is not allowed')
 
     # query password if entered username existent
     if username in mongodb_client.usernames:
@@ -79,12 +79,8 @@ def _sign_up(user: str, client: MongoDBClient, indentation: str, email_address: 
         email_address = input(f'{indentation}{EMAIL_QUERY}')
 
         if credentials.invalid_mailaddress(email_address):
-            return recurse_on_invalid_input(
-                message='Invalid email address',
-                n_deletion_lines=4,
-                function=_sign_up,
-                args=(user, client, indentation, None)
-            )
+            return repeat(function=_sign_up, n_deletion_lines=4, message='Invalid email address',
+                          args=(user, client, indentation, None))
 
         # TODO
         """elif client.mail_address_taken(mail_address):
@@ -93,12 +89,8 @@ def _sign_up(user: str, client: MongoDBClient, indentation: str, email_address: 
     password = getpass(f'{indentation}Create password: ')
 
     if credentials.invalid_password(password):
-        return recurse_on_invalid_input(
-            message='Password must contain at least 5 characters',
-            n_deletion_lines=5,
-            function=_sign_up,
-            args=(user, client, indentation, email_address)
-        )
+        return repeat(function=_sign_up, n_deletion_lines=5, message='Password must contain at least 5 characters',
+                      args=(user, client, indentation, email_address))
 
     client.initialize_user(user, email_address=email_address, password=password)
     erase_lines(4)

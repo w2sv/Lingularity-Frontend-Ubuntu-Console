@@ -9,7 +9,7 @@ from termcolor import colored
 
 from lingularity.backend.metadata import language_metadata
 from lingularity.frontend.console.utils.date import date_repr
-from lingularity.frontend.console.utils.input_resolution import resolve_input, recurse_on_unresolvable_input
+from lingularity.frontend.console.utils.input_resolution import resolve_input, repeat
 from lingularity.frontend.console.utils.terminal import clear_screen, centered_print, erase_lines
 from lingularity.frontend.console.utils.view import DEFAULT_VERTICAL_VIEW_OFFSET, view_creator
 
@@ -70,7 +70,7 @@ def select_action(actions) -> Optional[str]:
     centered_print(input_message, ' ', end='')
 
     if (training_selection := resolve_input(input(''), list(actions.keys()))) is None:
-        return recurse_on_unresolvable_input(select_action, n_deletion_lines=4, args=(actions, ))
+        return repeat(select_action, n_deletion_lines=4, args=(actions,))
 
     clear_screen()
     return training_selection

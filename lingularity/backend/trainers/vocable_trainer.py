@@ -57,6 +57,9 @@ class VocableTrainerBackend(TrainerBackend):
 
         sentence_indices = np.asarray(sentence_indices)
         np.random.shuffle(sentence_indices)
+
+        assert sentence_indices is not None
+
         return self._sentence_data[sentence_indices[:n]]
 
     # ---------------
@@ -91,7 +94,8 @@ class VocableTrainerBackend(TrainerBackend):
 
     @staticmethod
     def _wrong_article(response: str, translation: str) -> bool:
-        return len((contained_nouns := set(map(get_article_stripped_noun, [response, translation])))) == 1 and next(iter(contained_nouns))
+        contained_nouns = set(map(get_article_stripped_noun, [response, translation]))
+        return len(contained_nouns) == 1 and next(iter(contained_nouns)) is not None
 
     @staticmethod
     def _article_missing(response: str, translation: str) -> bool:
