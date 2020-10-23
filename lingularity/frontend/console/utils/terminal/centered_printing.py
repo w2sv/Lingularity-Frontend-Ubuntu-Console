@@ -45,7 +45,7 @@ def centered_query_indentation(input_message: str) -> str:
     return _indentation(len(input_message + ' ' * INPUT_SPACE_LENGTH))
 
 
-def centered_input(input_message: str = '', expected_response_length: int = 0) -> str:
+def centered_input_query(input_message: str = '', expected_response_length: int = 0) -> str:
     print(centered_print_indentation(input_message + ' ' * expected_response_length), end='')
     return input()
 

@@ -2,19 +2,12 @@ from typing import List, Optional, Sequence
 from itertools import repeat, starmap
 from functools import cached_property
 
-from unidecode import unidecode
 import numpy as np
 
+from .response_evaluation import ResponseEvaluation, get_response_evaluation
 from lingularity.backend.components import SentenceData, VocableEntry, TokenMap, get_token_map
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
-from .response_evaluation import (
-    ResponseEvaluation,
-    _wrong_article,
-    _article_missing,
-    _n_char_deviations,
-    _n_tolerable_char_deviations
-)
 
 
 class VocableTrainerBackend(TrainerBackend):
@@ -59,32 +52,3 @@ class VocableTrainerBackend(TrainerBackend):
         assert sentence_indices is not None
 
         return self._sentence_data[sentence_indices[:n]]
-
-    @staticmethod
-    def response_evaluation(response: str, translation: str) -> ResponseEvaluation:
-        response = response.strip(' ')
-
-        if not len(response):
-            return ResponseEvaluation.NoResponse
-
-        elif response == translation:
-            return ResponseEvaluation.Correct
-
-        elif response == unidecode(translation):
-            return ResponseEvaluation.AccentError
-
-        elif _n_char_deviations(response, translation) <= _n_tolerable_char_deviations(translation):
-            return ResponseEvaluation.AlmostCorrect
-
-        elif _article_missing(response, translation):
-            return ResponseEvaluation.MissingArticle
-
-        elif _wrong_article(response, translation):
-            return ResponseEvaluation.WrongArticle
-
-        return ResponseEvaluation.Wrong
-
-
-if __name__ == '__main__':
-    print(VocableTrainerBackend.response_evaluation(response='baretto', translation='il baretto'))
-    print(VocableTrainerBackend.response_evaluation(response='la baretto', translation='il baretto'))

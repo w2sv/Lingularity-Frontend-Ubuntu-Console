@@ -10,7 +10,7 @@ from .centered_printing import (
     centered_print,
     centered_print_indentation,
     centered_output_block_indentation,
-    centered_input,
+    centered_input_query,
     allign
 )
 

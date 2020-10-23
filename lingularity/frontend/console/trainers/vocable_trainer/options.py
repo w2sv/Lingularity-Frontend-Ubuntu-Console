@@ -5,7 +5,7 @@ from abc import ABC
 from time import sleep
 
 from lingularity.frontend.console.utils.input_resolution import resolve_input, repeat
-from lingularity.frontend.console.utils.terminal import centered_print, erase_lines, centered_input
+from lingularity.frontend.console.utils.terminal import centered_print, erase_lines, centered_input_query
 from lingularity.frontend.console.trainers.base.options import TrainingOption
 
 
@@ -58,7 +58,7 @@ class DeleteVocableEntry(VocableTrainerOption):
 
     def execute(self):
         centered_print(f"\nAre you sure you want to irreversibly delete {self._current_vocable_entry.line_repr}? (y)es/(n)o")
-        if (input_resolution := resolve_input(centered_input(), options=['yes', 'no'])) is None:
+        if (input_resolution := resolve_input(centered_input_query(), options=['yes', 'no'])) is None:
             return repeat(self.execute(), n_deletion_lines=3)
         elif input_resolution == 'yes':
             self._backend.mongodb_client.delete_vocable_entry(self._current_vocable_entry)

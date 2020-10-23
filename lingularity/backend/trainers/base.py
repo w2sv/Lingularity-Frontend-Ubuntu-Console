@@ -24,10 +24,6 @@ class TrainerBackend(ABC):
         self.forename_converter: Optional[ForenameConvertor] = self._get_forename_converter()
 
     @property
-    def locally_available_languages(self) -> List[str]:
-        return os.listdir(BASE_LANGUAGE_DATA_PATH)
-
-    @property
     def language(self) -> str:
         return [self._non_english_language, string_resources.ENGLISH][self._train_english]
 
@@ -49,13 +45,6 @@ class TrainerBackend(ABC):
         return self.forename_converter is not None
 
     # ----------------
-    # Paths
-    # ----------------
-    @property
-    def _language_dir_path(self):
-        return f'{BASE_LANGUAGE_DATA_PATH}/{self.language}'
-
-    # ----------------
     # Pre Training
     # ----------------
     @abstractmethod
@@ -67,13 +56,13 @@ class TrainerBackend(ABC):
         self.n_training_items = len(training_items)
         self._item_iterator = self._get_item_iterator(training_items)
 
-    def _get_sentence_data(self) -> SentenceData:
-        return SentenceData(self._non_english_language, self._train_english)
-
     @staticmethod
     def _get_item_iterator(item_list: Sequence[Any]) -> Iterator[Any]:
         np.random.shuffle(item_list)
         return iter(item_list)
+
+    def _get_sentence_data(self) -> SentenceData:
+        return SentenceData(self._non_english_language, self._train_english)
 
     # -----------------
     # Training
