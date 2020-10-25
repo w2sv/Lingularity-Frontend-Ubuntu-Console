@@ -34,6 +34,8 @@ class VocableTrainerBackend(TrainerBackend):
     # Pre Training
     # ---------------
     def set_item_iterator(self):
+        """ Additionally sets synonyms, new_vocable_entries iterator """
+
         vocable_entries_to_be_trained = self._vocable_entries_to_be_trained()
 
         self.synonyms = self._find_synonyms(vocable_entries_to_be_trained)
@@ -47,6 +49,12 @@ class VocableTrainerBackend(TrainerBackend):
 
     @staticmethod
     def _find_synonyms(vocable_entries: List[VocableEntry]) -> Dict[str, List[str]]:
+        """ Returns:
+                Dict[english_meaning: [synonym_1, synonym_2, ..., synonym_n]]
+
+                for n >= 2 synonyms contained within retrieved vocable entries possessing the IDENTICAL
+                english the-stripped meaning"""
+
         meaning_2_vocables = defaultdict(list)
 
         for entry in vocable_entries:
