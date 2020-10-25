@@ -1,5 +1,5 @@
 from typing import List, Optional, Sequence, Dict, Iterator
-from itertools import starmap
+from itertools import starmap, tee
 from collections import defaultdict
 
 import numpy as np
@@ -24,6 +24,11 @@ class VocableTrainerBackend(TrainerBackend):
     @staticmethod
     def get_eligible_languages() -> List[str]:
         return MongoDBClient.get_instance().query_vocabulary_possessing_languages()
+
+    @property
+    def new_vocable_entries_available(self) -> bool:
+        self.new_vocable_entries, teed = tee(self.new_vocable_entries)
+        return next(teed, None) is not None
 
     # ---------------
     # Pre Training

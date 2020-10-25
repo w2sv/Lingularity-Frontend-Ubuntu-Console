@@ -52,8 +52,8 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     def __call__(self) -> bool:
         self._backend.set_item_iterator()
 
-        # if len(self._backend.new_vocable_entries):
-        #     self._display_new_vocabulary_if_desired()
+        if self._backend.new_vocable_entries_available:
+            self._display_new_vocabulary_if_desired()
 
         self._display_training_screen_header_section()
         self._run_training()

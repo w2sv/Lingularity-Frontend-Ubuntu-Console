@@ -22,3 +22,4 @@ dependencies:
     - googletrans==3.0.0
     - textacy==0.10.1
     - spacy
+    - aenum

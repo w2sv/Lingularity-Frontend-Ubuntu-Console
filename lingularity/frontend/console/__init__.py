@@ -55,16 +55,16 @@ def _complete_initialization():
         if is_new_user:
             display_input_resolution_information()
 
-    # # display additional information, last session metrics if existent
-    # display_sentence_data_reference()
-    # if (last_session_metrics := mongodb_client.query_last_session_statistics()) is not None:
-    #     display_constitution_query(mongodb_client.user, last_session_metrics['language'])
-    #     display_last_session_conclusion(last_session_metrics=last_session_metrics)
-    # else:
-    #     display_welcome_message(mongodb_client.user)
+    # display additional information, last session metrics if existent
+    display_sentence_data_reference()
+    if (last_session_metrics := mongodb_client.query_last_session_statistics()) is not None:
+        display_constitution_query(mongodb_client.user, last_session_metrics['language'])
+        display_last_session_conclusion(last_session_metrics=last_session_metrics)
+    else:
+        display_welcome_message(mongodb_client.user)
 
     # select action
-    action_selection: str = 'vocabulary trainer'  # select_action(actions=ELIGIBLE_ACTIONS)
+    action_selection: str = select_action(actions=ELIGIBLE_ACTIONS)
     action_executor = ELIGIBLE_ACTIONS[action_selection]
 
     # instantiate trainer if action_executor one
