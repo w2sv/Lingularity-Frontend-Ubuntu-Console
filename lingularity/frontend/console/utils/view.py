@@ -1,14 +1,14 @@
 from typing import Optional
 from functools import wraps
 
-from lingularity.frontend.console.utils.terminal import clear_screen, centered_print
+from lingularity.frontend.console.utils.console import clear_screen, centered_print
 
 
 DEFAULT_VERTICAL_VIEW_OFFSET = '\n' * 2
 
 
 def view_creator(header: Optional[str] = None):
-    """ Decorator for functions creating new terminal view,
+    """ Decorator for functions creating new console view,
         serving both documentation purposes as well as initializing the latter
         by
             clearing screen,

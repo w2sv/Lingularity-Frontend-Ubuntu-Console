@@ -19,7 +19,7 @@ from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, T
 from lingularity.frontend.console.utils.view import view_creator, DEFAULT_VERTICAL_VIEW_OFFSET
 from lingularity.frontend.console.utils.input_resolution import resolve_input, repeat
 from lingularity.frontend.console.utils import matplotlib as plt_utils
-from lingularity.frontend.console.utils.terminal import (
+from lingularity.frontend.console.utils.console import (
     erase_lines,
     centered_print,
     centered_block_indentation,

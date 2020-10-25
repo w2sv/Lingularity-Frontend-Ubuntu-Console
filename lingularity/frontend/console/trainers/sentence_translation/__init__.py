@@ -17,7 +17,7 @@ from lingularity.frontend.console.utils.input_resolution import (
     repeat,
     indicate_indissolubility
 )
-from lingularity.frontend.console.utils.terminal import (
+from lingularity.frontend.console.utils.console import (
     erase_lines,
     centered_print,
     centered_block_indentation,
@@ -30,7 +30,6 @@ _redo_print = RedoPrint()
 
 class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     _TRAINING_LOOP_INDENTATION = ' ' * 16
-    _SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'
 
     def __init__(self):
         self._tts = TextToSpeech.get_instance()

@@ -1,12 +1,12 @@
 from typing import Optional, Sequence, List
 
 from .undoable_printing import LineCounter
-from .utils import _ansi_escape_code_stripped, _terminal_length
+from .utils import ansi_escape_code_stripped, _terminal_length
 from lingularity.backend.utils.iterables import longest_value
 
 
 def centered_print_indentation(row: str) -> str:
-    return " " * ((_terminal_length() - len(_ansi_escape_code_stripped(row))) // 2)
+    return " " * ((_terminal_length() - len(ansi_escape_code_stripped(row))) // 2)
 
 
 def centered_print(*print_elements: str, end='\n', line_counter: Optional[LineCounter] = None):
@@ -63,8 +63,8 @@ def align(column1: Sequence[str], column2: Sequence[str]) -> List[str]:
 
 def centered_block_indentation(output_block: Sequence[str]) -> str:
     """ Returns:
-            indentation determined by length of longest terminal output row comprised by output_block,
+            indentation determined by length of longest console output row comprised by output_block,
             enabling centered positioning of the aforementioned row and the others to start on the same
-            terminal column, resulting in an uniform writing appearance """
+            console column, resulting in an uniform writing appearance """
 
     return centered_print_indentation(longest_value(output_block))

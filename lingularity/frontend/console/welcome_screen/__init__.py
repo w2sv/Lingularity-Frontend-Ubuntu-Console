@@ -10,7 +10,7 @@ from termcolor import colored
 from lingularity.backend.metadata import language_metadata
 from lingularity.frontend.console.utils.date import date_repr
 from lingularity.frontend.console.utils.input_resolution import resolve_input, repeat
-from lingularity.frontend.console.utils.terminal import clear_screen, centered_print, erase_lines
+from lingularity.frontend.console.utils.console import clear_screen, centered_print, erase_lines
 from lingularity.frontend.console.utils.view import DEFAULT_VERTICAL_VIEW_OFFSET, view_creator
 
 

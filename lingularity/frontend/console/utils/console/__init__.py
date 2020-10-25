@@ -3,6 +3,7 @@ from functools import wraps
 
 import cursor
 
+from .utils import ansi_escape_code_stripped
 from .termcolor import colorize_chars
 from .undoable_printing import LineCounter, UndoPrint, RedoPrint
 from .clearing import clear_screen, erase_lines
@@ -15,6 +16,9 @@ from .centered_printing import (
     centered_input_query,
     align
 )
+
+
+SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'
 
 
 def cursor_hider(function: Callable):

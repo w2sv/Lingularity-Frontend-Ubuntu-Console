@@ -15,7 +15,7 @@ from lingularity.backend.metadata import language_metadata
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.utils import date as date_utils
 
-from lingularity.frontend.console.utils.terminal import centered_print, centered_print_indentation
+from lingularity.frontend.console.utils.console import centered_print, centered_print_indentation
 from lingularity.frontend.console.utils import matplotlib as plt_utils
 from .options import TrainingOptions
 

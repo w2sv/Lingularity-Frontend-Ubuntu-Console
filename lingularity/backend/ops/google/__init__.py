@@ -4,7 +4,6 @@
              German -> de
              French -> fr """
 
-
 from typing import Optional, Dict, List
 from abc import ABC
 

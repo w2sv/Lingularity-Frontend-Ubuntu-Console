@@ -5,7 +5,7 @@ import pymongo
 
 from lingularity.utils.logging import enable_logging
 from lingularity.backend.database import MongoDBClient
-from lingularity.frontend.console.utils import terminal
+from lingularity.frontend.console.utils import console
 from lingularity.frontend.console.welcome_screen import (
     account_management,
     display_starting_screen,
@@ -17,6 +17,7 @@ from lingularity.frontend.console.welcome_screen import (
     select_action,
     exit_on_missing_internet_connection
 )
+from .welcome_screen.language_selection_screen import select_language
 
 try:
     from lingularity.frontend.console.trainers import *
@@ -43,8 +44,9 @@ def _complete_initialization():
         # TODO: assert proper working
         return _complete_initialization()
 
+    select_language()
+
     # initialize console
-    terminal.clear_screen()
     display_starting_screen()
 
     # log in if user not yet set

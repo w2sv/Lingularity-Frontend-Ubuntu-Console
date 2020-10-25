@@ -4,7 +4,7 @@ import os
 
 from lingularity.backend.database import MongoDBClient
 from lingularity.frontend.console.utils.input_resolution import repeat
-from lingularity.frontend.console.utils.terminal import centered_query_indentation, erase_lines, centered_print
+from lingularity.frontend.console.utils.console import centered_query_indentation, erase_lines, centered_print
 from lingularity.frontend.console.utils import credentials
 from lingularity.frontend.console.utils import fernet
 

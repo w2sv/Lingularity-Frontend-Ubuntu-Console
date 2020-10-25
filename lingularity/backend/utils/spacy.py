@@ -31,6 +31,8 @@ LANGUAGE_2_MODEL_IDENTIFIERS = {
     'Spanish': ['es', _NEWS]
 }
 
+ELIGIBLE_LANGUAGES = set(LANGUAGE_2_MODEL_IDENTIFIERS.keys())
+
 
 def load_model(language: str) -> Model:
     model_name = _assemble_model_name(language=language)

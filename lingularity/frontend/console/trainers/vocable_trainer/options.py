@@ -5,7 +5,7 @@ from abc import ABC
 from time import sleep
 
 from lingularity.frontend.console.utils.input_resolution import resolve_input, repeat
-from lingularity.frontend.console.utils.terminal import centered_print, erase_lines, centered_input_query
+from lingularity.frontend.console.utils.console import centered_print, erase_lines, centered_input_query
 from lingularity.frontend.console.trainers.base.options import TrainingOption
 
 

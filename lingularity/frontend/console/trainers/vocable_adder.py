@@ -7,7 +7,7 @@ from lingularity.backend.trainers import VocableAdderBackend
 from lingularity.backend.database import MongoDBClient
 from lingularity.frontend.console.trainers import VocableTrainerConsoleFrontend
 from lingularity.frontend.console.utils.input_resolution import resolve_input, indicate_indissolubility
-from lingularity.frontend.console.utils.terminal import (
+from lingularity.frontend.console.utils.console import (
     clear_screen,
     centered_block_indentation,
     erase_lines

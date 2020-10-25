@@ -1,7 +1,7 @@
 from typing import Iterable, Optional, Callable, Tuple, Any
 import time
 
-from lingularity.frontend.console.utils.terminal import (
+from lingularity.frontend.console.utils.console import (
     clear_screen,
     erase_lines,
     centered_print,
@@ -28,7 +28,7 @@ def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
 def indicate_indissolubility(n_deletion_lines: int, message=INDISSOLUBILITY_MESSAGE, sleep_duration=1.0):
     """ - Display message communicating indissolubility reason,
         - freeze program for sleep duration
-        - erase n_deletion_lines last terminal output lines or clear screen if n_deletion_lines = -1 """
+        - erase n_deletion_lines last console output lines or clear screen if n_deletion_lines = -1 """
 
     centered_print(message)
 
@@ -51,7 +51,7 @@ def repeat(function: Callable,
 
     """ Args:
             function: callable to be repeated
-            n_deletion_lines: terminal output lines to be deleted, if -1 screen will be cleared
+            n_deletion_lines: console output lines to be deleted, if -1 screen will be cleared
             message: message to be displayed, communicating mistake committed by user because of which
                 repetition had to be triggered
             sleep_duration: program sleep duration in ms
