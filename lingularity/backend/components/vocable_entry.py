@@ -17,6 +17,12 @@ class VocableEntry:
             's': 0.0,
             'lfd': None})
 
+    @staticmethod
+    def is_perfected(data: VocableData) -> bool:
+        if data['lfd'] is None:
+            return False
+        return data['s'] >= 5 and n_days_ago(data['lfd']) < 50
+
     def __init__(self, vocable: str, data: VocableData):
         self.vocable: str = vocable
         self._data: VocableData = data
@@ -53,10 +59,8 @@ class VocableEntry:
         self._increment_times_faced()
 
     @property
-    def is_perfected(self) -> bool:
-        if self.last_faced_date is None:
-            return False
-        return self.score >= 5 and n_days_ago(self.last_faced_date) < 50
+    def perfected(self) -> bool:
+        return self.is_perfected(self._data)
 
     @property
     def as_dict(self) -> Dict[str, VocableData]:

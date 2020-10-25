@@ -72,7 +72,7 @@ class TrainerConsoleFrontend(ABC):
 
         vocable_and_meaning = []
 
-        for query_message in enumerate([f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']):
+        for query_message in [f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']:
             field = input(query_message)
             if not len(field):
                 centered_print("INPUT FIELD LEFT UNFILLED")

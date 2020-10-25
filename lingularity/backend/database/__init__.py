@@ -144,7 +144,7 @@ class MongoDBClient(MonoStatePossessor):
     def query_vocabulary_possessing_languages(self) -> List[str]:
         return self._get_ids(self.vocabulary_collection)
 
-    def query_vocable_entries(self) -> Iterator[Tuple[str, VocableData]]:
+    def query_vocabulary(self) -> Iterator[Tuple[str, VocableData]]:
         vocable_entries = self.vocabulary_collection.find_one(self._language)
         vocable_entries.pop('_id')
         return iter(vocable_entries.items())

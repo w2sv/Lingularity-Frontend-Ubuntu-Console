@@ -14,4 +14,4 @@ def get_mongodb_client() -> MongoDBClient:
 
 
 def get_vocable_entries() -> List[VocableEntry]:
-    return list(starmap(VocableEntry, get_mongodb_client().query_vocable_entries()))
+    return list(starmap(VocableEntry, get_mongodb_client().query_vocabulary()))

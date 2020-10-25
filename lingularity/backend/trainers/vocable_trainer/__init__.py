@@ -1,4 +1,4 @@
-from typing import List, Optional, Sequence, Dict, Iterator
+from typing import List, Optional, Sequence, Dict, Iterator, Tuple
 from itertools import starmap, tee
 from collections import defaultdict
 
@@ -6,7 +6,8 @@ import numpy as np
 
 from .deviation_masks import deviation_masks
 from .response_evaluation import ResponseEvaluation, get_response_evaluation
-from lingularity.backend.components import SentenceData, VocableEntry, TokenMap, get_token_map
+from lingularity.backend.database.document_types import VocableData
+from lingularity.backend.components import SentenceData, TokenMap, get_token_map, VocableEntry
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
 
@@ -43,9 +44,8 @@ class VocableTrainerBackend(TrainerBackend):
         self._set_item_iterator(vocable_entries_to_be_trained)
 
     def _vocable_entries_to_be_trained(self) -> List[VocableEntry]:
-        # TODO
-        entire_vocabulary = starmap(VocableEntry, self.mongodb_client.query_vocable_entries())
-        return list(filter(lambda vocable_entry: not vocable_entry.is_perfected, entire_vocabulary))
+        tokens_with_vocable_data: Iterator[Tuple[str, VocableData]] = filter(lambda token_with_data: not VocableEntry.is_perfected(data=token_with_data[1]), self.mongodb_client.query_vocabulary())
+        return list(starmap(VocableEntry, tokens_with_vocable_data))
 
     @staticmethod
     def _find_synonyms(vocable_entries: List[VocableEntry]) -> Dict[str, List[str]]:
