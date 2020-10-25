@@ -54,7 +54,7 @@ class TokenMap(defaultdict, ABC):
                 - consecutively pop sentence indices element from sentence indices list, starting with the
                     ones corresponding to tokens of lower relevance, and return the intersection between
                     the remaining sentence indices elements if existent
-                - return sentence indices of most relevant token if the only one remaining """
+                - return sentence indices of most relevant vocable if the only one remaining """
 
         relevance_sorted_sentence_indices = none_stripped((self.get(token) for token in relevance_sorted_tokens))
 

@@ -4,8 +4,7 @@ import cursor
 import time
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend
-from lingularity.backend.components import TextToSpeech
+from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend, TextToSpeech
 from lingularity.backend.resources import strings as string_resources
 from lingularity.backend.utils.strings import common_start, strip_multiple
 
@@ -21,7 +20,7 @@ from lingularity.frontend.console.utils.input_resolution import (
 from lingularity.frontend.console.utils.terminal import (
     erase_lines,
     centered_print,
-    centered_output_block_indentation,
+    centered_block_indentation,
     RedoPrint
 )
 
@@ -87,7 +86,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         # display eligible languages in starting-letter-grouped manner
         starting_letter_grouped_languages = [', '.join(list(v)) for _, v in groupby(eligible_languages, lambda x: x[0])]
-        indentation = centered_output_block_indentation(starting_letter_grouped_languages)
+        indentation = centered_block_indentation(starting_letter_grouped_languages)
         for language_group in starting_letter_grouped_languages:
             print(indentation, language_group)
 
@@ -120,7 +119,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     def _select_training_mode(self) -> str:
 
         # display eligible modes
-        indentation = centered_output_block_indentation(modes.explanations)
+        indentation = centered_block_indentation(modes.explanations)
         for keyword, explanation in zip(modes.keywords, modes.explanations):
             print(f'{indentation}{keyword.title()}:')
             print(f'{indentation}\t{explanation}\n')
@@ -146,9 +145,9 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         assert self._tts.language_variety_choices is not None
 
         # display eligible varieties
-        common_start_length = len(common_start(self._tts.language_variety_choices) or '')
+        common_start_length = len(common_start(self._tts.language_variety_choices))
         processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._tts.language_variety_choices]
-        indentation = centered_output_block_indentation(processed_varieties)
+        indentation = centered_block_indentation(processed_varieties)
         for variety in processed_varieties:
             print(indentation, variety)
         print('')
@@ -181,7 +180,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
 
     def _display_instructions(self):
         instructions = ["      Enter:"] + self._training_options.instructions
-        indentation = centered_output_block_indentation(instructions)
+        indentation = centered_block_indentation(instructions)
         for i, line in enumerate(instructions):
             # display intermediate tts option header if applicable
             if i == 4:

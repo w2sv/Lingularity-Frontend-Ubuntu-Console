@@ -3,15 +3,17 @@ from functools import wraps
 
 import cursor
 
+from .termcolor import colorize_chars
 from .undoable_printing import LineCounter, UndoPrint, RedoPrint
 from .clearing import clear_screen, erase_lines
+from .termcolor import colorize_chars
 from .centered_printing import (
     centered_query_indentation,
     centered_print,
     centered_print_indentation,
-    centered_output_block_indentation,
+    centered_block_indentation,
     centered_input_query,
-    allign
+    align
 )
 
 

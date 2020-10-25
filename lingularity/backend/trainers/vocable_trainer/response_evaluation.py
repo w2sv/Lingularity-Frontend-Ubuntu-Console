@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from aenum import NoAliasEnum
 from unidecode import unidecode
 
@@ -14,66 +16,93 @@ class ResponseEvaluation(NoAliasEnum):
     Correct = 1.0
 
 
-def get_response_evaluation(response: str, translation: str) -> ResponseEvaluation:
-    response = response.strip(' ')
+def get_response_evaluation(response: str, ground_truth: str, vocable_identification_aid='') -> Tuple[str, ResponseEvaluation]:
+    response, evaluation = response.strip(' '), None
 
     if not len(response):
-        return ResponseEvaluation.NoResponse  # type: ignore
+        evaluation = ResponseEvaluation.NoResponse
+    else:
+        response = vocable_identification_aid + response
 
-    elif response == translation:
-        return ResponseEvaluation.Correct  # type: ignore
+        if response == ground_truth:
+            evaluation = ResponseEvaluation.Correct
 
-    elif response == unidecode(translation):
-        return ResponseEvaluation.AccentError  # type: ignore
+        elif unidecode(response) == unidecode(ground_truth):
+            evaluation = ResponseEvaluation.AccentError
 
-    elif _n_char_deviations(response, translation) <= _n_tolerable_char_deviations(translation):
-        return ResponseEvaluation.AlmostCorrect  # type: ignore
+        elif _article_missing(response, ground_truth):
+            evaluation = ResponseEvaluation.MissingArticle
 
-    elif _article_missing(response, translation):
-        return ResponseEvaluation.MissingArticle  # type: ignore
+        elif _wrong_article(response, ground_truth):
+            evaluation = ResponseEvaluation.WrongArticle
 
-    elif _wrong_article(response, translation):
-        return ResponseEvaluation.WrongArticle  # type: ignore
+        elif _almost_correct(response, ground_truth):
+            evaluation = ResponseEvaluation.AlmostCorrect
 
-    return ResponseEvaluation.Wrong  # type: ignore
+        else:
+            evaluation = ResponseEvaluation.Wrong
 
-
-def _wrong_article(response: str, translation: str) -> bool:
-    contained_nouns = set(map(get_article_stripped_noun, [response, translation]))
-    return len(contained_nouns) == 1 and next(iter(contained_nouns)) is not None
-
-
-def _article_missing(response: str, translation: str) -> bool:
-    return get_article_stripped_noun(translation) == response
+    return response, evaluation  # type: ignore
 
 
-def _n_tolerable_char_deviations(translation: str) -> int:
-    N_ALLOWED_NON_WHITESPACE_CHARS_PER_DEVIATION = 4
+# ---------------
+# Article related
+# ---------------
+def _wrong_article(response: str, ground_truth: str) -> bool:
+    contained_nouns = list(map(get_article_stripped_noun, [response, ground_truth]))
+    return len(set(contained_nouns)) == 1 and contained_nouns[0] is not None
 
-    return len(translation.replace(' ', '')) // N_ALLOWED_NON_WHITESPACE_CHARS_PER_DEVIATION
+
+def _article_missing(response: str, ground_truth: str) -> bool:
+    return get_article_stripped_noun(ground_truth) == response
 
 
-def _n_char_deviations(response, translation) -> int:
+# ---------------
+# Almost Correct
+# ---------------
+def _almost_correct(response: str, ground_truth: str) -> bool:
+    TOLERATED_CHAR_DEVIATIONS_PER_TOKEN = 1
+
+    response_tokens = response.split(' ')
+    ground_truth_tokens = ground_truth.split(' ')
+
+    if len(response_tokens) != len(ground_truth_tokens):
+        return False
+
+    for response_token, ground_truth_token, in zip(response_tokens, ground_truth_tokens):
+        n_char_deviations = _n_char_deviations(response_token, ground_truth_token)
+        if n_char_deviations > TOLERATED_CHAR_DEVIATIONS_PER_TOKEN or n_char_deviations == TOLERATED_CHAR_DEVIATIONS_PER_TOKEN and not _char_deviation_tolerated(ground_truth_token):
+            return False
+    return True
+
+
+def _char_deviation_tolerated(ground_truth: str) -> bool:
+    return len(ground_truth) >= 4
+
+
+def _n_char_deviations(response: str, ground_truth: str) -> int:
     n_deviations = 0
 
-    modified_response = response
-    for i in range(len(translation)):
-        try:
-            if modified_response[i] != translation[i]:
-                n_deviations += 1
+    adjusted_response = response
+    for i in range(len(ground_truth)):
 
-                if len(modified_response) < len(translation):
-                    modified_response = modified_response[:i] + ' ' + modified_response[i:]
-
-                elif len(modified_response) > len(translation):
-                    modified_response = modified_response[:i] + modified_response[i + 1:]
-        except IndexError:
-            n_deviations += len(translation) - len(response)
+        # exit if i has exceeded length of adjusted response
+        if i == len(adjusted_response):
+            n_deviations += len(ground_truth) - len(response)
             break
 
+        elif adjusted_response[i] != ground_truth[i]:
+            n_deviations += 1
+
+            # enable covering of cases in which one character has been omitted,
+            # such as in sopare <-> scopare
+            if len(ground_truth) > len(adjusted_response) and adjusted_response[i] == ground_truth[i+1]:
+                adjusted_response = adjusted_response[:i] + ' ' + adjusted_response[i:]
+
+            # enable covering of cases in which character has been incorrectly inserted,
+            # such as in scopaare <-> scopare
+            elif len(adjusted_response) > len(ground_truth) and adjusted_response[i+1] == ground_truth[i]:
+                adjusted_response = adjusted_response[:i] + adjusted_response[i + 1:]
+                i -= 1
+
     return n_deviations
-
-
-if __name__ == '__main__':
-    print(get_response_evaluation(response='baretto', translation='il baretto'))
-    print(get_response_evaluation(response='la baretto', translation='il baretto'))

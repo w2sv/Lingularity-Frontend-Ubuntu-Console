@@ -105,17 +105,17 @@ def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> Set[str]:
     return set(filter(is_digit_free, tokens))
 
 
-def common_start(strings: Iterable[str]) -> Optional[str]:
+def common_start(strings: Iterable[str]) -> str:
     buffer = ''
     for strings_i in zip(*strings):
         if len(set(strings_i)) == 1:
             buffer += strings_i[0]
         else:
             break
-    return [None, buffer][bool(len(buffer))]
+    return buffer
 
 
-def longest_continuous_partial_overlap(strings: Iterable[str], min_length=2) -> Optional[str]:
+def longest_continuous_partial_overlap(strings: Iterable[str], min_length=1) -> Optional[str]:
     buffer = ''
     substrings_list = list(map(lambda string: set(_substrings_from_start(string)), strings))
     for i, substrings in enumerate(substrings_list):

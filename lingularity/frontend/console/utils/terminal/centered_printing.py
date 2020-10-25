@@ -2,10 +2,11 @@ from typing import Optional, Sequence, List
 
 from .undoable_printing import LineCounter
 from .utils import _ansi_escape_code_stripped, _terminal_length
+from lingularity.backend.utils.iterables import longest_value
 
 
-def _indentation(line_length: int) -> str:
-    return " " * ((_terminal_length() - line_length) // 2)
+def centered_print_indentation(row: str) -> str:
+    return " " * ((_terminal_length() - len(_ansi_escape_code_stripped(row))) // 2)
 
 
 def centered_print(*print_elements: str, end='\n', line_counter: Optional[LineCounter] = None):
@@ -23,7 +24,7 @@ def centered_print(*print_elements: str, end='\n', line_counter: Optional[LineCo
             # otherwise print writing in between newlines in uniformly indented manner
             else:
                 distinct_lines = print_element.split('\n')
-                indentation = centered_output_block_indentation(distinct_lines)
+                indentation = centered_block_indentation(distinct_lines)
 
                 for line in distinct_lines:
                     printer(indentation + line)
@@ -32,28 +33,24 @@ def centered_print(*print_elements: str, end='\n', line_counter: Optional[LineCo
             printer(centered_print_indentation(print_element) + print_element, end=['\n', end][i == len(print_elements) - 1])
 
 
-def centered_print_indentation(string: str) -> str:
-    return _indentation(len(_ansi_escape_code_stripped(string)))
-
-
 # ------------------
 # Centered Query
 # ------------------
 def centered_query_indentation(input_message: str) -> str:
     INPUT_SPACE_LENGTH = 8
 
-    return _indentation(len(input_message + ' ' * INPUT_SPACE_LENGTH))
+    return centered_print_indentation(input_message + ' ' * INPUT_SPACE_LENGTH)
 
 
 def centered_input_query(input_message: str = '', expected_response_length: int = 0) -> str:
-    print(centered_print_indentation(input_message + ' ' * expected_response_length), end='')
+    print(f"{centered_print_indentation(input_message + ' ' * expected_response_length)}{input_message}", end='')
     return input()
 
 
 # ------------------
 # Block Centering
 # ------------------
-def allign(column1: Sequence[str], column2: Sequence[str]) -> List[str]:
+def align(column1: Sequence[str], column2: Sequence[str]) -> List[str]:
     """ Args:
             column1 to be of equal length as column2
 
@@ -64,10 +61,10 @@ def allign(column1: Sequence[str], column2: Sequence[str]) -> List[str]:
     return [f"{' ' * (max_length_first_column_element - len(column1[i]) + 1)}".join([column1[i], column2[i]]) for i in range(len(column1))]
 
 
-def centered_output_block_indentation(output_block: Sequence[str]) -> str:
+def centered_block_indentation(output_block: Sequence[str]) -> str:
     """ Returns:
             indentation determined by length of longest terminal output row comprised by output_block,
             enabling centered positioning of the aforementioned row and the others to start on the same
             terminal column, resulting in an uniform writing appearance """
 
-    return _indentation(max(map(lambda row: len(_ansi_escape_code_stripped(row)), output_block)))
+    return centered_print_indentation(longest_value(output_block))

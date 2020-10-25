@@ -1,10 +1,10 @@
 from typing import Optional, List, Type
 
-from lingularity.backend.components import TextToSpeech
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.metadata import language_metadata
 from lingularity.backend.trainers import TrainerBackend
 from .modes import TrainingMode
+from .text_to_speech import TextToSpeech
 
 
 class SentenceTranslationTrainerBackend(TrainerBackend):

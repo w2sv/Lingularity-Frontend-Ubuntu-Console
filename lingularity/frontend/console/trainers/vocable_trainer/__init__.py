@@ -5,11 +5,12 @@ import matplotlib.pyplot as plt
 from termcolor import colored
 
 from lingularity.backend.components import VocableEntry
-from lingularity.backend.utils.strings import split_at_uppercase
+from lingularity.backend.utils.strings import split_at_uppercase, common_start
 from lingularity.backend.trainers.vocable_trainer import (
     VocableTrainerBackend as Backend,
     ResponseEvaluation,
-    get_response_evaluation
+    get_response_evaluation,
+    deviation_masks
 )
 
 from lingularity.frontend.console.trainers.vocable_trainer.options import *
@@ -21,10 +22,11 @@ from lingularity.frontend.console.utils import matplotlib as plt_utils
 from lingularity.frontend.console.utils.terminal import (
     erase_lines,
     centered_print,
-    centered_output_block_indentation,
+    centered_block_indentation,
     UndoPrint,
     centered_print_indentation,
-    centered_input_query
+    centered_input_query,
+    colorize_chars
 )
 
 
@@ -101,7 +103,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         centered_print('ELIGIBLE LANGUAGES', DEFAULT_VERTICAL_VIEW_OFFSET)
 
         # display available languages
-        indentation = centered_output_block_indentation(eligible_languages)
+        indentation = centered_block_indentation(eligible_languages)
         for language in sorted(eligible_languages):
             print(indentation, language)
         print('')
@@ -117,7 +119,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     @staticmethod
     @view_creator()
     def _start_sentence_translation_trainer():
-        # TODO: forward to sentence translation trainer/vocable
+        # TODO: forward to sentence ground_truth trainer/vocable
         #  adder selection screen
 
         centered_print("""You have to accumulate vocabulary by means of the 
@@ -149,8 +151,8 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         print(DEFAULT_VERTICAL_VIEW_OFFSET)
 
         # display entry line representations
-        line_reprs = list(map(lambda entry: entry.line_repr, self._backend.new_vocable_entries))
-        indentation = centered_output_block_indentation(line_reprs)
+        line_reprs = list(map(lambda entry: str(entry), self._backend.new_vocable_entries))
+        indentation = centered_block_indentation(line_reprs)
         for line_repr in line_reprs:
             print(indentation, line_repr)
 
@@ -200,32 +202,48 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             self._display_streak()
             self._display_progress_bar()
 
-            # display vocable in reference language, query translation
-            translation_query_output = f'\t\t{entry.display_token} = '
+            # display vocable in reference language, query ground_truth
+            translation_query_output = f'\t\t{entry.meaning} = '
             _undo_print(translation_query_output, end='')
+
+            # get vocable identification aid if synonyms with identical
+            # english ground_truth amongst training vocables
+            vocable_identification_aid = ''
+            if synonyms := self._backend.synonyms.get(entry.the_stripped_meaning):
+                vocable_identification_aid = entry.vocable[:len(common_start(synonyms)) + 1]
+                print(vocable_identification_aid, end='')
+
             response = input()
 
-            # evaluate response, update vocable score, enter update into database
-            response_evaluation = get_response_evaluation(response, entry.display_translation)
+            # concatenate vocable identification aid, get response evaluation,
+            # update vocable score, enter update into database
+            response, response_evaluation = get_response_evaluation(response, entry.vocable, vocable_identification_aid)
             entry.update_score(response_evaluation.value)
-            self._backend.mongodb_client.update_vocable_entry(entry.token, entry.score)
+            self._backend.mongodb_client.update_vocable_entry(entry.vocable, entry.score)
 
-            # erase query line, redo translation query
+            # erase query line, redo ground_truth query
             erase_lines(1)
             _undo_print(translation_query_output, end='')
 
-            translation_output = f'{colored(entry.display_translation, "green")}'
+            ground_truth_output = f'{colored(entry.vocable, "green")}'
 
-            # merely display correct translation if no response given,
+            # merely display correct ground_truth if no response given,
             # otherwise display response and evaluation
             if response_evaluation is ResponseEvaluation.NoResponse:
-                _undo_print(translation_output, end='')
+                _undo_print(ground_truth_output, end='')
+
             else:
+                if response_evaluation is ResponseEvaluation.AlmostCorrect:
+                    response_deviation_mask, ground_truth_deviation_mask = deviation_masks(response=response, ground_truth=entry.vocable)
+
+                    response = colorize_chars(response, char_mask=response_deviation_mask, color_kwargs={'color': "red"})
+                    ground_truth_output = colorize_chars(entry.vocable, char_mask=ground_truth_deviation_mask, color_kwargs={'color': 'green', 'attrs': ['underline']}, fallback_color_kwargs={'color': 'green'})
+
                 _undo_print(f'{response} | {colored(" ".join(split_at_uppercase(response_evaluation.name)).upper(), EVALUATION_2_COLOR[response_evaluation])}', end='')
 
-                # display correct translation in case of imperfect response
+                # display correct ground_truth in case of imperfect response
                 if response_evaluation is not ResponseEvaluation.Correct:
-                    _undo_print(f" | Correct translation: {translation_output}", end='')
+                    _undo_print(f" | Correct translation: {ground_truth_output}", end='')
 
             # display new score in case of change having taken place
             if response_evaluation not in [ResponseEvaluation.NoResponse, ResponseEvaluation.Wrong]:
@@ -238,7 +256,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             _undo_print('\n')
 
             # get related sentence pairs, convert forenames if feasible
-            related_sentence_pairs = self._backend.related_sentence_pairs(entry.display_translation, n=2)
+            related_sentence_pairs = self._backend.related_sentence_pairs(entry.vocable, n=2)
             if self._backend.forenames_convertible:
                 related_sentence_pairs = list(map(self._backend.forename_converter, related_sentence_pairs))
 
@@ -248,6 +266,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             _undo_print('')
 
             # increment/reassign attributes
+            # entry.increment_times_faced()
             self._n_trained_items += 1
             self._accumulated_score += response_evaluation.value
             self._current_vocable_entry = entry
@@ -259,8 +278,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             _undo_print('')
 
             # query option/procedure, execute option if applicable
-            centered_print('$', end='', line_counter=_undo_print)
-            if (option_selection := resolve_input(input(), self._training_options.keywords)) is not None:
+            if len((option_selection := self._query_option_selection())):
                 self._training_options[option_selection].execute()
                 if type(self._training_options[option_selection]) is Exit:
                     return
@@ -270,6 +288,13 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
             entry = self._backend.get_training_item()
         # TODO: make display bar advance to 100% after completion of last vocable
+
+    def _query_option_selection(self) -> str:
+        centered_print('$', end='', line_counter=_undo_print)
+        if (option_selection := resolve_input(input(), self._training_options.keywords + [''])) is None:
+            _undo_print.pop()
+            return repeat(self._query_option_selection, n_deletion_lines=2)
+        return option_selection
 
     def _display_progress_bar(self):
         BAR_LENGTH = 70
@@ -314,7 +339,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         # TODO: revisit
 
         for entry in self._perfected_entries:
-            centered_print(entry.line_repr)
+            centered_print(str(entry))
         print('\n\n')
 
     # -----------------

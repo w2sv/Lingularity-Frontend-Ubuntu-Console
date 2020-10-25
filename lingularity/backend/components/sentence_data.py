@@ -161,7 +161,7 @@ class SentenceData(np.ndarray):
 
     @staticmethod
     def _strip_overlaps(translation_candidates: Iterable[str]) -> Set[str]:
-        if longest_partial_overlap := longest_continuous_partial_overlap(translation_candidates):
+        if longest_partial_overlap := longest_continuous_partial_overlap(translation_candidates, min_length=2):
             return SentenceData._strip_overlaps(list(filter(lambda candidate: longest_partial_overlap not in candidate, translation_candidates)) + [longest_partial_overlap])  # type: ignore
         return set(translation_candidates)
 

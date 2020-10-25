@@ -1,7 +1,12 @@
 from typing import Any, Dict
-import json
 import sys
+import json
 import pickle
+
+
+def write_json(data: Dict[Any, Any], file_path: str):
+    with open(f'{file_path}.json', 'w', encoding='utf-8') as write_file:
+        json.dump(data, write_file, ensure_ascii=False, indent=4)
 
 
 def load_json(file_path: str):
@@ -11,11 +16,6 @@ def load_json(file_path: str):
 
     with open(f'{file_path}.json', 'r', encoding='utf-8') as read_file:
         return json.load(read_file)
-
-
-def write_json(data: Dict[Any, Any], file_path: str):
-    with open(f'{file_path}.json', 'w', encoding='utf-8') as write_file:
-        json.dump(data, write_file, ensure_ascii=False, indent=4)
 
 
 def write_pickle(data: Any, file_path: str):

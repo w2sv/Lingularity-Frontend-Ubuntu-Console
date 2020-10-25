@@ -2,7 +2,7 @@ from typing import Optional, List
 import os
 import random
 
-from lingularity.backend.utils.data_storing import load_json
+from lingularity.backend.utils.data import load_json
 from .types import (
     SubstitutionForenamesMap,
     LanguageMetadata,

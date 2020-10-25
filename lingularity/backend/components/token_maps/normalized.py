@@ -8,7 +8,7 @@ import nltk
 
 from lingularity.backend.components.token_maps import TokenMap
 from lingularity.backend.components.token_maps import UnnormalizedTokenMap
-from lingularity.backend.utils import spacy as spacy_utils, data_storing
+from lingularity.backend.utils import spacy as spacy_utils, data as data_utils
 
 
 class NormalizedTokenMap(TokenMap, ABC):
@@ -65,7 +65,7 @@ class LemmaMap(NormalizedTokenMap):
         self._model: spacy_utils.Model
 
         if os.path.exists(save_path):
-            data, occurrence_map = data_storing.load_pickle(save_path)
+            data, occurrence_map = data_utils.load_pickle(save_path)
 
             super().__init__(data=data, occurrence_map=occurrence_map)
 
@@ -93,7 +93,7 @@ class LemmaMap(NormalizedTokenMap):
                         self.occurrence_map[token.lemma_] += len(indices)
 
     def _pickle_maps(self, save_path: str):
-        data_storing.write_pickle(data=(dict(self._get_data()), dict(self.occurrence_map)), file_path=save_path)
+        data_utils.write_pickle(data=(dict(self._get_data()), dict(self.occurrence_map)), file_path=save_path)
 
     # ------------------
     # Query

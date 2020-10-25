@@ -1,43 +1,38 @@
-from typing import Optional, Dict, List, Any, Iterator
-from dataclasses import dataclass
+from typing import Optional, Tuple, List, Any, Iterator
 
 import pymongo
 
-# TODO: resolve circular import when importing VocableEntry
-from .document_types import LastSessionStatistics, VocableAttributes, TrainingChronic
+from .document_types import LastSessionStatistics, VocableData, TrainingChronic
+from lingularity.utils.state_sharing import MonoStatePossessor
 from lingularity.backend.resources import strings as string_resources
 from lingularity.backend.utils.date import today
-from lingularity.backend.utils.state_sharing import MonoStatePossessor
+from lingularity.backend.components.vocable_entry import VocableEntry
+
+
+# TODO: change vocable data keywords in database, user collection names
+
+
+def client_endpoint(host: str, user: str, password: str) -> str:
+    """ Employing srv endpoint """
+
+    return f'mongodb+srv://{user}:{password}@{host}'
 
 
 class MongoDBClient(MonoStatePossessor):
-    @dataclass(frozen=True)
-    class Credentials:
-        host: str
-        user: str
-        password: str
+    _cluster: pymongo.MongoClient
 
-        @classmethod
-        def default(cls):
-            return cls(
-                host='cluster0.zthtl.mongodb.net/admin?retryWrites=true&w=majority',
-                user='sickdude69',
-                password='clusterpassword'
-            )
-
-        def client_endpoint(self, srv_endpoint: bool) -> str:
-            return f'mongodb{"+srv" if srv_endpoint else ""}://{self.user}:{self.password}@{self.host}'
-
-    def __init__(self, user: Optional[str] = None, language: Optional[str] = None):
+    def __init__(self):
         super().__init__()
 
-        self._user = user
-        self._language = language
-        self._cluster = pymongo.MongoClient(self.Credentials.default().client_endpoint(srv_endpoint=True), serverSelectionTimeoutMS=1_000)
+        self._user: Optional[str] = None
+        self._language: Optional[str] = None
 
-    # -------------------
-    # Properties
-    # -------------------
+        MongoDBClient._cluster = pymongo.MongoClient(
+            client_endpoint(
+                host='cluster0.zthtl.mongodb.net/admin?retryWrites=true&w=majority',
+                user='sickdude69',
+                password='clusterpassword'), serverSelectionTimeoutMS=1_000)
+
     @property
     def user(self) -> Optional[str]:
         return self._user
@@ -61,7 +56,7 @@ class MongoDBClient(MonoStatePossessor):
         self._language = value
 
     # --------------------
-    # .Database-related
+    # User transcendent
     # --------------------
     @property
     def mail_addresses(self) -> Iterator[str]:
@@ -76,27 +71,22 @@ class MongoDBClient(MonoStatePossessor):
 
         return self._cluster.list_database_names()
 
+    # --------------------
+    # User specific
+    # --------------------
+    def delete_user(self, user: str):
+        self._cluster.drop_database(user)
+
     @property
     def user_data_base(self) -> pymongo.collection.Collection:
         return self._cluster[self._user]
 
-    # -------------------
-    # Generic
-    # -------------------
-    def drop_all_databases(self):
-        for db in self._cluster.list_database_names():
-            self._cluster.drop_database(db)
-
-    def delete_user(self, user: str):
-        self._cluster.drop_database(user)
-
-    @staticmethod
-    def _get_ids(collection: pymongo.collection.Collection) -> List[Any]:
-        return list(collection.find().distinct('_id'))
-
     # ------------------
     # Collections
     # ------------------
+    @staticmethod
+    def _get_ids(collection: pymongo.collection.Collection) -> List[Any]:
+        return list(collection.find().distinct('_id'))
 
     # ------------------
     # .General
@@ -151,29 +141,37 @@ class MongoDBClient(MonoStatePossessor):
 
         return self.user_data_base['vocabulary']
 
-    def insert_vocable(self, vocable_entry):
+    def query_vocabulary_possessing_languages(self) -> List[str]:
+        return self._get_ids(self.vocabulary_collection)
+
+    def query_vocable_entries(self) -> Iterator[Tuple[str, VocableData]]:
+        vocable_entries = self.vocabulary_collection.find_one(self._language)
+        vocable_entries.pop('_id')
+        return iter(vocable_entries.items())
+
+    def insert_vocable_entry(self, vocable_entry: VocableEntry):
         self.vocabulary_collection.update_one(
             filter={'_id': self._language},
-            update={'$set': vocable_entry.entry},
+            update={'$set': vocable_entry.as_dict},
             upsert=True
         )
 
-    def delete_vocable_entry(self, vocable_entry):
+    def delete_vocable_entry(self, vocable_entry: VocableEntry):
         self.vocabulary_collection.update_one(
             filter={'_id': self._language},
-            update={'$unset': vocable_entry.entry}
+            update={'$unset': vocable_entry.as_dict}
         )
 
-    def update_vocable_entry(self, token: str, new_score: float):
+    def update_vocable_entry(self, vocable: str, new_score: float):
         self.vocabulary_collection.find_one_and_update(
-            filter={'_id': self._language, token: {'$exists': True}},
-            update={'$inc': {f'{token}.tf': 1},
-                    '$set': {f'{token}.lfd': str(today),
-                             f'{token}.s': new_score}},
+            filter={'_id': self._language, vocable: {'$exists': True}},
+            update={'$inc': {f'{vocable}.tf': 1},
+                    '$set': {f'{vocable}.lfd': str(today),
+                             f'{vocable}.s': new_score}},
             upsert=False
         )
 
-    def insert_altered_vocable_entry(self, old_vocable: str, altered_vocable_entry):
+    def alter_vocable_entry(self, old_vocable: str, altered_vocable_entry: VocableEntry):
         # delete old sub document corresponding to old_vocable regardless of whether the vocable,
         # that is the sub document key has changed
         self.vocabulary_collection.find_one_and_update(
@@ -181,15 +179,7 @@ class MongoDBClient(MonoStatePossessor):
             update={'$unset': {old_vocable: 1}}
         )
 
-        self.insert_vocable(altered_vocable_entry)
-
-    def query_vocabulary_possessing_languages(self) -> List[str]:
-        return self._get_ids(self.vocabulary_collection)
-
-    def query_vocabulary_data(self) -> List[Dict[str, Any]]:
-        result = self.vocabulary_collection.find_one(self._language)
-        result.pop('_id')
-        return [{k: v} for k, v in result.items()]
+        self.insert_vocable_entry(altered_vocable_entry)
 
     # ------------------
     # .Training Chronic
@@ -250,7 +240,7 @@ class MongoDBClient(MonoStatePossessor):
     # ------------------
     # ..playback speed
     # ------------------
-    def insert_playback_speed(self, variety: str, playback_speed: float):
+    def set_playback_speed(self, variety: str, playback_speed: float):
         self.language_metadata_collection.update_one(filter={'_id': self._language},
                                                      update={'$set': {f'variety.{variety}.playbackSpeed': playback_speed}},
                                                      upsert=True)
@@ -290,8 +280,3 @@ class MongoDBClient(MonoStatePossessor):
             return self.language_metadata_collection.find_one(filter={'_id': string_resources.ENGLISH})['referenceLanguage']
         except TypeError:
             return None
-
-
-if __name__ == '__main__':
-    client = MongoDBClient(user='janek')
-    print(client.query_vocabulary_possessing_languages())

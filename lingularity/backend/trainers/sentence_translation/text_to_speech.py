@@ -5,10 +5,10 @@ import vlc
 from mutagen.mp3 import MP3
 
 from lingularity.utils import either
+from lingularity.utils.state_sharing import MonoStatePossessor
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.ops.google.text_to_speech import google_tts
 from lingularity.backend.utils.time import get_timestamp
-from lingularity.backend.utils.state_sharing import MonoStatePossessor
 
 
 class TextToSpeech(MonoStatePossessor):
@@ -131,7 +131,7 @@ class TextToSpeech(MonoStatePossessor):
         # avoid unnecessary database calls
         if value != self._playback_speed:
             self._playback_speed = value
-            self._mongodb_client.insert_playback_speed(self._language_variety, self._playback_speed)
+            self._mongodb_client.set_playback_speed(self._language_variety, self._playback_speed)
 
     @staticmethod
     def is_valid_playback_speed(playback_speed: float) -> bool:

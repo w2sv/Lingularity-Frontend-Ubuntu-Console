@@ -57,7 +57,7 @@ class DeleteVocableEntry(VocableTrainerOption):
         super().__init__('delete', "delete the current vocable entry")
 
     def execute(self):
-        centered_print(f"\nAre you sure you want to irreversibly delete {self._current_vocable_entry.line_repr}? (y)es/(n)o")
+        centered_print(f"\nAre you sure you want to irreversibly delete {self._current_vocable_entry.__str__}? (y)es/(n)o")
         if (input_resolution := resolve_input(centered_input_query(), options=['yes', 'no'])) is None:
             return repeat(self.execute(), n_deletion_lines=3)
         elif input_resolution == 'yes':

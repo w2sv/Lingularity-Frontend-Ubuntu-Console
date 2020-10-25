@@ -1,4 +1,4 @@
-from typing import Union, Sequence, Deque
+from typing import Union, Deque, List
 from abc import ABC
 from collections import deque
 
@@ -11,8 +11,8 @@ class LineCounter(ABC):
         passed to them and counting the number of terminal output rows
         the output of the aforementioned resulted in """
 
-    def __init__(self, buffer_container: Union[Sequence, Deque]):
-        self._buffer: Union[Sequence, Deque] = buffer_container
+    def __init__(self, buffer_container: Union[List, Deque]):
+        self._buffer: Union[List, Deque] = buffer_container
         self._append_to_last_element: bool = False
 
     @property
@@ -56,6 +56,10 @@ class LineCounter(ABC):
         if '\n' not in end:
             self._append_to_last_element = True
 
+    def pop(self) -> str:
+        self._append_to_last_element = False
+        return self._buffer.pop()
+
 
 class UndoPrint(LineCounter):
     """ Class enabling convenient undoing of received output """
@@ -70,7 +74,7 @@ class UndoPrint(LineCounter):
 
 
 class RedoPrint(LineCounter):
-    """ Class enabling redo of previously stored output """
+    """ Class enabling redoing of previously stored output """
 
     def __init__(self):
         super().__init__(buffer_container=deque())

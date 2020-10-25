@@ -1,10 +1,10 @@
-from typing import Pattern
+from typing import Pattern, List
 import re
 import shutil
 
 
 _TAB_OUTPUT_LENGTH = 4
-_ANSI_ESCAPE: Pattern[str] = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+_ANSI_ESCAPE_REGEX: Pattern[str] = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
 
 
 def _ansi_escape_code_stripped(string: str) -> str:
@@ -14,7 +14,7 @@ def _ansi_escape_code_stripped(string: str) -> str:
         >>>_ansi_escape_code_stripped('[35mHello Görl![0m')
         Hello Görl!"""
 
-    return _ANSI_ESCAPE.sub('', string)
+    return _ANSI_ESCAPE_REGEX.sub('', string)
 
 
 def _output_length(string: str) -> int:
@@ -24,7 +24,7 @@ def _output_length(string: str) -> int:
         Returns:
             length of terminal output which the passed string would produce """
 
-    return len(string) + string.count('\t') * (_TAB_OUTPUT_LENGTH - 1)
+    return len(_ansi_escape_code_stripped(string)) + string.count('\t') * (_TAB_OUTPUT_LENGTH - 1)
 
 
 def _terminal_length() -> int:

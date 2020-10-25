@@ -81,7 +81,7 @@ class TrainerConsoleFrontend(ABC):
             vocable_and_meaning.append(field)
 
         self._latest_created_vocable_entry = VocableEntry.new(*vocable_and_meaning)
-        self._backend.mongodb_client.insert_vocable(self._latest_created_vocable_entry)
+        self._backend.mongodb_client.insert_vocable_entry(self._latest_created_vocable_entry)
 
         return 2
 
@@ -90,14 +90,14 @@ class TrainerConsoleFrontend(ABC):
                 number of printed lines: int """
 
         # store old properties for comparison, database identification
-        old_line_repr = vocable_entry.line_repr
-        old_vocable = vocable_entry.token
+        old_line_repr = str(vocable_entry)
+        old_vocable = vocable_entry.vocable
 
         # type indented old representation
         KeyboardController().type(f'{centered_print_indentation(old_line_repr)}{old_line_repr}')
         # TODO: debug print(centering_indentation) into KeyboardController().type(old_line_repr)
 
-        # get new components, i.e. vocable + translation
+        # get new components, i.e. vocable + ground_truth
         new_entry_components = input('').split(' - ')
 
         # exit in case of invalid alteration
@@ -111,8 +111,8 @@ class TrainerConsoleFrontend(ABC):
         vocable_entry.alter(*stripped_new_entry_components)
 
         # insert altered entry into database in case of alteration actually having taken place
-        if vocable_entry.line_repr != old_line_repr:
-            self._backend.mongodb_client.insert_altered_vocable_entry(old_vocable, vocable_entry)
+        if str(vocable_entry) != old_line_repr:
+            self._backend.mongodb_client.alter_vocable_entry(old_vocable, vocable_entry)
 
         return 2
 

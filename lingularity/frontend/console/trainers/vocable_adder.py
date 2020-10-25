@@ -9,7 +9,7 @@ from lingularity.frontend.console.trainers import VocableTrainerConsoleFrontend
 from lingularity.frontend.console.utils.input_resolution import resolve_input, indicate_indissolubility
 from lingularity.frontend.console.utils.terminal import (
     clear_screen,
-    centered_output_block_indentation,
+    centered_block_indentation,
     erase_lines
 )
 from lingularity.frontend.console.utils.view import DEFAULT_VERTICAL_VIEW_OFFSET
@@ -35,7 +35,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
             "\t  - 'alter' the latest vocable entry"
         )
 
-        indentation = centered_output_block_indentation(instructions)
+        indentation = centered_block_indentation(instructions)
         for instruction in instructions:
             print(f'{indentation}{instruction}')
 
@@ -48,7 +48,7 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
         return None
 
     def _output_vocable_addition_confirmation(self):
-        print(f'Added {self._latest_created_vocable_entry.line_repr}')
+        print(f'Added {str(self._latest_created_vocable_entry)}')
 
     def __call__(self) -> bool:
         self._display_training_screen_header_section()

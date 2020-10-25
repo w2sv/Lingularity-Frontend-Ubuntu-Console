@@ -4,7 +4,7 @@ from typing import List, Type, Dict
 from termcolor import colored
 
 from lingularity.backend.utils.iterables import unzip
-from lingularity.frontend.console.utils.terminal import allign
+from lingularity.frontend.console.utils.terminal import align
 
 
 class TrainingOption(ABC):
@@ -48,4 +48,4 @@ class TrainingOptions(dict):
         self.instructions: List[str] = self._compose_instruction()
 
     def _compose_instruction(self) -> List[str]:
-        return allign(*unzip(map(lambda option: (colored(option.keyword, 'red'), f'to {option.explanation}'), self.values())))
+        return align(*unzip(map(lambda option: (colored(option.keyword, 'red'), f'to {option.explanation}'), self.values())))

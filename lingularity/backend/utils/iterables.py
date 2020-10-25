@@ -1,4 +1,4 @@
-from typing import Set, Iterable, Any, List, Tuple
+from typing import Set, Iterable, Any, List, Tuple, Sequence
 from itertools import tee, islice
 
 
@@ -20,3 +20,7 @@ def longest_value(iterable: Iterable[Any]) -> Any:
 
 def unzip(nested_list: Iterable[Iterable[Any]]):
     return zip(*nested_list)
+
+
+def contains_index(sequence: Sequence[Any], index: int) -> bool:
+    return index <= len(sequence) - 1
