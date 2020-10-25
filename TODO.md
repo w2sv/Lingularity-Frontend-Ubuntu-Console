@@ -2,6 +2,10 @@
 
 ## GENERIC:
     - [ ] clean up options
+    - [ ] do something about repetitive entering of 'to' when adding 
+          english verb meanings
+    - [ ] incentivise entering of noun with article if applicable,
+          entering of adjectives in consistent gender flection
 
     - write impending tests:
         - [ ] token maps
@@ -27,6 +31,8 @@
     - [ ] display rectification proposals on adding of supposedly incorrect vocables
     - [ ] enable lemma query
     - [ ] favor related sentences which haven't yet been shown
+    - [ ] display incorrectly answered vocable entries after session termination and 
+          number of perfected entries 
     
     - SET UP MODES:
         - [ ] vocables user struggling with
