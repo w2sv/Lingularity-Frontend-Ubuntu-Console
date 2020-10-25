@@ -4,6 +4,12 @@ __pycache__
 /SentenceTranslation.spec
 /.idea/
 /.mypy_cache/
+logging.txt
+
+# coverage
+/.coverage
+/htmlcov/
+
 
 # Data
 *.mp3
@@ -16,6 +22,3 @@ __pycache__
 # Keys
 .fernet_key
 .logged_in_user
-
-# Logs
-logging.txt

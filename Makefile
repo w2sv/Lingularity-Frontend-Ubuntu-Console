@@ -6,7 +6,7 @@ mypy:
 	mypy lingularity/
 
 pytest:
-	python -m pytest -vv tests/
+	coverage run -m pytest -vv tests/
 
 doctest:
 	python -m pytest -vv --doctest-modules --doctest-continue-on-failure ./lingularity/ --ignore ./lingularity/frontend/webpage/
