@@ -178,7 +178,7 @@ class SentenceData(np.ndarray):
 
         @cached_property
         def uses_latin_script(self) -> bool:
-            return is_of_latin_script(self[-1], trim=True)
+            return is_of_latin_script(self[-1], remove_non_alphabetic_characters=True)
 
         def comprises_tokens(self, query_tokens: List[str], query_length_percentage=1.0) -> bool:
             """ Args:
@@ -188,7 +188,7 @@ class SentenceData(np.ndarray):
                         queried """
 
             # return False if query tokens of different script type than sentences
-            if self.uses_latin_script != is_of_latin_script(''.join(query_tokens), trim=False):
+            if self.uses_latin_script != is_of_latin_script(''.join(query_tokens), remove_non_alphabetic_characters=False):
                 return False
 
             query_tokens_set = set(query_tokens)
