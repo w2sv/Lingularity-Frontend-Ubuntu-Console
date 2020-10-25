@@ -1,8 +1,12 @@
 import pytest
 from collections import Counter
 
-from lingularity.backend.ops.data_mining.scraping import (scrape_sentence_data_download_links, scrape_demonym,
-                                                          scrape_popular_forenames, scrape_countries_language_employed_in)
+from lingularity.backend.ops.data_mining.scraping import (
+    scrape_sentence_data_download_links,
+    scrape_demonym,
+    scrape_countries_language_employed_in,
+    scrape_popular_forenames
+)
 
 
 def test_zip_download_link_parsing():
@@ -31,7 +35,7 @@ def test_zip_download_link_parsing():
     ('Uzbekistan', 'Uzbek'),
     ('Indogermanic', None)
 ])
-def test_demonyms_fetching(country, expected_demonym):
+def test_demonym_scraping(country, expected_demonym):
     assert scrape_demonym(country) == expected_demonym
 
 
@@ -52,7 +56,7 @@ def test_demonyms_fetching(country, expected_demonym):
     ('Hungarian', ['Hungary', 'Croatia', 'Vojvodina', 'Austria', 'Serbia', 'Slovakia', 'Slovenia', 'Ukraine', 'Romania']),
     ('Serbian', ['Bosnia_and_Herzegovina', 'Hungary', 'Croatia', 'North_Macedonia', 'Serbia', 'Slovakia', 'Kosovo', 'Montenegro', 'Romania', 'Czech_Republic']),
 ])
-def test_language_corresponding_countries_fetching(language, expected_countries):
+def test_language_corresponding_countries_scraping(language, expected_countries):
     countries_language_employed_in = scrape_countries_language_employed_in(language)
 
     if expected_countries is None:

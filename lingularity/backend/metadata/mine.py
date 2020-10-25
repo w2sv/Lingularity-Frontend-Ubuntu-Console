@@ -13,11 +13,12 @@ from lingularity.backend.components.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.metadata.types import LanguageMetadata, CountryMetadata
 from lingularity.backend.trainers.base import SentenceData
 from lingularity.backend.ops.google.translation import google_translator
-from lingularity.backend.utils import strings, data_storing
+from lingularity.backend.utils import strings, data
 from lingularity.backend.ops.data_mining.scraping import (
     scrape_sentence_data_download_links,
     scrape_countries_language_employed_in,
-    scrape_popular_forenames, scrape_demonym
+    scrape_popular_forenames,
+    scrape_demonym
 )
 
 
@@ -28,7 +29,7 @@ def _mine_metadata():
     language_2_download_link = scrape_sentence_data_download_links()
 
     # add English metadata
-    language_metadata[string_resources.ENGLISH] = data_storing.load_json(f'{METADATA_DIR_PATH}/correction/language')[string_resources.ENGLISH]
+    language_metadata[string_resources.ENGLISH] = data.load_json(f'{METADATA_DIR_PATH}/correction/language')[string_resources.ENGLISH]
     for country in language_metadata[string_resources.ENGLISH]['countriesEmployedIn']:
         _mine_and_set_forenames(country)
 
@@ -116,7 +117,7 @@ def _get_default_forename_translations(sentence_data: SentenceData, language: st
 
 
 def _correct_metadata(metadata: Union[LanguageMetadata, CountryMetadata], file_name: str):
-    correction_data = data_storing.load_json(f'{METADATA_DIR_PATH}/correction/{file_name}')
+    correction_data = data.load_json(f'{METADATA_DIR_PATH}/correction/{file_name}')
     for meta_key, sub_dict in correction_data.items():
         for sub_key, value in sub_dict.items():
             if isinstance(value, collections.abc.Mapping):
@@ -142,5 +143,5 @@ if __name__ == '__main__':
     # correct country metadata
     _correct_metadata(country_metadata, 'country')
 
-    data_storing.write_json(language_metadata, file_path=f'{METADATA_DIR_PATH}/language')
-    data_storing.write_json(country_metadata, file_path=f'{METADATA_DIR_PATH}/country')
+    data.write_json(language_metadata, file_path=f'{METADATA_DIR_PATH}/language')
+    data.write_json(country_metadata, file_path=f'{METADATA_DIR_PATH}/country')

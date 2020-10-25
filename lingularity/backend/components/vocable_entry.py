@@ -1,8 +1,16 @@
 from typing import Optional, Dict
 from functools import cached_property
 
-from lingularity.backend.database.document_types import VocableData
+from mypy_extensions import TypedDict
+
 from lingularity.backend.utils.date import n_days_ago
+
+
+class VocableData(TypedDict):
+    t: str
+    tf: int
+    s: float
+    lfd: Optional[str]
 
 
 class VocableEntry:

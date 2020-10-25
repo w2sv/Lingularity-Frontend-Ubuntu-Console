@@ -2,11 +2,11 @@ from typing import Optional, Tuple, List, Any, Iterator
 
 import pymongo
 
-from .document_types import LastSessionStatistics, VocableData, TrainingChronic
+from .document_types import LastSessionStatistics, TrainingChronic
 from lingularity.utils.state_sharing import MonoStatePossessor
 from lingularity.backend.resources import strings as string_resources
 from lingularity.backend.utils.date import today
-from lingularity.backend.components.vocable_entry import VocableEntry
+from lingularity.backend.components.vocable_entry import VocableEntry, VocableData
 
 
 # TODO: change vocable data keywords in database, user collection names

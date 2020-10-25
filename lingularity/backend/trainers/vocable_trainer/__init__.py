@@ -6,7 +6,7 @@ import numpy as np
 
 from .deviation_masks import deviation_masks
 from .response_evaluation import ResponseEvaluation, get_response_evaluation
-from lingularity.backend.database.document_types import VocableData
+from ...components.vocable_entry import VocableData
 from lingularity.backend.components import SentenceData, TokenMap, get_token_map, VocableEntry
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
@@ -28,6 +28,8 @@ class VocableTrainerBackend(TrainerBackend):
 
     @property
     def new_vocable_entries_available(self) -> bool:
+        assert self.new_vocable_entries is not None
+
         self.new_vocable_entries, teed = tee(self.new_vocable_entries)
         return next(teed, None) is not None
 

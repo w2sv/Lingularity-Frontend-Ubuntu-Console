@@ -5,7 +5,6 @@ import re
 
 from lingularity.backend.utils.iterables import windowed, longest_value
 
-
 APOSTROPHES = "'’́́́́́́́́́́́́"
 
 
@@ -33,13 +32,22 @@ def _to_ascii(string: str) -> str:
         Returns:
              ascii-transformed string, that is a string whose non-ascii characters have been
              transformed to their respective ascii-equivalent,
-                e.g. Odlično -> Odlicno,
-                     vilkår -> vilkar,
-                     Söýgi -> Soygi
+             e.g.
+                >>> _to_ascii('Odlično')
+                'Odlicno'
+                >>> _to_ascii('vilkår')
+                'vilkar'
+                >>> _to_ascii('Söýgi')
+                'Soygi'
+
              whilst such not possessing an equivalent are removed,
-                e.g. Hjælp -> Hjlp,
-                     Dođi -> Doi,
-                     等等我 -> ''
+                e.g.
+                >>> _to_ascii('Hjælp')
+                'Hjlp'
+                >>> _to_ascii('Dođi')
+                'Doi'
+                >>> _to_ascii('等等我')
+                ''
 
         Special characters have no impact of the working of this function whatsoever and are returned
             as are """
@@ -55,14 +63,14 @@ def strip_accents(string: str) -> str:
         Special characters have no impact of the working of this function whatsoever and are returned
             as are
 
-        >>>strip_accents('perché')
-        perche
-        >>>strip_accents("c'est-à-dire")
-        c'est-a-dire
-        >>>strip_accents('impact')
-        impact
-        >>>strip_accents('走吧')
-        走吧"""
+        >>> strip_accents('perché')
+        'perche'
+        >>> strip_accents("c'est-à-dire")
+        "c'est-a-dire"
+        >>> strip_accents('impact')
+        'impact'
+        >>> strip_accents('走吧')
+        '走吧' """
 
     if is_of_latin_script(string):
         return _to_ascii(string)
@@ -70,7 +78,11 @@ def strip_accents(string: str) -> str:
 
 
 def strip_special_characters(string: str, include_apostrophe=False, include_dash=False) -> str:
-    special_characters = '"„“!#$%&()*+,./:;<=>?@[\]^_`{|}~»«。¡¿'
+    """
+    >>> strip_special_characters('\wha/Za"„“!#$%&()*+,./:;<=>?@[]^\\_`{|}~»«。¡¿')
+    'whaZa' """
+
+    special_characters = '"„“!#$%&()*+,./:;<=>?@[]^\\_`{|}~»«。¡¿'
 
     if include_apostrophe:
         special_characters += APOSTROPHES
@@ -87,16 +99,16 @@ def get_article_stripped_noun(noun_candidate: str) -> Optional[str]:
     """ Returns:
             None in case of article identification inability
 
-        >>>get_article_stripped_noun('il pomeriggio')
-        'il pomeriggio'
-        >>>get_article_stripped_noun("l'amour")
-        amour
-        >>>get_article_stripped_noun("amour")
-        None
-        >>>get_article_stripped_noun("c'est-à-dire")
-        None
-        >>>get_article_stripped_noun('nel guai')
-        guai """
+        >>> get_article_stripped_noun('il pomeriggio')
+        'pomeriggio'
+        >>> get_article_stripped_noun("l'amour")
+        'amour'
+        >>> get_article_stripped_noun("amour")
+
+        >>> get_article_stripped_noun("c'est-à-dire")
+
+        >>> get_article_stripped_noun('nel guai')
+        'guai' """
 
     if contains_article(noun_candidate):
         return split_multiple(noun_candidate, delimiters=list(APOSTROPHES) + [' '])[1]
@@ -117,8 +129,9 @@ def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> Set[str]:
             - break text into distinct tokens
             - remove tokens containing digit(s)
 
-        >>>get_meaningful_tokens("Parce que il n'avait rien à foutre avec ces 3 saloppes, disait dieu.")
-        [Parce, que, il, n'avait, rien, à, foutre, avec, ces, saloppes, disait, dieu] """
+        >>> meaningful_tokens = get_meaningful_tokens("Parce que il n'avait rien à foutre avec ces 3 saloppes qu'il avait rencontrées dans le Bonn17, disait dieu.", apostrophe_splitting=True)
+        >>> sorted(meaningful_tokens)
+        ['Parce', 'avait', 'avec', 'ces', 'dans', 'dieu', 'disait', 'foutre', 'il', 'le', 'n', 'qu', 'que', 'rencontrées', 'rien', 'saloppes', 'à'] """
 
     special_character_stripped = strip_special_characters(text, include_apostrophe=False, include_dash=False)
     unicode_stripped = _strip_unicode(special_character_stripped)
@@ -135,11 +148,11 @@ def common_start(strings: Iterable[str]) -> str:
     """ Returns:
             empty string in case of strings not possessing common start
 
-        >>>common_start(['spaventare', 'spaventoso', 'spazio'])
-        spa
-        >>>common_start(['avventura', 'avventurarsi'])
-        avventura
-        >>>common_start(['nascondersi', 'incolpare'])
+        >>> common_start(['spaventare', 'spaventoso', 'spazio'])
+        'spa'
+        >>> common_start(['avventura', 'avventurarsi'])
+        'avventura'
+        >>> common_start(['nascondersi', 'incolpare'])
         '' """
 
     buffer = ''
@@ -158,14 +171,15 @@ def longest_continuous_partial_overlap(strings: Iterable[str], min_length=1) -> 
             been met
 
     >>> longest_continuous_partial_overlap(['メアリーが', 'トムは', 'トムはメアリーを', 'メアリー', 'トムはマリ', 'いた', 'メアリーは'])
-    メアリー
+    'メアリー'
     >>> longest_continuous_partial_overlap(['amatur', 'masochist', 'erlaucht', 'manko'])
-    ma
+    'ma'
     >>> longest_continuous_partial_overlap(['mast', 'merk', 'wucht'], min_length=2)
-    None """
+
+    """
 
     buffer = ''
-    substrings_list = list(map(lambda string: set(_substrings_from_start(string)), strings))
+    substrings_list = list(map(lambda string: set(_start_including_substrings(string)), strings))
     for i, substrings in enumerate(substrings_list):
         for comparison in substrings_list[i + 1:]:
             buffer = longest_value([buffer, longest_value(substrings & comparison | {''})])
@@ -204,7 +218,8 @@ def contains_article(noun_candidate: str) -> bool:
             as well as apostrophes and the first token, that is the article candidate shorter than
             the second, that is the noun candidate """
 
-    return len((tokens := split_multiple(noun_candidate, delimiters=list(APOSTROPHES) + [' ']))) == 2 and len(tokens[0]) < len(tokens[1])
+    return len((tokens := split_multiple(noun_candidate, delimiters=list(APOSTROPHES) + [' ', '-']))) == 2 and len(
+        tokens[0]) < len(tokens[1])
 
 
 # ---------------
@@ -221,8 +236,8 @@ def continuous_substrings(string: str, lengths: Optional[Iterable[int]] = None, 
             Iterator of entirety of continuous substrings of min length = 2 comprised by string
             sorted with respect to their lengths
 
-        >>>list(continuous_substrings('path'))
-        [pa, at, th, pat, ath, path] """
+        >>> list(continuous_substrings('path'))
+        ['pa', 'at', 'th', 'pat', 'ath', 'path'] """
 
     if lengths is None:
         lengths = range(min_length, len(string) + 1)
@@ -232,10 +247,10 @@ def continuous_substrings(string: str, lengths: Optional[Iterable[int]] = None, 
     return map(''.join, chain.from_iterable(map(lambda length: windowed(string, length), lengths)))
 
 
-def _substrings_from_start(string: str) -> Iterator[str]:
+def _start_including_substrings(string: str) -> Iterator[str]:
     """
-    >>> list(_substrings_from_start('path'))
-    [p, pa, pat, path] """
+    >>> list(_start_including_substrings('path'))
+    ['p', 'pa', 'pat', 'path'] """
 
     for i in range(1, len(string) + 1):
         yield string[:i]

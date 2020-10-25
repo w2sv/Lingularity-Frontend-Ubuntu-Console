@@ -137,7 +137,7 @@ class ForenameConvertor:
                 the respective fragments contain the passed forename and are hence to be converted
 
                 >>> list(ForenameConvertor._forename_containment_mask('Tom', ["Tom's", "seriously", "messed", "up."], False))
-                [True, False, False False]
+                [True, False, False, False]
                 >>> list(ForenameConvertor._forename_containment_mask('Tom', ["Tomorrow", "Mary", "sacrifices", "Toms", "virginity?"], False))
                 [False, False, False, True, False]
                 """

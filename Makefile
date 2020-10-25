@@ -8,7 +8,10 @@ mypy:
 pytest:
 	python -m pytest -vv tests/
 
-test: mypy pytest
+doctest:
+	python -m pytest -vv --doctest-modules --doctest-continue-on-failure ./lingularity/ --ignore ./lingularity/frontend/webpage/
+
+test: mypy pytest doctest  # run with -k flag in order to keep going in case of recipe failure
 
 # ----------Installation--------------
 

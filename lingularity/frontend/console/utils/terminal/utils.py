@@ -11,8 +11,8 @@ def _ansi_escape_code_stripped(string: str) -> str:
     """ Returns:
             ANSI escape code stripped string
 
-        >>>_ansi_escape_code_stripped('[35mHello Görl![0m')
-        Hello Görl!"""
+        >>> _ansi_escape_code_stripped('[35mHello Görl![0m')
+        'Hello Görl!' """
 
     return _ANSI_ESCAPE_REGEX.sub('', string)
 

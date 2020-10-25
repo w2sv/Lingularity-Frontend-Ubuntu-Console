@@ -1,10 +1,7 @@
 from lingularity.backend.trainers.vocable_trainer import VocableTrainerBackend
 from tests.utils import get_vocable_entries
 
-import pytest
 
-
-@pytest.skip(msg="Update expected synonyms")
 def test_find_synonyms():
     EXPECTED = {'next to': ['di fianco', 'accanto a'], 'face': ['la faccia', 'il viso']}
 
