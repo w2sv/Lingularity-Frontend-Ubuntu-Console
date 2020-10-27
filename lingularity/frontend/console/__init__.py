@@ -36,7 +36,7 @@ def reentry_at(reentry_point: ReentryPoint):
         return __call__()
 
     elif reentry_point is ReentryPoint.Exit:
-        return
+        return screen.exit.__call__()
 
     else:
         if reentry_point is ReentryPoint.LanguageAddition:
@@ -47,15 +47,11 @@ def reentry_at(reentry_point: ReentryPoint):
             if reentry_point := screen.home.__call__():
                 return reentry_at(reentry_point=reentry_point)
 
-        return _recurse_after_training_selection()
-
-
-def _recurse_after_training_selection():
-    return reentry_at(reentry_point=screen.training_selection.__call__())
+        return reentry_at(reentry_point=screen.training_selection.__call__())
 
 
 if __name__ == '__main__':
     enable_logging()
-    screen.ops.initialize_console()
+    screen.ops.resize_console()
     MongoDBClient()
     __call__()

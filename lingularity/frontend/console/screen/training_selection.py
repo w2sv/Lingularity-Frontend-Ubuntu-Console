@@ -26,14 +26,14 @@ KEYWORD_2_ACTION: Dict[str, Action] = {
 }
 
 
-@view.view_creator(banner_kind='3d-ascii', banner_color='green')
+@view.view_creator(banner='3d-ascii', banner_color='green')
 def __call__(is_new_user=False) -> ReentryPoint:
     view.set_terminal_title(f'{State.language} Training Selection')
 
     if is_new_user:
         _display_welcome_message(username=State.username)
 
-    _display_constitution_query(State.username, language=State.language)
+    _display_constitution_query(username=State.username, language=State.language)
 
     action_selection = _select_action()
 

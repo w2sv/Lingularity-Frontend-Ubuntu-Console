@@ -8,7 +8,7 @@ from lingularity.backend.trainers.sentence_translation import modes as mode_back
 
 class TrainingMode:
     def __init__(self, mode_backend: Type[mode_backends.TrainingMode], explanation: str):
-        self.keyword: str = ' '.join(map(lambda part: part.lower(), split_at_uppercase(mode_backend.__name__)))
+        self.keyword: str = ' '.join(map(lambda part: part.lower(), split_at_uppercase(mode_backend.__name__))).upper()
         self.explanation: str = explanation
         self.backend: Type[mode_backends.TrainingMode] = mode_backend
 

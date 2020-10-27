@@ -192,7 +192,7 @@ class MongoDBClient(MonoStatePossessor):
 
         return self.user_data_base['training_chronic']
 
-    def query_trained_languages(self) -> List[str]:
+    def query_languages(self) -> List[str]:
         return self._get_ids(self.training_chronic_collection)
 
     def inject_session_statistics(self, trainer_abbreviation: str, n_faced_items: int):

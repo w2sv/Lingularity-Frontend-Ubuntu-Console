@@ -10,36 +10,35 @@ from lingularity.frontend.console.state import State
 from lingularity.frontend.console.reentrypoint import ReentryPoint
 
 
-@view.view_creator(title='Home', banner_kind='impossible', banner_color='red')
+_OPTION_2_REENTRY_POINT = {
+        'sign': ReentryPoint.Login,
+        'add': ReentryPoint.LanguageAddition,
+        'terminate': ReentryPoint.Exit
+    }
+
+_OPTION_KEYWORDS = list(_OPTION_2_REENTRY_POINT.keys())
+
+
+@view.view_creator(title='Acquire Languages the Litboy Way', banner='impossible', banner_color='red')
 def __call__() -> Optional[ReentryPoint]:
     """ Returns:
             return_to_language_addition_flag: bool """
 
-    trained_languages = MongoDBClient.get_instance().query_trained_languages()
-
     train_english = False
 
     output.centered_print("YOUR LANGUAGES:\n")
-    for language_group in output.group_by_starting_letter(trained_languages, is_sorted=False):
+    for language_group in output.group_by_starting_letter(State.user_languages, is_sorted=False):
         output.centered_print('  '.join(language_group))
-
-    OPTION_2_REENTRY_POINT = {
-        'sign': ReentryPoint.Login,
-        'add': ReentryPoint.LanguageAddition,
-        'exit': ReentryPoint.Exit
-    }
-
-    option_keywords = list(OPTION_2_REENTRY_POINT.keys())
 
     output.centered_print(f"\nAdditional Options: "
                           f"{output.INTER_OPTION_INDENTATION}(A)dd Language"
                           f"{output.INTER_OPTION_INDENTATION}(S)ign Out"
-                          f"{output.INTER_OPTION_INDENTATION}(E)xit Program\n")
+                          f"{output.INTER_OPTION_INDENTATION}(T)erminate Program\n")
 
-    selection = input_resolution.query_relentlessly(query_message='Select Language/Option: ', options=trained_languages + option_keywords)
+    selection = input_resolution.query_relentlessly(query_message='Select Language/Option: ', options=list(State.user_languages) + _OPTION_KEYWORDS)
 
-    if selection in option_keywords:
-        return OPTION_2_REENTRY_POINT[selection]
+    if selection in _OPTION_KEYWORDS:
+        return _OPTION_2_REENTRY_POINT[selection]
 
     if selection == string_resources.ENGLISH:
         train_english = True

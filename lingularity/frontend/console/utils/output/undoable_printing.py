@@ -56,9 +56,8 @@ class LineCounter(ABC):
         if '\n' not in end:
             self._append_to_last_element = True
 
-    def pop(self) -> str:
-        self._append_to_last_element = False
-        return self._buffer.pop()
+    def __getattr__(self, item):
+        return getattr(self._buffer, item)
 
 
 class UndoPrint(LineCounter):

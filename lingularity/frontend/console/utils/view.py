@@ -13,7 +13,7 @@ DEFAULT_VERTICAL_VIEW_OFFSET = '\n' * 2
 def view_creator(
         header: Optional[str] = None,
         title: Optional[str] = None,
-        banner_kind: Optional[str] = None,
+        banner: Optional[str] = None,
         banner_color: Optional[str] = None
 ):
     """ Decorator for functions creating new output view,
@@ -34,9 +34,9 @@ def view_creator(
             if title is not None:
                 set_terminal_title(title=title)
 
-            if any([title, banner_kind]):
-                if banner_kind is not None:
-                    _display_banner(kind=banner_kind, color=banner_color)
+            if any([title, banner]):
+                if banner is not None:
+                    _display_banner(kind=banner, color=banner_color)
 
                 if header is not None:
                     output.centered_print(header)

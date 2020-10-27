@@ -13,6 +13,8 @@ class VocableAdderFrontend(VocableTrainerConsoleFrontend):
         self._backend = VocableAdderBackend(State.language)
 
     def __call__(self) -> ReentryPoint:
+        view.set_terminal_title(f'{self._backend.language} Vocable Adding')
+
         self._display_training_screen_header_section()
         self._run_training_loop()
 

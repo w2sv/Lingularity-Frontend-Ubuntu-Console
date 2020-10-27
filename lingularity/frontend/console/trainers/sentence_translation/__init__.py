@@ -1,6 +1,8 @@
 from typing import Optional
 import time
 
+from termcolor import colored
+
 from lingularity.backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend, TextToSpeech
 from lingularity.backend.utils.strings import common_start, strip_multiple
 
@@ -19,9 +21,6 @@ from lingularity.frontend.console.utils.output import (
 )
 
 
-_redo_print = RedoPrint()
-
-
 class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     _TRAINING_LOOP_INDENTATION = ' ' * 16
 
@@ -29,6 +28,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         self._tts = TextToSpeech.get_instance()
 
         super().__init__(backend=Backend)
+
+        self._redo_print = RedoPrint()
 
     def _get_training_options(self) -> TrainingOptions:
         options.SentenceTranslationOption.set_frontend_instance(self)
@@ -47,6 +48,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
     # Driver
     # -----------------
     def __call__(self) -> ReentryPoint:
+        view.set_terminal_title(f'{self._backend.language} Sentence Translation')
+
         self._set_tts_language_variety_if_applicable()
 
         self._set_training_mode()
@@ -75,7 +78,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         # display eligible modes
         indentation = centered_block_indentation(modes.explanations)
         for keyword, explanation in zip(modes.keywords, modes.explanations):
-            print(f'{indentation}{keyword.title()}:')
+            print(f'{indentation}{colored(f"{keyword}:", color="red")}')
             print(f'{indentation}\t{explanation}\n')
 
         return input_resolution.query_relentlessly(f'{SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: ', options=modes.keywords)
@@ -169,8 +172,8 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                 erase_lines(2)
 
                 # output translation_field
-                _redo_print(f'{self._TRAINING_LOOP_INDENTATION}{translation}')
-                _redo_print(f'{self._TRAINING_LOOP_INDENTATION}_______________')
+                self._redo_print(f'{self._TRAINING_LOOP_INDENTATION}{translation}')
+                self._redo_print(f'{self._TRAINING_LOOP_INDENTATION}_______________')
 
                 # play tts audio if available, otherwise suspend program
                 # for some time to incentivise gleaning over translation_field
@@ -182,7 +185,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
                 self._n_trained_items += 1
 
                 if self._n_trained_items >= 5:
-                    _redo_print.redo_partially(n_deletion_lines=3)
+                    self._redo_print.redo_partially(n_deletion_lines=3)
 
                 translation = self._process_procured_sentence_pair()
 
@@ -201,7 +204,7 @@ class SentenceTranslationTrainerConsoleFrontend(TrainerConsoleFrontend):
         else:
             reference_sentence, translation = sentence_pair
 
-        _redo_print(f'{self._TRAINING_LOOP_INDENTATION}{reference_sentence}')
+        self._redo_print(f'{self._TRAINING_LOOP_INDENTATION}{reference_sentence}')
         self._pending_output()
 
         return translation

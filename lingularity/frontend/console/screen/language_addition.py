@@ -1,10 +1,7 @@
-from typing import List
-
 from nltk.stem import SnowballStemmer
 from termcolor import colored
 
 from lingularity.backend.utils import spacy
-from lingularity.backend.database import MongoDBClient
 from lingularity.backend.ops.google.text_to_speech import google_tts
 from lingularity.backend.resources import strings as string_resources
 from lingularity.backend.metadata import language_metadata
@@ -14,11 +11,11 @@ from lingularity.frontend.console.state import State
 from lingularity.frontend.console.utils import output, view, input_resolution
 
 
-@view.view_creator(header='ELIGIBLE LANGUAGES', title='Add a new Language')
+@view.view_creator(title='Language Addition', banner='languages', banner_color='cyan')
 def __call__():
     train_english = False
 
-    eligible_languages = list(set(language_metadata.keys()) - set(MongoDBClient.get_instance().query_trained_languages()))
+    eligible_languages = list(set(language_metadata.keys()) - set(State.user_languages))
 
     starting_letter_grouped_languages = output.group_by_starting_letter(eligible_languages, is_sorted=False)
     colored_joined_language_groups = ['  '.join(map(_color_language_wrt_available_components, language_group)) for language_group in starting_letter_grouped_languages]

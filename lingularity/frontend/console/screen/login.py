@@ -38,8 +38,8 @@ def __call__() -> bool:
     assert username is not None
 
     # set state, database variables
-    State.username = username
     mongodb_client.user = username
+    State.set_user(username)
 
     # store encrypted user
     _store_logged_in_user(username)
@@ -59,7 +59,7 @@ def _store_logged_in_user(username: str):
         user_encryption_file.write(fernet.encrypt(username))
 
 
-@view.view_creator(title='Login', banner_kind='isometric2', banner_color='blue')
+@view.view_creator(title='Login', banner='isometric2', banner_color='blue')
 def _query_login_credentials() -> Tuple[str, bool]:
     """ Returns:
             username: str,

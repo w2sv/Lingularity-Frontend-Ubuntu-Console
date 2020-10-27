@@ -4,7 +4,7 @@ import time
 from lingularity.frontend.console.utils import output, view
 
 
-@view.view_creator(title='Acquire Languages the Litboy Way', banner_kind='isometric2', banner_color='blue')
+@view.view_creator(title='Acquire Languages the Litboy Way', banner='isometric2', banner_color='blue')
 @output.cursor_hider
 def __call__():
     print('\n' * 10)
