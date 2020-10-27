@@ -63,8 +63,8 @@ def align(column1: Sequence[str], column2: Sequence[str]) -> List[str]:
 
 def centered_block_indentation(output_block: Sequence[str]) -> str:
     """ Returns:
-            indentation determined by length of longest console output row comprised by output_block,
+            indentation determined by length of longest output output row comprised by output_block,
             enabling centered positioning of the aforementioned row and the others to start on the same
-            console column, resulting in an uniform writing appearance """
+            output column, resulting in an uniform writing appearance """
 
     return centered_print_indentation(longest_value(output_block))

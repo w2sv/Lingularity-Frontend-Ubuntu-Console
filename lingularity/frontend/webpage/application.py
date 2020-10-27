@@ -15,7 +15,7 @@ def index():
     return render_template('front-page.html')
 
 
-@app.route('/log_in', methods=['POST', 'GET'])
+@app.route('/__call__', methods=['POST', 'GET'])
 def login():
     global mongo_client
     html_file_path = 'login-page.html'

@@ -4,7 +4,7 @@ from typing import List, Type, Dict
 from termcolor import colored
 
 from lingularity.backend.utils.iterables import unzip
-from lingularity.frontend.console.utils.console import align
+from lingularity.frontend.console.utils.output import align
 
 
 class TrainingOption(ABC):

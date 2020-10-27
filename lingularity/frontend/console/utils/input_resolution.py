@@ -1,7 +1,7 @@
-from typing import Iterable, Optional, Callable, Tuple, Any
+from typing import Iterable, Optional, Callable, Tuple, Any, Sequence
 import time
 
-from lingularity.frontend.console.utils.console import (
+from lingularity.frontend.console.utils.output import (
     clear_screen,
     erase_lines,
     centered_print,
@@ -14,7 +14,7 @@ INDISSOLUBILITY_MESSAGE = "COULDN'T RESOLVE INPUT"
 # ------------------
 # Input Resolution
 # ------------------
-def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
+def _resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
     options_starting_on_input = list(filter(lambda option: option.lower().startswith(_input.lower()), options))
 
     if len(options_starting_on_input) == 1:
@@ -25,10 +25,10 @@ def resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
 
 
 @cursor_hider
-def indicate_indissolubility(n_deletion_lines: int, message=INDISSOLUBILITY_MESSAGE, sleep_duration=1.0):
+def _indicate_indissolubility(n_deletion_lines: int, message=INDISSOLUBILITY_MESSAGE, sleep_duration=1.0):
     """ - Display message communicating indissolubility reason,
         - freeze program for sleep duration
-        - erase n_deletion_lines last console output lines or clear screen if n_deletion_lines = -1 """
+        - erase n_deletion_lines last output output lines or clear screen if n_deletion_lines = -1 """
 
     centered_print(message)
 
@@ -51,7 +51,7 @@ def repeat(function: Callable,
 
     """ Args:
             function: callable to be repeated
-            n_deletion_lines: console output lines to be deleted, if -1 screen will be cleared
+            n_deletion_lines: output output lines to be deleted, if -1 screen will be cleared
             message: message to be displayed, communicating mistake committed by user because of which
                 repetition had to be triggered
             sleep_duration: program sleep duration in ms
@@ -59,6 +59,12 @@ def repeat(function: Callable,
         Returns:
             result of function provided with args """
 
-    indicate_indissolubility(n_deletion_lines, message, sleep_duration)
+    _indicate_indissolubility(n_deletion_lines, message, sleep_duration)
 
     return function(*args)
+
+
+def query_relentlessly(query_message: str, options: Sequence[str]) -> str:
+    if (option_selection := _resolve_input(input(query_message), options=options)) is None:
+        return repeat(query_relentlessly, n_deletion_lines=2, args=(query_message, options))
+    return option_selection

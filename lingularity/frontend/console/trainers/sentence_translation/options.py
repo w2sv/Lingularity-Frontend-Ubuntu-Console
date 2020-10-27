@@ -9,7 +9,7 @@ import cursor
 from pynput.keyboard import Controller as Keyboard
 
 from lingularity.frontend.console.utils.input_resolution import repeat
-from lingularity.frontend.console.utils.console import centered_print, erase_lines
+from lingularity.frontend.console.utils.output import centered_print, erase_lines
 from lingularity.frontend.console.trainers.base.options import TrainingOption
 
 
@@ -111,7 +111,7 @@ class ChangeTTSLanguageVariety(SentenceTranslationOption):
         selected_variety = self._select_tts_language_variety()
         self._tts.language_variety = selected_variety
 
-        # redo previous console output
+        # redo previous output output
         self._display_training_screen_header_section()
         self._buffer_print.redo()
         self._pending_output()

@@ -1,10 +1,8 @@
 from typing import List, Optional, Iterator, Any, Sequence
-import os
 from abc import ABC, abstractmethod
 
 import numpy as np
 
-from lingularity.backend import BASE_LANGUAGE_DATA_PATH
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.components import ForenameConvertor, SentenceData
 from lingularity.backend.resources import strings as string_resources

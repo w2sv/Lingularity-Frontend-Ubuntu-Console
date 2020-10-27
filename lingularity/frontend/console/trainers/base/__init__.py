@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Type, Iterator, Sequence
+from typing import Optional, Type, Iterator, Sequence, Tuple
 from abc import ABC, abstractmethod
 from time import sleep
 import datetime
@@ -12,18 +12,18 @@ from lingularity.utils import either
 from lingularity.backend.trainers import TrainerBackend
 from lingularity.backend.components import VocableEntry
 from lingularity.backend.metadata import language_metadata
-from lingularity.backend.database import MongoDBClient
 from lingularity.backend.utils import date as date_utils
 
-from lingularity.frontend.console.utils.console import centered_print, centered_print_indentation
+from lingularity.frontend.console.reentrypoint import ReentryPoint
+from lingularity.frontend.console.state import State
+from lingularity.frontend.console.utils.output import centered_print, centered_print_indentation
 from lingularity.frontend.console.utils import matplotlib as plt_utils
 from .options import TrainingOptions
 
 
 class TrainerConsoleFrontend(ABC):
     def __init__(self, backend: Type[TrainerBackend]):
-        non_english_language, train_english = self._select_training_language()
-        self._backend: TrainerBackend = backend(non_english_language, train_english)
+        self._backend: TrainerBackend = backend(State.non_english_language, State.train_english)
 
         self._training_options: TrainingOptions = self._get_training_options()
 
@@ -38,20 +38,16 @@ class TrainerConsoleFrontend(ABC):
     # Driver
     # -----------------
     @abstractmethod
-    def __call__(self) -> bool:
+    def __call__(self) -> ReentryPoint:
         """ Invokes trainer frontend
 
             Returns:
-                reinitialize program flag: bool """
+                reentry point """
         pass
 
     # -----------------
     # Pre Training
     # -----------------
-    @abstractmethod
-    def _select_training_language(self, mongodb_client: Optional[MongoDBClient] = None) -> Tuple[str, bool]:
-        pass
-
     @abstractmethod
     def _display_training_screen_header_section(self):
         pass
@@ -59,11 +55,17 @@ class TrainerConsoleFrontend(ABC):
     def _output_lets_go(self):
         centered_print(either(language_metadata[self._backend.language]['translations'].get('letsGo'), default="Let's go!"), '\n' * 2)
 
+    @staticmethod
+    def _get_instruction_head_and_indentation() -> Tuple[str, str]:
+        INSTRUCTION_HEAD = f"Enter:{' ' * 34}"
+
+        return INSTRUCTION_HEAD, centered_print_indentation(INSTRUCTION_HEAD)
+
     # -----------------
     # Training
     # -----------------
     @abstractmethod
-    def _run_training(self):
+    def _run_training_loop(self):
         pass
 
     def _add_vocable(self) -> int:

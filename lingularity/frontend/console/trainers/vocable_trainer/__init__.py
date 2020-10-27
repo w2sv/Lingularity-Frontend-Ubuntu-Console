@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, List
+from typing import Optional, List
 from time import sleep
 
 import matplotlib.pyplot as plt
@@ -14,12 +14,10 @@ from lingularity.backend.trainers.vocable_trainer import (
 )
 
 from lingularity.frontend.console.trainers.vocable_trainer.options import *
-from lingularity.frontend.console.trainers.sentence_translation import SentenceTranslationTrainerConsoleFrontend
 from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, TrainingOptions
-from lingularity.frontend.console.utils.view import view_creator, DEFAULT_VERTICAL_VIEW_OFFSET
-from lingularity.frontend.console.utils.input_resolution import resolve_input, repeat
-from lingularity.frontend.console.utils import matplotlib as plt_utils
-from lingularity.frontend.console.utils.console import (
+from lingularity.frontend.console.reentrypoint import ReentryPoint
+from lingularity.frontend.console.utils import view, input_resolution, matplotlib as plt_utils
+from lingularity.frontend.console.utils.output import (
     erase_lines,
     centered_print,
     centered_block_indentation,
@@ -38,7 +36,7 @@ _undo_print = UndoPrint()
 
 class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     def __init__(self):
-        super().__init__(Backend)
+        super().__init__(backend=Backend)
 
         self._accumulated_score: float = 0.0
         self._streak: int = 0
@@ -49,14 +47,17 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
     # -----------------
     # Driver
     # -----------------
-    def __call__(self) -> bool:
+    def __call__(self) -> ReentryPoint:
+        if self._backend.language not in self._backend.mongodb_client.query_vocabulary_possessing_languages():
+            return self._exit_on_nonexistent_vocabulary()
+
         self._backend.set_item_iterator()
 
         if self._backend.new_vocable_entries_available:  # type: ignore
             self._display_new_vocabulary_if_desired()
 
         self._display_training_screen_header_section()
-        self._run_training()
+        self._run_training_loop()
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
 
@@ -68,7 +69,18 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         if len(self._perfected_entries):
             self._display_perfected_entries()
 
-        return False
+        return ReentryPoint.TrainingSelection
+
+    @staticmethod
+    @view.view_creator()
+    def _exit_on_nonexistent_vocabulary() -> ReentryPoint:
+        print(view)
+
+        centered_print("""You have to accumulate vocabulary by means of the 
+            SentenceTranslationTrainer or VocableAdder first.""")
+        sleep(3)
+
+        return ReentryPoint.TrainingSelection
 
     # -----------------
     # Training Options
@@ -82,73 +94,20 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                                 Exit])
 
     # -----------------
-    # Training Property Selection
-    # -----------------
-    @view_creator()
-    def _select_training_language(self) -> Tuple[str, bool]:
-        # TODO: enable English training
-
-        train_english = False
-
-        # forward user to training action allowing for vocable accumulation if
-        # no vocabulary available whatsoever
-        if not (eligible_languages := Backend.get_eligible_languages()):
-            return self._start_sentence_translation_trainer()
-
-        # return language if only one singular available
-        elif len(eligible_languages) == 1:
-            return eligible_languages[0], train_english
-
-        # display header
-        centered_print('ELIGIBLE LANGUAGES', DEFAULT_VERTICAL_VIEW_OFFSET)
-
-        # display available languages
-        indentation = centered_block_indentation(eligible_languages)
-        for language in sorted(eligible_languages):
-            print(indentation, language)
-        print('')
-
-        # query selection
-        language_selection = resolve_input(centered_input_query('Enter desired language: ', expected_response_length=5), eligible_languages)
-        if language_selection is None:
-            return repeat(self._select_training_language, n_deletion_lines=-1)
-        print('\n')
-
-        return language_selection, train_english
-
-    @staticmethod
-    @view_creator()
-    def _start_sentence_translation_trainer():
-        # TODO: forward to sentence ground_truth trainer/vocable
-        #  adder selection screen
-
-        centered_print("""You have to accumulate vocabulary by means of the 
-        SentenceTranslation™ Trainer or VocableAdder first.""")
-        sleep(3)
-
-        centered_print('Initiating SentenceTranslation TrainerBackend...')
-        sleep(2)
-
-        return SentenceTranslationTrainerConsoleFrontend().__call__()
-
-    # -----------------
     # Pre Training
     # -----------------
-    @view_creator()
+    @view.view_creator()
     def _display_new_vocabulary_if_desired(self):
-        print(DEFAULT_VERTICAL_VIEW_OFFSET * 2)
+        print(view.DEFAULT_VERTICAL_VIEW_OFFSET * 2)
         centered_print('Would you like to see the vocable entries you recently created? (y)es/(n)o')
         centered_print(' ', end='')
 
-        if (input_resolution := resolve_input(input(''), ['yes', 'no'])) is None:
-            repeat(self._display_new_vocabulary_if_desired, n_deletion_lines=-1)
-
-        elif input_resolution == 'yes':
+        if input_resolution.query_relentlessly(query_message='', options=['yes', 'no']) == 'yes':
             self._display_new_vocable_entries()
 
-    @view_creator()
+    @view.view_creator()
     def _display_new_vocable_entries(self):
-        print(DEFAULT_VERTICAL_VIEW_OFFSET)
+        print(view.DEFAULT_VERTICAL_VIEW_OFFSET)
 
         # display entry line representations
         line_reprs = list(map(lambda entry: str(entry), self._backend.new_vocable_entries))
@@ -157,13 +116,13 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             print(indentation, line_repr)
 
         # wait for key press
-        centered_print(f'{DEFAULT_VERTICAL_VIEW_OFFSET}PRESS ANY KEY TO CONTINUE')
+        centered_print(f'{view.DEFAULT_VERTICAL_VIEW_OFFSET}PRESS ANY KEY TO CONTINUE')
         centered_input_query()
 
     # ------------------
     # Training
     # ------------------
-    @view_creator()
+    @view.view_creator()
     def _display_training_screen_header_section(self):
         # TODO: find better wording for 'imperfect entries', display forename origin country,
         #  elaborate usage instructions, functionality explanation
@@ -173,10 +132,8 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         centered_print("Hit Enter to proceed after response evaluation\n")
 
         # display instructions
-        INSTRUCTION_HEAD = f"Enter:{' ' * 34}"
-        indentation = centered_print_indentation(INSTRUCTION_HEAD)
-
-        print(f'{indentation}{INSTRUCTION_HEAD}')
+        head, indentation = self._get_instruction_head_and_indentation()
+        print(f'{indentation}{head}')
         for i, instruction_row in enumerate(self._training_options.instructions):
             print(f'{indentation}  {instruction_row}')
             if i == 2:
@@ -186,7 +143,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         # display lets go
         self._output_lets_go()
 
-    def _run_training(self):
+    def _run_training_loop(self):
         EVALUATION_2_COLOR = {
              ResponseEvaluation.Wrong: 'red',
              ResponseEvaluation.AccentError: 'yellow',
@@ -278,7 +235,9 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
             _undo_print('')
 
             # query option/procedure, execute option if applicable
-            if len((option_selection := self._query_option_selection())):
+            option_selection = input_resolution.query_relentlessly(query_message=f'{centered_print_indentation(" ")}$', options=self._training_options.keywords + [''])
+            _undo_print.add_lines_to_buffer(1)
+            if len(option_selection):
                 self._training_options[option_selection].execute()
                 if type(self._training_options[option_selection]) is Exit:
                     return
@@ -288,13 +247,6 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
             entry = self._backend.get_training_item()
         # TODO: make display bar advance to 100% after completion of last vocable
-
-    def _query_option_selection(self) -> str:
-        centered_print('$', end='', line_counter=_undo_print)
-        if (option_selection := resolve_input(input(), self._training_options.keywords + [''])) is None:
-            _undo_print.pop()
-            return repeat(self._query_option_selection, n_deletion_lines=2)
-        return option_selection
 
     def _display_progress_bar(self):
         BAR_LENGTH = 70
@@ -334,7 +286,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         else:
             self._streak = 0
 
-    @view_creator('PERFECTED ENTRIES')
+    @view.view_creator('PERFECTED ENTRIES')
     def _display_perfected_entries(self):
         # TODO: revisit
 
@@ -379,7 +331,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         ax.set_title(self._performance_verdict(correctness_percentage))
         ax.axis('equal')
 
-        # remove decimal point from accumulated score if integer
+        # remove decimal reentry_point from accumulated score if integer
         accumulated_score = [int(self._accumulated_score), self._accumulated_score][bool(self._accumulated_score % 1)]
 
         fig.canvas.set_window_title(f'You got {accumulated_score}/{self._n_trained_items} right')

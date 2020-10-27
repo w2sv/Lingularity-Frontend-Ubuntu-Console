@@ -8,7 +8,7 @@ from .utils import _output_length, _terminal_length
 
 class LineCounter(ABC):
     """ Interface for classes being capable of buffering the output
-        passed to them and counting the number of console output rows
+        passed to them and counting the number of output output rows
         the output of the aforementioned resulted in """
 
     def __init__(self, buffer_container: Union[List, Deque]):
@@ -18,7 +18,7 @@ class LineCounter(ABC):
     @property
     def _n_buffered_terminal_rows(self) -> int:
         """ Returns:
-                number of occupied console rows if currently stored buffer content
+                number of occupied output rows if currently stored buffer content
                 were to be displayed """
 
         return sum(map(self._n_comprised_terminal_output_rows, self._buffer))
@@ -71,6 +71,14 @@ class UndoPrint(LineCounter):
         erase_lines(self._n_buffered_terminal_rows)
         self._buffer.clear()
         self._append_to_last_element = False
+
+    def add_lines_to_buffer(self, n_lines: int):
+        # TODO
+
+        self._append_to_last_element = False
+
+        for _ in range(n_lines):
+            self._buffer.append('')
 
 
 class RedoPrint(LineCounter):

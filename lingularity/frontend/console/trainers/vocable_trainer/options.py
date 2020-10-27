@@ -4,8 +4,7 @@ __all__ = ['VocableTrainerOption', 'AddVocable', 'AlterLatestCreatedVocableEntry
 from abc import ABC
 from time import sleep
 
-from lingularity.frontend.console.utils.input_resolution import resolve_input, repeat
-from lingularity.frontend.console.utils.console import centered_print, erase_lines, centered_input_query
+from lingularity.frontend.console.utils import input_resolution, output
 from lingularity.frontend.console.trainers.base.options import TrainingOption
 
 
@@ -26,7 +25,7 @@ class AddVocable(VocableTrainerOption):
 
     def execute(self):
         n_printed_lines = self._add_vocable()
-        erase_lines(n_printed_lines + 1)
+        output.erase_lines(n_printed_lines + 1)
 
 
 class AlterLatestCreatedVocableEntry(VocableTrainerOption):
@@ -35,12 +34,12 @@ class AlterLatestCreatedVocableEntry(VocableTrainerOption):
 
     def execute(self):
         if self._latest_created_vocable_entry is None:
-            centered_print("YOU HAVEN'T ADDED ANY ENTRY DURING THE CURRENT SESSION")
+            output.centered_print("YOU HAVEN'T ADDED ANY ENTRY DURING THE CURRENT SESSION")
             sleep(1.5)
-            erase_lines(1)
+            output.erase_lines(1)
 
         n_printed_lines = self._alter_vocable_entry(self._latest_created_vocable_entry)
-        erase_lines(n_printed_lines - 1)
+        output.erase_lines(n_printed_lines - 1)
 
 
 class AlterCurrentVocableEntry(VocableTrainerOption):
@@ -49,7 +48,7 @@ class AlterCurrentVocableEntry(VocableTrainerOption):
 
     def execute(self):
         n_printed_lines = self._alter_vocable_entry(self._current_vocable_entry)
-        erase_lines(n_printed_lines - 1)
+        output.erase_lines(n_printed_lines - 1)
 
 
 class DeleteVocableEntry(VocableTrainerOption):
@@ -57,12 +56,11 @@ class DeleteVocableEntry(VocableTrainerOption):
         super().__init__('delete', "delete the current vocable entry")
 
     def execute(self):
-        centered_print(f"\nAre you sure you want to irreversibly delete {self._current_vocable_entry.__str__}? (y)es/(n)o")
-        if (input_resolution := resolve_input(centered_input_query(), options=['yes', 'no'])) is None:
-            return repeat(self.execute(), n_deletion_lines=3)
-        elif input_resolution == 'yes':
+        output.centered_print(f"\nAre you sure you want to irreversibly delete {str(self._current_vocable_entry)}? (y)es/(n)o")
+
+        if input_resolution.query_relentlessly(output.centered_print_indentation(' '), ['yes', 'no']) == 'yes':
             self._backend.mongodb_client.delete_vocable_entry(self._current_vocable_entry)
-        erase_lines(3)
+        output.erase_lines(3)
 
 
 class Exit(VocableTrainerOption):
@@ -70,4 +68,4 @@ class Exit(VocableTrainerOption):
         super().__init__('exit', 'exit training')
 
     def execute(self):
-        erase_lines(1)
+        output.erase_lines(1)

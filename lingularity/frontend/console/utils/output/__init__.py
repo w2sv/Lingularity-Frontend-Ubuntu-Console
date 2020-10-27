@@ -1,5 +1,6 @@
-from typing import Callable
+from typing import Callable, Iterable, Iterator
 from functools import wraps
+from itertools import groupby
 
 import cursor
 
@@ -19,6 +20,7 @@ from .centered_printing import (
 
 
 SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'
+INTER_OPTION_INDENTATION = ' ' * 6
 
 
 def cursor_hider(function: Callable):
@@ -29,3 +31,10 @@ def cursor_hider(function: Callable):
         cursor.show()
         return result
     return wrapper
+
+
+def group_by_starting_letter(strings: Iterable[str], is_sorted: bool) -> Iterator[Iterator[str]]:
+    if not is_sorted:
+        strings = sorted(strings)
+
+    return (v for _, v in groupby(strings, lambda element: element[0]))

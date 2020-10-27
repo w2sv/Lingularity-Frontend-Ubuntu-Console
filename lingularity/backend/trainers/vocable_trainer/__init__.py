@@ -6,8 +6,8 @@ import numpy as np
 
 from .deviation_masks import deviation_masks
 from .response_evaluation import ResponseEvaluation, get_response_evaluation
-from ...components.vocable_entry import VocableData
-from lingularity.backend.components import SentenceData, TokenMap, get_token_map, VocableEntry
+from lingularity.backend.components.vocable_entry import VocableData, VocableEntry
+from lingularity.backend.components import SentenceData, TokenMap, get_token_map
 from lingularity.backend.trainers.base import TrainerBackend
 from lingularity.backend.database import MongoDBClient
 

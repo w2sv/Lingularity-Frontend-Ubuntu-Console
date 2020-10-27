@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, List, Any, Iterator
+from typing import Optional, Tuple, List, Any, Iterator, Set
 
 import pymongo
 
@@ -39,7 +39,6 @@ class MongoDBClient(MonoStatePossessor):
 
     @user.setter
     def user(self, value: str):
-        assert self._user is None, 'user ought not to be reassigned'
         self._user = value
 
     @property
@@ -52,7 +51,6 @@ class MongoDBClient(MonoStatePossessor):
 
     @language.setter
     def language(self, value: str):
-        assert self._language is None, 'language ought not to be reassigned'
         self._language = value
 
     # --------------------
@@ -119,8 +117,11 @@ class MongoDBClient(MonoStatePossessor):
             upsert=True
         )
 
-    def query_password(self) -> str:
-        return self.general_collection.find_one({'_id': 'unique'})['password']
+    def query_password(self, username: str) -> str:
+        self._user = username
+        password = self.general_collection.find_one({'_id': 'unique'})['password']
+        self._user = None
+        return password
 
     def query_last_session_statistics(self) -> Optional[LastSessionStatistics]:
         try:
@@ -141,8 +142,8 @@ class MongoDBClient(MonoStatePossessor):
 
         return self.user_data_base['vocabulary']
 
-    def query_vocabulary_possessing_languages(self) -> List[str]:
-        return self._get_ids(self.vocabulary_collection)
+    def query_vocabulary_possessing_languages(self) -> Set[str]:
+        return set(self._get_ids(self.vocabulary_collection))
 
     def query_vocabulary(self) -> Iterator[Tuple[str, VocableData]]:
         vocable_entries = self.vocabulary_collection.find_one(self._language)
@@ -190,6 +191,9 @@ class MongoDBClient(MonoStatePossessor):
              $date: {$trainer_abbreviation: n_faced_items}} """
 
         return self.user_data_base['training_chronic']
+
+    def query_trained_languages(self) -> List[str]:
+        return self._get_ids(self.training_chronic_collection)
 
     def inject_session_statistics(self, trainer_abbreviation: str, n_faced_items: int):
         self.training_chronic_collection.update_one(
