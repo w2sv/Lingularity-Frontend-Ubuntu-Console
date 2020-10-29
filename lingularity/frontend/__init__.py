@@ -1,7 +1,5 @@
 import requests
 
-from lingularity.utils.logging import enable_logging
-
 try:
     from lingularity.backend.database import MongoDBClient
 
@@ -50,7 +48,6 @@ def reentry_at(reentry_point: ReentryPoint):
 
 
 if __name__ == '__main__':
-    enable_logging()
     screen.ops.maximize_console()
     MongoDBClient()
     __call__()

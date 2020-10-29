@@ -177,6 +177,9 @@ class TextToSpeech(MonoStatePossessor):
         player.play()
 
         start_time = time.time()
+
+        assert self.audio_file is not None
+
         duration = self._audio_length(self.audio_file) / self._playback_speed - 0.2
         while time.time() - start_time < duration:
             # TODO: let function break on enter stroke by employing threading

@@ -109,7 +109,7 @@ class TrainerFrontend(ABC):
 
         # create new vocable entry, enter into database
         self._latest_created_vocable_entry = VocableEntry.new(*vocable_and_meaning)
-        self._backend.mongodb_client.insert_vocable_entry(self._latest_created_vocable_entry.as_dict)
+        self._backend.mongodb_client.insert_vocable_entry(self._latest_created_vocable_entry.as_dict)  # type: ignore
 
         # update language_vocabulary_possessing flag in State
         if not State.language_vocabulary_possessing:
@@ -158,7 +158,7 @@ class TrainerFrontend(ABC):
 
         # query language training history of respective trainer
         training_history = self._backend.mongodb_client.query_training_chronic()
-        training_history = {date: trainer_dict[str(self)] for date, trainer_dict in training_history.items() if trainer_dict.get(str(self))}
+        training_history = {date: trainer_dict[str(self._backend)] for date, trainer_dict in training_history.items() if trainer_dict.get(str(self))}
 
         # get plotting dates
         dates = list(self._plotting_dates(training_dates=iter(training_history.keys()), day_delta=DAY_DELTA))

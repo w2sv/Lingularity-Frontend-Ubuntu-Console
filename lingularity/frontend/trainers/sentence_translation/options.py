@@ -66,5 +66,5 @@ class ChangeTTSLanguageVariety(TrainingOption):
 
         # redo previous output output
         self._display_training_screen_header_section()
-        self._buffer_print.redo()
+        self._redo_print.redo()
         self._pending_output()

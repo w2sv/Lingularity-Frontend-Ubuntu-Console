@@ -18,7 +18,8 @@ from lingularity.frontend.utils.output import (
     centered_block_indentation,
     RedoPrint,
     SELECTION_QUERY_OUTPUT_OFFSET,
-    cursor_hider
+    cursor_hider,
+    column_percentual_indentation
 )
 
 
@@ -96,12 +97,14 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         if all([self._tts.available, not self._tts.language_variety, self._tts.language_variety_choices]):
             self._tts.language_variety = self._select_tts_language_variety()
 
-    @view.view_creator(header='SELECT TEXT-TO-SPEECH LANGUAGE VARIETY')
+    @view.view_creator(title='TTS Language Variety Selection', banner='language-varieties/larry-3d', banner_color='blue')
     def _select_tts_language_variety(self) -> str:
         """ Returns:
                 selected language variety: element of language_variety_choices """
 
         assert self._tts.language_variety_choices is not None
+
+        print(view.DEFAULT_VERTICAL_VIEW_OFFSET)
 
         # display eligible varieties
         common_start_length = len(common_start(self._tts.language_variety_choices))
@@ -109,10 +112,10 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         indentation = centered_block_indentation(processed_varieties)
         for variety in processed_varieties:
             print(indentation, variety)
-        print('')
+        print('\n\n')
 
         # query variety
-        dialect_selection = input_resolution.query_relentlessly(query_message=indentation[:-5], options=processed_varieties)
+        dialect_selection = input_resolution.query_relentlessly(query_message=f'{column_percentual_indentation(percentage=0.37)}Enter desired variety: ', options=processed_varieties)
         return self._tts.language_variety_choices[processed_varieties.index(dialect_selection)]
 
     # -----------------
@@ -121,7 +124,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
     @view.view_creator(header=None)
     def _display_training_screen_header_section(self):
         self._display_session_information()
-        self._training_options.display_instructions(insertions_with_indices=(('TEXT-TO-SPEECH OPTIONS', 3),))
+        self._training_options.display_instructions(insertion_args=((3, 'TEXT-TO-SPEECH OPTIONS', True),))
         self._output_lets_go()
 
     def _display_session_information(self):
@@ -164,7 +167,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
 
                 # output translation_field
                 self._redo_print(f'{self._TRAINING_LOOP_INDENTATION}{translation}')
-                self._redo_print(f'{self._TRAINING_LOOP_INDENTATION}_______________')
+                self._redo_print(f'{self._TRAINING_LOOP_INDENTATION}{colored("----------------", "red")}')
 
                 # play tts audio if available, otherwise suspend program
                 # for some time to incentivise gleaning over translation_field
@@ -201,7 +204,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         return translation
 
     def _pending_output(self):
-        print(f"{self._TRAINING_LOOP_INDENTATION}pending... ")
+        print(colored(f"{self._TRAINING_LOOP_INDENTATION}pending... ", "cyan", attrs=['dark']))
 
     # -----------------
     # Post Training

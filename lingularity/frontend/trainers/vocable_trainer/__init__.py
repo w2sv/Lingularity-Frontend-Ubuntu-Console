@@ -13,6 +13,7 @@ from lingularity.backend.trainers.vocable_trainer import (
     deviation_masks
 )
 
+from . import options
 from lingularity.frontend.trainers.base import TrainerFrontend
 from lingularity.frontend.trainers.base.options import TrainingOptions, base_options
 from lingularity.frontend.reentrypoint import ReentryPoint
@@ -94,8 +95,8 @@ class VocableTrainerFrontend(TrainerFrontend):
     def _get_training_options(self) -> TrainingOptions:
         return TrainingOptions([base_options.AddVocable,
                                 base_options.RectifyLatestAddedVocableEntry,
-                                AlterCurrentVocableEntry,
-                                DeleteVocableEntry,
+                                options.AlterCurrentVocableEntry,
+                                options.DeleteVocableEntry,
                                 base_options.Exit], frontend_instance=self)
 
     @property
@@ -144,7 +145,7 @@ class VocableTrainerFrontend(TrainerFrontend):
 
         # display instructions
         self._training_options.display_instructions(
-            insertions_with_indices=(("    NOTE: distinct translations are to be delimited by ', '", 3), )
+            insertion_args=((3, "    NOTE: distinct translations are to be delimited by ', '", False),)
         )
 
         # display lets go

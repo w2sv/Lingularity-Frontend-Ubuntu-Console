@@ -8,7 +8,7 @@ from lingularity.frontend.state import State
 from lingularity.frontend.utils import credentials, fernet, input_resolution, output, view
 
 _USER_ENCRYPTION_FILE_PATH = f'{os.getcwd()}/.logged_in_user'
-_QUERY_INDENTATION = output.centered_print_indentation(' ' * 126)
+_QUERY_INDENTATION = output.column_percentual_indentation(percentage=0.4)
 
 
 def remove_user_from_disk():
@@ -34,7 +34,7 @@ def __call__() -> bool:
         # sign up new user if entered one not yet existent
         if not login_successful:
             output.erase_lines(1)
-            _sign_up(username, mongodb_client, _QUERY_INDENTATION)
+            _sign_up(username, mongodb_client)
             is_new_user = True
 
     assert username is not None
@@ -66,6 +66,8 @@ def _query_login_credentials() -> Tuple[str, bool]:
     """ Returns:
             username: str,
             login_successful_flag: bool """
+
+    print(output.row_percentual_indentation(percentage=0.15))
 
     mongodb_client = MongoDBClient.get_instance()
     login_successful = False

@@ -52,13 +52,15 @@ class TrainingOptions(dict):
     def _compose_instruction(self) -> List[str]:
         return output.align(*unzip(map(lambda option: (colored(option.keyword, 'red'), f'to {option.explanation}'), self.values())))
 
-    def display_instructions(self, insertions_with_indices: Tuple[Tuple[str, int]] = (('', -1), )):
-        _, insertion_indices = unzip(insertions_with_indices)
+    def display_instructions(self, insertion_args: Tuple[Tuple[int, str, bool]] = ((-1, '', False),)):
+        insertion_indices, *_ = unzip(insertion_args)
 
         print(f'{self._INSTRUCTION_INDENTATION}Enter:')
         for i, instruction_row in enumerate(self.instructions):
             if i in insertion_indices:
-                print(f"\n{self._INSTRUCTION_INDENTATION}{insertions_with_indices[insertion_indices.index(i)][0]}\n")
+                args = insertion_args[insertion_indices.index(i)]
+
+                print(f"\n{[self._INSTRUCTION_INDENTATION, output.centered_print_indentation(args[1])][args[2]]}{args[1]}\n")
 
             print(f'{self._INSTRUCTION_INDENTATION}  {instruction_row}')
 
