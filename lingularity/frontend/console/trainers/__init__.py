@@ -1,4 +1,0 @@
-from lingularity.frontend.console.trainers.base import TrainerFrontend
-from lingularity.frontend.console.trainers.sentence_translation import SentenceTranslationTrainerFrontend
-from lingularity.frontend.console.trainers.vocable_trainer import VocableTrainerFrontend
-from .vocable_adder import VocableAdderFrontend

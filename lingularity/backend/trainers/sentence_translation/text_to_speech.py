@@ -1,8 +1,8 @@
 from typing import Optional, List
 import os
 import time
+
 import vlc
-from mutagen.mp3 import MP3
 
 from lingularity.utils import either
 from lingularity.backend.utils.state_sharing import MonoStatePossessor
@@ -165,6 +165,10 @@ class TextToSpeech(MonoStatePossessor):
 
         self._audio_file_path = audio_file_path
 
+    @staticmethod
+    def _audio_length(audio_file_path: str, bits_per_second=500) -> float:
+        return os.path.getsize(audio_file_path) / 8 / bits_per_second
+
     def play_audio(self):
         """ Suspends program for playback duration, deletes audio file subsequently """
 
@@ -172,7 +176,8 @@ class TextToSpeech(MonoStatePossessor):
         player.set_rate(self._playback_speed)
         player.play()
 
-        start_time, duration = time.time(), MP3(self.audio_file).info.length / self._playback_speed - 0.2
+        start_time = time.time()
+        duration = self._audio_length(self.audio_file) / self._playback_speed - 0.2
         while time.time() - start_time < duration:
             # TODO: let function break on enter stroke by employing threading
             pass

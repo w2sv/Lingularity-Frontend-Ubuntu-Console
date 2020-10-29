@@ -10,14 +10,11 @@ logging.txt
 /.coverage
 /htmlcov/
 
-
 # Data
 *.mp3
 
 # Envs
 /env/
-/console-env/
-/webpage-env/
 
 # Keys
 .fernet_key
