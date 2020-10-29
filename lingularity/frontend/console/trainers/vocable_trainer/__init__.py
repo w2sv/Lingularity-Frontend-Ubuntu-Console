@@ -1,4 +1,4 @@
-from typing import Optional, List, Callable
+from typing import Optional, List, Callable, Any
 from time import sleep
 
 import matplotlib.pyplot as plt
@@ -15,7 +15,7 @@ from lingularity.backend.trainers.vocable_trainer import (
 )
 
 from lingularity.frontend.console.trainers.vocable_trainer.options import *
-from lingularity.frontend.console.trainers.base import TrainerConsoleFrontend, TrainingOptions
+from lingularity.frontend.console.trainers.base import TrainerFrontend, TrainingOptions
 from lingularity.frontend.console.reentrypoint import ReentryPoint
 from lingularity.frontend.console.state import State
 from lingularity.frontend.console.utils import view, input_resolution, matplotlib as plt_utils
@@ -34,11 +34,11 @@ from lingularity.frontend.console.utils.output import (
 # TODO: set up modes
 #  revisit score history system
 
-class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
+class VocableTrainerFrontend(TrainerFrontend):
     def __new__(cls, *args, **kwargs):
         if State.language not in MongoDBClient.get_instance().query_vocabulary_possessing_languages():
             return cls._exit_on_nonexistent_vocabulary()
-        return super().__new__(cls, *args, **kwargs)
+        return super().__new__(cls)
 
     @staticmethod
     @cursor_hider
@@ -58,7 +58,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         return lambda: ReentryPoint.TrainingSelection
 
     def __init__(self):
-        super().__init__(backend=Backend)
+        super().__init__(backend_type=Backend)
 
         self._undo_print = UndoPrint()
 
@@ -68,15 +68,12 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         self._current_vocable_entry: Optional[VocableEntry] = None
 
-    # -----------------
-    # Driver
-    # -----------------
     def __call__(self) -> ReentryPoint:
-        view.set_terminal_title(f'{self._backend.language} Vocabulary Training')
+        self._set_terminal_title()
 
         self._backend.set_item_iterator()
 
-        if self._backend.new_vocable_entries_available:  # type: ignore
+        if self._backend.new_vocable_entries_available:
             self._display_new_vocabulary_if_desired()
 
         self._display_training_screen_header_section()
@@ -94,9 +91,6 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         return ReentryPoint.TrainingSelection
 
-    # -----------------
-    # Training Options
-    # -----------------
     def _get_training_options(self) -> TrainingOptions:
         VocableTrainerOption.set_frontend_instance(self)
         return TrainingOptions([AddVocable,
@@ -104,6 +98,10 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                                 AlterCurrentVocableEntry,
                                 DeleteVocableEntry,
                                 Exit])
+
+    @property
+    def _training_designation(self) -> str:
+        return 'Vocable Training'
 
     # -----------------
     # Pre Training
@@ -119,6 +117,8 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
     @view.view_creator()
     def _display_new_vocable_entries(self):
+        assert self._backend.new_vocable_entries is not None
+
         print(view.DEFAULT_VERTICAL_VIEW_OFFSET)
 
         # display entry line representations
@@ -144,13 +144,9 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
         centered_print("Hit Enter to proceed after response evaluation\n")
 
         # display instructions
-        head, indentation = self._get_instruction_head_and_indentation()
-        print(f'{indentation}{head}')
-        for i, instruction_row in enumerate(self._training_options.instructions):
-            print(f'{indentation}  {instruction_row}')
-            if i == 2:
-                print(f"\n{indentation}    NOTE: distinct translations are to be delimited by ', '\n")
-        print('\n')
+        self._training_options.display_instructions(
+            insertions_with_indices=(("    NOTE: distinct translations are to be delimited by ', '", 3), )
+        )
 
         # display lets go
         self._output_lets_go()
@@ -226,7 +222,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
             # get related sentence pairs, convert forenames if feasible
             related_sentence_pairs = self._backend.related_sentence_pairs(entry.vocable, n=2)
-            if self._backend.forenames_convertible:
+            if self._backend.forename_converter is not None:
                 related_sentence_pairs = list(map(self._backend.forename_converter, related_sentence_pairs))
 
             # display sentence pairs
@@ -246,11 +242,11 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 centered_print(f'\n{self._n_trained_items} Entries faced, {self._backend.n_training_items - self._n_trained_items} more to go\n', line_counter=self._undo_print)
             self._undo_print('')
 
-            # query option/procedure, execute option if applicable
-            option_selection = input_resolution.query_relentlessly(query_message=f'{centered_print_indentation(" ")}$', options=self._training_options.keywords + [''])
+            # query option/procedure, __call__ option if applicable
+            option_selection = input_resolution.query_relentlessly(query_message=f'{centered_print_indentation(" ")}$', options=self._training_options.keywords)
             self._undo_print.add_lines_to_buffer(1)
             if len(option_selection):
-                self._training_options[option_selection].execute()
+                self._training_options[option_selection].__call__()
                 if type(self._training_options[option_selection]) is Exit:
                     return
 
@@ -284,7 +280,7 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
                 if self._streak >= 7:
                     background = ['on_green', 'on_yellow', 'on_blue', 'on_cyan', 'on_white'][min((self._streak - 7) // 2, 4)]
 
-            centered_print(f'Current streak: {colored(self._streak, "red", background, attrs=attrs)}', end='', line_counter=self._undo_print)
+            centered_print(f'Current streak: {colored(str(self._streak), "red", background, attrs=attrs)}', end='', line_counter=self._undo_print)
         self._undo_print('\n\n')
 
     def _update_streak(self, response_evaluation: ResponseEvaluation):
@@ -331,10 +327,11 @@ class VocableTrainerConsoleFrontend(TrainerConsoleFrontend):
 
         # discard plot attributes of opposing slice if either correctness percentage
         # or incorrectness percentage = 100
+        PLOT_ATTRS: List[List[Any]] = [LABELS, EXPLODE, SIZES, COLORS]
         for i, percentage in enumerate([incorrectness_percentage, correctness_percentage]):
             if percentage == 100:
-                for plot_attributes in [LABELS, EXPLODE, SIZES, COLORS]:
-                    plot_attributes.pop(i)
+                for plot_attributes in PLOT_ATTRS:
+                    del plot_attributes[i]
                 break
 
         # define pie chart

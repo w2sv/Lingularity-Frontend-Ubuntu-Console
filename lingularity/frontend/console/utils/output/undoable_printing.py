@@ -3,7 +3,7 @@ from abc import ABC
 from collections import deque
 
 from .clearing import erase_lines
-from .utils import _output_length, _terminal_length
+from .utils import _output_length, _terminal_columns
 
 
 class LineCounter(ABC):
@@ -30,7 +30,7 @@ class LineCounter(ABC):
 
     @staticmethod
     def _n_additionally_occupied_terminal_rows(buffer_element: str) -> int:
-        return _output_length(buffer_element) // _terminal_length()
+        return _output_length(buffer_element) // _terminal_columns()
 
     def __call__(self, *args, end='\n'):
         """ Buffer and display passed print arguments """

@@ -3,15 +3,15 @@ from termcolor import colored
 
 from lingularity.backend.utils import spacy
 from lingularity.backend.ops.google.text_to_speech import google_tts
-from lingularity.backend.resources import strings as string_resources
+from lingularity.utils import string_resources as string_resources
 from lingularity.backend.metadata import language_metadata
 
-from .ops.reference_language import get_english_reference_language
+from .ops import reference_language
 from lingularity.frontend.console.state import State
 from lingularity.frontend.console.utils import output, view, input_resolution
 
 
-@view.view_creator(title='Language Addition', banner='languages', banner_color='cyan')
+@view.view_creator(title='Language Addition', banner='languages/3d-ascii', banner_color='cyan')
 def __call__():
     train_english = False
 
@@ -31,7 +31,7 @@ def __call__():
     # query desired reference language if English selected
     if selection == string_resources.ENGLISH:
         train_english = True
-        selection = get_english_reference_language(eligible_languages=eligible_languages)
+        selection = reference_language.get(eligible_languages=eligible_languages)
 
     State.set_language(non_english_language=selection, train_english=train_english)
 

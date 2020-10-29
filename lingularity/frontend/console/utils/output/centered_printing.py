@@ -1,12 +1,12 @@
 from typing import Optional, Sequence, List
 
 from .undoable_printing import LineCounter
-from .utils import ansi_escape_code_stripped, _terminal_length
+from .utils import ansi_escape_code_stripped, _terminal_columns
 from lingularity.backend.utils.iterables import longest_value
 
 
 def centered_print_indentation(row: str) -> str:
-    return " " * ((_terminal_length() - len(ansi_escape_code_stripped(row))) // 2)
+    return " " * ((_terminal_columns() - len(ansi_escape_code_stripped(row))) // 2)
 
 
 def centered_print(*print_elements: str, end='\n', line_counter: Optional[LineCounter] = None):
@@ -36,12 +36,6 @@ def centered_print(*print_elements: str, end='\n', line_counter: Optional[LineCo
 # ------------------
 # Centered Query
 # ------------------
-def centered_query_indentation(input_message: str) -> str:
-    INPUT_SPACE_LENGTH = 8
-
-    return centered_print_indentation(input_message + ' ' * INPUT_SPACE_LENGTH)
-
-
 def centered_input_query(input_message: str = '', expected_response_length: int = 0) -> str:
     print(f"{centered_print_indentation(input_message + ' ' * expected_response_length)}{input_message}", end='')
     return input()

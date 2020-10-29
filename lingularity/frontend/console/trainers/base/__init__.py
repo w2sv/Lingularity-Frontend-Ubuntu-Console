@@ -1,4 +1,4 @@
-from typing import Optional, Type, Iterator, Sequence, Tuple
+from typing import Optional, Type, Iterator, Sequence, overload, Union
 from abc import ABC, abstractmethod
 from time import sleep
 import datetime
@@ -9,21 +9,39 @@ from matplotlib.ticker import MaxNLocator
 from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.utils import either
-from lingularity.backend.trainers import TrainerBackend
+from lingularity.backend.trainers import *
 from lingularity.backend.components import VocableEntry
 from lingularity.backend.metadata import language_metadata
 from lingularity.backend.utils import date as date_utils
 
 from lingularity.frontend.console.reentrypoint import ReentryPoint
 from lingularity.frontend.console.state import State
-from lingularity.frontend.console.utils.output import centered_print, centered_print_indentation
-from lingularity.frontend.console.utils import matplotlib as plt_utils
+from lingularity.frontend.console.utils import output, matplotlib as plt_utils, view
 from .options import TrainingOptions
 
 
-class TrainerConsoleFrontend(ABC):
-    def __init__(self, backend: Type[TrainerBackend]):
-        self._backend: TrainerBackend = backend(State.non_english_language, State.train_english)
+TrainerBackendType = Union[
+    Type[SentenceTranslationTrainerBackend],
+    Type[VocableTrainerBackend],
+    Type[VocableAdderBackend]
+]
+
+
+@overload
+def _backend(backend_type: Type[VocableTrainerBackend]) -> VocableTrainerBackend: ...
+@overload
+def _backend(backend_type: Type[SentenceTranslationTrainerBackend]) -> SentenceTranslationTrainerBackend: ...
+@overload
+def _backend(backend_type: Type[VocableAdderBackend]) -> VocableAdderBackend: ...
+
+
+def _backend(backend_type: TrainerBackendType) -> Union[VocableTrainerBackend, SentenceTranslationTrainerBackend, VocableAdderBackend]:
+    return backend_type(State.non_english_language, State.train_english)
+
+
+class TrainerFrontend(ABC):
+    def __init__(self, backend_type: TrainerBackendType):
+        self._backend = _backend(backend_type=backend_type)
 
         self._training_options: TrainingOptions = self._get_training_options()
 
@@ -45,6 +63,14 @@ class TrainerConsoleFrontend(ABC):
                 reentry point """
         pass
 
+    def _set_terminal_title(self):
+        view.set_terminal_title(f'{self._backend.language} {self._training_designation}')
+
+    @property
+    @abstractmethod
+    def _training_designation(self) -> str:
+        pass
+
     # -----------------
     # Pre Training
     # -----------------
@@ -53,13 +79,7 @@ class TrainerConsoleFrontend(ABC):
         pass
 
     def _output_lets_go(self):
-        centered_print(either(language_metadata[self._backend.language]['translations'].get('letsGo'), default="Let's go!"), '\n' * 2)
-
-    @staticmethod
-    def _get_instruction_head_and_indentation() -> Tuple[str, str]:
-        INSTRUCTION_HEAD = f"Enter:{' ' * 34}"
-
-        return INSTRUCTION_HEAD, centered_print_indentation(INSTRUCTION_HEAD)
+        output.centered_print(either(language_metadata[self._backend.language]['translations'].get('letsGo'), default="Let's go!"), '\n' * 2)
 
     # -----------------
     # Training
@@ -72,12 +92,13 @@ class TrainerConsoleFrontend(ABC):
         """ Returns:
                 number of printed lines: int """
 
+        INDENTATION = output.column_percentual_indentation(percentage=0.32)
+
         vocable_and_meaning = []
 
         for query_message in [f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']:
-            field = input(query_message)
-            if not len(field):
-                centered_print("INPUT FIELD LEFT UNFILLED")
+            if not len((field := input(f'{INDENTATION}{query_message}'))):
+                output.centered_print("INPUT FIELD LEFT UNFILLED")
                 sleep(1)
                 return 3
             vocable_and_meaning.append(field)
@@ -96,7 +117,7 @@ class TrainerConsoleFrontend(ABC):
         old_vocable = vocable_entry.vocable
 
         # type indented old representation
-        KeyboardController().type(f'{centered_print_indentation(old_line_repr)}{old_line_repr}')
+        KeyboardController().type(f'{output.centered_print_indentation(old_line_repr)}{old_line_repr}')
         # TODO: debug print(centering_indentation) into KeyboardController().type(old_line_repr)
 
         # get new components, i.e. vocable + ground_truth
@@ -104,7 +125,7 @@ class TrainerConsoleFrontend(ABC):
 
         # exit in case of invalid alteration
         if len(new_entry_components) != 2:
-            centered_print('INVALID ALTERATION')
+            output.centered_print('INVALID ALTERATION')
             sleep(1)
             return 3
 
@@ -180,8 +201,7 @@ class TrainerConsoleFrontend(ABC):
 
         if yesterday_exceedance_difference >= 0:
             return f"Exceeded yesterdays score by {yesterday_exceedance_difference + 1} {item_name}"
-        else:
-            return f"{abs(yesterday_exceedance_difference)} {item_name} left to top yesterdays score"
+        return f"{abs(yesterday_exceedance_difference)} {item_name} left to top yesterdays score"
 
     @property
     @abstractmethod
@@ -209,12 +229,12 @@ class TrainerConsoleFrontend(ABC):
             '2020-10-06', '2020-10-12', '2020-10-13', '2020-10-14', '2020-10-15', '2020-10-16', '2020-10-17',
             '2020-10-19', '2020-10-20')
 
-            TrainerConsoleFrontend._plotting_dates(_training_dates, day_delta=14)
+            TrainerFrontend._plotting_dates(_training_dates, day_delta=14)
             ['2020-10-06', '2020-10-07', '2020-10-08', '2020-10-09', '2020-10-10', '2020-10-11', '2020-10-12',
             '2020-10-13', '2020-10-14', '2020-10-15', '2020-10-16', '2020-10-17', '2020-10-18', '2020-10-19',
             '2020-10-20'] """
 
-        starting_date = TrainerConsoleFrontend._get_starting_date(training_dates, day_delta)
+        starting_date = TrainerFrontend._get_starting_date(training_dates, day_delta)
 
         while starting_date <= date_utils.today:
             yield str(starting_date)

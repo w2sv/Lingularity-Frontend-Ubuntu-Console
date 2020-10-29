@@ -1,7 +1,5 @@
-from typing import Optional, List, Type
+from typing import Optional, Type
 
-from lingularity.backend.database import MongoDBClient
-from lingularity.backend.metadata import language_metadata
 from lingularity.backend.trainers import TrainerBackend
 from .modes import TrainingMode
 from .text_to_speech import TextToSpeech
@@ -33,7 +31,3 @@ class SentenceTranslationTrainerBackend(TrainerBackend):
         filtered_sentence_data = self._training_mode.filter_sentence_data(sentence_data, self._non_english_language)
 
         self._set_item_iterator(training_items=filtered_sentence_data)
-
-    @staticmethod
-    def get_eligible_languages(mongodb_client: Optional[MongoDBClient] = None) -> List[str]:
-        return list(language_metadata.keys())

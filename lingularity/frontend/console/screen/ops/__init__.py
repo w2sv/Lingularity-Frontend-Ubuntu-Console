@@ -6,7 +6,10 @@ from termcolor import colored
 from lingularity.frontend.console.utils import output, view
 
 
-def resize_console():
+INTER_OPTION_INDENTATION = ' ' * 6
+
+
+def maximize_console():
     os.system('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz')
     time.sleep(0.005)
 

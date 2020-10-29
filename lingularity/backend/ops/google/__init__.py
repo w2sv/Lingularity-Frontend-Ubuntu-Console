@@ -27,17 +27,18 @@ class GoogleOp(ABC):
     def _get_identifier(self, query_language: str) -> Optional[str]:
         """ Args:
                 query_language: written out language in english as title,
-                                e.g. Spanish
+                    e.g. Spanish
+
             Returns:
                 in case of several eligible language variations:
                     first matching google language identifier
                 otherwise:
                     the one sole corresponding one """
 
-        if (identifier := self._language_2_identifier.get(query_language)) is not None:
+        if identifier := self._language_2_identifier.get(query_language):
             return identifier
 
-        elif (cached_identifier := self._cached_language_repr_2_identifier.get(query_language)) is not None:
+        elif cached_identifier := self._cached_language_repr_2_identifier.get(query_language):
             return cached_identifier
 
         for _language, identifier in self._language_2_identifier.items():

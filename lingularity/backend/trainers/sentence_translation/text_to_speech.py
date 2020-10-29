@@ -152,7 +152,9 @@ class TextToSpeech(MonoStatePossessor):
     def audio_file(self):
         """ Deletes audio file, sets audio_file_path to None """
 
-        os.remove(self._audio_file_path)
+        if self._audio_file_path is not None:
+            os.remove(self._audio_file_path)
+
         self._audio_file_path = None
 
     def download_audio_file(self, text: str):

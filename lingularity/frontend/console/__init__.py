@@ -9,8 +9,8 @@ from lingularity.frontend.console.state import State
 try:
     from lingularity.backend.database import MongoDBClient
     from lingularity.frontend.console.trainers import (
-        SentenceTranslationTrainerConsoleFrontend,
-        VocableTrainerConsoleFrontend,
+        SentenceTranslationTrainerFrontend,
+        VocableTrainerFrontend,
         VocableAdderFrontend
     )
 except (RuntimeError, requests.exceptions.ConnectionError):
@@ -52,6 +52,6 @@ def reentry_at(reentry_point: ReentryPoint):
 
 if __name__ == '__main__':
     enable_logging()
-    screen.ops.resize_console()
+    screen.ops.maximize_console()
     MongoDBClient()
     __call__()

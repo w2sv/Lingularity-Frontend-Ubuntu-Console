@@ -1,12 +1,12 @@
 from typing import List
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.resources import strings as string_resources
+from lingularity.utils import string_resources as string_resources
 from lingularity.frontend.console.utils import output, input_resolution
 
 
-def get_english_reference_language(eligible_languages: List[str]) -> str:
-    selection = query_english_reference_language()
+def get(eligible_languages: List[str]) -> str:
+    selection = query()
 
     if not selection:
         output.erase_lines(2)
@@ -19,5 +19,5 @@ def get_english_reference_language(eligible_languages: List[str]) -> str:
     return selection
 
 
-def query_english_reference_language():
+def query():
     return MongoDBClient.get_instance().query_reference_language()

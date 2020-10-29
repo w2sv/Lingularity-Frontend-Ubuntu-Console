@@ -8,11 +8,11 @@ import os
 from tqdm import tqdm
 from textacy.similarity import levenshtein
 
-from lingularity.backend.resources import strings as string_resources
+from lingularity.utils import string_resources as string_resources
 from lingularity.backend.components.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.metadata.types import LanguageMetadata, CountryMetadata
 from lingularity.backend.trainers.base import SentenceData
-from lingularity.backend.ops.google.translation import google_translator
+from lingularity.backend.ops.google.translation.translation import google_translator
 from lingularity.backend.utils import strings, data
 from lingularity.backend.ops.data_mining.scraping import (
     scrape_sentence_data_download_links,

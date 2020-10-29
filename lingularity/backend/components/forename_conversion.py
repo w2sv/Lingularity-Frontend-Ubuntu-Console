@@ -2,7 +2,7 @@ from typing import Optional, List, Iterator, Tuple, Iterable
 import random
 from collections.abc import Mapping
 
-from lingularity.backend.resources import strings as string_resources
+from lingularity.utils import string_resources as string_resources
 from lingularity.backend.utils.strings import split_multiple
 from lingularity.backend.metadata import (
     SubstitutionForenamesMap,

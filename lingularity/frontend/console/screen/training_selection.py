@@ -3,30 +3,30 @@ import random
 
 from lingularity.backend.metadata import language_metadata
 
-from . import ops
+from .ops import INTER_OPTION_INDENTATION
 from lingularity.frontend.console.state import State
 from lingularity.frontend.console.reentrypoint import ReentryPoint
 from lingularity.frontend.console.utils import view, output, date, input_resolution
 from lingularity.frontend.console.trainers import (
-    SentenceTranslationTrainerConsoleFrontend,
-    VocableTrainerConsoleFrontend,
+    SentenceTranslationTrainerFrontend,
+    VocableTrainerFrontend,
     VocableAdderFrontend,
-    TrainerConsoleFrontend
+    TrainerFrontend
 )
 
 
-Action = Union[Type[TrainerConsoleFrontend], Callable]
+Action = Union[Type[TrainerFrontend], Callable]
 
 
 KEYWORD_2_ACTION: Dict[str, Action] = {
-    'sentence': SentenceTranslationTrainerConsoleFrontend,
-    'vocabulary': VocableTrainerConsoleFrontend,
+    'sentence': SentenceTranslationTrainerFrontend,
+    'vocabulary': VocableTrainerFrontend,
     'add': VocableAdderFrontend,
     'home': lambda: ReentryPoint.LanguageSelection
 }
 
 
-@view.view_creator(banner='3d-ascii', banner_color='green')
+@view.view_creator(banner='lingularity/3d-ascii', banner_color='green')
 def __call__(is_new_user=False) -> ReentryPoint:
     view.set_terminal_title(f'{State.language} Training Selection')
 
@@ -62,10 +62,10 @@ def _display_last_session_conclusion(last_session_metrics: Dict[str, Any]):
 
 def _select_action() -> Action:
     output.centered_print(f"What would you like to do?: "
-                          f"{output.INTER_OPTION_INDENTATION}Translate (S)entences"
-                          f"{output.INTER_OPTION_INDENTATION}Train (V)ocabulary"
-                          f"{output.INTER_OPTION_INDENTATION}(A)dd Vocabulary"
-                          f"{output.INTER_OPTION_INDENTATION}Go back to (H)ome Screen")
+                          f"{INTER_OPTION_INDENTATION}Translate (S)entences"
+                          f"{INTER_OPTION_INDENTATION}Train (V)ocabulary"
+                          f"{INTER_OPTION_INDENTATION}(A)dd Vocabulary"
+                          f"{INTER_OPTION_INDENTATION}Go back to (H)ome Screen")
 
     action_selection_keyword = input_resolution.query_relentlessly(query_message=output.centered_print_indentation(' '), options=list(KEYWORD_2_ACTION.keys()))
     return KEYWORD_2_ACTION[action_selection_keyword]

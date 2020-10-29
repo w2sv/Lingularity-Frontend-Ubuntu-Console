@@ -1,7 +1,7 @@
 from lingularity.frontend.console.utils import output, view
 
 
-@view.view_creator()
+@view.view_creator(banner='lingularity/isometric2')
 def __call__():
     print(view.DEFAULT_VERTICAL_VIEW_OFFSET)
 

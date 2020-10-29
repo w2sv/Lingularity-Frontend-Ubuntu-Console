@@ -1,4 +1,4 @@
-from typing import Pattern, List
+from typing import Pattern
 import re
 import shutil
 
@@ -27,5 +27,9 @@ def _output_length(string: str) -> int:
     return len(ansi_escape_code_stripped(string)) + string.count('\t') * (_TAB_OUTPUT_LENGTH - 1)
 
 
-def _terminal_length() -> int:
+def _terminal_columns() -> int:
     return int(shutil.get_terminal_size().columns)
+
+
+def _terminal_lines() -> int:
+    return int(shutil.get_terminal_size().lines)

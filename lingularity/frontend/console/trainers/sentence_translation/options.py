@@ -8,8 +8,7 @@ from functools import partial
 import cursor
 from pynput.keyboard import Controller as Keyboard
 
-from lingularity.frontend.console.utils.input_resolution import repeat
-from lingularity.frontend.console.utils.output import centered_print, erase_lines
+from lingularity.frontend.console.utils import input_resolution, output
 from lingularity.frontend.console.trainers.base.options import TrainingOption
 
 
@@ -20,75 +19,71 @@ class SentenceTranslationOption(TrainingOption, ABC):
     def set_frontend_instance(instance):
         SentenceTranslationOption._FRONTEND_INSTANCE = instance
 
-    def __init__(self, keyword: str, explanation: str):
-        super().__init__(keyword, explanation)
-
 
 class AddVocabulary(SentenceTranslationOption):
     def __init__(self):
-        super().__init__('vocabulary', 'add a vocable')
+        self.keyword, self.explanation = 'vocabulary', 'add a vocable'
 
-    def execute(self):
+    def __call__(self):
         n_printed_lines = self._add_vocable()
-        erase_lines(n_printed_lines + 1)
+        output.erase_lines(n_printed_lines + 1)
 
 
 class AlterLatestVocableEntry(SentenceTranslationOption):
     def __init__(self):
-        super().__init__('alter', 'alter the most recently added vocable entry')
+        self.keyword, self.explanation = 'alter', 'alter the most recently added vocable entry'
 
-    def execute(self):
+    def __call__(self):
         if self._latest_created_vocable_entry is None:
-            centered_print("You haven't added any vocabulary during the current session")
+            output.centered_print("You haven't added any vocabulary during the current session")
             sleep(1.5)
-            erase_lines(2)
+            output.erase_lines(2)
         else:
             n_printed_lines = self._alter_vocable_entry(self._latest_created_vocable_entry)
-            erase_lines(n_printed_lines)
+            output.erase_lines(n_printed_lines)
 
 
 class Exit(SentenceTranslationOption):
     def __init__(self):
-        super().__init__('exit', 'terminate program')
+        self.keyword, self.explanation = 'quit', 'return to training selection screen'
 
-    def execute(self):
-        erase_lines(1)
+    def __call__(self):
+        output.erase_lines(1)
         print(f'\nNumber of faced sentences: {self._n_trained_items}')
-        cursor.show()
 
 
 class EnableTTS(SentenceTranslationOption):
     def __init__(self):
-        super().__init__('enable', 'enable speech output')
+        self.keyword, self.explanation = 'enable', 'enable speech output'
 
-    def execute(self):
+    def __call__(self):
         self._tts.enabled = True
-        erase_lines(1)
+        output.erase_lines(1)
 
 
 class DisableTTS(SentenceTranslationOption):
     def __init__(self):
-        super().__init__('disable', 'disable speech output')
+        self.keyword, self.explanation = 'disable', 'disable speech output'
 
-    def execute(self):
+    def __call__(self):
         self._tts.enabled = False
-        erase_lines(1)
+        output.erase_lines(1)
 
 
 class ChangePlaybackSpeed(SentenceTranslationOption):
     def __init__(self):
-        super().__init__('speed', 'change playback speed')
+        self.keyword, self.explanation = 'speed', 'change playback speed'
 
-    def execute(self):
+    def __call__(self):
         self._change_playback_speed()
-        erase_lines(3)
+        output.erase_lines(3)
 
     def _change_playback_speed(self):
-        print('Playback speed:\n\t', end='')
+        print(f'Playback speed:{output.SELECTION_QUERY_OUTPUT_OFFSET}', end='')
         Keyboard().type(str(self._tts.playback_speed))
         cursor.show()
 
-        _recurse = partial(repeat, function=self._change_playback_speed, message='Invalid input', n_deletion_lines=3)
+        _recurse = partial(input_resolution.repeat, function=self._change_playback_speed, message='Invalid input', n_deletion_lines=3)
 
         try:
             altered_playback_speed = float(input())
@@ -105,9 +100,9 @@ class ChangePlaybackSpeed(SentenceTranslationOption):
 
 class ChangeTTSLanguageVariety(SentenceTranslationOption):
     def __init__(self):
-        super().__init__('variety', 'change text-to-speech language variety')
+        self.keyword, self.explanation = 'variety', 'change text-to-speech language variety'
 
-    def execute(self):
+    def __call__(self):
         selected_variety = self._select_tts_language_variety()
         self._tts.language_variety = selected_variety
 

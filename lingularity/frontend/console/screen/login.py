@@ -9,11 +9,14 @@ from lingularity.frontend.console.utils import input_resolution, output, credent
 
 
 _USER_ENCRYPTION_FILE_PATH = f'{os.getcwd()}/.logged_in_user'
-_QUERY_INDENTATION = output.centered_query_indentation(' ' * 18)
+_QUERY_INDENTATION = output.centered_print_indentation(' ' * 126)
 
 
 def remove_user_from_disk():
     os.remove(_USER_ENCRYPTION_FILE_PATH)
+
+
+# TODO
 
 
 def __call__() -> bool:
@@ -59,7 +62,7 @@ def _store_logged_in_user(username: str):
         user_encryption_file.write(fernet.encrypt(username))
 
 
-@view.view_creator(title='Login', banner='isometric2', banner_color='blue')
+@view.view_creator(title='Login', banner='lingularity/isometric2', banner_color='blue')
 def _query_login_credentials() -> Tuple[str, bool]:
     """ Returns:
             username: str,

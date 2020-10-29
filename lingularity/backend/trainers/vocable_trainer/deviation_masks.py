@@ -4,11 +4,11 @@ from itertools import zip_longest
 from lingularity.backend.utils.iterables import unzip
 
 
-def deviation_masks(response: str, ground_truth: str) -> Iterator[Iterator[Optional[bool]]]:
+def deviation_masks(response: str, ground_truth: str) -> Iterator[Iterator[bool]]:
     return unzip(_find_deviations(response, ground_truth))
 
 
-def _find_deviations(response: str, ground_truth: str) -> Iterator[List[Optional[bool]]]:
+def _find_deviations(response: str, ground_truth: str) -> Iterator[List[bool]]:
     comparators = [response, ground_truth]
     for i, chars_i in enumerate(zip_longest(response, ground_truth)):
 
@@ -19,7 +19,7 @@ def _find_deviations(response: str, ground_truth: str) -> Iterator[List[Optional
         else:
             # exit in case of length discrepancy
             if not all(chars_i):
-                mask_elements: List[Optional[bool]] = [None, None]
+                mask_elements: List[bool] = [False, False]
 
                 # iterate over chars_i to determine terminated string
                 for j, char_ij in enumerate(chars_i):

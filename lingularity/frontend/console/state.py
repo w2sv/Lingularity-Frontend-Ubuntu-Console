@@ -1,7 +1,7 @@
 from typing import Set
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.resources import strings as string_resources
+from lingularity.utils import string_resources as string_resources
 
 
 class State:

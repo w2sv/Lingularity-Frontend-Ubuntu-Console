@@ -1,11 +1,11 @@
-from typing import List, Optional, Iterator, Any, Sequence
+from typing import Optional, Iterator, Any, Sequence
 from abc import ABC, abstractmethod
 
 import numpy as np
 
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.components import ForenameConvertor, SentenceData
-from lingularity.backend.resources import strings as string_resources
+from lingularity.utils import string_resources as string_resources
 
 
 class TrainerBackend(ABC):
@@ -25,11 +25,6 @@ class TrainerBackend(ABC):
     def language(self) -> str:
         return [self._non_english_language, string_resources.ENGLISH][self._train_english]
 
-    @staticmethod
-    @abstractmethod
-    def get_eligible_languages() -> List[str]:
-        pass
-
     # ----------------
     # Forename Conversion
     # ----------------
@@ -37,10 +32,6 @@ class TrainerBackend(ABC):
         if ForenameConvertor.available_for(self._non_english_language):
             return ForenameConvertor(self._non_english_language, train_english=self._train_english)
         return None
-
-    @property
-    def forenames_convertible(self) -> bool:
-        return self.forename_converter is not None
 
     # ----------------
     # Pre Training

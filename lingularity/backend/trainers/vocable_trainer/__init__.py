@@ -1,4 +1,4 @@
-from typing import List, Optional, Sequence, Dict, Iterator, Tuple
+from typing import List, Sequence, Dict, Iterator, Tuple
 from itertools import starmap, tee
 from collections import defaultdict
 
@@ -9,7 +9,6 @@ from .response_evaluation import ResponseEvaluation, get_response_evaluation
 from lingularity.backend.components.vocable_entry import VocableData, VocableEntry
 from lingularity.backend.components import SentenceData, TokenMap, get_token_map
 from lingularity.backend.trainers.base import TrainerBackend
-from lingularity.backend.database import MongoDBClient
 
 
 class VocableTrainerBackend(TrainerBackend):
@@ -19,17 +18,11 @@ class VocableTrainerBackend(TrainerBackend):
         self._sentence_data: SentenceData = self._get_sentence_data()
         self._token_2_sentence_indices: TokenMap = get_token_map(self._sentence_data, self.language, load_normalizer=True)
 
-        self.synonyms: Optional[Dict[str, List[str]]] = None
-        self.new_vocable_entries: Optional[Iterator[VocableEntry]] = None
-
-    @staticmethod
-    def get_eligible_languages() -> List[str]:
-        return MongoDBClient.get_instance().query_vocabulary_possessing_languages()
+        self.synonyms: Dict[str, List[str]] = None  # type: ignore
+        self.new_vocable_entries: Iterator[VocableEntry] = None  # type: ignore
 
     @property
     def new_vocable_entries_available(self) -> bool:
-        assert self.new_vocable_entries is not None
-
         self.new_vocable_entries, teed = tee(self.new_vocable_entries)
         return next(teed, None) is not None
 
