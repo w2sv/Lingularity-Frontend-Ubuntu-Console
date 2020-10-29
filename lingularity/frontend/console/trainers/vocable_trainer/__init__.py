@@ -4,7 +4,6 @@ from time import sleep
 import matplotlib.pyplot as plt
 from termcolor import colored
 
-from lingularity.backend.database import MongoDBClient
 from lingularity.backend.components import VocableEntry
 from lingularity.backend.utils.strings import split_at_uppercase, common_start
 from lingularity.backend.trainers.vocable_trainer import (
@@ -36,7 +35,7 @@ from lingularity.frontend.console.utils.output import (
 
 class VocableTrainerFrontend(TrainerFrontend):
     def __new__(cls, *args, **kwargs):
-        if State.language not in MongoDBClient.get_instance().query_vocabulary_possessing_languages():
+        if not State.language_vocabulary_possessing:
             return cls._exit_on_nonexistent_vocabulary()
         return super().__new__(cls)
 

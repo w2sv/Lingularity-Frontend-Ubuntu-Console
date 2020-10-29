@@ -106,6 +106,9 @@ class TrainerFrontend(ABC):
         self._latest_created_vocable_entry = VocableEntry.new(*vocable_and_meaning)
         self._backend.mongodb_client.insert_vocable_entry(self._latest_created_vocable_entry)
 
+        if not State.language_vocabulary_possessing:
+            State.language_vocabulary_possessing = True
+
         return 2
 
     def _alter_vocable_entry(self, vocable_entry: VocableEntry) -> int:
