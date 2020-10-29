@@ -5,7 +5,7 @@ import vlc
 from mutagen.mp3 import MP3
 
 from lingularity.utils import either
-from lingularity.utils.state_sharing import MonoStatePossessor
+from lingularity.backend.utils.state_sharing import MonoStatePossessor
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.ops.google.text_to_speech import google_tts
 from lingularity.backend.utils.time import get_timestamp

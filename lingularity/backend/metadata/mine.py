@@ -9,10 +9,10 @@ from tqdm import tqdm
 from textacy.similarity import levenshtein
 
 from lingularity.utils import string_resources as string_resources
-from lingularity.backend.components.forename_conversion import DEFAULT_FORENAMES
+from lingularity.backend.trainers.components.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.metadata.types import LanguageMetadata, CountryMetadata
 from lingularity.backend.trainers.base import SentenceData
-from lingularity.backend.ops.google.translation.translation import google_translator
+from lingularity.backend.ops.google.translation import google_translator
 from lingularity.backend.utils import strings, data
 from lingularity.backend.ops.data_mining.scraping import (
     scrape_sentence_data_download_links,
@@ -28,7 +28,7 @@ METADATA_DIR_PATH = f'{os.getcwd()}/lingularity/backend/resources/metadata'
 def _mine_metadata():
     language_2_download_link = scrape_sentence_data_download_links()
 
-    # add English metadata
+    # add English data
     language_metadata[string_resources.ENGLISH] = data.load_json(f'{METADATA_DIR_PATH}/correction/language')[string_resources.ENGLISH]
     for country in language_metadata[string_resources.ENGLISH]['countriesEmployedIn']:
         _mine_and_set_forenames(country)
@@ -136,11 +136,11 @@ if __name__ == '__main__':
 
     _mine_metadata()
 
-    # sort metadata for legibility
+    # sort data for legibility
     country_metadata = _sort_dict_by_key(country_metadata)
     language_metadata = _sort_dict_by_key(language_metadata)
 
-    # correct country metadata
+    # correct country data
     _correct_metadata(country_metadata, 'country')
 
     data.write_json(language_metadata, file_path=f'{METADATA_DIR_PATH}/language')

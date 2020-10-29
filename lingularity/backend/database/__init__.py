@@ -1,15 +1,21 @@
-from typing import Optional, Tuple, List, Any, Iterator, Set
+from typing import Optional, Tuple, List, Any, Iterator, Set, Dict
 
 import pymongo
 
-from .document_types import LastSessionStatistics, TrainingChronic
-from lingularity.utils.state_sharing import MonoStatePossessor
-from ...utils import string_resources as string_resources
-from lingularity.backend.utils.date import today
-from lingularity.backend.components.vocable_entry import VocableEntry, VocableData
+from lingularity.utils import string_resources as string_resources
+
+from lingularity.backend.utils import state_sharing, date
+from .document_types import (
+    LastSessionStatistics,
+    TrainingChronic,
+    VocableData
+)
 
 
 # TODO: change vocable data keywords in database, user collection names
+
+
+VocableEntryDictRepr = Dict[str, VocableData]
 
 
 def client_endpoint(host: str, user: str, password: str) -> str:
@@ -18,7 +24,7 @@ def client_endpoint(host: str, user: str, password: str) -> str:
     return f'mongodb+srv://{user}:{password}@{host}'
 
 
-class MongoDBClient(MonoStatePossessor):
+class MongoDBClient(state_sharing.MonoStatePossessor):
     _cluster: pymongo.MongoClient
 
     def __init__(self):
@@ -112,7 +118,7 @@ class MongoDBClient(MonoStatePossessor):
             filter={'_id': 'unique'},
             update={'$set': {'lastSession': {'trainer': trainer,
                                              'nFacedItems': faced_items,
-                                             'date': str(today),
+                                             'date': str(date.today),
                                              'language': self._language}}},
             upsert=True
         )
@@ -150,29 +156,29 @@ class MongoDBClient(MonoStatePossessor):
         vocable_entries.pop('_id')
         return iter(vocable_entries.items())
 
-    def insert_vocable_entry(self, vocable_entry: VocableEntry):
+    def insert_vocable_entry(self, vocable_entry: VocableEntryDictRepr):
         self.vocabulary_collection.update_one(
             filter={'_id': self._language},
-            update={'$set': vocable_entry.as_dict},
+            update={'$set': vocable_entry},
             upsert=True
         )
 
-    def delete_vocable_entry(self, vocable_entry: VocableEntry):
+    def delete_vocable_entry(self, vocable_entry: VocableEntryDictRepr):
         self.vocabulary_collection.update_one(
             filter={'_id': self._language},
-            update={'$unset': vocable_entry.as_dict}
+            update={'$unset': vocable_entry}
         )
 
     def update_vocable_entry(self, vocable: str, new_score: float):
         self.vocabulary_collection.find_one_and_update(
             filter={'_id': self._language, vocable: {'$exists': True}},
             update={'$inc': {f'{vocable}.tf': 1},
-                    '$set': {f'{vocable}.lfd': str(today),
+                    '$set': {f'{vocable}.lfd': str(date.today),
                              f'{vocable}.s': new_score}},
             upsert=False
         )
 
-    def alter_vocable_entry(self, old_vocable: str, altered_vocable_entry: VocableEntry):
+    def alter_vocable_entry(self, old_vocable: str, altered_vocable_entry: VocableEntryDictRepr):
         # delete old sub document corresponding to old_vocable regardless of whether the vocable,
         # that is the sub document key has changed
         self.vocabulary_collection.find_one_and_update(
@@ -198,7 +204,7 @@ class MongoDBClient(MonoStatePossessor):
     def inject_session_statistics(self, trainer_abbreviation: str, n_faced_items: int):
         self.training_chronic_collection.update_one(
             filter={'_id': self._language},
-            update={'$inc': {f'{str(today)}.{trainer_abbreviation}': n_faced_items}},
+            update={'$inc': {f'{str(date.today)}.{trainer_abbreviation}': n_faced_items}},
             upsert=True
         )
 

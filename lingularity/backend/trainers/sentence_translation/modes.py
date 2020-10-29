@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from lingularity.backend.trainers.base import SentenceData
-from lingularity.backend.components.token_maps import get_token_map
+from lingularity.backend.trainers.components import get_token_map
 
 
 class TrainingMode(ABC):

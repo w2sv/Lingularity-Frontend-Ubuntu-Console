@@ -7,23 +7,16 @@ from lingularity.backend.utils.iterables import unzip
 from lingularity.frontend.console.utils import output
 
 
-class TrainingOption(ABC):
-    _FRONTEND_INSTANCE = None
-
-    __slots__ = ('keyword', 'explanation')
+class FrontendExtender(ABC):
+    _FRONTEND_INSTANCE: object
 
     @staticmethod
-    @abstractmethod
-    def set_frontend_instance(instance):
-        pass
-
-    @abstractmethod
-    def __call__(self):
-        pass
+    def set_frontend_instance(instance: object):
+        FrontendExtender._FRONTEND_INSTANCE = instance
 
     def __setattr__(self, key, value):
-        if key in TrainingOption.__slots__:
-            TrainingOption.__dict__[key].__set__(self, value)
+        if key in self.__class__.__slots__:
+            super().__setattr__(key, value)
 
         else:
             assert hasattr(self._FRONTEND_INSTANCE, key)
@@ -34,10 +27,23 @@ class TrainingOption(ABC):
         return getattr(self._FRONTEND_INSTANCE, item)
 
 
+class TrainingOption(FrontendExtender, ABC):
+    exit_training: bool
+
+    __slots__ = ('keyword', 'explanation')
+
+    @abstractmethod
+    def __call__(self):
+        pass
+
+
 class TrainingOptions(dict):
     _INSTRUCTION_INDENTATION = output.column_percentual_indentation(percentage=0.35)
 
-    def __init__(self, option_classes: Sequence[Type[TrainingOption]]):
+    def __init__(self, option_classes: Sequence[Type[TrainingOption]], frontend_instance: object):
+        TrainingOption.exit_training = False
+        TrainingOption.set_frontend_instance(instance=frontend_instance)
+
         super().__init__({option.keyword: option for option in map(lambda cls: cls(), option_classes)})
 
         self.keywords: List[str] = [option.keyword for option in self.values()] + ['']
@@ -57,3 +63,7 @@ class TrainingOptions(dict):
             print(f'{self._INSTRUCTION_INDENTATION}  {instruction_row}')
 
         print('\n')
+
+    @property
+    def exit_training(self) -> bool:
+        return TrainingOption.exit_training

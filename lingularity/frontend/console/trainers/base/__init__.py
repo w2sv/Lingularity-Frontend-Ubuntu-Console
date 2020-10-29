@@ -10,14 +10,14 @@ from pynput.keyboard import Controller as KeyboardController
 
 from lingularity.utils import either
 from lingularity.backend.trainers import *
-from lingularity.backend.components import VocableEntry
+from lingularity.backend.trainers.components import VocableEntry
 from lingularity.backend.metadata import language_metadata
 from lingularity.backend.utils import date as date_utils
 
+from .options import TrainingOptions
 from lingularity.frontend.console.reentrypoint import ReentryPoint
 from lingularity.frontend.console.state import State
 from lingularity.frontend.console.utils import output, matplotlib as plt_utils, view
-from .options import TrainingOptions
 
 
 TrainerBackendType = Union[
@@ -89,13 +89,17 @@ class TrainerFrontend(ABC):
         pass
 
     def _add_vocable(self) -> int:
-        """ Returns:
+        """ Query, create new vocable entry,
+            Enter it into database
+            Update State.language_vocabulary_possessing
+
+            Returns:
                 number of printed lines: int """
 
         INDENTATION = output.column_percentual_indentation(percentage=0.32)
 
+        # query vocable and meaning, exit if one of the two fields empty
         vocable_and_meaning = []
-
         for query_message in [f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']:
             if not len((field := input(f'{INDENTATION}{query_message}'))):
                 output.centered_print("INPUT FIELD LEFT UNFILLED")
@@ -103,9 +107,11 @@ class TrainerFrontend(ABC):
                 return 3
             vocable_and_meaning.append(field)
 
+        # create new vocable entry, enter into database
         self._latest_created_vocable_entry = VocableEntry.new(*vocable_and_meaning)
-        self._backend.mongodb_client.insert_vocable_entry(self._latest_created_vocable_entry)
+        self._backend.mongodb_client.insert_vocable_entry(self._latest_created_vocable_entry.as_dict)
 
+        # update language_vocabulary_possessing flag in State
         if not State.language_vocabulary_possessing:
             State.language_vocabulary_possessing = True
 
@@ -138,7 +144,7 @@ class TrainerFrontend(ABC):
 
         # insert altered entry into database in case of alteration actually having taken place
         if str(vocable_entry) != old_line_repr:
-            self._backend.mongodb_client.alter_vocable_entry(old_vocable, vocable_entry)
+            self._backend.mongodb_client.alter_vocable_entry(old_vocable, vocable_entry.as_dict)
 
         return 2
 
@@ -257,8 +263,3 @@ class TrainerFrontend(ABC):
 
         raise AttributeError
 
-    # -----------------
-    # Dunder(s)
-    # -----------------
-    def __str__(self):
-        return self.__class__.__name__[0].lower()

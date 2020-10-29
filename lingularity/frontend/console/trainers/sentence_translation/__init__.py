@@ -8,7 +8,8 @@ from lingularity.backend.utils.strings import common_start, strip_multiple
 
 from . import options
 from . import modes
-from lingularity.frontend.console.trainers.base import TrainerFrontend, TrainingOptions
+from lingularity.frontend.console.trainers.base import TrainerFrontend
+from lingularity.frontend.console.trainers.base.options import TrainingOptions, base_options
 from lingularity.frontend.console.reentrypoint import ReentryPoint
 from lingularity.frontend.console.utils import view, input_resolution
 from lingularity.frontend.console.utils.output import (
@@ -48,9 +49,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         return ReentryPoint.TrainingSelection
 
     def _get_training_options(self) -> TrainingOptions:
-        options.SentenceTranslationOption.set_frontend_instance(self)
-
-        option_classes = [options.AddVocabulary, options.AlterLatestVocableEntry, options.Exit]
+        option_classes = [base_options.AddVocable, base_options.RectifyLatestAddedVocableEntry, base_options.Exit]
 
         if self._tts.available:
             option_classes += [options.EnableTTS, options.DisableTTS, options.ChangePlaybackSpeed]
@@ -58,14 +57,18 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         if bool(self._tts.language_variety_choices):
             option_classes += [options.ChangeTTSLanguageVariety]
 
-        return TrainingOptions(option_classes)
+        return TrainingOptions(option_classes=option_classes, frontend_instance=self)
 
     @property
     def _training_designation(self) -> str:
         return 'Sentence Translation'
 
     # -----------------
-    # Training Property Selection
+    # Property Selection
+    # -----------------
+
+    # -----------------
+    # .Mode
     # -----------------
     def _set_training_mode(self):
         """ Invokes training mode selection method, forwards backend_type of selected mode to backend_type """
@@ -84,6 +87,9 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
 
         return input_resolution.query_relentlessly(f'{SELECTION_QUERY_OUTPUT_OFFSET}Enter desired mode: ', options=modes.keywords)
 
+    # -----------------
+    # .TTS Language Variety
+    # -----------------
     def _set_tts_language_variety_if_applicable(self):
         """ Invokes variety selection method, forwards selected variety to tts """
 
@@ -110,12 +116,12 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         return self._tts.language_variety_choices[processed_varieties.index(dialect_selection)]
 
     # -----------------
-    # Pre training
+    # Training
     # -----------------
     @view.view_creator(header=None)
     def _display_training_screen_header_section(self):
         self._display_session_information()
-        self._training_options.display_instructions(insertions_with_indices=(('TEXT-TO-SPEECH OPTIONS', 4), ))
+        self._training_options.display_instructions(insertions_with_indices=(('TEXT-TO-SPEECH OPTIONS', 3),))
         self._output_lets_go()
 
     def _display_session_information(self):
@@ -129,9 +135,6 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
                 centered_print(f'Employing forenames stemming from {self._backend.forename_converter.country}.')
         print('')
 
-    # -----------------
-    # Training
-    # -----------------
     @cursor_hider
     def _run_training_loop(self):
         translation = self._process_procured_sentence_pair()
@@ -149,7 +152,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
                 if len(response):
                     self._training_options[response].__call__()
 
-                    if type(self._training_options[response]) is options.Exit:
+                    if self._training_options.exit_training:
                         return
 
             else:

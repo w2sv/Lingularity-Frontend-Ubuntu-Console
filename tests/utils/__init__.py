@@ -2,7 +2,7 @@ from typing import List
 from itertools import starmap
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.components.vocable_entry import VocableEntry
+from lingularity.backend.trainers.components import VocableEntry
 
 
 def get_mongodb_client() -> MongoDBClient:

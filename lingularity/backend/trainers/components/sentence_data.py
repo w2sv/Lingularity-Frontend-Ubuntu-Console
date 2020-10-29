@@ -8,7 +8,7 @@ from textacy.similarity import levenshtein
 
 from lingularity.backend import BASE_LANGUAGE_DATA_PATH
 from lingularity.backend.ops.data_mining.downloading import download_sentence_data
-from lingularity.backend.components.forename_conversion import DEFAULT_FORENAMES
+from lingularity.backend.trainers.components.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.utils.iterables import longest_value
 from lingularity.backend.utils.strings import (
     get_meaningful_tokens,

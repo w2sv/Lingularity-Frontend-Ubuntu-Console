@@ -1,4 +1,4 @@
 from .demonym import scrape_demonym
 from .sentence_data_download_links import scrape_sentence_data_download_links
 from .forenames import scrape_popular_forenames
-from .countries_language_employed_in import scrape_countries_language_employed_in
+from .countries import scrape_countries_language_employed_in

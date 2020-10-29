@@ -11,7 +11,7 @@ from .types import (
 )
 
 
-METADATA_DIR_PATH = f'{os.getcwd()}/lingularity/backend/resources/metadata'
+METADATA_DIR_PATH = f'{os.getcwd()}/lingularity/backend/metadata/data'
 
 
 language_metadata: LanguageMetadata = load_json(f'{METADATA_DIR_PATH}/language')

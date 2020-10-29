@@ -9,9 +9,9 @@ from lingularity.frontend.console.reentrypoint import ReentryPoint
 
 
 _OPTION_2_REENTRY_POINT = {
-        'sign': ReentryPoint.Login,
         'add': ReentryPoint.LanguageAddition,
-        'terminate': ReentryPoint.Exit
+        'sign': ReentryPoint.Login,
+        'quit': ReentryPoint.Exit
     }
 
 _OPTION_KEYWORDS = list(_OPTION_2_REENTRY_POINT.keys())
@@ -31,7 +31,7 @@ def __call__() -> Optional[ReentryPoint]:
     output.centered_print(f"\nAdditional Options: "
                           f"{INTER_OPTION_INDENTATION}(A)dd Language"
                           f"{INTER_OPTION_INDENTATION}(S)ign Out"
-                          f"{INTER_OPTION_INDENTATION}(T)erminate Program\n")
+                          f"{INTER_OPTION_INDENTATION}(Q)uit\n")
 
     selection = input_resolution.query_relentlessly(query_message='Select Language/Option: ', options=list(State.user_languages) + _OPTION_KEYWORDS)
 

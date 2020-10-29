@@ -1,6 +1,6 @@
 from typing import Optional, Type
 
-from lingularity.backend.trainers import TrainerBackend
+from lingularity.backend.trainers.base import TrainerBackend
 from .modes import TrainingMode
 from .text_to_speech import TextToSpeech
 

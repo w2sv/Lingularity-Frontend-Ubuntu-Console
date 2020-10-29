@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.backend.components import ForenameConvertor, SentenceData
+from lingularity.backend.trainers.components import ForenameConvertor, SentenceData
 from lingularity.utils import string_resources as string_resources
 
 
@@ -21,17 +21,14 @@ class TrainerBackend(ABC):
 
         self.forename_converter: Optional[ForenameConvertor] = self._get_forename_converter()
 
-    @property
-    def language(self) -> str:
-        return [self._non_english_language, string_resources.ENGLISH][self._train_english]
-
-    # ----------------
-    # Forename Conversion
-    # ----------------
     def _get_forename_converter(self) -> Optional[ForenameConvertor]:
         if ForenameConvertor.available_for(self._non_english_language):
             return ForenameConvertor(self._non_english_language, train_english=self._train_english)
         return None
+
+    @property
+    def language(self) -> str:
+        return [self._non_english_language, string_resources.ENGLISH][self._train_english]
 
     # ----------------
     # Pre Training
@@ -77,8 +74,5 @@ class TrainerBackend(ABC):
         self.mongodb_client.update_last_session_statistics(*update_args)
         self.mongodb_client.inject_session_statistics(*update_args)
 
-    # -----------------
-    # Dunder(s)
-    # -----------------
     def __str__(self):
         return self.__class__.__name__[0].lower()

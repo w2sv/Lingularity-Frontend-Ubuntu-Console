@@ -1,7 +1,4 @@
-from typing import Optional, List
-
 from lingularity.backend.trainers.base import TrainerBackend
-from lingularity.backend.database import MongoDBClient
 
 
 class VocableAdderBackend(TrainerBackend):

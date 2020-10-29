@@ -4,7 +4,7 @@ from time import sleep
 import matplotlib.pyplot as plt
 from termcolor import colored
 
-from lingularity.backend.components import VocableEntry
+from lingularity.backend.trainers.components import VocableEntry
 from lingularity.backend.utils.strings import split_at_uppercase, common_start
 from lingularity.backend.trainers.vocable_trainer import (
     VocableTrainerBackend as Backend,
@@ -14,7 +14,8 @@ from lingularity.backend.trainers.vocable_trainer import (
 )
 
 from lingularity.frontend.console.trainers.vocable_trainer.options import *
-from lingularity.frontend.console.trainers.base import TrainerFrontend, TrainingOptions
+from lingularity.frontend.console.trainers.base import TrainerFrontend
+from lingularity.frontend.console.trainers.base.options import TrainingOptions, base_options
 from lingularity.frontend.console.reentrypoint import ReentryPoint
 from lingularity.frontend.console.state import State
 from lingularity.frontend.console.utils import view, input_resolution, matplotlib as plt_utils
@@ -41,7 +42,7 @@ class VocableTrainerFrontend(TrainerFrontend):
 
     @staticmethod
     @cursor_hider
-    @view.view_creator(banner='bloody', banner_color='red')
+    @view.view_creator(banner='lingularity/bloody', banner_color='red')
     def _exit_on_nonexistent_vocabulary() -> Callable[[], ReentryPoint]:
         print('\n' * 5)
 
@@ -91,12 +92,11 @@ class VocableTrainerFrontend(TrainerFrontend):
         return ReentryPoint.TrainingSelection
 
     def _get_training_options(self) -> TrainingOptions:
-        VocableTrainerOption.set_frontend_instance(self)
-        return TrainingOptions([AddVocable,
-                                AlterLatestCreatedVocableEntry,
+        return TrainingOptions([base_options.AddVocable,
+                                base_options.RectifyLatestAddedVocableEntry,
                                 AlterCurrentVocableEntry,
                                 DeleteVocableEntry,
-                                Exit])
+                                base_options.Exit], frontend_instance=self)
 
     @property
     def _training_designation(self) -> str:
@@ -244,9 +244,11 @@ class VocableTrainerFrontend(TrainerFrontend):
             # query option/procedure, __call__ option if applicable
             option_selection = input_resolution.query_relentlessly(query_message=f'{centered_print_indentation(" ")}$', options=self._training_options.keywords)
             self._undo_print.add_lines_to_buffer(1)
+
             if len(option_selection):
                 self._training_options[option_selection].__call__()
-                if type(self._training_options[option_selection]) is Exit:
+
+                if self._training_options.exit_training:
                     return
 
             # clear screen part pertaining to current entry

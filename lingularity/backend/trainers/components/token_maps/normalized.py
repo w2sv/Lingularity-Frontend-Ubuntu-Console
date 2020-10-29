@@ -6,9 +6,9 @@ from tqdm import tqdm
 import numpy as np
 import nltk
 
-from lingularity.backend.components.token_maps import TokenMap
-from lingularity.backend.components.token_maps import UnnormalizedTokenMap
 from lingularity.backend.utils import spacy as spacy_utils, data as data_utils
+from lingularity.backend.trainers.components.token_maps.base import TokenMap
+from lingularity.backend.trainers.components.token_maps.unnormalized import UnnormalizedTokenMap
 
 
 class NormalizedTokenMap(TokenMap, ABC):
