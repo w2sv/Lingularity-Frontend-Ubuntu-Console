@@ -7,7 +7,7 @@ from lingularity.backend.metadata import (
     SubstitutionForenamesMap,
     get_substitution_forenames_map,
     language_metadata,
-    replacement_forenames_available_for
+    data_beset_countries_language_employed_in
 )
 
 
@@ -17,7 +17,9 @@ DEFAULT_FORENAMES = ('Tom', 'John', 'Mary', 'Alice')  # _DEFAULT_SURNAME = 'Jack
 class ForenameConvertor:
     @staticmethod
     def available_for(language: str) -> bool:
-        return replacement_forenames_available_for(language)
+        if not len(language_metadata[language]['translations']):
+            return False
+        return bool(data_beset_countries_language_employed_in(language=language))
 
     def __init__(self, language: str, train_english: bool):
         """ Assumes previous assertion of language convertibility  """

@@ -1,3 +1,4 @@
+from typing import Callable
 from enum import Enum, auto
 
 
@@ -7,3 +8,6 @@ class ReentryPoint(Enum):
     Home = auto()
     TrainingSelection = auto()
     Exit = auto()
+
+
+ReentryPointProvider = Callable[[], ReentryPoint]

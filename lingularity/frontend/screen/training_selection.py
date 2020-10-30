@@ -1,11 +1,11 @@
-from typing import Dict, Any, Union, Callable, Type
+from typing import Dict, Any, Union, Type
 import random
 
 from lingularity.backend.metadata import language_metadata
 
 from .ops import INTER_OPTION_INDENTATION
 from lingularity.frontend.state import State
-from lingularity.frontend.reentrypoint import ReentryPoint
+from lingularity.frontend.reentrypoint import ReentryPoint, ReentryPointProvider
 from lingularity.frontend.utils import query, output, view, date
 from lingularity.frontend.trainers import (
     SentenceTranslationTrainerFrontend,
@@ -13,17 +13,15 @@ from lingularity.frontend.trainers import (
     VocableAdderFrontend
 )
 
-CallableAction = Callable[[], ReentryPoint]
-
-Action = Union[
+ActionOption = Union[
     Type[SentenceTranslationTrainerFrontend],
     Type[VocableTrainerFrontend],
     Type[VocableAdderFrontend],
-    CallableAction
+    ReentryPointProvider
 ]
 
 
-KEYWORD_2_ACTION: Dict[str, Action] = {
+KEYWORD_2_ACTION: Dict[str, ActionOption] = {
     'sentence': SentenceTranslationTrainerFrontend,
     'vocabulary': VocableTrainerFrontend,
     'add': VocableAdderFrontend,
@@ -42,14 +40,14 @@ def __call__(is_new_user=False) -> ReentryPoint:
     _display_constitution_query(username=State.username, language=State.language)
 
     # query desired action
-    action: Action = _query_action_selection()
+    action_selection: ActionOption = _query_action_selection()
 
     # instantiate frontend if selected
-    callable_action: CallableAction
-    if isinstance(action, type):
-        callable_action = action()
+    callable_action: ReentryPointProvider
+    if isinstance(action_selection, type):
+        callable_action = action_selection()
     else:
-        callable_action = action
+        callable_action = action_selection
 
     return callable_action()
 
@@ -73,7 +71,7 @@ def _display_last_session_conclusion(last_session_metrics: Dict[str, Any]):
                           f"during your last session {date.date_repr(last_session_metrics['date'])}", '\n' * 3)
 
 
-def _query_action_selection() -> Action:
+def _query_action_selection() -> ActionOption:
     output.centered_print(f"What would you like to do?: "
                           f"{INTER_OPTION_INDENTATION}Translate (S)entences"
                           f"{INTER_OPTION_INDENTATION}Train (V)ocabulary"

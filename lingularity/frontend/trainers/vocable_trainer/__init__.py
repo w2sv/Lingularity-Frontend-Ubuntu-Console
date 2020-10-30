@@ -1,4 +1,4 @@
-from typing import Optional, List, Callable, Any
+from typing import Optional, List, Any
 from time import sleep
 
 import matplotlib.pyplot as plt
@@ -16,7 +16,7 @@ from lingularity.backend.trainers.vocable_trainer import (
 from . import options
 from lingularity.frontend.trainers.base import TrainerFrontend
 from lingularity.frontend.trainers.base.options import TrainingOptions, base_options
-from lingularity.frontend.reentrypoint import ReentryPoint
+from lingularity.frontend.reentrypoint import ReentryPoint, ReentryPointProvider
 from lingularity.frontend.state import State
 from lingularity.frontend.utils import matplotlib as plt_utils, query, view
 from lingularity.frontend.utils.output import (
@@ -35,7 +35,7 @@ from lingularity.frontend.utils.output import (
 #  revisit score history system
 
 class VocableTrainerFrontend(TrainerFrontend):
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs) -> ReentryPointProvider:  # type: ignore
         if not State.vocabulary_available:
             return cls._exit_on_nonexistent_vocabulary()
         return super().__new__(cls)
@@ -43,7 +43,7 @@ class VocableTrainerFrontend(TrainerFrontend):
     @staticmethod
     @cursor_hider
     @view.view_creator(banner='lingularity/bloody', banner_color='red')
-    def _exit_on_nonexistent_vocabulary() -> Callable[[], ReentryPoint]:
+    def _exit_on_nonexistent_vocabulary() -> ReentryPointProvider:
         print('\n' * 5)
 
         centered_print("You have to accumulate vocabulary by means of the "
@@ -65,7 +65,7 @@ class VocableTrainerFrontend(TrainerFrontend):
 
         self._accumulated_score: float = 0.0
         self._streak: int = 0
-        self._perfected_entries: List[VocableEntry] = []
+        self._n_perfected_entries: int = 0
 
         self._current_vocable_entry: Optional[VocableEntry] = None
 
@@ -82,13 +82,10 @@ class VocableTrainerFrontend(TrainerFrontend):
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
 
-        if self._n_trained_items:
-            self._display_pie_chart()
-
-        self._plot_training_chronic()
-
-        if len(self._perfected_entries):
-            self._display_perfected_entries()
+        # if self._n_trained_items:
+        #     self._display_pie_chart()
+        #
+        # self._plot_training_chronic()
 
         return ReentryPoint.TrainingSelection
 
@@ -215,7 +212,7 @@ class VocableTrainerFrontend(TrainerFrontend):
                 if entry.score < 5:
                     self._undo_print(f" | New Score: {[int(entry.score), entry.score][bool(entry.score % 1)]}", end='')
                 else:
-                    self._perfected_entries.append(entry)
+                    self._n_perfected_entries += 1
                     self._undo_print(" | Entry Perfected", end='')
 
             self._undo_print('\n')
@@ -295,14 +292,6 @@ class VocableTrainerFrontend(TrainerFrontend):
 
         else:
             self._streak = 0
-
-    @view.view_creator('PERFECTED ENTRIES')
-    def _display_perfected_entries(self):
-        # TODO: revisit
-
-        for entry in self._perfected_entries:
-            centered_print(str(entry))
-        print('\n\n')
 
     # -----------------
     # Post Training

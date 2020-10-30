@@ -8,7 +8,7 @@ from textacy.similarity import levenshtein
 from .utils import read_page_source
 
 
-def scrape_demonym(country_name: str) -> Optional[str]:
+def scrape(country_name: str) -> Optional[str]:
     """
         Args:
             country_name: uppercase
@@ -35,5 +35,4 @@ def scrape_demonym(country_name: str) -> Optional[str]:
                     if is_demonym(demonym_candidate) and levenshtein(country_name, demonym_candidate) > levenshtein(country_name, demonym):
                         demonym = demonym_candidate
 
-    logging.info(f'country_demonym: {demonym}')
     return demonym

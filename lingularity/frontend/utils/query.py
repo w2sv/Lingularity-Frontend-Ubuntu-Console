@@ -60,6 +60,9 @@ def repeat(function: Callable,
 
 
 def relentlessly(query_message: str, options: Sequence[str]) -> str:
+    """ Repeats query defined by query_message until response unambiguously
+        identifying singular option element has been given """
+
     if (option_selection := _resolve_input(input(query_message), options=options)) is None:
         return repeat(relentlessly, n_deletion_lines=2, args=(query_message, options))
     return option_selection

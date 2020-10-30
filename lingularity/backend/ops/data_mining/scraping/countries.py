@@ -27,7 +27,7 @@ def _rectify_country_names(country_list: List[str]) -> Set[str]:
     return set(country_list)
 
 
-def scrape_countries_language_employed_in(language: str) -> Optional[Set[str]]:
+def scrape(language: str) -> Optional[Set[str]]:
     """
         Args:
             language: uppercase """
@@ -59,4 +59,4 @@ def scrape_countries_language_employed_in(language: str) -> Optional[Set[str]]:
 
 
 if __name__ == '__main__':
-    print(scrape_countries_language_employed_in('English'))
+    print(scrape('English'))

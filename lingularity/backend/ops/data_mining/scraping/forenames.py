@@ -9,7 +9,7 @@ _POPULAR_FORENAMES_PAGE_URL = 'http://en.wikipedia.org/wiki/List_of_most_popular
 popular_forenames_page_source: List[str] = str(read_page_source(_POPULAR_FORENAMES_PAGE_URL)).split('\n')
 
 
-def scrape_popular_forenames(country: str) -> Optional[List[List[List[str]]]]:
+def scrape(country: str) -> Optional[List[List[List[str]]]]:
     """
         Returns:
             None in case of irretrievability of both popular male and female forenames, otherwise
@@ -79,5 +79,5 @@ if __name__ == '__main__':
     from time import time
 
     t1 = time()
-    print(scrape_popular_forenames('New Zealand'))
+    print(scrape('New Zealand'))
     print(f'took {time() - t1}s')

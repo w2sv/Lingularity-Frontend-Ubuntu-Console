@@ -1,17 +1,12 @@
-import requests
+from lingularity.backend.database import instantiate_client
 
-try:
-    from lingularity.backend.database import MongoDBClient
-
-    from lingularity.frontend import screen
-    from lingularity.frontend.reentrypoint import ReentryPoint
-    from lingularity.frontend.trainers import (
-        SentenceTranslationTrainerFrontend,
-        VocableTrainerFrontend,
-        VocableAdderFrontend
-    )
-except (RuntimeError, requests.exceptions.ConnectionError):
-    screen.missing_internet_exit.__call__()
+from lingularity.frontend import screen
+from lingularity.frontend.reentrypoint import ReentryPoint
+from lingularity.frontend.trainers import (
+    SentenceTranslationTrainerFrontend,
+    VocableTrainerFrontend,
+    VocableAdderFrontend
+)
 
 
 def __call__():
@@ -49,5 +44,8 @@ def reentry_at(reentry_point: ReentryPoint):
 
 if __name__ == '__main__':
     screen.ops.maximize_console()
-    MongoDBClient()
+
+    if not instantiate_client():
+        screen.missing_internet_exit.__call__()
+
     __call__()
