@@ -31,14 +31,16 @@ mine-metadata:
 # ----------Building-------------
 
 build:
-	python -OO -m PyInstaller lingularity/frontend/__init__.py \
+	python -OO -m PyInstaller --noconfirm --clean lingularity/frontend/__init__.py \
  				--name Lingularity \
+ 				--distpath="./build/dist" \
+				--workpath="./build/build" \
+				--specpath="./build" \
  				--add-data=".language_data/*:language_data" \
  				--add-data="lingularity/backend/metadata/data/*:metadata" \
  				--add-data="lingularity/backend/ops/google/text_to_speech/identifiers.json:text_to_speech_identifiers.json" \
  				--add-data="lingularity/frontend/banners/*:banners" \
-				--distpath="./build/dist" \
-				--workpath="./build/build" \
-				--specpath="./build" \
-				--noconfirm \
-				--clean \
+				--exclude-module bs4 \
+				--exclude-module coverage \
+				--exclude-module pytest \
+				--exclude-module mypy \

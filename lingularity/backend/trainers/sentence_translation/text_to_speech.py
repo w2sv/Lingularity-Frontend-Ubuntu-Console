@@ -4,7 +4,7 @@ import time
 
 import vlc
 
-from lingularity.utils import either
+from lingularity.backend.utils import either
 from lingularity.backend.utils.state_sharing import MonoStatePossessor
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.ops.google.text_to_speech import google_tts

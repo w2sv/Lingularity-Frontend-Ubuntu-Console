@@ -30,6 +30,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         self._tts = TextToSpeech.get_instance()
 
         super().__init__(backend_type=Backend)
+        self._backend: Backend
 
         self._redo_print = RedoPrint()
 

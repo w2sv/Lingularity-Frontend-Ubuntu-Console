@@ -1,6 +1,6 @@
 from typing import Optional
 
-from lingularity.utils import string_resources as string_resources
+from lingularity.backend.utils import string_resources
 
 from .ops import INTER_OPTION_INDENTATION, reference_language
 from lingularity.frontend.utils import input_resolution, output, view

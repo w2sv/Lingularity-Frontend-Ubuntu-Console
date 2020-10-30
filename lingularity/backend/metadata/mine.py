@@ -8,6 +8,7 @@ import os
 from tqdm import tqdm
 from textacy.similarity import levenshtein
 
+import lingularity.backend.utils.string_resources
 from lingularity.utils import string_resources as string_resources
 from lingularity.backend.trainers.components.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.metadata.types import LanguageMetadata, CountryMetadata
@@ -29,8 +30,9 @@ def _mine_metadata():
     language_2_download_link = scrape_sentence_data_download_links()
 
     # add English data
-    language_metadata[string_resources.ENGLISH] = data.load_json(f'{METADATA_DIR_PATH}/correction/language')[string_resources.ENGLISH]
-    for country in language_metadata[string_resources.ENGLISH]['countriesEmployedIn']:
+    language_metadata[lingularity.backend.utils.string_resources.ENGLISH] = data.load_json(f'{METADATA_DIR_PATH}/correction/language')[
+        lingularity.backend.utils.string_resources.ENGLISH]
+    for country in language_metadata[lingularity.backend.utils.string_resources.ENGLISH]['countriesEmployedIn']:
         _mine_and_set_forenames(country)
 
     for language, download_link in (progress_bar := tqdm(language_2_download_link.items(), total=len(language_2_download_link))):
@@ -88,7 +90,7 @@ def _mine_and_set_translations(language: str, sentence_data: SentenceData):
     translation_sub_dict = {}
 
     if google_translator.available_for(language):
-        translate = partial(google_translator.translate, src=string_resources.ENGLISH, dest=language)
+        translate = partial(google_translator.translate, src=lingularity.backend.utils.string_resources.ENGLISH, dest=language)
 
         # lets go
         translation_sub_dict["letsGo"] = translate("Let's go!")
@@ -108,8 +110,8 @@ def _get_default_forename_translations(sentence_data: SentenceData, language: st
 
     forename_2_translations = {}
     for forename, translations in zip(DEFAULT_FORENAMES, sentence_data.deduce_forename_translations()):
-        translations = set(filter(lambda translation: levenshtein(forename, google_translator.translate(translation, dest=string_resources.ENGLISH, src=language)) >= MIN_FORENAME_TRANSLATION_TRANSLATION_FORENAME_LEVENSHTEIN_SCORE, translations))
-        translations.add(google_translator.translate(forename, dest=language, src=string_resources.ENGLISH))
+        translations = set(filter(lambda translation: levenshtein(forename, google_translator.translate(translation, dest=lingularity.backend.utils.string_resources.ENGLISH, src=language)) >= MIN_FORENAME_TRANSLATION_TRANSLATION_FORENAME_LEVENSHTEIN_SCORE, translations))
+        translations.add(google_translator.translate(forename, dest=language, src=lingularity.backend.utils.string_resources.ENGLISH))
         translations.add(forename)
         forename_2_translations[forename] = sorted(translations, key=len, reverse=True)
 

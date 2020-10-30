@@ -1,4 +1,4 @@
-from typing import Optional, Type, Iterator, Sequence, overload, Union
+from typing import Optional, Type, Iterator, Sequence
 from abc import ABC, abstractmethod
 from time import sleep
 import datetime
@@ -8,11 +8,10 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from pynput.keyboard import Controller as KeyboardController
 
-from lingularity.utils import either
 from lingularity.backend.trainers import *
 from lingularity.backend.trainers.components import VocableEntry
 from lingularity.backend.metadata import language_metadata
-from lingularity.backend.utils import date as date_utils
+from lingularity.backend.utils import date as date_utils, either
 
 from .options import TrainingOptions
 from lingularity.frontend.reentrypoint import ReentryPoint
@@ -20,28 +19,9 @@ from lingularity.frontend.state import State
 from lingularity.frontend.utils import matplotlib as plt_utils, output, view
 
 
-TrainerBackendType = Union[
-    Type[SentenceTranslationTrainerBackend],
-    Type[VocableTrainerBackend],
-    Type[VocableAdderBackend]
-]
-
-
-@overload
-def _backend(backend_type: Type[VocableTrainerBackend]) -> VocableTrainerBackend: ...
-@overload
-def _backend(backend_type: Type[SentenceTranslationTrainerBackend]) -> SentenceTranslationTrainerBackend: ...
-@overload
-def _backend(backend_type: Type[VocableAdderBackend]) -> VocableAdderBackend: ...
-
-
-def _backend(backend_type: TrainerBackendType) -> Union[VocableTrainerBackend, SentenceTranslationTrainerBackend, VocableAdderBackend]:
-    return backend_type(State.non_english_language, State.train_english)
-
-
 class TrainerFrontend(ABC):
-    def __init__(self, backend_type: TrainerBackendType):
-        self._backend = _backend(backend_type=backend_type)
+    def __init__(self, backend_type: Type[TrainerBackend]):
+        self._backend: TrainerBackend = backend_type(State.non_english_language, State.train_english)
 
         self._training_options: TrainingOptions = self._get_training_options()
 

@@ -1,7 +1,7 @@
 from typing import List
 
 from lingularity.backend.database import MongoDBClient
-from lingularity.utils import string_resources as string_resources
+from lingularity.backend.utils import string_resources
 from lingularity.frontend.utils import input_resolution, output
 
 

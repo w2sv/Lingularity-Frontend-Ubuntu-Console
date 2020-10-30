@@ -1,9 +1,7 @@
 from nltk.stem import SnowballStemmer
 from termcolor import colored
 
-from lingularity.utils import string_resources as string_resources
-
-from lingularity.backend.utils import spacy
+from lingularity.backend.utils import spacy, string_resources
 from lingularity.backend.ops.google.text_to_speech import google_tts
 from lingularity.backend.metadata import language_metadata
 

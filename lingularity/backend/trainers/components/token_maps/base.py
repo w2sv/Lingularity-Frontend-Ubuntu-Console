@@ -4,7 +4,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from lingularity.utils import either
+from lingularity.backend.utils import either
 from lingularity.backend.utils.strings import split_at_uppercase, get_meaningful_tokens, get_article_stripped_noun
 from lingularity.backend.utils.iterables import iterables_intersection, none_stripped
 

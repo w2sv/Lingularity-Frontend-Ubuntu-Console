@@ -11,6 +11,7 @@ from lingularity.frontend.utils import input_resolution, output, view
 class VocableAdderFrontend(TrainerFrontend):
     def __init__(self):
         super().__init__(backend_type=Backend)
+        self._backend: Backend
 
     def __call__(self) -> ReentryPoint:
         self._set_terminal_title()

@@ -2,9 +2,8 @@ from typing import Optional, Tuple, List, Any, Iterator, Set, Dict
 
 import pymongo
 
-from lingularity.utils import string_resources as string_resources
 
-from lingularity.backend.utils import state_sharing, date
+from lingularity.backend.utils import state_sharing, date, string_resources
 from .document_types import (
     LastSessionStatistics,
     TrainingChronic,

@@ -18,8 +18,7 @@ from lingularity.frontend.trainers.base import TrainerFrontend
 from lingularity.frontend.trainers.base.options import TrainingOptions, base_options
 from lingularity.frontend.reentrypoint import ReentryPoint
 from lingularity.frontend.state import State
-from lingularity.frontend.utils import view
-from lingularity.frontend.utils import matplotlib as plt_utils, input_resolution
+from lingularity.frontend.utils import matplotlib as plt_utils, input_resolution, view
 from lingularity.frontend.utils.output import (
     erase_lines,
     centered_print,
@@ -60,6 +59,7 @@ class VocableTrainerFrontend(TrainerFrontend):
 
     def __init__(self):
         super().__init__(backend_type=Backend)
+        self._backend: Backend
 
         self._undo_print = UndoPrint()
 
@@ -223,7 +223,7 @@ class VocableTrainerFrontend(TrainerFrontend):
             # get related sentence pairs, convert forenames if feasible
             related_sentence_pairs = self._backend.related_sentence_pairs(entry.vocable, n=2)
             if self._backend.forename_converter is not None:
-                related_sentence_pairs = list(map(self._backend.forename_converter, related_sentence_pairs))
+                related_sentence_pairs = list(map(self._backend.forename_converter, related_sentence_pairs))  # type: ignore
 
             # display sentence pairs
             for sentence_pair in related_sentence_pairs:

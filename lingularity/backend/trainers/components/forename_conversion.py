@@ -2,8 +2,7 @@ from typing import Optional, List, Iterator, Tuple, Iterable
 import random
 from collections.abc import Mapping
 
-from lingularity.utils import string_resources as string_resources
-from lingularity.backend.utils.strings import split_multiple
+from lingularity.backend.utils import string_resources, strings
 from lingularity.backend.metadata import (
     SubstitutionForenamesMap,
     get_substitution_forenames_map,
@@ -151,7 +150,7 @@ class ForenameConvertor:
             return english_fragment[:-1] == forename and english_fragment[-1] == 's'
 
         def is_special_character_delimited_forename() -> bool:
-            return split_multiple(english_fragment, delimiters=list("'?!.,"))[0] == forename
+            return strings.split_multiple(english_fragment, delimiters=list("'?!.,"))[0] == forename
 
         return is_s_trailed_forename() or is_special_character_delimited_forename()
 

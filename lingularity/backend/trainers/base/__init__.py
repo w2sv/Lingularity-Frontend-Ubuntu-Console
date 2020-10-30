@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
+from lingularity.backend.utils import string_resources
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.trainers.components import ForenameConvertor, SentenceData
-from lingularity.utils import string_resources as string_resources
 
 
 class TrainerBackend(ABC):
