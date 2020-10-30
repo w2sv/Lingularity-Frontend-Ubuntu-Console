@@ -26,3 +26,19 @@ doctest:
 
 mine-metadata:
 	python -m lingularity.backend.metadata.mine -Mine
+
+
+# ----------Building-------------
+
+build:
+	python -OO -m PyInstaller lingularity/frontend/__init__.py \
+ 				--name Lingularity \
+ 				--add-data=".language_data/*:language_data" \
+ 				--add-data="lingularity/backend/metadata/data/*:metadata" \
+ 				--add-data="lingularity/backend/ops/google/text_to_speech/identifiers.json:text_to_speech_identifiers.json" \
+ 				--add-data="lingularity/frontend/banners/*:banners" \
+				--distpath="./build/dist" \
+				--workpath="./build/build" \
+				--specpath="./build" \
+				--noconfirm \
+				--clean \

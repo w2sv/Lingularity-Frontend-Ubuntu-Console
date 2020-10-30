@@ -1,7 +1,5 @@
 # Generic
 __pycache__
-/dist/
-/SentenceTranslation.spec
 /.idea/
 /.mypy_cache/
 logging.txt
@@ -13,9 +11,13 @@ logging.txt
 # Data
 *.mp3
 
+
 # Envs
 /env/
 
 # Keys
 .fernet_key
 .logged_in_user
+
+# Build
+/build/
