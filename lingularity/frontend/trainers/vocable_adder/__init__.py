@@ -5,7 +5,7 @@ from lingularity.backend.trainers import VocableAdderBackend as Backend
 from lingularity.frontend.reentrypoint import ReentryPoint
 from lingularity.frontend.trainers.base import TrainerFrontend
 from lingularity.frontend.trainers.base.options import TrainingOptions, base_options
-from lingularity.frontend.utils import input_resolution, output, view
+from lingularity.frontend.utils import query, output, view
 
 
 class VocableAdderFrontend(TrainerFrontend):
@@ -45,13 +45,13 @@ class VocableAdderFrontend(TrainerFrontend):
         add_vocable = base_options.AddVocable()
 
         while True:
-            output.empty_row()
+            print(output.EMPTY_ROW)
 
             add_vocable()
 
             self._output_vocable_addition_confirmation()
 
-            response = input_resolution.query_relentlessly(f'{output.centered_print_indentation("Enter option/Proceed via Enter Stroke")}$', options=self._training_options.keywords)
+            response = query.relentlessly(f'{output.centered_print_indentation("Enter option/Proceed via Enter Stroke")}$', options=self._training_options.keywords)
             if len(response):
                 self._training_options[response].__call__()
 

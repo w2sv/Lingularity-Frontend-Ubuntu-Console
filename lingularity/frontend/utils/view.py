@@ -6,7 +6,7 @@ from termcolor import colored
 
 from lingularity.frontend.utils import output
 
-DEFAULT_VERTICAL_VIEW_OFFSET = '\n' * 2
+VERTICAL_OFFSET = '\n' * 2
 
 
 def view_creator(
@@ -28,7 +28,7 @@ def view_creator(
         @wraps(function)
         def wrapper(*args, **kwargs):
             output.clear_screen()
-            print(DEFAULT_VERTICAL_VIEW_OFFSET)
+            print(VERTICAL_OFFSET)
 
             if title is not None:
                 set_terminal_title(title=title)
@@ -40,7 +40,7 @@ def view_creator(
                 if header is not None:
                     output.centered_print(header)
 
-                print(DEFAULT_VERTICAL_VIEW_OFFSET, end='')
+                print(VERTICAL_OFFSET, end='')
 
             return function(*args, **kwargs)
         return wrapper

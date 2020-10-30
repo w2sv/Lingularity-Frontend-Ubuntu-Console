@@ -18,9 +18,6 @@ from .centered_printing import (
 )
 
 
-SELECTION_QUERY_OUTPUT_OFFSET = '\n\t'  # TODO: remove
-
-
 def cursor_hider(function: Callable):
     @wraps(function)
     def wrapper(*args, **kwargs):
@@ -38,5 +35,4 @@ def group_by_starting_letter(strings: Iterable[str], is_sorted: bool) -> Iterato
     return (v for _, v in groupby(strings, lambda element: element[0]))
 
 
-def empty_row():
-    print()
+EMPTY_ROW = ''

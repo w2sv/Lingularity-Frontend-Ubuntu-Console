@@ -71,7 +71,7 @@ class TrainerFrontend(ABC):
     def _add_vocable(self) -> int:
         """ Query, create new vocable entry,
             Enter it into database
-            Update State.language_vocabulary_possessing
+            Update State.vocabulary_available
 
             Returns:
                 number of printed lines: int """
@@ -91,9 +91,9 @@ class TrainerFrontend(ABC):
         self._latest_created_vocable_entry = VocableEntry.new(*vocable_and_meaning)
         self._backend.mongodb_client.insert_vocable_entry(self._latest_created_vocable_entry.as_dict)  # type: ignore
 
-        # update language_vocabulary_possessing flag in State
-        if not State.language_vocabulary_possessing:
-            State.language_vocabulary_possessing = True
+        # update vocabulary_available flag in State
+        if not State.vocabulary_available:
+            State.vocabulary_available = True
 
         return 2
 

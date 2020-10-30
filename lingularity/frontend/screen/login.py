@@ -5,7 +5,8 @@ import os
 from lingularity.backend.database import MongoDBClient
 
 from lingularity.frontend.state import State
-from lingularity.frontend.utils import credentials, fernet, input_resolution, output, view
+from lingularity.frontend.utils import credentials, fernet, query, output, view
+
 
 _USER_ENCRYPTION_FILE_PATH = f'{os.getcwd()}/.logged_in_user'
 _QUERY_INDENTATION = output.column_percentual_indentation(percentage=0.4)
@@ -37,14 +38,14 @@ def __call__() -> bool:
             _sign_up(username, mongodb_client)
             is_new_user = True
 
+        # store encrypted user
+        _store_logged_in_user(username)
+
     assert username is not None
 
     # set state, database variables
     mongodb_client.user = username
     State.set_user(username)
-
-    # store encrypted user
-    _store_logged_in_user(username)
 
     return is_new_user
 
@@ -72,12 +73,10 @@ def _query_login_credentials() -> Tuple[str, bool]:
     mongodb_client = MongoDBClient.get_instance()
     login_successful = False
 
-    USER_NAME_QUERY = 'Enter user name: '
-
     # query username
-    username = input(f'{_QUERY_INDENTATION}{USER_NAME_QUERY}')
+    username = input(f'{_QUERY_INDENTATION}Enter user name: ')
     if credentials.invalid_username(username):
-        return input_resolution.repeat(__call__, n_deletion_lines=2, message='Empty username is not allowed')
+        return query.repeat(__call__, n_deletion_lines=2, message='Empty username is not allowed')
 
     # query password if entered username existent
     elif username in mongodb_client.usernames:
@@ -88,8 +87,6 @@ def _query_login_credentials() -> Tuple[str, bool]:
 
         password, password_input = mongodb_client.query_password(username), query_password('Enter password: ')
         while password != password_input:
-            # TODO: find way to erase 'Enter password: ' query line, somehow infeasible by means of
-            #  erase_lines after first invocation
             output.erase_lines(1)
             password_input = query_password('Incorrect, try again: ')
         output.erase_lines(2)
@@ -108,8 +105,8 @@ def _sign_up(user: str, client: MongoDBClient, email_address: Optional[str] = No
         email_address = input(f'{_QUERY_INDENTATION}{EMAIL_QUERY}')
 
         if credentials.invalid_mailaddress(email_address):
-            return input_resolution.repeat(function=_sign_up, n_deletion_lines=4, message='Invalid email address',
-                                           args=(user, client, _QUERY_INDENTATION, None))
+            return query.repeat(function=_sign_up, n_deletion_lines=4, message='Invalid email address',
+                                args=(user, client, _QUERY_INDENTATION, None))
 
         # TODO
         """elif client.mail_address_taken(mail_address):
@@ -118,8 +115,8 @@ def _sign_up(user: str, client: MongoDBClient, email_address: Optional[str] = No
     password = getpass(f'{_QUERY_INDENTATION}Create password: ')
 
     if credentials.invalid_password(password):
-        return input_resolution.repeat(function=_sign_up, n_deletion_lines=5, message='Password must contain at least 5 characters',
-                                       args=(user, client, _QUERY_INDENTATION, email_address))
+        return query.repeat(function=_sign_up, n_deletion_lines=5, message='Password must contain at least 5 characters',
+                            args=(user, client, _QUERY_INDENTATION, email_address))
 
     client.initialize_user(user, email_address=email_address, password=password)
     output.erase_lines(4)

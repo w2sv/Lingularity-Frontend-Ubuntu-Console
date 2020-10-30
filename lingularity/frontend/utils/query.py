@@ -1,15 +1,10 @@
 from typing import Iterable, Optional, Callable, Tuple, Any, Sequence
 import time
 
-from lingularity.frontend.utils.output import (
-    clear_screen,
-    erase_lines,
-    centered_print,
-    cursor_hider
-)
+from lingularity.frontend.utils import output
 
-INDISSOLUBILITY_MESSAGE = "COULDN'T RESOLVE INPUT"
-
+_INDISSOLUBILITY_MESSAGE = "COULDN'T RESOLVE INPUT"
+HORIZONTAL_OFFSET = output.column_percentual_indentation(percentage=0.1)
 
 # ------------------
 # Input Resolution
@@ -24,20 +19,20 @@ def _resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
     return None
 
 
-@cursor_hider
-def _indicate_indissolubility(n_deletion_lines: int, message=INDISSOLUBILITY_MESSAGE, sleep_duration=1.0):
+@output.cursor_hider
+def _indicate_indissolubility(n_deletion_lines: int, message=_INDISSOLUBILITY_MESSAGE, sleep_duration=1.0):
     """ - Display message communicating indissolubility reason,
         - freeze program for sleep duration
         - erase n_deletion_lines last output output lines or clear screen if n_deletion_lines = -1 """
 
-    centered_print(message)
+    output.centered_print(message)
 
     time.sleep(sleep_duration)
 
     if n_deletion_lines == -1:
-        clear_screen()
+        output.clear_screen()
     else:
-        erase_lines(n_deletion_lines)
+        output.erase_lines(n_deletion_lines)
 
 
 # ------------------
@@ -45,7 +40,7 @@ def _indicate_indissolubility(n_deletion_lines: int, message=INDISSOLUBILITY_MES
 # ------------------
 def repeat(function: Callable,
            n_deletion_lines: int,
-           message=INDISSOLUBILITY_MESSAGE,
+           message=_INDISSOLUBILITY_MESSAGE,
            sleep_duration=1.0,
            args: Tuple[Any, ...] = ()):
 
@@ -64,7 +59,7 @@ def repeat(function: Callable,
     return function(*args)
 
 
-def query_relentlessly(query_message: str, options: Sequence[str]) -> str:
+def relentlessly(query_message: str, options: Sequence[str]) -> str:
     if (option_selection := _resolve_input(input(query_message), options=options)) is None:
-        return repeat(query_relentlessly, n_deletion_lines=2, args=(query_message, options))
+        return repeat(relentlessly, n_deletion_lines=2, args=(query_message, options))
     return option_selection

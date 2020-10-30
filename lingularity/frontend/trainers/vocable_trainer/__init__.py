@@ -18,7 +18,7 @@ from lingularity.frontend.trainers.base import TrainerFrontend
 from lingularity.frontend.trainers.base.options import TrainingOptions, base_options
 from lingularity.frontend.reentrypoint import ReentryPoint
 from lingularity.frontend.state import State
-from lingularity.frontend.utils import matplotlib as plt_utils, input_resolution, view
+from lingularity.frontend.utils import matplotlib as plt_utils, query, view
 from lingularity.frontend.utils.output import (
     erase_lines,
     centered_print,
@@ -36,7 +36,7 @@ from lingularity.frontend.utils.output import (
 
 class VocableTrainerFrontend(TrainerFrontend):
     def __new__(cls, *args, **kwargs):
-        if not State.language_vocabulary_possessing:
+        if not State.vocabulary_available:
             return cls._exit_on_nonexistent_vocabulary()
         return super().__new__(cls)
 
@@ -108,18 +108,18 @@ class VocableTrainerFrontend(TrainerFrontend):
     # -----------------
     @view.view_creator()
     def _display_new_vocabulary_if_desired(self):
-        print(view.DEFAULT_VERTICAL_VIEW_OFFSET * 2)
+        print(view.VERTICAL_OFFSET * 2)
         centered_print('Would you like to see the vocable entries you recently created? (y)es/(n)o')
         centered_print(' ', end='')
 
-        if input_resolution.query_relentlessly(query_message='', options=['yes', 'no']) == 'yes':
+        if query.relentlessly(query_message='', options=['yes', 'no']) == 'yes':
             self._display_new_vocable_entries()
 
     @view.view_creator()
     def _display_new_vocable_entries(self):
         assert self._backend.new_vocable_entries is not None
 
-        print(view.DEFAULT_VERTICAL_VIEW_OFFSET)
+        print(view.VERTICAL_OFFSET)
 
         # display entry line representations
         line_reprs = list(map(lambda entry: str(entry), self._backend.new_vocable_entries))
@@ -128,7 +128,7 @@ class VocableTrainerFrontend(TrainerFrontend):
             print(indentation, line_repr)
 
         # wait for key press
-        centered_print(f'{view.DEFAULT_VERTICAL_VIEW_OFFSET}PRESS ANY KEY TO CONTINUE')
+        centered_print(f'{view.VERTICAL_OFFSET}PRESS ANY KEY TO CONTINUE')
         centered_input_query()
 
     # ------------------
@@ -243,7 +243,7 @@ class VocableTrainerFrontend(TrainerFrontend):
             self._undo_print('')
 
             # query option/procedure, __call__ option if applicable
-            option_selection = input_resolution.query_relentlessly(query_message=f'{centered_print_indentation(" ")}$', options=self._training_options.keywords)
+            option_selection = query.relentlessly(query_message=f'{centered_print_indentation(" ")}$', options=self._training_options.keywords)
             self._undo_print.add_lines_to_buffer(1)
 
             if len(option_selection):

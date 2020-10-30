@@ -6,7 +6,7 @@ from functools import partial
 import cursor
 from pynput.keyboard import Controller as Keyboard
 
-from lingularity.frontend.utils import input_resolution, output
+from lingularity.frontend.utils import query, output
 from lingularity.frontend.trainers.base.options import TrainingOption
 
 
@@ -37,11 +37,11 @@ class ChangePlaybackSpeed(TrainingOption):
         output.erase_lines(3)
 
     def _change_playback_speed(self):
-        print(f'Playback speed:{output.SELECTION_QUERY_OUTPUT_OFFSET}', end='')
+        print(f'Playback speed:\n{query.HORIZONTAL_OFFSET}', end='')
         Keyboard().type(str(self._tts.playback_speed))
         cursor.show()
 
-        _recurse = partial(input_resolution.repeat, function=self._change_playback_speed, message='INVALID INPUT', n_deletion_lines=3)
+        _recurse = partial(query.repeat, function=self._change_playback_speed, message='INVALID INPUT', n_deletion_lines=3)
 
         try:
             altered_playback_speed = float(input())

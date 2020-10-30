@@ -2,22 +2,31 @@ from typing import List
 
 from lingularity.backend.database import MongoDBClient
 from lingularity.backend.utils import string_resources
-from lingularity.frontend.utils import input_resolution, output
+from lingularity.frontend.utils import query, output
 
 
-def get(eligible_languages: List[str]) -> str:
-    selection = query()
+def procure(eligible_languages: List[str]) -> str:
+    """ Procures English reference language from either database or
+        user if unsuccessful, enters selection into database in case
+        of the latter """
 
-    if not selection:
+    if not (selection := query_database()):
         output.erase_lines(2)
 
-        eligible_languages.remove(string_resources.ENGLISH)
-        selection = input_resolution.query_relentlessly(f'{output.SELECTION_QUERY_OUTPUT_OFFSET}Select reference language: ', options=eligible_languages)
-
+        selection = _query_user(eligible_languages)
         MongoDBClient.get_instance().set_reference_language(reference_language=selection)
 
     return selection
 
 
-def query():
+def _query_user(eligible_languages: List[str]) -> str:
+    eligible_languages.remove(string_resources.ENGLISH)
+    selection = query.relentlessly(
+        f'{query.HORIZONTAL_OFFSET}Select reference language: ',
+        options=eligible_languages
+    )
+
+    return selection
+
+def query_database():
     return MongoDBClient.get_instance().query_reference_language()

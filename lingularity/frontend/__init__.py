@@ -39,7 +39,7 @@ def reentry_at(reentry_point: ReentryPoint):
         if reentry_point is ReentryPoint.LanguageAddition:
             screen.language_addition.__call__()
 
-        elif reentry_point is ReentryPoint.LanguageSelection:
+        elif reentry_point is ReentryPoint.Home:
 
             if reentry_point := screen.home.__call__():
                 return reentry_at(reentry_point=reentry_point)
