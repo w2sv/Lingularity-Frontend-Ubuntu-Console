@@ -10,6 +10,7 @@ logging.txt
 
 # Data
 *.mp3
+/lingularity/backend/data/sentence-data/
 
 
 # Envs

@@ -34,34 +34,28 @@ LANGUAGE_2_MODEL_IDENTIFIERS = {
 ELIGIBLE_LANGUAGES = set(LANGUAGE_2_MODEL_IDENTIFIERS.keys())
 
 
-def load_model(language: str) -> Model:
-    model_name = _assemble_model_name(language=language)
-
-    try:
-        return _load_model(model_name=model_name)
-    except OSError:
-        _install_additional_dependencies_if_required(language=language)
-
-        # try to download model
-        if os.system(f'python -m spacy download {model_name}') == 256:
-            raise EnvironmentError("Couldn't download spacy model")
-
-    return _load_model(model_name=model_name)
+def load_model(language: str):
+    print('Loading model...')
+    return spacy.load(_assemble_model_name(language=language))
 
 
 def _assemble_model_name(language: str) -> str:
-    MODEL_SIZE = 'sm'
+    MODEL_SIZE_IDENTIFIER = 'sm'
 
-    return f'{LANGUAGE_2_MODEL_IDENTIFIERS[language][0]}_core_{LANGUAGE_2_MODEL_IDENTIFIERS[language][1]}_{MODEL_SIZE}'
-
-
-def _load_model(model_name: str):
-    print('Loading model...')
-    return spacy.load(model_name)
+    return f'{LANGUAGE_2_MODEL_IDENTIFIERS[language][0]}_core_{LANGUAGE_2_MODEL_IDENTIFIERS[language][1]}_{MODEL_SIZE_IDENTIFIER}'
 
 
-def _install_additional_dependencies_if_required(language: str):
-    # TODO: test
-    relative_os_dependency_installation_file_path = f'os_dependencies/languages/{language}.sh'
-    if os.path.exists(f'{os.getcwd()}/{relative_os_dependency_installation_file_path}'):
-        os.system(f'bash {relative_os_dependency_installation_file_path}')
+if __name__ == '__main__':
+    def download_models():
+        for language in LANGUAGE_2_MODEL_IDENTIFIERS.keys():
+            os.system(f'python -m spacy download {_assemble_model_name(language=language)}')
+            _install_os_dependencies_if_required(language)
+
+
+    def _install_os_dependencies_if_required(language: str):
+        relative_os_dependency_installation_file_path = f'os-dependencies/languages/{language}.sh'
+
+        if os.path.exists(f'{os.getcwd()}/{relative_os_dependency_installation_file_path}'):
+            os.system(f'bash {relative_os_dependency_installation_file_path}')
+
+    download_models()

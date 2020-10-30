@@ -6,6 +6,7 @@ from tqdm import tqdm
 import numpy as np
 import nltk
 
+from lingularity.backend import TOKEN_MAPS_PATH
 from lingularity.backend.utils import spacy as spacy_utils, data as data_utils
 from lingularity.backend.trainers.components.token_maps.base import TokenMap
 from lingularity.backend.trainers.components.token_maps.unnormalized import UnnormalizedTokenMap
@@ -61,7 +62,7 @@ class LemmaMap(NormalizedTokenMap):
         """ Args:
                 language: titled language """
 
-        save_path = f'{os.getcwd()}/.language_data/{language.title()}/lemma_maps.pickle'
+        save_path = f'{TOKEN_MAPS_PATH}/{language}.pickle'
         self._model: spacy_utils.Model
 
         if os.path.exists(save_path):

@@ -8,7 +8,7 @@ dependencies:
   - pytest  # dev
   - mypy  # dev
   - numpy=1.18.1  # one application
-  - requests=2.23.0  # one application
+  - requests=2.23.0  # dev
   - unidecode=1.1.1
   - nltk=3.4.5
   - pymongo=3.9.0

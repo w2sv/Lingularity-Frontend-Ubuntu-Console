@@ -1,7 +1,7 @@
 from typing import Optional, List
-import os
 import random
 
+from lingularity.backend import META_DATA_PATH
 from lingularity.backend.utils.data import load_json
 from .types import (
     SubstitutionForenamesMap,
@@ -11,11 +11,8 @@ from .types import (
 )
 
 
-METADATA_DIR_PATH = f'{os.getcwd()}/lingularity/backend/metadata/data'
-
-
-language_metadata: LanguageMetadata = load_json(f'{METADATA_DIR_PATH}/language')
-_country_metadata: CountryMetadata = load_json(f'{METADATA_DIR_PATH}/country')
+language_metadata: LanguageMetadata = load_json(f'{META_DATA_PATH}/language')
+_country_metadata: CountryMetadata = load_json(f'{META_DATA_PATH}/country')
 
 
 def replacement_forenames_available_for(language: str) -> bool:

@@ -6,7 +6,7 @@ import collections
 import numpy as np
 from textacy.similarity import levenshtein
 
-from lingularity.backend import BASE_LANGUAGE_DATA_PATH
+from lingularity.backend import sentence_data_path
 from lingularity.backend.ops.data_mining.downloading import download_sentence_data
 from lingularity.backend.trainers.components.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.utils.iterables import longest_value
@@ -36,15 +36,15 @@ class SentenceData(np.ndarray):
         cls._train_english = train_english
 
         # download sentence data if necessary
-        if not os.path.exists((language_dir_path := f'{BASE_LANGUAGE_DATA_PATH}/{language}')):
+        if not os.path.exists((_sentence_data_path := sentence_data_path(language))):
             download_sentence_data(language=language)
 
-        return cls._read_in(language_dir_path, train_english).view(SentenceData)
+        return cls._read_in(_sentence_data_path, train_english).view(SentenceData)
 
     @staticmethod
-    def _read_in(language_dir_path: str, train_english: bool) -> np.ndarray:
+    def _read_in(_sentence_data_path: str, train_english: bool) -> np.ndarray:
         processed_sentence_data = []
-        with open(f'{language_dir_path}/sentence_data.txt', 'r', encoding='utf-8') as sentence_data_file:
+        with open(_sentence_data_path, 'r', encoding='utf-8') as sentence_data_file:
             for sentence_pair_line in sentence_data_file.readlines():
                 sentence_pair = sentence_pair_line.strip('\n').split('\t')
                 if train_english:

@@ -8,6 +8,7 @@ install:
 
 	rm -rf env
 	conda env create -f environment.yml --prefix ./env
+	python -m lingularity.backend.utils.spacy
 
 # ----------Testing----------
 
