@@ -33,7 +33,7 @@ class TokenMap(defaultdict, ABC):
     def _display_mapping_initialization_message(self):
         print(f'Creating {" ".join(split_at_uppercase(self.__class__.__name__))}s...')
 
-    def _get_data(self) -> Dict[str, List[int]]:
+    def _get_data(self) -> Type:
         return {**self}
 
     # ------------------
@@ -50,7 +50,7 @@ class TokenMap(defaultdict, ABC):
     def _find_best_fit_sentence_indices(self, relevance_sorted_tokens: List[str]) -> Optional[List[int]]:
         """ Working Principle:
                 - query sentence indices corresponding to distinct tokens present in relevance_sorted_tokens
-                - return None if no sentence indices found at all
+                    -> return None if no sentence indices found at all
                 - consecutively pop sentence indices element from sentence indices list, starting with the
                     ones corresponding to tokens of lower relevance, and return the intersection between
                     the remaining sentence indices elements if existent
@@ -63,8 +63,7 @@ class TokenMap(defaultdict, ABC):
 
         relevance_sorted_sentence_indices = list(map(set, relevance_sorted_sentence_indices))
         while len(relevance_sorted_sentence_indices) > 1:
-            if len((remaining_sentence_indices_list_intersection := iterables_intersection(
-                    relevance_sorted_sentence_indices))):
+            if len((remaining_sentence_indices_list_intersection := iterables_intersection(relevance_sorted_sentence_indices))):
                 return list(remaining_sentence_indices_list_intersection)
             relevance_sorted_sentence_indices.pop()
 

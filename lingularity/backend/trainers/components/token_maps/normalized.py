@@ -51,7 +51,7 @@ class StemMap(NormalizedTokenMap):
 
 
 class LemmaMap(NormalizedTokenMap):
-    IGNORE_POS_TYPES = ('DET', 'PROPN', 'SYM', 'PUNCT', 'X')
+    IGNORE_POS_TYPES = ('DET', 'PROPN', 'SYM', 'PUNCT', 'X', 'PART')
     SENTENCE_TRANSLATION_MODE_MAPPING_INCLUSION_POS_TYPES = ('VERB', 'NOUN', 'ADJ', 'ADV', 'ADP')
 
     @staticmethod
