@@ -108,7 +108,7 @@ class LemmaMap(NormalizedTokenMap):
         tokens = self._model(vocable_entry)
 
         # remove tokens of REMOVE_POS_TYPE if tokens not solely comprised of them
-        if len((pos_set := set((token.pos_ for token in tokens))).intersection(REMOVE_POS_TYPES)) != len(pos_set):
+        if len(set((token.pos_ for token in tokens)) - REMOVE_POS_TYPES):
             tokens = list(filter(lambda token: token.pos_ not in REMOVE_POS_TYPES, tokens))
 
         pos_value_sorted_lemmas = [token.lemma_ for token in sorted(tokens, key=lambda t: POS_VALUES.get(t.pos_, 0))]
