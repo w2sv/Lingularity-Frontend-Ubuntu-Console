@@ -1,39 +1,40 @@
-from typing import DefaultDict, Optional, List, Dict
+from typing import *
 from abc import ABC, abstractmethod
 from collections import defaultdict
 
-import numpy as np
-
-from lingularity.backend.utils import either
-from lingularity.backend.utils.strings import split_at_uppercase, get_meaningful_tokens, get_article_stripped_noun
-from lingularity.backend.utils.iterables import iterables_intersection, none_stripped
+from lingularity.backend.trainers.components.mappings.token.types import Token
+from lingularity.backend.utils import either, strings, iterables
 
 
-class TokenMap(defaultdict, ABC):
+SentenceIndex2UniqueTokens = Dict[int, Set[Token]]
+
+
+class TokenSentenceIndicesMap(defaultdict, ABC):
     """ Interface for map classes comprising an association of
           unique, LOWERCASE and RELEVANT tokens (unnormalized/normalized): str
                 to the
           sentence indices corresponding to the bilateral sentence data in
           which they occur, in either an inflected form (NormalizedTokenMaps)
-          or as they are(UnnormalizedTokenMap): List[int] """
+          or as they are(UnnormalizedTokenSentenceIndicesMap): List[int] """
 
-    Type = Dict[str, List[int]]
-    OccurrenceMap = DefaultDict[str, int]
+    _Type = Dict[str, List[int]]
 
-    def __init__(self, data: Optional[Type] = None, occurrence_map: Optional[OccurrenceMap] = None):
-        super().__init__(list, either(data, default={}))
-
-        self.occurrence_map: TokenMap.OccurrenceMap = either(occurrence_map, default=defaultdict(lambda: 0))
+    def __init__(self, data: Optional[_Type] = None):
+        super().__init__(list)
 
     @abstractmethod
-    def _map_tokens(self, sentence_data: np.ndarray):
-        """ Sets both data and occurrence map """
+    def tokenize(self, sentence: str) -> List[Token]:
         pass
 
-    def _display_mapping_initialization_message(self):
-        print(f'Creating {" ".join(split_at_uppercase(self.__class__.__name__))}s...')
+    def create(self, sentence_index_2_unique_tokens: SentenceIndex2UniqueTokens):
+        print(f'Creating {" ".join(strings.split_at_uppercase(self.__class__.__name__))}...')
 
-    def _get_data(self) -> Type:
+        for sentence_index, tokens in sentence_index_2_unique_tokens.items():
+            for token in tokens:
+                self[token].append(sentence_index)
+
+    @property
+    def data(self) -> _Type:
         return {**self}
 
     # ------------------
@@ -56,14 +57,14 @@ class TokenMap(defaultdict, ABC):
                     the remaining sentence indices elements if existent
                 - return sentence indices of most relevant vocable if the only one remaining """
 
-        relevance_sorted_sentence_indices = none_stripped((self.get(token) for token in relevance_sorted_tokens))
+        relevance_sorted_sentence_indices = iterables.none_stripped((self.get(token) for token in relevance_sorted_tokens))
 
         if not len(relevance_sorted_sentence_indices):
             return None
 
         relevance_sorted_sentence_indices = list(map(set, relevance_sorted_sentence_indices))
         while len(relevance_sorted_sentence_indices) > 1:
-            if len((remaining_sentence_indices_list_intersection := iterables_intersection(relevance_sorted_sentence_indices))):
+            if len((remaining_sentence_indices_list_intersection := iterables.iterables_intersection(relevance_sorted_sentence_indices))):
                 return list(remaining_sentence_indices_list_intersection)
             relevance_sorted_sentence_indices.pop()
 
@@ -71,6 +72,6 @@ class TokenMap(defaultdict, ABC):
 
     @staticmethod
     def _get_length_sorted_meaningful_tokens(vocable_entry: str) -> List[str]:
-        if (article_stripped_noun := get_article_stripped_noun(vocable_entry)) is not None:
+        if (article_stripped_noun := strings.get_article_stripped_noun(vocable_entry)) is not None:
             return [article_stripped_noun]
-        return sorted(get_meaningful_tokens(vocable_entry, apostrophe_splitting=True), key=lambda token: len(token))
+        return sorted(strings.get_meaningful_tokens(vocable_entry, apostrophe_splitting=True), key=lambda token: len(token))

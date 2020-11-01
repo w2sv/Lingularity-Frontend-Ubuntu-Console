@@ -7,6 +7,14 @@ import spacy
 
 
 Model = Any
+Token = spacy.tokens.Token
+
+
+POS_VALUES = {
+    'NOUN': 5, 'VERB': 5, 'ADJ': 5, 'ADV': 5,
+    'NUM': 4,
+    'AUX': 3, 'ADP': 3, 'PRON': 3
+}
 
 
 _WEB = 'web'
@@ -40,7 +48,7 @@ def load_model(language: str):
 
 
 def _assemble_model_name(language: str) -> str:
-    MODEL_SIZE_IDENTIFIER = 'sm'
+    MODEL_SIZE_IDENTIFIER = 'md'
 
     return f'{LANGUAGE_2_MODEL_IDENTIFIERS[language][0]}_core_{LANGUAGE_2_MODEL_IDENTIFIERS[language][1]}_{MODEL_SIZE_IDENTIFIER}'
 

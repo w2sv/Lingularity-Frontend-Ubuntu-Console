@@ -7,7 +7,7 @@ import numpy as np
 from .deviation_masks import deviation_masks
 from .response_evaluation import ResponseEvaluation, get_response_evaluation
 from lingularity.backend.trainers.components.vocable_entry import VocableData, VocableEntry
-from lingularity.backend.trainers.components import SentenceData, TokenMap, get_token_map
+from lingularity.backend.trainers.components import SentenceData, TokenSentenceIndicesMap, get_token_sentence_indices_map
 from lingularity.backend.trainers.base import TrainerBackend
 
 
@@ -16,7 +16,7 @@ class VocableTrainerBackend(TrainerBackend):
         super().__init__(non_english_language, train_english)
 
         self._sentence_data: SentenceData = self._get_sentence_data()
-        self._token_2_sentence_indices: TokenMap = get_token_map(self._sentence_data, self.language, load_normalizer=True)
+        self._token_2_sentence_indices: TokenSentenceIndicesMap = get_token_sentence_indices_map(self.language, load_normalizer=True)
 
         self.synonyms: Dict[str, List[str]] = None  # type: ignore
         self.new_vocable_entries: Iterator[VocableEntry] = None  # type: ignore

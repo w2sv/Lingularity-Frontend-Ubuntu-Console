@@ -123,7 +123,7 @@ def split_multiple(string: str, delimiters: List[str]) -> List[str]:
     return replace_multiple(string, delimiters[:-1], delimiters[-1]).split(delimiters[-1])
 
 
-def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> Set[str]:
+def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> List[str]:
     """ Working Principle:
             - strip special characters, unicode remnants
             - break text into distinct tokens
@@ -131,7 +131,7 @@ def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> Set[str]:
 
         >>> meaningful_tokens = get_meaningful_tokens("Parce que il n'avait rien à foutre avec ces 3 saloppes qu'il avait rencontrées dans le Bonn17, disait dieu.", apostrophe_splitting=True)
         >>> sorted(meaningful_tokens)
-        ['Parce', 'avait', 'avec', 'ces', 'dans', 'dieu', 'disait', 'foutre', 'il', 'le', 'n', 'qu', 'que', 'rencontrées', 'rien', 'saloppes', 'à'] """
+        ['Parce', 'avait', 'avec', 'ces', 'dans', 'dieu', 'disait', 'foutre', 'il', 'il' 'le', 'n', 'qu', 'que', 'rencontrées', 'rien', 'saloppes', 'à'] """
 
     special_character_stripped = strip_special_characters(text, include_apostrophe=False, include_dash=False)
     unicode_stripped = _strip_unicode(special_character_stripped)
@@ -141,7 +141,11 @@ def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> Set[str]:
         split_characters += APOSTROPHES
 
     tokens = re.split(f"[{split_characters}]", unicode_stripped)
-    return set(filter(is_digit_free, tokens))
+    return list(filter(is_digit_free, tokens))
+
+
+def get_unique_meaningful_tokens(text: str, apostrophe_splitting=False) -> Set[str]:
+    return set(get_meaningful_tokens(text, apostrophe_splitting=apostrophe_splitting))
 
 
 def common_start(strings: Iterable[str]) -> str:
