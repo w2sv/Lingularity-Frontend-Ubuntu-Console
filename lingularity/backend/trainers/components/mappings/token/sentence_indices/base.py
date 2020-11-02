@@ -1,12 +1,12 @@
 from typing import *
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from itertools import repeat
 
-from lingularity.backend.trainers.components.mappings.token.types import Token
 from lingularity.backend.utils import either, strings, iterables
 
 
-SentenceIndex2UniqueTokens = Dict[int, Set[Token]]
+SentenceIndex2UniqueTokens = Dict[int, Set[str]]
 
 
 class TokenSentenceIndicesMap(defaultdict, ABC):
@@ -22,8 +22,11 @@ class TokenSentenceIndicesMap(defaultdict, ABC):
     def __init__(self, data: Optional[_Type] = None):
         super().__init__(list)
 
+    def tokenize_with_pos_tags(self, sentence: str) -> List[Tuple[str, str]]:
+        return list(zip(self.tokenize(sentence), repeat('')))
+
     @abstractmethod
-    def tokenize(self, sentence: str) -> List[Token]:
+    def tokenize(self, sentence: str) -> List[str]:
         pass
 
     def create(self, sentence_index_2_unique_tokens: SentenceIndex2UniqueTokens):

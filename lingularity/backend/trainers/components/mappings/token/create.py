@@ -1,5 +1,6 @@
 from typing import *
 from collections import defaultdict
+from itertools import zip_longest
 
 from tqdm import tqdm
 
@@ -7,8 +8,7 @@ from lingularity.backend.utils import iterables, strings
 from lingularity.backend.trainers.components.sentence_data import SentenceData
 from lingularity.backend.trainers.components.mappings.token.sentence_indices import get_token_sentence_indices_map, LemmaSentenceIndicesMap
 from lingularity.backend.trainers.components.mappings.token.sentence_indices.base import SentenceIndex2UniqueTokens, TokenSentenceIndicesMap
-from lingularity.backend.trainers.components.mappings.token.occurrences import TokenOccurrencesMap, ParaphrasesTokensList, ParaphrasesTokens
-from lingularity.backend.trainers.components.mappings.token.types import Token
+from lingularity.backend.trainers.components.mappings.token.occurrences import TokenOccurrencesMap, ParaphrasesTokensList, ParaphrasesTokens, ParaphrasesPOSTagsList
 
 
 assert __name__ == '__main__', 'module solely to be invoked as main'
@@ -24,27 +24,28 @@ def create_token_maps(language: str) -> Tuple[TokenSentenceIndicesMap, TokenOccu
     print(f'{token_sentence_indices_map.__class__.__name__} available')
 
     # procure token maps foundations
-    sentence_index_2_tokens, paraphrases_tokens_list = _token_maps_foundations(sentence_data, tokenize=token_sentence_indices_map.tokenize)
+    sentence_index_2_tokens, paraphrases_tokens_list, paraphrases_pos_tags_list = _token_maps_foundations(
+        sentence_data=sentence_data,
+        tokenize_with_pos_tags=token_sentence_indices_map.tokenize_with_pos_tags
+    )
 
     # create token maps
     token_sentence_indices_map.create(sentence_index_2_tokens)
-
-    token_occurrences_map = TokenOccurrencesMap()
-    if type(token_sentence_indices_map) is LemmaSentenceIndicesMap:
-        token_occurrences_map.create_off_spacy_tokens(paraphrases_tokens_list)
-    else:
-        token_occurrences_map.create_off_ordinary_tokens(paraphrases_tokens_list)
+    token_occurrences_map = TokenOccurrencesMap().create(paraphrases_tokens_list, [None, paraphrases_pos_tags_list][type(token_sentence_indices_map) is LemmaSentenceIndicesMap])
 
     return token_sentence_indices_map, token_occurrences_map
 
+
 def _token_maps_foundations(
         sentence_data: SentenceData,
-        tokenize: Callable[[str], List[Token]]) -> Tuple[SentenceIndex2UniqueTokens, ParaphrasesTokensList]:
+        tokenize_with_pos_tags: Callable[[str], List[Tuple[str, str]]]
+) -> Tuple[SentenceIndex2UniqueTokens, ParaphrasesTokensList, ParaphrasesPOSTagsList]:
 
-    english_sentence_2_paraphrases_with_indices = _english_sentence_paraphrases_with_indices_map(sentence_data=sentence_data[:1_000])
+    english_sentence_2_paraphrases_with_indices = _english_sentence_paraphrases_with_indices_map(sentence_data=sentence_data[1:100])
 
     sentence_index_2_unique_tokens: SentenceIndex2UniqueTokens = {}
     paraphrases_tokens_list: ParaphrasesTokensList = []
+    paraphrases_pos_tags_list: ParaphrasesPOSTagsList = []
 
     proper_nouns: Set[str] = sentence_data.deduce_proper_nouns()
 
@@ -52,19 +53,18 @@ def _token_maps_foundations(
     for paraphrases_with_indices in tqdm(english_sentence_2_paraphrases_with_indices.values()):
         paraphrases, indices = iterables.unzip(paraphrases_with_indices)
 
-        # preprocess paraphrases
-        paraphrases = _preprocess_paraphrases(paraphrases)
-
         # tokenize paraphrases
-        paraphrases_tokens = [tokenize(sentence) for sentence in paraphrases]
+        paraphrases_tokens_with_pos_tags: List[List[Tuple[str, str]]] = [tokenize_with_pos_tags(sentence) for sentence in paraphrases]
+        if any(map(len, paraphrases_tokens_with_pos_tags)):
+            paraphrases_tokens, paraphrases_pos_tags = map(iterables.none_stripped, zip_longest(*map(lambda paraphrase_tokens_with_pos_tags: zip(*paraphrase_tokens_with_pos_tags), paraphrases_tokens_with_pos_tags)))
 
-        # filter, process tokens
-        paraphrases_tokens = _process_paraphrases_tokens(paraphrases_tokens, proper_nouns=proper_nouns)
+            paraphrases_tokens = _process_paraphrases_tokens(paraphrases_tokens, proper_nouns=proper_nouns)
 
-        sentence_index_2_unique_tokens.update({index: set(comprising_tokens) for index, comprising_tokens in zip(indices, paraphrases_tokens)})
-        paraphrases_tokens_list.append(paraphrases_tokens)
+            sentence_index_2_unique_tokens.update({index: set(comprising_tokens) for index, comprising_tokens in zip(indices, paraphrases_tokens)})
+            paraphrases_tokens_list.append(paraphrases_tokens)
+            paraphrases_pos_tags_list.append(paraphrases_pos_tags)
 
-    return sentence_index_2_unique_tokens, paraphrases_tokens_list
+    return sentence_index_2_unique_tokens, paraphrases_tokens_list, paraphrases_pos_tags_list
 
 
 def _english_sentence_paraphrases_with_indices_map(sentence_data: SentenceData) -> EnglishSentence2ParaphrasesWithIndices:
@@ -75,13 +75,6 @@ def _english_sentence_paraphrases_with_indices_map(sentence_data: SentenceData) 
         english_sentence_2_paraphrases[english_sentence].append((foreign_sentence, i))
 
     return english_sentence_2_paraphrases
-
-
-def _preprocess_paraphrases(paraphrases: List[str]) -> Iterator[str]:
-    """ Removes unicode, as well as special characters """
-
-    unicode_stripped = map(lambda paraphrase: strings._strip_unicode(paraphrase), paraphrases)
-    return map(lambda paraphrase: strings.strip_special_characters(paraphrase, include_apostrophe=False, include_dash=False), unicode_stripped)
 
 
 def _process_paraphrases_tokens(paraphrases_tokens: ParaphrasesTokens, proper_nouns: Set[str]) -> List[List[str]]:
@@ -95,6 +88,6 @@ def _process_paraphrases_tokens(paraphrases_tokens: ParaphrasesTokens, proper_no
     return paraphrases_tokens
 
 
-token_sentence_indices_map, token_occurrences_map = create_token_maps(language='Urdu')
-# print(token_sentence_indices_map)
+token_sentence_indices_map, token_occurrences_map = create_token_maps(language='Burmese')
+print(token_sentence_indices_map)
 print(token_occurrences_map)

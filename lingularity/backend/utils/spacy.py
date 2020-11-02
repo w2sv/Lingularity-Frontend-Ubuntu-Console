@@ -7,7 +7,6 @@ import spacy
 
 
 Model = Any
-Token = spacy.tokens.Token
 
 
 POS_VALUES = {

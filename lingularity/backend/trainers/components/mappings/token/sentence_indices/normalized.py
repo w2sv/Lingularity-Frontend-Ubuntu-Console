@@ -1,13 +1,13 @@
-from typing import Optional, List, Iterator
+from typing import Optional, List, Iterator, Tuple, Union
 from abc import ABC, abstractmethod
 import os
 
 import nltk
+from spacy.tokens import Token
 
 from lingularity.backend import TOKEN_MAPS_PATH
 from lingularity.backend.utils import spacy as spacy_utils, data as data_utils, strings
 from lingularity.backend.trainers.components.mappings.token.sentence_indices.base import TokenSentenceIndicesMap
-from lingularity.backend.trainers.components.mappings.token.types import Token
 
 
 class NormalizedTokenSentenceIndicesMap(TokenSentenceIndicesMap, ABC):
@@ -20,11 +20,11 @@ class NormalizedTokenSentenceIndicesMap(TokenSentenceIndicesMap, ABC):
         pass
 
     @abstractmethod
-    def _tokenize(self, text: str) -> List[Token]:
+    def _tokenize(self, text: str) -> List[Union[Token, str]]:
         pass
 
     @abstractmethod
-    def _normalize(self, tokens: List[Token]) -> List[str]:
+    def _normalize(self, tokens: List[str]) -> List[str]:
         pass
 
 
@@ -82,17 +82,21 @@ class LemmaSentenceIndicesMap(NormalizedTokenSentenceIndicesMap):
 
             self._model = spacy_utils.load_model(language)
 
-    def tokenize(self, sentence: str) -> List[spacy_utils.Token]:
+    def tokenize_with_pos_tags(self, sentence: str) -> List[Tuple[str, str]]:
+        filtered_tokens = self._filter_tokens(self._tokenize(strings.strip_special_characters(string=sentence)))
+        return list(map(lambda token: (token.lemma_, token.pos_), filtered_tokens))
+
+    def tokenize(self, sentence: str) -> List[str]:
         return self._normalize(self._filter_tokens(self._tokenize(sentence)))
 
-    def _normalize(self, tokens: List[spacy_utils.Token]) -> List[str]:
+    def _normalize(self, tokens: List[Token]) -> List[str]:
         return [token.lemma_ for token in tokens]
 
-    def _filter_tokens(self, tokens: List[spacy_utils.Token]) -> List[spacy_utils.Token]:
+    def _filter_tokens(self, tokens: List[Token]) -> List[Token]:
         return list(filter(lambda token: token.pos_ not in self._IGNORE_POS_TYPES, tokens))
 
-    def _tokenize(self, text: str) -> List[spacy_utils.Token]:
-        return self._model(strings.strip_special_characters(string=text))
+    def _tokenize(self, text: str) -> List[Token]:
+        return self._model(text)
 
     # ------------------
     # Query
@@ -100,7 +104,7 @@ class LemmaSentenceIndicesMap(NormalizedTokenSentenceIndicesMap):
     def query_sentence_indices(self, vocable_entry: str) -> Optional[List[int]]:
         REMOVE_POS_TYPES = {'DET', 'PROPN', 'SYM'}
 
-        tokens = self.tokenize(vocable_entry)
+        tokens = self._tokenize(vocable_entry)
 
         # remove tokens of REMOVE_POS_TYPE if tokens not solely comprised of them
         if len((pos_set := set((token.pos_ for token in tokens))).intersection(REMOVE_POS_TYPES)) != len(pos_set):
@@ -108,6 +112,3 @@ class LemmaSentenceIndicesMap(NormalizedTokenSentenceIndicesMap):
 
         pos_value_sorted_lemmas = [token.lemma_ for token in sorted(tokens, key=lambda t: spacy_utils.POS_VALUES.get(t.pos_, 0))]
         return self._find_best_fit_sentence_indices(relevance_sorted_tokens=pos_value_sorted_lemmas)
-
-
-#TODO: deficiente
