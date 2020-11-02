@@ -4,12 +4,13 @@ from collections import defaultdict
 from itertools import repeat
 
 from lingularity.backend.utils import either, strings, iterables
+from lingularity.backend.trainers.components.mappings.base import CustomMapping
 
 
 SentenceIndex2UniqueTokens = Dict[int, Set[str]]
 
 
-class TokenSentenceIndicesMap(defaultdict, ABC):
+class TokenSentenceIndicesMap(defaultdict, CustomMapping, ABC):
     """ Interface for map classes comprising an association of
           unique, LOWERCASE and RELEVANT tokens (unnormalized/normalized): str
                 to the
@@ -35,10 +36,6 @@ class TokenSentenceIndicesMap(defaultdict, ABC):
         for sentence_index, tokens in sentence_index_2_unique_tokens.items():
             for token in tokens:
                 self[token].append(sentence_index)
-
-    @property
-    def data(self) -> _Type:
-        return {**self}
 
     # ------------------
     # Sentence Index Query

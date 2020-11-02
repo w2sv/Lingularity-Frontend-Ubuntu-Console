@@ -21,8 +21,8 @@ def strip_multiple(text: str, strings: List[str]) -> str:
     return replace_multiple(text, strings, replacement='')
 
 
-def _strip_unicode(token: str) -> str:
-    return strip_multiple(token, strings=list("\u2009\u202f\xa0\xa2\u200b"))
+def strip_unicode(text: str) -> str:
+    return strip_multiple(text, strings=["\u2009", "\u202f", "\xa0", "\xa2", "\u200b", "\xad"])
 
 
 def _to_ascii(string: str) -> str:
@@ -134,14 +134,13 @@ def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> List[str]:
         ['Parce', 'avait', 'avec', 'ces', 'dans', 'dieu', 'disait', 'foutre', 'il', 'il' 'le', 'n', 'qu', 'que', 'rencontrées', 'rien', 'saloppes', 'à'] """
 
     special_character_stripped = strip_special_characters(text, include_apostrophe=False, include_dash=False)
-    unicode_stripped = _strip_unicode(special_character_stripped)
 
     split_characters = ' -'
     if apostrophe_splitting:
         split_characters += APOSTROPHES
 
-    tokens = re.split(f"[{split_characters}]", unicode_stripped)
-    return list(filter(is_digit_free, tokens))
+    tokens = re.split(f"[{split_characters}]", special_character_stripped)
+    return list(filter(lambda token: len(token) and is_digit_free(token), tokens))
 
 
 def get_unique_meaningful_tokens(text: str, apostrophe_splitting=False) -> Set[str]:

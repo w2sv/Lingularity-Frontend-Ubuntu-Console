@@ -9,7 +9,7 @@ install:
 	rm -rf env
 	conda env create -f environment.yml --prefix ./env
 
-install-models:
+download-spacy-models:
 	python -m lingularity.backend.utils.spacy
 
 # ----------Testing----------

@@ -16,7 +16,8 @@ from lingularity.backend.utils.strings import (
     is_of_latin_script,
     strip_special_characters,
     continuous_substrings,
-    longest_continuous_partial_overlap
+    longest_continuous_partial_overlap,
+    strip_unicode
 )
 
 
@@ -45,9 +46,9 @@ class SentenceData(np.ndarray):
     @staticmethod
     def _read_in(_sentence_data_path: str, train_english: bool) -> np.ndarray:
         processed_sentence_data = []
-        with open(_sentence_data_path, 'r', encoding='utf-8') as sentence_data_file:
+        with open(_sentence_data_path, 'r', encoding='utf-8', errors='strict') as sentence_data_file:
             for sentence_pair_line in sentence_data_file.readlines():
-                sentence_pair = sentence_pair_line.strip('\n').split('\t')
+                sentence_pair = strip_unicode(sentence_pair_line[:-1]).split('\t')
                 if train_english:
                     sentence_pair = list(reversed(sentence_pair))
                 processed_sentence_data.append(sentence_pair)
@@ -88,6 +89,15 @@ class SentenceData(np.ndarray):
                 if not len(query_tokens_set):
                     return True
             return False
+
+        @cached_property
+        def comprising_characters(self) -> Set[str]:
+            characters = set()
+
+            for sentence in self:
+                characters.update(set(list(sentence)))
+
+            return characters
 
     @cached_property
     def english_sentences(self) -> Column:
@@ -241,7 +251,11 @@ class SentenceData(np.ndarray):
 if __name__ == '__main__':
     from time import time
 
-    t1 = time()
-    translations = SentenceData('Hebrew').deduce_forename_translations()
-    print(translations)
-    print(time() - t1)
+    # t1 = time()
+    # translations = SentenceData('Hebrew').deduce_forename_translations()
+    # print(translations)
+    # print(time() - t1)
+
+    s = SentenceData('Hungarian')
+    print(s.foreign_language_sentences.comprising_characters)
+    print(s.english_sentences.comprising_characters)

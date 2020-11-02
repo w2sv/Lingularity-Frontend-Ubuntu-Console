@@ -2,6 +2,7 @@
 
 from typing import Any
 import os
+from enum import Enum, auto
 
 import spacy
 
@@ -9,15 +10,31 @@ import spacy
 Model = Any
 
 
+def load_model(language: str) -> Model:
+    print('Loading model...')
+    return spacy.load(_assemble_model_name(language=language))
+
+
+# ---------------
+# POS Values
+# ---------------
+class _PosValue(Enum):
+    Low = auto()
+    Medium = auto()
+    High = auto()
+
+
 POS_VALUES = {
-    'NOUN': 5, 'VERB': 5, 'ADJ': 5, 'ADV': 5,
-    'NUM': 4,
-    'AUX': 3, 'ADP': 3, 'PRON': 3
+    'NOUN': _PosValue.High, 'VERB': _PosValue.High, 'ADJ': _PosValue.High, 'ADV': _PosValue.High,
+    'NUM': _PosValue.Medium,
+    'AUX': _PosValue.Low, 'ADP': _PosValue.Low, 'PRON': _PosValue.Low
 }
 
 
-_WEB = 'web'
-_NEWS = 'news'
+# ---------------
+# Model Name Assembly
+# ---------------
+_WEB, _NEWS = 'web', 'news'
 
 
 LANGUAGE_2_MODEL_IDENTIFIERS = {
@@ -38,21 +55,19 @@ LANGUAGE_2_MODEL_IDENTIFIERS = {
     'Spanish': ['es', _NEWS]
 }
 
-ELIGIBLE_LANGUAGES = set(LANGUAGE_2_MODEL_IDENTIFIERS.keys())
-
-
-def load_model(language: str):
-    print('Loading model...')
-    return spacy.load(_assemble_model_name(language=language))
-
-
 def _assemble_model_name(language: str) -> str:
     MODEL_SIZE_IDENTIFIER = 'md'
 
     return f'{LANGUAGE_2_MODEL_IDENTIFIERS[language][0]}_core_{LANGUAGE_2_MODEL_IDENTIFIERS[language][1]}_{MODEL_SIZE_IDENTIFIER}'
 
 
+ELIGIBLE_LANGUAGES = set(LANGUAGE_2_MODEL_IDENTIFIERS.keys())
+
+
 if __name__ == '__main__':
+    """ Download all available spacy models alongside additional dependencies """
+
+
     def download_models():
         for language in LANGUAGE_2_MODEL_IDENTIFIERS.keys():
             os.system(f'python -m spacy download {_assemble_model_name(language=language)}')
@@ -65,4 +80,15 @@ if __name__ == '__main__':
         if os.path.exists(f'{os.getcwd()}/{relative_os_dependency_installation_file_path}'):
             os.system(f'bash {relative_os_dependency_installation_file_path}')
 
+
+    def install_additional_dependencies():
+        ADDITIONAL_DEPENDENCIES = [
+            'sudachipy sudachidict_core',
+            'jieba'
+        ]
+
+        for dependency in ADDITIONAL_DEPENDENCIES:
+            os.system(f'pip install {dependency}')
+
     download_models()
+    install_additional_dependencies()

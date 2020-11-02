@@ -1,5 +1,5 @@
 from typing import Set, Iterable, Any, List, Tuple, Sequence
-from itertools import tee, islice
+from itertools import tee, islice, zip_longest
 
 
 def none_stripped(iterable: Iterable[Any]) -> List[Any]:
@@ -20,6 +20,10 @@ def longest_value(iterable: Iterable[Any]) -> Any:
 
 def unzip(nested_list: Iterable[Iterable[Any]]):
     return zip(*nested_list)
+
+
+def unzip_longest(nested_list: Iterable[Iterable[Any]]):
+    return zip_longest(*nested_list)
 
 
 def contains_index(sequence: Sequence[Any], index: int) -> bool:
