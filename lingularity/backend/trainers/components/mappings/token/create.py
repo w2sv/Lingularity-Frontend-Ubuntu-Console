@@ -11,7 +11,7 @@ from lingularity.backend.trainers.components.sentence_data import SentenceData
 from lingularity.backend.trainers.components.mappings.token.sentence_indices import (
     get_token_sentence_indices_map,
     LemmaSentenceIndicesMap,
-    TokenSentenceIndicesMap
+    SegmentSentenceIndicesMap
 )
 from lingularity.backend.trainers.components.mappings.token.occurrences import (
     TokenOccurrencesMap,
@@ -19,10 +19,7 @@ from lingularity.backend.trainers.components.mappings.token.occurrences import (
 )
 
 
-assert __name__ == '__main__', 'module solely to be invoked as main'
-
-
-def create_token_maps(language: str) -> Tuple[TokenSentenceIndicesMap, TokenOccurrencesMap]:
+def create_token_maps(language: str) -> Tuple[SegmentSentenceIndicesMap, TokenOccurrencesMap]:
     sentence_data = SentenceData(language=language)
 
     token_sentence_indices_map = get_token_sentence_indices_map(language=language)
@@ -37,7 +34,8 @@ def create_token_maps(language: str) -> Tuple[TokenSentenceIndicesMap, TokenOccu
     token_sentence_indices_map.create(sentence_index_2_unique_tokens=sentence_indices_map_foundation)
     token_occurrences_map = create_token_occurrences_map(
         paraphrases_tokens_list=occurrence_map_foundations[0],
-        paraphrases_pos_tags_list=[None, occurrence_map_foundations[1]][type(token_sentence_indices_map) is LemmaSentenceIndicesMap]
+        paraphrases_pos_tags_list=[None, occurrence_map_foundations[1]][
+            type(token_sentence_indices_map) is LemmaSentenceIndicesMap]
     )
 
     return token_sentence_indices_map, token_occurrences_map
@@ -62,4 +60,5 @@ def __call__():
             data.write_pickle(token_occurrences_map.data, file_path=f'{language_dir}/occurrences-map')
 
 
-__call__()
+if __name__ == '__main__':
+    __call__()

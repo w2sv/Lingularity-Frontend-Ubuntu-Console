@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 from lingularity.backend.utils import iterables, strings
 from lingularity.backend.trainers.components.sentence_data import SentenceData
+from lingularity.backend.trainers.components.mappings.base import _display_creation_kickoff_message
 from lingularity.backend.trainers.components.mappings.token.sentence_indices.base import SentenceIndex2UniqueTokens
 from lingularity.backend.trainers.components.mappings.token.occurrences import (
     ParaphrasesTokensList,
@@ -49,10 +50,10 @@ def token_maps_foundations(
     return sentence_index_2_unique_tokens, (paraphrases_tokens_list, paraphrases_pos_tags_list)
 
 
+@_display_creation_kickoff_message('Creating paraphrases map...')
 def _english_sentence_paraphrases_with_indices_map(sentence_data: SentenceData) -> DefaultDict[str, List[Tuple[str, int]]]:
     english_sentence_2_paraphrases = defaultdict(list)
 
-    print('Creating paraphrases map...')
     for i, (english_sentence, foreign_sentence) in enumerate(tqdm(sentence_data)):
         english_sentence_2_paraphrases[english_sentence].append((foreign_sentence, i))
 

@@ -75,7 +75,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         """ Invokes training mode selection method, forwards backend_type of selected mode to backend_type """
 
         mode_selection = self._select_training_mode()
-        self._backend.training_mode = modes.__getitem__(mode_selection).backend
+        self._backend.sentence_data_filter = modes.__getitem__(mode_selection).sentence_data_filter
 
     @view.view_creator(header='TRAINING MODES')
     def _select_training_mode(self) -> str:

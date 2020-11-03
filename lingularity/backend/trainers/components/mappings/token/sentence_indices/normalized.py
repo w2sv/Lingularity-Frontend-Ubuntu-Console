@@ -7,10 +7,10 @@ from spacy.tokens import Token
 
 from lingularity.backend import TOKEN_MAPS_PATH
 from lingularity.backend.utils import spacy as spacy_utils, data as data_utils, strings
-from lingularity.backend.trainers.components.mappings.token.sentence_indices.base import TokenSentenceIndicesMap
+from lingularity.backend.trainers.components.mappings.token.sentence_indices.base import SegmentSentenceIndicesMap
 
 
-class NormalizedTokenSentenceIndicesMap(TokenSentenceIndicesMap, ABC):
+class NormalizedTokenSentenceIndicesMap(SegmentSentenceIndicesMap, ABC):
     @staticmethod
     @abstractmethod
     def is_available(language: str) -> bool:
@@ -33,11 +33,11 @@ class StemSentenceIndicesMap(NormalizedTokenSentenceIndicesMap):
     def is_available(language: str) -> bool:
         return language.lower() in nltk.stem.SnowballStemmer.languages
 
-    def __init__(self, language: str, *args, **kwargs):
+    def __init__(self, language: str, create=False, *args, **kwargs):
         """ Args:
                 language: titled language """
 
-        super().__init__()
+        super().__init__(language, create=create)
 
         self._stemmer: nltk.stem.SnowballStemmer = nltk.stem.SnowballStemmer(language.lower())
 
@@ -62,24 +62,15 @@ class LemmaSentenceIndicesMap(NormalizedTokenSentenceIndicesMap):
     def is_available(language: str) -> bool:
         return language in spacy_utils.LANGUAGE_2_MODEL_IDENTIFIERS.keys()
 
-    def __init__(self, language: str, load_normalizer=True):
+    def __init__(self, language: str, create=False, load_normalizer=True):
         """ Args:
                 language: titled language """
 
-        save_path = f'{TOKEN_MAPS_PATH}/{language}.pickle'
+        super().__init__(language, create=create)
+
         self._model: spacy_utils.Model
 
-        if os.path.exists(save_path):
-            data = data_utils.load_pickle(save_path)
-
-            super().__init__(data=data)
-
-            if load_normalizer:
-                self._model = spacy_utils.load_model(language)
-
-        else:
-            super().__init__()
-
+        if load_normalizer:
             self._model = spacy_utils.load_model(language)
 
     def tokenize_with_pos_tags(self, sentence: str) -> List[Tuple[str, str]]:
@@ -110,5 +101,11 @@ class LemmaSentenceIndicesMap(NormalizedTokenSentenceIndicesMap):
         if len((pos_set := set((token.pos_ for token in tokens))).intersection(REMOVE_POS_TYPES)) != len(pos_set):
             tokens = list(filter(lambda token: token.pos_ not in REMOVE_POS_TYPES, tokens))
 
-        pos_value_sorted_lemmas = [token.lemma_ for token in sorted(tokens, key=lambda t: spacy_utils.POS_VALUES.get(t.pos_, 0))]
+        pos_value_sorted_lemmas = [token.lemma_ for token in sorted(tokens, key=lambda t: spacy_utils.POS_VALUES.get(t.pos_, spacy_utils.PosValue.Null).value)]
         return self._find_best_fit_sentence_indices(relevance_sorted_tokens=pos_value_sorted_lemmas)
+
+
+if __name__ == '__main__':
+    _map = LemmaSentenceIndicesMap('Italian')
+    print(list(_map.keys()))
+    print(len(_map))

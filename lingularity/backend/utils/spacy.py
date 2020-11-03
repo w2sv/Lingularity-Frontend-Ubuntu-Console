@@ -18,16 +18,17 @@ def load_model(language: str) -> Model:
 # ---------------
 # POS Values
 # ---------------
-class _PosValue(Enum):
+class PosValue(Enum):
+    Null = 0
     Low = auto()
     Medium = auto()
     High = auto()
 
 
 POS_VALUES = {
-    'NOUN': _PosValue.High, 'VERB': _PosValue.High, 'ADJ': _PosValue.High, 'ADV': _PosValue.High,
-    'NUM': _PosValue.Medium,
-    'AUX': _PosValue.Low, 'ADP': _PosValue.Low, 'PRON': _PosValue.Low
+    'NOUN': PosValue.High, 'VERB': PosValue.High, 'ADJ': PosValue.High, 'ADV': PosValue.High,
+    'NUM': PosValue.Medium,
+    'AUX': PosValue.Low, 'ADP': PosValue.Low, 'PRON': PosValue.Low
 }
 
 

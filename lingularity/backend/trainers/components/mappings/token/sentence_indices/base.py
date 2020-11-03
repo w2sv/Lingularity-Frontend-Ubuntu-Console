@@ -3,39 +3,40 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from itertools import repeat
 
-from lingularity.backend.utils import either, strings, iterables
-from lingularity.backend.trainers.components.mappings.base import CustomMapping
+from lingularity.backend.utils import strings, iterables
+from lingularity.backend.trainers.components.mappings.base import CustomMapping, _display_creation_kickoff_message
 
 
 SentenceIndex2UniqueTokens = Dict[int, Set[str]]
 
 
-class TokenSentenceIndicesMap(defaultdict, CustomMapping, ABC):
+class SegmentSentenceIndicesMap(defaultdict, CustomMapping, ABC):
     """ Interface for map classes comprising an association of
           unique, LOWERCASE and RELEVANT tokens (unnormalized/normalized): str
                 to the
           sentence indices corresponding to the bilateral sentence data in
           which they occur, in either an inflected form (NormalizedTokenMaps)
-          or as they are(UnnormalizedTokenSentenceIndicesMap): List[int] """
+          or as they are(TokenSentenceIndicesMap): List[int] """
 
     _Type = Dict[str, List[int]]
 
-    def __init__(self, data: Optional[_Type] = None):
-        super().__init__(list)
+    def __init__(self, language: str, create: bool):
+        super().__init__(list, self._data(language, create=create))
+
+    @_display_creation_kickoff_message('Creating {}...')
+    def create(self, sentence_index_2_unique_tokens: SentenceIndex2UniqueTokens):
+        for sentence_index, tokens in sentence_index_2_unique_tokens.items():
+            for token in tokens:
+                self[token].append(sentence_index)
 
     def tokenize_with_pos_tags(self, sentence: str) -> List[Tuple[str, str]]:
+        # TODO: Implement in spacy devoid fashion
+
         return list(zip(self.tokenize(sentence), repeat('')))
 
     @abstractmethod
     def tokenize(self, sentence: str) -> List[str]:
         pass
-
-    def create(self, sentence_index_2_unique_tokens: SentenceIndex2UniqueTokens):
-        print(f'Creating {" ".join(strings.split_at_uppercase(self.__class__.__name__))}...')
-
-        for sentence_index, tokens in sentence_index_2_unique_tokens.items():
-            for token in tokens:
-                self[token].append(sentence_index)
 
     # ------------------
     # Sentence Index Query

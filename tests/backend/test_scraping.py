@@ -2,15 +2,14 @@ import pytest
 from collections import Counter
 
 from lingularity.backend.ops.data_mining.scraping import (
-    scrape_sentence_data_download_links,
-    scrape_demonym,
-    scrape_countries_language_employed_in,
-    scrape_popular_forenames
+    demonym,
+    sentence_data_download_links,
+    countries
 )
 
 
 def test_zip_download_link_parsing():
-    language_2_download_link = scrape_sentence_data_download_links()
+    language_2_download_link = sentence_data_download_links.scrape()
     assert all(k.endswith('.zip') for k in language_2_download_link.values())
 
     # check if number of languages has changed
@@ -36,7 +35,7 @@ def test_zip_download_link_parsing():
     ('Indogermanic', None)
 ])
 def test_demonym_scraping(country, expected_demonym):
-    assert scrape_demonym(country) == expected_demonym
+    assert demonym.scrape(country) == expected_demonym
 
 
 @pytest.mark.parametrize('language,expected_countries', [
@@ -57,7 +56,7 @@ def test_demonym_scraping(country, expected_demonym):
     ('Serbian', ['Bosnia_and_Herzegovina', 'Hungary', 'Croatia', 'North_Macedonia', 'Serbia', 'Slovakia', 'Kosovo', 'Montenegro', 'Romania', 'Czech_Republic']),
 ])
 def test_language_corresponding_countries_scraping(language, expected_countries):
-    countries_language_employed_in = scrape_countries_language_employed_in(language)
+    countries_language_employed_in = countries.scrape(language)
 
     if expected_countries is None:
         assert countries_language_employed_in is None

@@ -21,8 +21,6 @@ from lingularity.backend.ops.data_mining.scraping import (
 )
 
 
-assert __name__ == '__main__', 'module solely to be invoked as main'
-
 language_metadata: LanguageMetadata = collections.defaultdict(lambda: {})
 country_metadata: CountryMetadata = {}
 
@@ -133,14 +131,15 @@ def _sort_dict_by_key(dictionary):
     return {k: v for k, v in sorted(dictionary.items())}
 
 
-_mine_metadata()
+if __name__ == '__main__':
+    _mine_metadata()
 
-# sort data for legibility
-country_metadata = _sort_dict_by_key(country_metadata)
-language_metadata = _sort_dict_by_key(language_metadata)
+    # sort data for legibility
+    country_metadata = _sort_dict_by_key(country_metadata)
+    language_metadata = _sort_dict_by_key(language_metadata)
 
-# correct country data
-_correct_metadata(country_metadata, 'country')
+    # correct country data
+    _correct_metadata(country_metadata, 'country')
 
-data.write_json(language_metadata, file_path=f'{META_DATA_PATH}/language')
-data.write_json(country_metadata, file_path=f'{META_DATA_PATH}/country')
+    data.write_json(language_metadata, file_path=f'{META_DATA_PATH}/language')
+    data.write_json(country_metadata, file_path=f'{META_DATA_PATH}/country')
