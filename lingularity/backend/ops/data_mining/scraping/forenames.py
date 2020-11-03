@@ -1,7 +1,7 @@
 from typing import Optional, List
 
-from .utils import read_page_source
 from lingularity.backend.utils.strings import strip_multiple
+from .utils import read_page_source
 
 
 _POPULAR_FORENAMES_PAGE_URL = 'http://en.wikipedia.org/wiki/List_of_most_popular_given_names'

@@ -1,7 +1,13 @@
 from typing import Callable
-from . import random, simple, diction_expansion
 
 from lingularity.backend.trainers.components import SentenceData
+from lingularity.backend.utils.module_abstraction import abstractmodulemethod
+from . import random, simple, diction_expansion
+
+
+@abstractmodulemethod
+def filter_sentence_data():
+    pass
 
 
 SentenceDataFilter = Callable[[SentenceData, str], SentenceData]
