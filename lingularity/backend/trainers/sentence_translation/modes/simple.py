@@ -18,6 +18,7 @@ def filter_sentence_data(sentence_data: SentenceData, language: str) -> Sentence
     sentence_indices = (sentence_index for sentence_index, comprising_occurrences in sentence_indices_with_comprising_occurrences if all((occurrence >= occurrences_map.occurrence_mean for occurrence in comprising_occurrences)))
     return sentence_data[list(sentence_indices)]
 
+
 def _sentence_indices_with_comprising_tokens(sentence_indices_map: SegmentSentenceIndicesMap,
                                              occurrences_map: TokenOccurrencesMap) -> Iterator[Tuple[int, Iterator[int]]]:
 
