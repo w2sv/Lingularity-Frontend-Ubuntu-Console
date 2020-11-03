@@ -1,4 +1,4 @@
-name: lingularity
+name: frontend
 channels:
   - conda-forge
   - defaults
@@ -7,27 +7,10 @@ dependencies:
   - pip=20.0.2
   - pytest  # dev
   - mypy  # dev
-  - numpy=1.18.1  # one application
-  - requests=2.23.0  # dev
-  - unidecode=1.1.1
-  - nltk=3.4.5
-  - pymongo=3.9.0
   - pip:
-    - bs4==0.0.1  # dev
-    - dnspython
-    - python-vlc==3.0.11115
-    - cryptography==3.1  # one application
-    - gTTS
-    - googletrans
-    - textacy==0.10.1
-    - spacy
-    - aenum  # one application
+    # - git+https://W2SV@bitbucket.org/W2SV/backend.git@master
+    - /home/w2sv/W2SV/python/projects/lingularity/dist/backend-0.1.1-py3-none-any.whl
     - coverage  # dev
-    - pyinstaller  # dev
-
-    # Frontend
-    - matplotlib==3.2.1
-    - tqdm==4.45.0  # dev
     - pynput==1.6.8
     - cursor==1.3.4
     - screeninfo==0.6.5
