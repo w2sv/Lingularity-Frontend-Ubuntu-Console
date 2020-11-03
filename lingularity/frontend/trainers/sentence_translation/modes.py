@@ -1,25 +1,24 @@
-from typing import *
+from types import ModuleType
 from itertools import starmap
 
-from lingularity.backend.utils.iterables import unzip
-from lingularity.backend.utils.strings import split_at_uppercase
-from lingularity.backend.trainers.sentence_translation import modes as mode_backends
+from lingularity.backend.utils import iterables, strings
+from lingularity.backend.trainers.sentence_translation import modes
 
 
 class TrainingMode:
-    def __init__(self, mode_backend: Type[mode_backends.TrainingMode], explanation: str):
-        self.keyword: str = ' '.join(map(lambda part: part.lower(), split_at_uppercase(mode_backend.__name__))).upper()
+    def __init__(self, mode_module: ModuleType, explanation: str):
+        self.keyword: str = strings.snake_case_to_title(snake_case_string=mode_module.__name__.split('.')[-1])
         self.explanation: str = explanation
-        self.backend: Type[mode_backends.TrainingMode] = mode_backend
+        self.sentence_data_filter: modes.SentenceDataFilter = mode_module.filter_sentence_data  # type: ignore
 
 
 _modes = list(starmap(TrainingMode, (
-    (mode_backends.DictionExpansion, 'show me sentences containing rather infrequently used vocabulary'),
-    (mode_backends.Simple, 'show me sentences comprising exclusively commonly used vocabulary'),
-    (mode_backends.Random, 'just hit me with dem sentences'))))
+    (modes.diction_expansion, 'show me sentences containing rather infrequently used vocabulary'),
+    (modes.simple, 'show me sentences comprising exclusively commonly used vocabulary'),
+    (modes.random, 'just hit me with dem sentences'))))
 
 
-keywords, explanations = unzip(map(lambda mode: (mode.keyword, mode.explanation), _modes))
+keywords, explanations = iterables.unzip(map(lambda mode: (mode.keyword, mode.explanation), _modes))
 _keyword_2_mode = {mode.keyword: mode for mode in _modes}
 
 

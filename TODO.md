@@ -1,7 +1,7 @@
 # TODO
 
 ## GENERIC:
-    - [ ] clean up options
+    - [x] clean up options
     - [ ] do something about repetitive entering of 'to' when adding 
           english verb meanings
     - [ ] incentivise entering of noun with article if applicable,

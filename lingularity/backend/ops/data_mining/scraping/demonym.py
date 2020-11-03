@@ -1,5 +1,4 @@
 from typing import Optional
-import logging
 from itertools import islice
 
 from bs4 import BeautifulSoup

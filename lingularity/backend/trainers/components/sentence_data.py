@@ -3,6 +3,7 @@ import os
 from functools import cached_property
 import collections
 
+from tqdm import tqdm
 import numpy as np
 from textacy.similarity import levenshtein
 
@@ -11,11 +12,12 @@ from lingularity.backend.ops.data_mining.downloading import download_sentence_da
 from lingularity.backend.trainers.components.forename_conversion import DEFAULT_FORENAMES
 from lingularity.backend.utils.iterables import longest_value
 from lingularity.backend.utils.strings import (
-    get_meaningful_tokens,
+    get_unique_meaningful_tokens,
     is_of_latin_script,
     strip_special_characters,
     continuous_substrings,
-    longest_continuous_partial_overlap
+    longest_continuous_partial_overlap,
+    strip_unicode
 )
 
 
@@ -44,14 +46,66 @@ class SentenceData(np.ndarray):
     @staticmethod
     def _read_in(_sentence_data_path: str, train_english: bool) -> np.ndarray:
         processed_sentence_data = []
-        with open(_sentence_data_path, 'r', encoding='utf-8') as sentence_data_file:
+        with open(_sentence_data_path, 'r', encoding='utf-8', errors='strict') as sentence_data_file:
             for sentence_pair_line in sentence_data_file.readlines():
-                sentence_pair = sentence_pair_line.strip('\n').split('\t')
+                sentence_pair = strip_unicode(sentence_pair_line[:-1]).split('\t')
                 if train_english:
                     sentence_pair = list(reversed(sentence_pair))
                 processed_sentence_data.append(sentence_pair)
 
         return np.asarray(processed_sentence_data)
+
+    # -------------------
+    # Columns
+    # -------------------
+    class Column(np.ndarray):
+        """ Abstraction of entirety of sentence data pertaining to one language
+
+            equals: np.ndarray[str] """
+
+        def __new__(cls, sentence_data_column: np.ndarray):
+            return sentence_data_column.view(SentenceData.Column)
+
+        @cached_property
+        def uses_latin_script(self) -> bool:
+            return is_of_latin_script(self[-1], remove_non_alphabetic_characters=True)
+
+        def comprises_tokens(self, query_tokens: List[str], query_length_percentage=1.0) -> bool:
+            """ Args:
+                    query_tokens: tokens which have to be comprised by sentence data in order for method to
+                        return True
+                    query_length_percentage: sentence data max length up to which presence of query tokens will be
+                        queried """
+
+            # return False if query tokens of different script type than sentences
+            if self.uses_latin_script != is_of_latin_script(''.join(query_tokens),
+                                                            remove_non_alphabetic_characters=False):
+                return False
+
+            query_tokens_set = set(query_tokens)
+            for sentence in self[:int(len(self) * query_length_percentage)]:
+                meaningful_tokens = get_unique_meaningful_tokens(sentence, apostrophe_splitting=False)
+                query_tokens_set -= meaningful_tokens
+                if not len(query_tokens_set):
+                    return True
+            return False
+
+        @cached_property
+        def comprising_characters(self) -> Set[str]:
+            characters = set()
+
+            for sentence in self:
+                characters.update(set(list(sentence)))
+
+            return characters
+
+    @cached_property
+    def english_sentences(self) -> Column:
+        return self.Column(self[:, 0 + int(self._train_english)])
+
+    @cached_property
+    def foreign_language_sentences(self) -> Column:
+        return self.Column(self[:, 1 - int(self._train_english)])
 
     # -------------------
     # Translation query
@@ -70,7 +124,35 @@ class SentenceData(np.ndarray):
         return None
 
     # -------------------
-    # Translation(s) deduction
+    # Deduction
+    # -------------------
+
+    # -------------------
+    # .Proper Nouns
+    # -------------------
+    def deduce_proper_nouns(self) -> Set[str]:
+        """ Working principle:
+                for each sentence pair:
+                    - get set of intersection between tokens of english sentence and its translation_field
+                    - add tokens starting on uppercase character being either comprised of at least 2 characters or
+                      non-latin
+
+            Returns:
+                set of lowercase proper nouns """
+
+        proper_nouns = set()
+
+        print('Procuring proper nouns...')
+        for sentence_pair in tqdm(self):
+            proper_noun_candidates = set.intersection(*map(get_unique_meaningful_tokens, sentence_pair))
+            for candidate in proper_noun_candidates:
+                if candidate.istitle() and len(candidate) > 1:
+                    proper_nouns.add(candidate.lower())
+
+        return proper_nouns
+
+    # -------------------
+    # .Forename Translations
     # -------------------
     def deduce_forename_translations(self) -> List[Set[str]]:
         candidates_list: List[Set[str]] = []
@@ -100,8 +182,8 @@ class SentenceData(np.ndarray):
         lowercase_words_cache = set()
 
         for english_sentence, foreign_language_sentence in self._english_to_foreign_language_sentence_iterator:
-            if proper_noun in get_meaningful_tokens(english_sentence, apostrophe_splitting=True):
-                for token in get_meaningful_tokens(foreign_language_sentence, apostrophe_splitting=True):
+            if proper_noun in get_unique_meaningful_tokens(english_sentence, apostrophe_splitting=True):
+                for token in get_unique_meaningful_tokens(foreign_language_sentence, apostrophe_splitting=True):
                     if token.istitle() and levenshtein(proper_noun, token) >= MIN_CANDIDATE_PN_LEVENSHTEIN:
                         candidates.add(token)
                     elif token.islower():
@@ -123,7 +205,7 @@ class SentenceData(np.ndarray):
         translation_candidate_2_n_occurrences: Counter[str] = collections.Counter()
         translation_comprising_sentence_substrings_cache: List[Set[str]] = []
         for english_sentence, foreign_language_sentence in self._english_to_foreign_language_sentence_iterator:
-            if proper_noun in get_meaningful_tokens(english_sentence, apostrophe_splitting=True):
+            if proper_noun in get_unique_meaningful_tokens(english_sentence, apostrophe_splitting=True):
                 foreign_language_sentence = strip_special_characters(foreign_language_sentence, include_dash=True, include_apostrophe=True).replace(' ', '')
 
                 # skip sentences possessing substring already being present in candidates list
@@ -165,53 +247,15 @@ class SentenceData(np.ndarray):
             return SentenceData._strip_overlaps(list(filter(lambda candidate: longest_partial_overlap not in candidate, translation_candidates)) + [longest_partial_overlap])  # type: ignore
         return set(translation_candidates)
 
-    # -------------------
-    # Columns
-    # -------------------
-    class Column(np.ndarray):
-        """ Abstraction of entirety of sentence data pertaining to one language
-
-            equals: np.ndarray[str] """
-
-        def __new__(cls, sentence_data_column: np.ndarray):
-            return sentence_data_column.view(SentenceData.Column)
-
-        @cached_property
-        def uses_latin_script(self) -> bool:
-            return is_of_latin_script(self[-1], remove_non_alphabetic_characters=True)
-
-        def comprises_tokens(self, query_tokens: List[str], query_length_percentage=1.0) -> bool:
-            """ Args:
-                    query_tokens: tokens which have to be comprised by sentence data in order for method to
-                        return True
-                    query_length_percentage: sentence data max length up to which presence of query tokens will be
-                        queried """
-
-            # return False if query tokens of different script type than sentences
-            if self.uses_latin_script != is_of_latin_script(''.join(query_tokens), remove_non_alphabetic_characters=False):
-                return False
-
-            query_tokens_set = set(query_tokens)
-            for sentence in self[:int(len(self) * query_length_percentage)]:
-                meaningful_tokens = get_meaningful_tokens(sentence, apostrophe_splitting=False)
-                query_tokens_set -= meaningful_tokens
-                if not len(query_tokens_set):
-                    return True
-            return False
-
-    @cached_property
-    def english_sentences(self) -> Column:
-        return self.Column(self[:, 0 + int(self._train_english)])
-
-    @cached_property
-    def foreign_language_sentences(self) -> Column:
-        return self.Column(self[:, 1 - int(self._train_english)])
-
 
 if __name__ == '__main__':
     from time import time
 
-    t1 = time()
-    translations = SentenceData('Hebrew').deduce_forename_translations()
-    print(translations)
-    print(time() - t1)
+    # t1 = time()
+    # translations = SentenceData('Hebrew').deduce_forename_translations()
+    # print(translations)
+    # print(time() - t1)
+
+    s = SentenceData('Hungarian')
+    print(s.foreign_language_sentences.comprising_characters)
+    print(s.english_sentences.comprising_characters)

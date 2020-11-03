@@ -21,8 +21,8 @@ def strip_multiple(text: str, strings: List[str]) -> str:
     return replace_multiple(text, strings, replacement='')
 
 
-def _strip_unicode(token: str) -> str:
-    return strip_multiple(token, strings=list("\u2009\u202f\xa0\xa2\u200b"))
+def strip_unicode(text: str) -> str:
+    return strip_multiple(text, strings=["\u2009", "\u202f", "\xa0", "\xa2", "\u200b", "\xad"])
 
 
 def _to_ascii(string: str) -> str:
@@ -79,7 +79,7 @@ def strip_accents(string: str) -> str:
 
 def strip_special_characters(string: str, include_apostrophe=False, include_dash=False) -> str:
     """
-    >>> strip_special_characters('\wha/Za"„“!#$%&()*+,./:;<=>?@[]^\\_`{|}~»«。¡¿')
+    >>> strip_special_characters('''\\wha/Za"„“!#$%&()*+,./:;<=>?@[]^\\_`{|}~»«。¡¿''')
     'whaZa' """
 
     special_characters = '"„“!#$%&()*+,./:;<=>?@[]^\\_`{|}~»«。¡¿'
@@ -90,6 +90,17 @@ def strip_special_characters(string: str, include_apostrophe=False, include_dash
         special_characters += '-'
 
     return strip_multiple(string, strings=list(special_characters))
+
+
+# ---------------
+# Conversion
+# ---------------
+def snake_case_to_title(snake_case_string: str) -> str:
+    """
+    >>> snake_case_to_title('snake_case_string')
+    'Snake Case String' """
+
+    return ' '.join(map(lambda split: split.title(), snake_case_string.split('_')))
 
 
 # ---------------
@@ -123,25 +134,33 @@ def split_multiple(string: str, delimiters: List[str]) -> List[str]:
     return replace_multiple(string, delimiters[:-1], delimiters[-1]).split(delimiters[-1])
 
 
-def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> Set[str]:
+def get_meaningful_tokens(text: str, apostrophe_splitting=False) -> List[str]:
     """ Working Principle:
             - strip special characters, unicode remnants
             - break text into distinct tokens
             - remove tokens containing digit(s)
 
         >>> meaningful_tokens = get_meaningful_tokens("Parce que il n'avait rien à foutre avec ces 3 saloppes qu'il avait rencontrées dans le Bonn17, disait dieu.", apostrophe_splitting=True)
-        >>> sorted(meaningful_tokens)
-        ['Parce', 'avait', 'avec', 'ces', 'dans', 'dieu', 'disait', 'foutre', 'il', 'le', 'n', 'qu', 'que', 'rencontrées', 'rien', 'saloppes', 'à'] """
+        >>> meaningful_tokens
+        ['Parce', 'que', 'il', 'n', 'avait', 'rien', 'à', 'foutre', 'avec', 'ces', 'saloppes', 'qu', 'il', 'avait', 'rencontrées', 'dans', 'le', 'disait', 'dieu'] """
 
     special_character_stripped = strip_special_characters(text, include_apostrophe=False, include_dash=False)
-    unicode_stripped = _strip_unicode(special_character_stripped)
 
     split_characters = ' -'
     if apostrophe_splitting:
         split_characters += APOSTROPHES
 
-    tokens = re.split(f"[{split_characters}]", unicode_stripped)
-    return set(filter(is_digit_free, tokens))
+    tokens = re.split(f"[{split_characters}]", special_character_stripped)
+    return list(filter(lambda token: len(token) and is_digit_free(token), tokens))
+
+
+def get_unique_meaningful_tokens(text: str, apostrophe_splitting=False) -> Set[str]:
+    """
+    >>> unique_meaningful_tokens = get_unique_meaningful_tokens("Parce que il n'avait rien à foutre avec ces 3 saloppes qu'il avait rencontrées dans le Bonn17, disait dieu.", apostrophe_splitting=True)
+    >>> sorted(unique_meaningful_tokens)
+    ['Parce', 'avait', 'avec', 'ces', 'dans', 'dieu', 'disait', 'foutre', 'il', 'le', 'n', 'qu', 'que', 'rencontrées', 'rien', 'saloppes', 'à'] """
+
+    return set(get_meaningful_tokens(text, apostrophe_splitting=apostrophe_splitting))
 
 
 def common_start(strings: Iterable[str]) -> str:
@@ -167,8 +186,8 @@ def common_start(strings: Iterable[str]) -> str:
 def longest_continuous_partial_overlap(strings: Iterable[str], min_length=1) -> Optional[str]:
     """ Returns:
             longest retrievable substring of length >= min_length present in at least
-            two strings values, None if any of the aforementioned conditions not having
-            been met
+            two strings at any position respectively, None if no such substring being
+            present
 
     >>> longest_continuous_partial_overlap(['メアリーが', 'トムは', 'トムはメアリーを', 'メアリー', 'トムはマリ', 'いた', 'メアリーは'])
     'メアリー'
@@ -220,6 +239,10 @@ def contains_article(noun_candidate: str) -> bool:
 
     return len((tokens := split_multiple(noun_candidate, delimiters=list(APOSTROPHES) + [' ', '-']))) == 2 and len(
         tokens[0]) < len(tokens[1])
+
+
+def contains_escape_sequence(text: str) -> bool:
+    return "\\" in repr(text)
 
 
 # ---------------

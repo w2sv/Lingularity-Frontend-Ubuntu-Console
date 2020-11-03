@@ -1,7 +1,7 @@
 import re
 from typing import Optional, List, Set
 
-from lingularity.backend.ops.data_mining.scraping.utils import read_page_source
+from .utils import read_page_source
 
 
 def _rectify_country_names(country_list: List[str]) -> Set[str]:
