@@ -1,9 +1,8 @@
-from nltk.stem import SnowballStemmer
 from termcolor import colored
 
-from backend.utils import spacy, string_resources
-from backend import TTSABLE_LANGUAGES
-from backend import language_metadata
+from backend import string_resources, language_metadata
+from backend.ops.normalizing import stemming, lemmatizing
+from backend.ops.google import text_to_speech
 
 from .ops import reference_language
 from frontend.state import State
@@ -49,12 +48,12 @@ def __call__():
 def _color_language_wrt_available_components(language: str) -> str:
     color, attrs = None, None
 
-    if language in TTSABLE_LANGUAGES:
+    if language in text_to_speech.AVAILABLE_LANGUAGES:
         attrs = ['bold']
 
-    if language in spacy.ELIGIBLE_LANGUAGES:
+    if language in lemmatizing.AVAILABLE_LANGUAGES:
         color = 'red'
-    elif language.lower() in SnowballStemmer.languages:
+    elif language.lower() in stemming.AVAILABLE_LANGUAGES:
         color = 'magenta'
     else:
         color = 'cyan'

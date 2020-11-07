@@ -10,7 +10,7 @@ install:
 
 reinstall-backend:
 	pip uninstall -y backend
-	pip install /home/w2sv/W2SV/python/projects/lingularity/dist/backend-0.1.1-py3-none-any.whl
+	pip install /home/w2sv/W2SV/python/projects/lingularity/dist/backend-0.1.2-py3-none-any.whl
 
 
 # ----------Testing----------

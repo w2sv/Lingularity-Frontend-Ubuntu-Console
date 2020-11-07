@@ -171,7 +171,7 @@ class VocableTrainerFrontend(TrainerFrontend):
             # get vocable identification aid if synonyms with identical
             # english ground_truth amongst training vocables
             vocable_identification_aid = ''
-            if synonyms := self._backend.synonyms.get(entry.the_stripped_meaning):
+            if synonyms := self._backend.paraphrases.get(entry.the_stripped_meaning):
                 vocable_identification_aid = entry.vocable[:len(common_start(synonyms)) + 1]
                 print(vocable_identification_aid, end='')
 

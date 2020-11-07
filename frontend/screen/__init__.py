@@ -1,4 +1,4 @@
-from backend.utils.module_abstraction import abstractmodulemethod
+from backend.utils.module_interfacing import abstractmodulemethod
 
 from . import (
     login,

@@ -1,4 +1,4 @@
-import os
+import subprocess
 import time
 
 from frontend.utils import output
@@ -7,8 +7,8 @@ INTER_OPTION_INDENTATION = ' ' * 6
 
 
 def maximize_console():
-    os.system('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz')
-    time.sleep(0.005)
+    subprocess.call('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz', shell=True)
+    time.sleep(0.02)
 
 
 def display_signum():
