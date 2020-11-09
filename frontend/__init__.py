@@ -43,6 +43,11 @@ def reentry_at(reentry_point: ReentryPoint):
 
 
 if __name__ == '__main__':
+    from backend.logging import enable_backend_logging
+    import os
+
+    enable_backend_logging(file_path=f'{os.getcwd()}/logging.txt')
+
     screen.ops.maximize_console()
 
     if not instantiate_client():

@@ -8,11 +8,6 @@ install:
 	rm -rf env
 	conda env create -f environment.yml --prefix ./env
 
-reinstall-backend:
-	pip uninstall -y backend
-	pip install /home/w2sv/W2SV/python/projects/lingularity/dist/backend-0.1.2-py3-none-any.whl
-
-
 # ----------Testing----------
 
 test: mypy pytest doctest  # run with -k flag in order to continue in case of recipe failure
