@@ -85,7 +85,7 @@ class VocableTrainerFrontend(TrainerFrontend):
         # if self._n_trained_items:
         #     self._display_pie_chart()
         #
-        # self._plot_training_chronic()
+        # self._training_item_sequence()
 
         return ReentryPoint.TrainingSelection
 

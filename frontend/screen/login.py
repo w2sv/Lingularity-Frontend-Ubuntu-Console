@@ -19,10 +19,7 @@ def remove_user_from_disk():
 # TODO
 
 
-def __call__() -> bool:
-    """ Returns:
-            is_new_user_flag: bool """
-
+def __call__():
     mongodb_client = MongoDBClient.get_instance()
     is_new_user = False
 
@@ -45,9 +42,7 @@ def __call__() -> bool:
 
     # set state, database variables
     mongodb_client.user = username
-    State.set_user(username)
-
-    return is_new_user
+    State.set_user(username, is_new_user=is_new_user)
 
 
 def _retrieve_logged_in_user_from_disk() -> Optional[str]:

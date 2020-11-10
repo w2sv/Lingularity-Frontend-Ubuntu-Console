@@ -18,7 +18,7 @@ _OPTION_KEYWORDS = list(_OPTION_2_REENTRY_POINT.keys())
 
 
 @view.view_creator(title='Acquire Languages the Litboy Way', banner='lingularity/ansi-shadow', banner_color='red')
-def __call__() -> Optional[ReentryPoint]:
+def __call__() -> ReentryPoint:
     """ Displays languages already used by user, as well as additional procedure options of
             - adding a new language
             - signing into another account
@@ -59,4 +59,4 @@ def __call__() -> Optional[ReentryPoint]:
     # write selected language into state
     State.set_language(non_english_language=selection, train_english=train_english)
 
-    return None
+    return ReentryPoint.TrainingSelection

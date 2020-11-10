@@ -21,6 +21,7 @@ class State(StaticClass):
     __slots__ = ()
 
     username: str
+    is_new_user: bool
 
     non_english_language: str
     train_english: bool
@@ -31,12 +32,13 @@ class State(StaticClass):
     user_languages: Set[str]
 
     @staticmethod
-    def set_user(username: str):
+    def set_user(username: str, is_new_user: bool):
         """ Sets:
                 username
                 user_languages queried from database """
 
         State.username = username
+        State.is_new_user = is_new_user
 
         State.user_languages = set(MongoDBClient.get_instance().query_languages())
 

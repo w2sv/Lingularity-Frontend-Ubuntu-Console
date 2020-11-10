@@ -1,11 +1,8 @@
-from typing import Optional, Type, Iterator, Sequence
+from typing import Optional, Type, Iterator, Sequence, Iterable
 from abc import ABC, abstractmethod
 from time import sleep
 import datetime
 
-import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib.ticker import MaxNLocator
 from pynput.keyboard import Controller as KeyboardController
 
 from backend.trainers import TrainerBackend
@@ -13,9 +10,8 @@ from backend.trainers.components import VocableEntry
 from backend import language_metadata
 from backend.utils import date as date_utils, either
 
-from frontend.reentrypoint import ReentryPoint
 from frontend.state import State
-from frontend.utils import matplotlib as plt_utils, output, view
+from frontend.utils import output, view
 from frontend.trainers.base.options import TrainingOptions
 
 
@@ -35,8 +31,10 @@ class TrainerFrontend(ABC):
     # -----------------
     # Driver
     # -----------------
+    TrainingItemSequence = Iterable[int]
+
     @abstractmethod
-    def __call__(self) -> ReentryPoint:
+    def __call__(self) -> TrainingItemSequence:
         """ Invokes trainer frontend
 
             Returns:
@@ -131,10 +129,8 @@ class TrainerFrontend(ABC):
     # -----------------
     # Post Training
     # -----------------
-    def _plot_training_chronic(self):
+    def _training_item_sequence(self) -> TrainingItemSequence:
         DAY_DELTA = 14
-
-        plt.style.use('dark_background')
 
         # query language training history of respective trainer
         training_history = self._backend.mongodb_client.query_training_chronic()
@@ -143,43 +139,7 @@ class TrainerFrontend(ABC):
         # get plotting dates
         dates = list(self._plotting_dates(training_dates=iter(training_history.keys()), day_delta=DAY_DELTA))
         # get training item sequence, conduct zero-padding on dates on which no training took place
-        item_scores = [training_history.get(date, 0) for date in dates]
-
-        # omit year, invert day & month for proper tick label display, replace todays date with 'today'
-        dates = ['-'.join(date.split('-')[1:][::-1]) for date in dates[:-1]] + ['today']
-
-        # add 0 y-value in case of only one y-value being present
-        if len(dates) == 1:
-            dates = ['a.l.'] + dates
-            item_scores = [0] + item_scores
-
-        # set up figure
-        fig, ax = plt.subplots()
-        # fig.set_size_inches(np.asarray([6.5, 7]))
-        fig.canvas.draw()
-        fig.canvas.set_window_title(f'{self._backend.language} Training History')
-
-        ax.set_title(self._training_chronic_axis_title(item_scores), c='darkgoldenrod', fontsize=11)
-
-        # define plot
-        x_range = np.arange(len(dates))
-
-        ax.plot(x_range, item_scores, marker=None, markevery=list(x_range), color=['r', 'b'][str(self) == 'v'], linestyle='solid', label='sentences')
-        ax.set_xticks(x_range)
-        ax.set_xticklabels(dates, minor=False, rotation=45)
-        ax.set_xlabel('date')
-        # set margin between left axis and first y-value to 0, shift plot towards left depending
-        # on sparseness of available number of dates with small amount of dates -> vast shift
-        ax.set_xlim(left=0, right=len(x_range) + (DAY_DELTA / 2) * (1 - len(x_range) / DAY_DELTA))
-
-        max_value_item_score = max(item_scores)
-        # leave space between biggest y-value and plot top
-        ax.set_ylim(bottom=0, top=max_value_item_score + max_value_item_score * 0.3)
-        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-        ax.set_ylabel(f'# trained {self._pluralized_item_name}')
-
-        plt_utils.center_window()
-        plt_utils.close_window_on_button_press()
+        return [training_history.get(date, 0) for date in dates]
 
     def _training_chronic_axis_title(self, item_scores: Sequence[int]) -> str:
         if len(item_scores) == 2 and not item_scores[0]:

@@ -1,6 +1,7 @@
 from backend.database import instantiate_client
 
 from frontend import screen
+from frontend.state import State
 from frontend.reentrypoint import ReentryPoint
 from frontend.trainers import (
     SentenceTranslationTrainerFrontend,
@@ -10,16 +11,13 @@ from frontend.trainers import (
 
 
 def __call__():
-    is_new_user = screen.login.__call__()
+    screen.login.__call__()
 
-    if is_new_user:
+    if State.is_new_user:
         screen.post_signup_information.__call__()
         screen.language_addition.__call__()
 
-    elif reentry_point := screen.home.__call__():
-        return reentry_at(reentry_point)
-
-    return reentry_at(reentry_point=screen.training_selection.__call__(is_new_user=is_new_user))
+    return reentry_at(reentry_point=screen.home.__call__())
 
 
 def reentry_at(reentry_point: ReentryPoint):
@@ -30,16 +28,13 @@ def reentry_at(reentry_point: ReentryPoint):
     elif reentry_point is ReentryPoint.Exit:
         return screen.exit.__call__()
 
-    else:
-        if reentry_point is ReentryPoint.LanguageAddition:
-            screen.language_addition.__call__()
+    elif reentry_point is ReentryPoint.LanguageAddition:
+        screen.language_addition.__call__()
 
-        elif reentry_point is ReentryPoint.Home:
+    elif reentry_point is ReentryPoint.Home:
+        return reentry_at(reentry_point=screen.home.__call__())
 
-            if reentry_point := screen.home.__call__():
-                return reentry_at(reentry_point=reentry_point)
-
-        return reentry_at(reentry_point=screen.training_selection.__call__())
+    return reentry_at(reentry_point=screen.training_selection.__call__())
 
 
 if __name__ == '__main__':

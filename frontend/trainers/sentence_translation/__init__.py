@@ -33,7 +33,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
 
         self._redo_print = RedoPrint()
 
-    def __call__(self) -> ReentryPoint:
+    def __call__(self) -> TrainerFrontend.TrainingItemSequence:
         self._set_terminal_title()
 
         self._set_tts_language_variety_if_applicable()
@@ -45,9 +45,8 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         self._run_training_loop()
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
-        self._plot_training_chronic()
 
-        return ReentryPoint.TrainingSelection
+        return self._training_item_sequence()
 
     def _get_training_options(self) -> TrainingOptions:
         option_classes = [base_options.AddVocable, base_options.RectifyLatestAddedVocableEntry, base_options.Exit]
