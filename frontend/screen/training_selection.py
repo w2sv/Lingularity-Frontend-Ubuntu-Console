@@ -2,6 +2,7 @@ from typing import Dict, Any, Union, Type
 import random
 
 from backend import language_metadata
+import asciichartpy
 
 from frontend.state import State
 from frontend.reentrypoint import ReentryPoint, ReentryPointProvider

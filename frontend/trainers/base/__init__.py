@@ -138,7 +138,7 @@ class TrainerFrontend(ABC):
 
         # query language training history of respective trainer
         training_history = self._backend.mongodb_client.query_training_chronic()
-        training_history = {date: trainer_dict[str(self._backend)] for date, trainer_dict in training_history.items() if trainer_dict.get(str(self))}
+        training_history = {date: trainer_dict[str(self._backend)] for date, trainer_dict in training_history.items() if trainer_dict.get(str(self._backend))}
 
         # get plotting dates
         dates = list(self._plotting_dates(training_dates=iter(training_history.keys()), day_delta=DAY_DELTA))
