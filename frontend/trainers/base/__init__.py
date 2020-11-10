@@ -138,7 +138,7 @@ class TrainerFrontend(ABC):
 
         # get plotting dates
         dates = list(self._plotting_dates(training_dates=iter(training_history.keys()), day_delta=DAY_DELTA))
-        # get training item sequence, conduct zero-padding on dates on which no training took place
+        # get training item sequences, conduct zero-padding on dates on which no training took place
         return [training_history.get(date, 0) for date in dates]
 
     def _training_chronic_axis_title(self, item_scores: Sequence[int]) -> str:
@@ -165,7 +165,7 @@ class TrainerFrontend(ABC):
     @staticmethod
     def _plotting_dates(training_dates: Iterator[str], day_delta: int) -> Iterator[str]:
         """ Returns:
-                continuous sequence of plotting dates to be seized as x-axis ticks
+                continuous sequences of plotting dates to be seized as x-axis ticks
                 starting from earliest day with (todays date - respective date) <= day_delta,
                 going up to todays date
 

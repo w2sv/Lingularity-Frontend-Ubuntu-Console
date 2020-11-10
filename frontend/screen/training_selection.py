@@ -2,16 +2,15 @@ from typing import Dict, Any, Union, Type, Optional, Iterable
 import random
 
 from backend import language_metadata
-import asciichartpy
 
+from frontend import asciichartpy
 from frontend.state import State
 from frontend.reentrypoint import ReentryPoint, ReentryPointProvider
 from frontend.utils import query, output, view, date
 from frontend.trainers import (
     SentenceTranslationTrainerFrontend,
     VocableTrainerFrontend,
-    VocableAdderFrontend,
-    TrainerFrontend
+    VocableAdderFrontend
 )
 from frontend.screen.ops import INTER_OPTION_INDENTATION
 
@@ -40,7 +39,7 @@ def __call__(training_item_sequence: Optional[Iterable[int]] = None) -> ReentryP
     if training_item_sequence is None:
         _display_constitution_query(username=State.username, language=State.language)
 
-    # display training item sequence corresponding to previous training action
+    # display training item sequences corresponding to previous training action
     else:
         _display_training_item_sequence(training_item_sequence)
 
@@ -70,11 +69,14 @@ def _display_constitution_query(username: str, language: str):
 def _display_training_item_sequence(training_item_sequence: Iterable[int]):
     chart = asciichartpy.plot(training_item_sequence, cfg={
         'height': 20,
+        'horizontal_point_spacing': 5,
         'offset': 30,
-        'format': '{:8.0f}'
+        'format': '{:8.0f}',
+        'colors': [asciichartpy.red],
+        'display_x_axis': True
     })
 
-    print(asciichartpy.colored(chart, color=asciichartpy.red), '\n' * 2)
+    print(chart, '\n' * 2)
 
 
 def _display_last_session_conclusion(last_session_metrics: Dict[str, Any]):

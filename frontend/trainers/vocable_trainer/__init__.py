@@ -18,7 +18,7 @@ from frontend.trainers.base import TrainerFrontend
 from frontend.trainers.base.options import TrainingOptions, base_options
 from frontend.reentrypoint import ReentryPoint, ReentryPointProvider
 from frontend.state import State
-from frontend.utils import matplotlib as plt_utils, query, view
+from frontend.utils import query, view
 from frontend.utils.output import (
     erase_lines,
     centered_print,
@@ -69,7 +69,7 @@ class VocableTrainerFrontend(TrainerFrontend):
 
         self._current_vocable_entry: Optional[VocableEntry] = None
 
-    def __call__(self) -> ReentryPoint:
+    def __call__(self) -> TrainerFrontend.TrainingItemSequence:
         self._set_terminal_title()
 
         self._backend.set_item_iterator()
@@ -82,12 +82,7 @@ class VocableTrainerFrontend(TrainerFrontend):
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
 
-        # if self._n_trained_items:
-        #     self._display_pie_chart()
-        #
-        # self._training_item_sequence()
-
-        return ReentryPoint.TrainingSelection
+        return self._training_item_sequence()
 
     def _get_training_options(self) -> TrainingOptions:
         return TrainingOptions([base_options.AddVocable,
@@ -296,48 +291,6 @@ class VocableTrainerFrontend(TrainerFrontend):
     # -----------------
     # Post Training
     # -----------------
-    @staticmethod
-    def _performance_verdict(correctness_percentage: float) -> str:
-        return {
-            0: 'You suck.',
-            20: 'Get your shit together m8.',
-            40: "You can't climb the ladder of success with your hands in your pockets.",
-            60: "Keep hustlin' young blood.",
-            80: 'Attayboy!',
-            100: '0361/2680494. Call me.'
-        }[int(correctness_percentage) // 20 * 20]
-
-    def _display_pie_chart(self):
-        correctness_percentage = self._accumulated_score / self._n_trained_items * 100
-        incorrectness_percentage = 100 - correctness_percentage
-
-        LABELS = ['Correct', 'Incorrect']
-        EXPLODE = [0.1, 0]
-        SIZES = [correctness_percentage, incorrectness_percentage]
-        COLORS = ['g', 'r']
-
-        # discard plot attributes of opposing slice if either correctness percentage
-        # or incorrectness percentage = 100
-        PLOT_ATTRS: List[List[Any]] = [LABELS, EXPLODE, SIZES, COLORS]
-        for i, percentage in enumerate([incorrectness_percentage, correctness_percentage]):
-            if percentage == 100:
-                for plot_attributes in PLOT_ATTRS:
-                    del plot_attributes[i]
-                break
-
-        # define pie chart
-        fig, ax = plt.subplots()
-        ax.pie(SIZES, labels=LABELS, shadow=True, startangle=120, autopct='%1.1f%%', explode=EXPLODE, colors=COLORS)
-        ax.set_title(self._performance_verdict(correctness_percentage))
-        ax.axis('equal')
-
-        # remove decimal reentry_point from accumulated score if integer
-        accumulated_score = [int(self._accumulated_score), self._accumulated_score][bool(self._accumulated_score % 1)]
-
-        fig.canvas.set_window_title(f'You got {accumulated_score}/{self._n_trained_items} right')
-        plt_utils.center_window()
-        plt_utils.close_window_on_button_press()
-
     @property
     def _item_name(self) -> str:
         return 'vocable entry'
