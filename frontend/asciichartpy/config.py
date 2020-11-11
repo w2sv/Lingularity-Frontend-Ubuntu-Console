@@ -18,7 +18,7 @@ class Config:
     format: str = '{:8.0f} '
 
     horizontal_point_spacing: int = 0
-    display_x_axis: bool = True
+    display_x_axis: bool = False
     x_ticks: Optional[List[Any]] = None
 
     @property

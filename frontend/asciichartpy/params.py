@@ -9,8 +9,8 @@ from frontend.asciichartpy.config import Config
 @dataclass(frozen=True)
 class Params:
     ratio: float
-    minimum: int
-    maximum: int
+    min: int
+    max: int
     n_rows: int
     width: int
 
@@ -23,6 +23,6 @@ class Params:
 
         n_rows = maximum - minimum
 
-        width = max(map(len, sequences))
+        width = max(map(len, sequences)) + config.offset
 
         return cls(ratio, minimum, maximum, n_rows, width)

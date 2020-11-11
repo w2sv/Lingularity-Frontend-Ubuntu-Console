@@ -7,36 +7,18 @@ options to tune the output.
 from __future__ import annotations
 from typing import *
 from math import isnan
+import re
 
 from frontend.asciichartpy.config import Config, _is_numeric
 from frontend.asciichartpy.params import Params
 from frontend.asciichartpy.types import _Sequences
-
-
-black = "\033[30m"
-red = "\033[31m"
-green = "\033[32m"
-yellow = "\033[33m"
-blue = "\033[34m"
-magenta = "\033[35m"
-cyan = "\033[36m"
-lightgray = "\033[37m"
-default = "\033[39m"
-darkgray = "\033[90m"
-lightred = "\033[91m"
-lightgreen = "\033[92m"
-lightyellow = "\033[93m"
-lightblue = "\033[94m"
-lightmagenta = "\033[95m"
-lightcyan = "\033[96m"
-white = "\033[97m"
-reset = "\033[0m"
+from frontend.asciichartpy import colors
 
 
 def colored(chart: str, color: str) -> str:
     if not color:
         return chart
-    return color + chart + reset
+    return color + chart + colors.RESET
 
 
 _PLOT_SEGMENTS = ['┼', '┤', '╶', '╴', '─', '╰', '╭', '╮', '╯', '│', '┬']
@@ -55,41 +37,40 @@ def _get_chart(sequences: _Sequences, config: Config) -> List[str]:
     params = Params.compute(sequences, config)
 
     chart = [[' '] * params.width for _ in range(params.n_rows + 1)]
+    _add_y_axis(chart, config, params)
     _add_sequences(sequences, chart, config, params)
 
-    # if config.display_x_axis:
-    #     _add_x_axis()
-
-    _add_y_axis(chart, config, params)
-
-    for i, row in enumerate(chart):
-        chart[i] = [' '] * config.offset + row
+    if config.display_x_axis:
+        _add_x_axis(chart, config)
 
     return chart
 
+
 def _add_y_axis(chart: List[str], config: Config, params: Params):
-    for i, row in enumerate(chart):
-        label = config.format.format(params.maximum - ((i - params.minimum) * config.interval / [1, params.n_rows][bool(params.n_rows)]))
-        chart[i - params.minimum] = [label] + [_PLOT_SEGMENTS[[1, 0][i == 0]]] + row
+    divisor = [1, params.n_rows][bool(params.n_rows)]
+
+    for i in range(params.min, params.max + 1):
+        label = config.format.format(config.max - ((i - params.min) * config.interval / divisor))
+        chart[i - params.min][max(config.offset - len(label), 0)] = label
+        chart[i - params.min][config.offset - 1] = _PLOT_SEGMENTS[[1, 0][i == 0]]
 
 
 def _add_sequences(sequences: _Sequences, chart: List[str], config: Config, params: Params):
 
     def scaled(value: float):
-        clamped_value = min(max(value, params.minimum), params.maximum)
-        return int(round(clamped_value * params.ratio) - params.minimum)
+        clamped_value = min(max(value, config.min), config.max)
+        return int(round(clamped_value * params.ratio) - params.min)
 
-    # first value is a tick mark across the y-axis
-    # if _is_numeric(sequences[0][0]):
-    #     chart[params.n_rows - scaled(sequences[0][0])][config.offset - 1] = _PLOT_SEGMENTS[0]
-
-    for i, series_i in enumerate(sequences):
+    for i, sequence in enumerate(sequences):
         color = config.colors[i % len(config.colors)]
 
+        if _is_numeric(sequence[0]):
+            chart[params.n_rows - scaled(sequence[0])][config.offset - 1] = colored(_PLOT_SEGMENTS[0], color)
+
         # add symbols corresponding to singular sequences
-        for j in range(len(series_i) - 1):
-            value = series_i[j]
-            following_value = series_i[j + 1]
+        for j in range(len(sequence) - 1):
+            value = sequence[j]
+            following_value = sequence[j + 1]
 
             symbol_index: int = None  # type: ignore
             row_subtrahend: int = None  # type: ignore
@@ -109,7 +90,7 @@ def _add_sequences(sequences: _Sequences, chart: List[str], config: Config, para
             if symbol_index is not None:
                 symbol = _PLOT_SEGMENTS[symbol_index]
 
-                chart[params.n_rows - row_subtrahend][j] = colored(symbol, color)
+                chart[params.n_rows - row_subtrahend][j + config.offset] = colored(symbol, color)
 
             else:
                 if y0 > y1:
@@ -119,13 +100,13 @@ def _add_sequences(sequences: _Sequences, chart: List[str], config: Config, para
                     symbol_y0 = _PLOT_SEGMENTS[8]
                     symbol_y1 = _PLOT_SEGMENTS[6]
 
-                chart[params.n_rows - y0][j] = colored(symbol_y0, color)
-                chart[params.n_rows - y1][j] = colored(symbol_y1, color)
+                chart[params.n_rows - y0][j + config.offset] = colored(symbol_y0, color)
+                chart[params.n_rows - y1][j + config.offset] = colored(symbol_y1, color)
 
                 start = min(y0, y1) + 1
                 end = max(y0, y1)
                 for y in range(start, end):
-                    chart[params.n_rows - y][j] = colored(_PLOT_SEGMENTS[9], color)
+                    chart[params.n_rows - y][j + config.offset] = colored(_PLOT_SEGMENTS[9], color)
 
 
 def _add_x_axis(chart: List[str], config: Config):
@@ -133,38 +114,49 @@ def _add_x_axis(chart: List[str], config: Config):
         '┤': '┼',
         '─': '┬',
         '╰': '├',
-        '╯': '┤'
+        '╯': '┤',
+        '': ''
     }
 
+    ANSI_ESCAPE_PATTERN = re.compile(r'\x1b[^m]*m')
+
+    def _extract_color(chart_parcel: str) -> str:
+        if len((ansi_sequences := re.findall(ANSI_ESCAPE_PATTERN, chart_parcel))):
+            return ansi_sequences[0]
+        return ''
+
     def is_data_point(point_index: int) -> bool:
-        return bool(point_index) and point_index % ((config.horizontal_point_spacing or 0) + 1) == 0
+        return point_index % (config.horizontal_point_spacing + 1) == 0
 
     last_row = chart[-1]
 
-    # if is_data_point(j):
-    #     axis_symbol = _PLOT_SEGMENTS[-1]
-    # else:
-    #     axis_symbol = _PLOT_SEGMENTS[4]
-    #
-    # chart[-1][j + config.offset] = axis_symbol
-    #
-    # if params.n_rows - row_subtrahend == params.n_rows and config.display_x_axis and is_data_point(j):
-    #     symbol = _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE[symbol]
-    #
-    # if params.n_rows - y0 == params.n_rows and config.display_x_axis and is_data_point(j):
-    #     symbol_y0 = _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE[symbol_y0]
-    #
-    # if config.display_x_axis:
-    #     chart[-1][-1] = _PLOT_SEGMENTS[-1]
-    #     chart[params.n_rows - y1][-1] = colored(_PLOT_SEGMENTS[4], color)
-    #
-    #     chart[-1][config.offset - 1] = _PLOT_SEGMENTS[0]
+    if not _extract_color(last_row[config.offset - 1]):
+        last_row[config.offset - 1] = _PLOT_SEGMENTS[0]
+
+    for i, segment in enumerate(last_row[config.offset:]):
+        _is_data_point = is_data_point(i + 1)
+
+        if segment == ' ':
+            if _is_data_point:
+                last_row[i + config.offset] = _PLOT_SEGMENTS[-1]
+            else:
+                last_row[i + config.offset] = _PLOT_SEGMENTS[4]
+        elif _is_data_point:
+            if color := _extract_color(segment):
+                segment = re.split(ANSI_ESCAPE_PATTERN, segment)[1]
+
+            last_row[i + config.offset] = color + _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE[segment] + colors.RESET
+
+    for row_index in range(len(chart) - 1):
+        if (last_column_segment := chart[row_index][-2]) != ' ':
+            chart[row_index][-1] = _extract_color(last_column_segment) + _PLOT_SEGMENTS[4] + colors.RESET
 
 
 if __name__ == '__main__':
-    print(plot([9] + list(range(4, 7)), config=Config(
-        colors=[red],
-        horizontal_point_spacing=3,
+    print(plot([2, 6, 17, 0, 0, 21, 11, 0, 0, 0, 2, 0, 27, 33, 15], config=Config(
+        horizontal_point_spacing=5,
+        offset=30,
+        colors=[colors.RED],
         display_x_axis=True,
-        offset=2
+        height=15
     )))

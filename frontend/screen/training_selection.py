@@ -67,14 +67,15 @@ def _display_constitution_query(username: str, language: str):
 
 
 def _display_training_item_sequence(training_item_sequence: Iterable[int]):
-    chart = asciichartpy.plot(training_item_sequence, cfg={
-        'height': 15,
-        'horizontal_point_spacing': 5,
-        'offset': 30,
-        'format': '{:8.0f}',
-        'colors': [asciichartpy.red],
-        'display_x_axis': True
-    })
+    print(training_item_sequence)
+    chart = asciichartpy.plot(training_item_sequence, config=asciichartpy.Config(
+        height=15,
+        horizontal_point_spacing=5,
+        offset=30,
+        format='{:8.0f}',
+        colors=[asciichartpy.colors.RED],
+        display_x_axis=True
+    ))
 
     print(chart, '\n' * 2)
 
