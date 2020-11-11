@@ -68,7 +68,7 @@ def _display_constitution_query(username: str, language: str):
 
 def _display_training_item_sequence(training_item_sequence: Iterable[int]):
     chart = asciichartpy.plot(training_item_sequence, cfg={
-        'height': 20,
+        'height': 15,
         'horizontal_point_spacing': 5,
         'offset': 30,
         'format': '{:8.0f}',

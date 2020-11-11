@@ -4,9 +4,11 @@ ascii chart from a sequences of numbers. The chart can be configured via several
 options to tune the output.
 """
 
+from __future__ import annotations
 from typing import *
-from math import ceil, floor, isnan
+from math import ceil, floor, isnan, inf
 import itertools
+from dataclasses import dataclass
 
 
 black = "\033[30m"
@@ -29,107 +31,158 @@ white = "\033[97m"
 reset = "\033[0m"
 
 
-def colored(chart, color):
+def colored(chart: str, color: str) -> str:
     if not color:
         return chart
     return color + chart + reset
 
 
-def plot(*sequences: Iterable[float], cfg: Optional[Dict[str, str]] = None) -> List[str]:
-    PLOT_SEGMENTS = ['┼', '┤', '╶', '╴', '─', '╰', '╭', '╮', '╯', '│', '┬']
-    X_AXIS_TOUCHING_PLOT_SYMBOL_SUBSTITUTES = {
-        '┤': '┼',
-        '─': '┬',
-        '╰': '├',
-        '╯': '┤'
-    }
+_Sequences = List[Sequence[float]]
 
-    sequences = list(sequences)
-    
-    # ------PROCESS CONFIGURATION OPTIONS------
-    cfg = cfg or {}
 
-    colors = cfg.get('colors', [None])
+@dataclass
+class Config:
+    min: float = inf
+    max: float = -inf
 
-    minimum = cfg.get('min', min(filter(_is_numeric, [j for i in sequences for j in i])))
-    maximum = cfg.get('max', max(filter(_is_numeric, [j for i in sequences for j in i])))
+    offset: int = 3
+    height: Optional[float] = None
 
-    if minimum > maximum:
-        raise ValueError('The min value cannot exceed the max value.')
+    colors: Sequence[Optional[str]] = (None,)
+    format: str = '{:8.0f} '
 
-    interval = maximum - minimum
-    
-    offset = cfg.get('offset', 3)
-    height = cfg.get('height', interval)
+    horizontal_point_spacing: int = 0
+    display_x_axis: bool = True
+    x_ticks: Optional[List[Any]] = None
 
-    horizontal_point_spacing = cfg.get('horizontal_point_spacing', 0)
-    if bool(horizontal_point_spacing):
-        padded_series_i = []
-        for i, series_i in enumerate(sequences):
-            for j, series_i_j in enumerate(series_i[:-1]):
-                padded_series_i.append(series_i_j)
-                fill_points = _fill_points(series_i_j, series_i[j + 1], horizontal_point_spacing)
-                padded_series_i.extend(fill_points)
-            padded_series_i.append(series_i[-1])
-            sequences[i] = padded_series_i[0:1] + padded_series_i[2:]
+    @property
+    def interval(self) -> float:
+        return self.max - self.min
 
-    display_x_axis = cfg.get('display_x_axis', False)
+    @property
+    def ratio(self) -> float:
+        return self.height / [1, self.interval][self.interval > 0]
 
-    x_ticks = cfg.get('x_ticks')
-    if x_ticks is not None and not _contains_unique_value(map(len, itertools.chain(x_ticks, *sequences))):
-        raise ValueError('x_ticks and entirety of passed sequences have to be at length parity')
+    def process(self, sequences: _Sequences):
+        self.min = min(self.min, min(filter(_is_numeric, itertools.chain(*sequences))))
+        self.max = max(self.max, max(filter(_is_numeric, itertools.chain(*sequences))))
 
-    placeholder = cfg.get('format', '{:8.0f} ')
+        if self.min > self.max:
+            raise ValueError('The min value cannot exceed the max value.')
 
-    # ------COMPUTE PARAMETERS------
+        if self.height is None:
+            self.height = self.interval
 
-    ratio = height / interval if interval > 0 else 1
+        if bool(self.x_ticks) and not _contains_unique_value(map(len, itertools.chain(self.x_ticks, *sequences))):
+            raise ValueError('x_ticks and entirety of passed sequences have to be at length parity')
 
-    min2 = int(floor(minimum * ratio))
-    max2 = int(ceil(maximum * ratio))
+    def padded_sequences(self, sequences: _Sequences) -> _Sequences:
+        """
+        >>> config = Config(horizontal_point_spacing=2)
+        >>> config.padded_sequences([list(range(4))])
+        [[0, 0.3333333333333333, 0.6666666666666666, 1, 1.3333333333333333, 1.6666666666666665, 2, 2.3333333333333335, 2.666666666666667, 3]] """
 
-    n_rows = max2 - min2
+        if self.horizontal_point_spacing:
+            padded_sequences = []
+            for sequence in sequences:
+                padded_sequence = []
+                for i in range(len(sequence[:-1])):
+                    padded_sequence.append(sequence[i])
+                    padded_sequence.extend(_fill_points(
+                        start=sequence[i],
+                        end=sequence[i + 1],
+                        n_points=self.horizontal_point_spacing
+                    ))
+                padded_sequences.append(padded_sequence + [sequence[-1]])
+            sequences = padded_sequences
 
-    width = 0
-    for i in range(0, len(sequences)):
-        width = max(width, len(sequences[i]))
-    width += offset
+        return sequences
 
-    chart = [[' '] * width for _ in range(n_rows + 1)]
 
-    # ------ADD Y-AXIS WITH LABELS------
-    for y in range(min2, max2 + 1):
-        label = placeholder.format(maximum - ((y - min2) * interval / (n_rows if n_rows else 1)))
-        chart[y - min2][max(offset - len(label), 0)] = label
-        chart[y - min2][offset - 1] = PLOT_SEGMENTS[0] if y == 0 else PLOT_SEGMENTS[1]  # zero tick mark
+@dataclass(frozen=True)
+class Params:
+    ratio: float
+    minimum: int
+    maximum: int
+    n_rows: int
+    width: int
 
-    # ------ADD SEQUENCES------
+    @classmethod
+    def compute(cls, sequences: _Sequences, config: Config) -> Params:
+        ratio = config.height / [1, config.interval][config.interval > 0]
+
+        minimum = int(floor(config.min * ratio))
+        maximum = int(ceil(config.max * ratio))
+
+        n_rows = maximum - minimum
+
+        width = max(map(len, sequences)) + config.offset
+
+        return cls(ratio, minimum, maximum, n_rows, width)
+
+
+_PLOT_SEGMENTS = ['┼', '┤', '╶', '╴', '─', '╰', '╭', '╮', '╯', '│', '┬']
+_SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE = {
+    '┤': '┼',
+    '─': '┬',
+    '╰': '├',
+    '╯': '┤'
+}
+
+
+def plot(*sequences: Sequence[float], config=Config()) -> str:
+    sequences = list(sequences)  # type: ignore
+
+    config.process(sequences)
+    sequences = config.padded_sequences(sequences)
+
+    return '\n'.join([''.join(row).rstrip() for row in _get_chart(sequences, config)])
+
+
+def _get_chart(sequences: _Sequences, config: Config) -> List[str]:
+    params = Params.compute(sequences, config)
+
+    chart = [[' '] * params.width for _ in range(params.n_rows + 1)]
+    _add_y_axis(chart, config, params)
+    _add_sequences(sequences, chart, config, params)
+
+    return chart
+
+def _add_y_axis(chart: List[str], config: Config, params: Params):
+    for y in range(params.minimum, params.maximum + 1):
+        label = config.format.format(params.maximum - ((y - params.minimum) * config.interval / [1, params.n_rows][bool(params.n_rows)]))
+        chart[y - params.minimum][max(config.offset - len(label), 0)] = label
+        chart[y - params.minimum][config.offset - 1] = _PLOT_SEGMENTS[0] if y == 0 else _PLOT_SEGMENTS[1]  # zero tick mark
+
+
+def _add_sequences(sequences: _Sequences, chart: List[str], config: Config, params: Params):
+
     def scaled(value: float):
-        clamped_value = min(max(value, minimum), maximum)
-        return int(round(clamped_value * ratio) - min2)
+        clamped_value = min(max(value, params.minimum), params.maximum)
+        return int(round(clamped_value * params.ratio) - params.minimum)
 
     def is_data_point(point_index: int) -> bool:
-        return point_index and point_index % ((horizontal_point_spacing or 0) + 1) == 0
+        return bool(point_index) and point_index % ((config.horizontal_point_spacing or 0) + 1) == 0
 
     # first value is a tick mark across the y-axis
     if _is_numeric(sequences[0][0]):
-        symbol = PLOT_SEGMENTS[0]
-        chart[n_rows - scaled(sequences[0][0])][offset - 1] = symbol
+        symbol = _PLOT_SEGMENTS[0]
+        chart[params.n_rows - scaled(sequences[0][0])][config.offset - 1] = symbol
 
     for i, series_i in enumerate(sequences):
-        color = colors[i % len(colors)]
+        color = config.colors[i % len(config.colors)]
 
         # add symbols corresponding to singular sequences
         for j in range(len(series_i) - 1):
 
             # add x-axis segment
-            if display_x_axis:
+            if config.display_x_axis:
                 if is_data_point(j):
-                    axis_symbol = PLOT_SEGMENTS[-1]
+                    axis_symbol = _PLOT_SEGMENTS[-1]
                 else:
-                    axis_symbol = PLOT_SEGMENTS[4]
+                    axis_symbol = _PLOT_SEGMENTS[4]
 
-                chart[-1][j + offset] = axis_symbol
+                chart[-1][j + config.offset] = axis_symbol
 
             value = series_i[j]
             following_value = series_i[j + 1]
@@ -150,39 +203,37 @@ def plot(*sequences: Iterable[float], cfg: Optional[Dict[str, str]] = None) -> L
                 symbol_index, row_subtrahend = 4, y0
 
             if symbol_index is not None:
-                symbol = PLOT_SEGMENTS[symbol_index]
+                symbol = _PLOT_SEGMENTS[symbol_index]
 
-                if n_rows - row_subtrahend == n_rows and display_x_axis and is_data_point(j):
-                    symbol = X_AXIS_TOUCHING_PLOT_SYMBOL_SUBSTITUTES[symbol]
+                if params.n_rows - row_subtrahend == params.n_rows and config.display_x_axis and is_data_point(j):
+                    symbol = _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE[symbol]
 
-                chart[n_rows - row_subtrahend][j + offset] = colored(symbol, color)
+                chart[params.n_rows - row_subtrahend][j + config.offset] = colored(symbol, color)
 
             else:
                 if y0 > y1:
-                    symbol_y0 = PLOT_SEGMENTS[7]
-                    symbol_y1 = PLOT_SEGMENTS[5]
+                    symbol_y0 = _PLOT_SEGMENTS[7]
+                    symbol_y1 = _PLOT_SEGMENTS[5]
                 else:
-                    symbol_y0 = PLOT_SEGMENTS[8]
-                    symbol_y1 = PLOT_SEGMENTS[6]
+                    symbol_y0 = _PLOT_SEGMENTS[8]
+                    symbol_y1 = _PLOT_SEGMENTS[6]
 
-                if n_rows - y0 == n_rows and display_x_axis and is_data_point(j):
-                    symbol_y0 = X_AXIS_TOUCHING_PLOT_SYMBOL_SUBSTITUTES[symbol_y0]
+                if params.n_rows - y0 == params.n_rows and config.display_x_axis and is_data_point(j):
+                    symbol_y0 = _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE[symbol_y0]
 
-                chart[n_rows - y0][j + offset] = colored(symbol_y0, color)
-                chart[n_rows - y1][j + offset] = colored(symbol_y1, color)
+                chart[params.n_rows - y0][j + config.offset] = colored(symbol_y0, color)
+                chart[params.n_rows - y1][j + config.offset] = colored(symbol_y1, color)
 
                 start = min(y0, y1) + 1
                 end = max(y0, y1)
                 for y in range(start, end):
-                    chart[n_rows - y][j + offset] = colored(PLOT_SEGMENTS[9], color)
+                    chart[params.n_rows - y][j + config.offset] = colored(_PLOT_SEGMENTS[9], color)
 
-        if display_x_axis:
-            chart[-1][-1] = PLOT_SEGMENTS[-1]
-            chart[n_rows-y1][-1] = colored(PLOT_SEGMENTS[4], color)
+        if config.display_x_axis:
+            chart[-1][-1] = _PLOT_SEGMENTS[-1]
+            chart[params.n_rows-y1][-1] = colored(_PLOT_SEGMENTS[4], color)
 
-            chart[-1][offset - 1] = PLOT_SEGMENTS[0]
-
-    return '\n'.join([''.join(row).rstrip() for row in chart])
+            chart[-1][config.offset - 1] = _PLOT_SEGMENTS[0]
 
 
 def _is_numeric(n: float) -> bool:
@@ -194,13 +245,13 @@ def _fill_points(start: float, end: float, n_points: int) -> List[float]:
     return list(itertools.accumulate([start] + [step_size] * n_points))[1:]
 
 
-def _contains_unique_value(sequence: Sequence[Any]) -> bool:
+def _contains_unique_value(sequence: Iterable[Any]) -> bool:
     return len(set(sequence)) == 1
 
 
 if __name__ == '__main__':
-    print(plot([9] + list(range(4, 7)), cfg={
-        'colors': [red],
-        'horizontal_point_spacing': 3,
-        'display_x_axis': True
-    }))
+    print(plot([9] + list(range(4, 7)), config=Config(
+        colors=[red],
+        horizontal_point_spacing=3,
+        display_x_axis=True
+    )))
