@@ -1,5 +1,3 @@
-from typing import Optional
-
 from backend import string_resources
 
 from frontend.utils import query, output, view
@@ -11,7 +9,7 @@ from frontend.screen.ops import INTER_OPTION_INDENTATION, reference_language
 _OPTION_2_REENTRY_POINT = {
         'add': ReentryPoint.LanguageAddition,
         'sign': ReentryPoint.Login,
-        'quit': ReentryPoint.Exit
+        'quit': ReentryPoint.Exit,
     }
 
 _OPTION_KEYWORDS = list(_OPTION_2_REENTRY_POINT.keys())

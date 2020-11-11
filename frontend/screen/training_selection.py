@@ -67,7 +67,6 @@ def _display_constitution_query(username: str, language: str):
 
 
 def _display_training_item_sequence(training_item_sequence: Iterable[int]):
-    print(training_item_sequence)
     chart = asciichartpy.plot(training_item_sequence, config=asciichartpy.Config(
         height=15,
         horizontal_point_spacing=5,
@@ -87,8 +86,7 @@ def _display_last_session_conclusion(last_session_metrics: Dict[str, Any]):
 
 
 def _query_action_selection() -> ActionOption:
-    output.centered_print(f"What would you like to do?: "
-                          f"{INTER_OPTION_INDENTATION}Translate (S)entences"
+    output.centered_print(f"{INTER_OPTION_INDENTATION}Translate (S)entences"
                           f"{INTER_OPTION_INDENTATION}Train (V)ocabulary"
                           f"{INTER_OPTION_INDENTATION}(A)dd Vocabulary"
                           f"{INTER_OPTION_INDENTATION}Return to (H)ome Screen"

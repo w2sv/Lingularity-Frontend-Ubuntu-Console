@@ -12,7 +12,8 @@ class Params:
     min: int
     max: int
     n_rows: int
-    width: int
+    plot_width: int
+    chart_width: int
 
     @classmethod
     def compute(cls, sequences: _Sequences, config: Config) -> Params:
@@ -23,6 +24,7 @@ class Params:
 
         n_rows = maximum - minimum
 
-        width = max(map(len, sequences)) + config.offset
+        plot_width = max(map(len, sequences))
+        chart_width = plot_width + config.offset
 
-        return cls(ratio, minimum, maximum, n_rows, width)
+        return cls(ratio, minimum, maximum, n_rows, plot_width, chart_width)

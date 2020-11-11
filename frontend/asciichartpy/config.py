@@ -1,7 +1,7 @@
-from typing import Optional, Sequence, List, Any, Iterable
+from typing import Optional, Sequence, List
 import itertools
 from dataclasses import dataclass
-from math import inf, isnan
+from math import inf, isfinite
 
 from frontend.asciichartpy.types import _Sequences
 
@@ -19,7 +19,9 @@ class Config:
 
     horizontal_point_spacing: int = 0
     display_x_axis: bool = False
-    x_ticks: Optional[List[Any]] = None
+    x_labels: Optional[List[str]] = None
+
+    title: Optional[str] = None
 
     @property
     def interval(self) -> float:
@@ -30,17 +32,14 @@ class Config:
         return self.height / [1, self.interval][self.interval > 0]
 
     def process(self, sequences: _Sequences):
-        self.min = min(self.min, min(filter(_is_numeric, itertools.chain(*sequences))))
-        self.max = max(self.max, max(filter(_is_numeric, itertools.chain(*sequences))))
+        self.min = min(self.min, min(filter(isfinite, itertools.chain(*sequences))))
+        self.max = max(self.max, max(filter(isfinite, itertools.chain(*sequences))))
 
         if self.min > self.max:
             raise ValueError('The min value cannot exceed the max value.')
 
         if self.height is None:
             self.height = self.interval
-
-        if bool(self.x_ticks) and not _contains_unique_value(map(len, itertools.chain(self.x_ticks, *sequences))):
-            raise ValueError('x_ticks and entirety of passed sequences have to be at length parity')
 
     def padded_sequences(self, sequences: _Sequences) -> _Sequences:
         """
@@ -65,14 +64,6 @@ class Config:
         return sequences
 
 
-def _is_numeric(n: float) -> bool:
-    return not isnan(n)
-
-
 def _fill_points(start: float, end: float, n_points: int) -> List[float]:
     step_size = (end - start) / (n_points + 1)
     return list(itertools.accumulate([start] + [step_size] * n_points))[1:]
-
-
-def _contains_unique_value(sequence: Iterable[Any]) -> bool:
-    return len(set(sequence)) == 1

@@ -6,19 +6,17 @@ options to tune the output.
 
 from __future__ import annotations
 from typing import *
-from math import isnan
+from math import isfinite
 import re
 
-from frontend.asciichartpy.config import Config, _is_numeric
+from frontend.asciichartpy.config import Config
 from frontend.asciichartpy.params import Params
 from frontend.asciichartpy.types import _Sequences
 from frontend.asciichartpy import colors
 
 
-def colored(chart: str, color: str) -> str:
-    if not color:
-        return chart
-    return color + chart + colors.RESET
+def colored(string: str, color: str) -> str:
+    return color + string + colors.RESET
 
 
 _PLOT_SEGMENTS = ['┼', '┤', '╶', '╴', '─', '╰', '╭', '╮', '╯', '│', '┬']
@@ -30,18 +28,22 @@ def plot(*sequences: Sequence[float], config=Config()) -> str:
     config.process(sequences)
     sequences = config.padded_sequences(sequences)
 
-    return '\n'.join([''.join(row).rstrip() for row in _get_chart(sequences, config)])
-
-
-def _get_chart(sequences: _Sequences, config: Config) -> List[str]:
     params = Params.compute(sequences, config)
+    serialized_chart = '\n'.join([''.join(row).rstrip() for row in _get_chart(sequences, config, params)])
 
-    chart = [[' '] * params.width for _ in range(params.n_rows + 1)]
+    if config.title:
+        serialized_chart = ' ' * (config.offset + params.plot_width // 2 + len(config.title) // 2) + config.title + '\n' + serialized_chart
+
+    return serialized_chart
+
+
+def _get_chart(sequences: _Sequences, config: Config, params: Params) -> List[str]:
+    chart = [[' '] * params.chart_width for _ in range(params.n_rows + 1)]
     _add_y_axis(chart, config, params)
-    _add_sequences(sequences, chart, config, params)
+    last_row_indices = _add_sequences(sequences, chart, config, params)
 
     if config.display_x_axis:
-        _add_x_axis(chart, config)
+        _add_x_axis(chart, config, last_row_indices)
 
     return chart
 
@@ -55,67 +57,60 @@ def _add_y_axis(chart: List[str], config: Config, params: Params):
         chart[i - params.min][config.offset - 1] = _PLOT_SEGMENTS[[1, 0][i == 0]]
 
 
-def _add_sequences(sequences: _Sequences, chart: List[str], config: Config, params: Params):
+def _add_sequences(sequences: _Sequences, chart: List[str], config: Config, params: Params) -> List[int]:
+    _INIT_VALUE = -1
 
     def scaled(value: float):
         clamped_value = min(max(value, config.min), config.max)
         return int(round(clamped_value * params.ratio) - params.min)
 
+    last_sequence_point_row_indices: List[int] = []
     for i, sequence in enumerate(sequences):
         color = config.colors[i % len(config.colors)]
 
-        if _is_numeric(sequence[0]):
+        # add '┼' at sequence beginning
+        if isfinite(sequence[0]):
             chart[params.n_rows - scaled(sequence[0])][config.offset - 1] = colored(_PLOT_SEGMENTS[0], color)
 
         # add symbols corresponding to singular sequences
-        for j in range(len(sequence) - 1):
-            value = sequence[j]
-            following_value = sequence[j + 1]
+        j = _INIT_VALUE
+        y0, y1 = _INIT_VALUE, _INIT_VALUE
+        while (j := j + 1) < len(sequence) - 1:
 
-            symbol_index: int = None  # type: ignore
-            row_subtrahend: int = None  # type: ignore
+            def set_parcel(row_subtrahend: int, segment: str):
+                chart[params.n_rows - row_subtrahend][j + config.offset] = colored(segment, color)
 
-            if isnan(value) and isnan(following_value):
-                continue
+            y0 = scaled(sequence[j])
+            y1 = scaled(sequence[j + 1])
 
-            if isnan(value) and _is_numeric(following_value):
-                symbol_index, row_subtrahend = 2, scaled(following_value)
-
-            elif _is_numeric(value) and isnan(following_value):
-                symbol_index, row_subtrahend = 3, scaled(value)
-
-            elif (y0 := scaled(value)) == (y1 := scaled(following_value)):
-                symbol_index, row_subtrahend = 4, y0
-
-            if symbol_index is not None:
-                symbol = _PLOT_SEGMENTS[symbol_index]
-
-                chart[params.n_rows - row_subtrahend][j + config.offset] = colored(symbol, color)
+            if y0 == y1:
+                set_parcel(y0, _PLOT_SEGMENTS[4])
 
             else:
                 if y0 > y1:
-                    symbol_y0 = _PLOT_SEGMENTS[7]
-                    symbol_y1 = _PLOT_SEGMENTS[5]
+                    symbol_y0, symbol_y1 = _PLOT_SEGMENTS[7], _PLOT_SEGMENTS[5]
                 else:
-                    symbol_y0 = _PLOT_SEGMENTS[8]
-                    symbol_y1 = _PLOT_SEGMENTS[6]
+                    symbol_y0, symbol_y1 = _PLOT_SEGMENTS[8], _PLOT_SEGMENTS[6]
 
-                chart[params.n_rows - y0][j + config.offset] = colored(symbol_y0, color)
-                chart[params.n_rows - y1][j + config.offset] = colored(symbol_y1, color)
+                set_parcel(y0, symbol_y0)
+                set_parcel(y1, symbol_y1)
 
-                start = min(y0, y1) + 1
-                end = max(y0, y1)
-                for y in range(start, end):
+                for y in range(min(y0, y1) + 1, max(y0, y1)):
                     chart[params.n_rows - y][j + config.offset] = colored(_PLOT_SEGMENTS[9], color)
 
+        if j + 1 + config.offset == params.chart_width:
+            last_point = [min, max][y1 > y0](y0, y1)
+            last_sequence_point_row_indices.append(last_point)
 
-def _add_x_axis(chart: List[str], config: Config):
+    return last_sequence_point_row_indices
+
+
+def _add_x_axis(chart: List[str], config: Config, last_sequence_point_row_indices: List[int]):
     _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE = {
         '┤': '┼',
         '─': '┬',
         '╰': '├',
-        '╯': '┤',
-        '': ''
+        '╯': '┤'
     }
 
     ANSI_ESCAPE_PATTERN = re.compile(r'\x1b[^m]*m')
@@ -147,16 +142,19 @@ def _add_x_axis(chart: List[str], config: Config):
 
             last_row[i + config.offset] = color + _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE[segment] + colors.RESET
 
-    for row_index in range(len(chart) - 1):
-        if (last_column_segment := chart[row_index][-2]) != ' ':
-            chart[row_index][-1] = _extract_color(last_column_segment) + _PLOT_SEGMENTS[4] + colors.RESET
+    for row_index in last_sequence_point_row_indices:
+        last_column_segment = chart[-row_index - 1][-2]
+        chart[-row_index - 1][-1] = _extract_color(last_column_segment) + _PLOT_SEGMENTS[4] + colors.RESET
 
 
 if __name__ == '__main__':
-    print(plot([2, 6, 17, 0, 0, 21, 11, 0, 0, 0, 2, 0, 27, 33, 15], config=Config(
+    from random import randint
+
+    print(plot([randint(0, 100) for _ in range(5)], config=Config(
         horizontal_point_spacing=5,
         offset=30,
         colors=[colors.RED],
         display_x_axis=True,
-        height=15
+        height=15,
+        title='SICKPLOT'
     )))
