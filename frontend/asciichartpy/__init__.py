@@ -40,12 +40,6 @@ def colored(chart: str, color: str) -> str:
 
 
 _PLOT_SEGMENTS = ['┼', '┤', '╶', '╴', '─', '╰', '╭', '╮', '╯', '│', '┬']
-_SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE = {
-    '┤': '┼',
-    '─': '┬',
-    '╰': '├',
-    '╯': '┤'
-}
 
 
 def plot(*sequences: Sequence[float], config=Config()) -> str:
@@ -61,16 +55,22 @@ def _get_chart(sequences: _Sequences, config: Config) -> List[str]:
     params = Params.compute(sequences, config)
 
     chart = [[' '] * params.width for _ in range(params.n_rows + 1)]
-    _add_y_axis(chart, config, params)
     _add_sequences(sequences, chart, config, params)
+
+    # if config.display_x_axis:
+    #     _add_x_axis()
+
+    _add_y_axis(chart, config, params)
+
+    for i, row in enumerate(chart):
+        chart[i] = [' '] * config.offset + row
 
     return chart
 
 def _add_y_axis(chart: List[str], config: Config, params: Params):
-    for y in range(params.minimum, params.maximum + 1):
-        label = config.format.format(params.maximum - ((y - params.minimum) * config.interval / [1, params.n_rows][bool(params.n_rows)]))
-        chart[y - params.minimum][max(config.offset - len(label), 0)] = label
-        chart[y - params.minimum][config.offset - 1] = _PLOT_SEGMENTS[0] if y == 0 else _PLOT_SEGMENTS[1]  # zero tick mark
+    for i, row in enumerate(chart):
+        label = config.format.format(params.maximum - ((i - params.minimum) * config.interval / [1, params.n_rows][bool(params.n_rows)]))
+        chart[i - params.minimum] = [label] + [_PLOT_SEGMENTS[[1, 0][i == 0]]] + row
 
 
 def _add_sequences(sequences: _Sequences, chart: List[str], config: Config, params: Params):
@@ -79,29 +79,15 @@ def _add_sequences(sequences: _Sequences, chart: List[str], config: Config, para
         clamped_value = min(max(value, params.minimum), params.maximum)
         return int(round(clamped_value * params.ratio) - params.minimum)
 
-    def is_data_point(point_index: int) -> bool:
-        return bool(point_index) and point_index % ((config.horizontal_point_spacing or 0) + 1) == 0
-
     # first value is a tick mark across the y-axis
-    if _is_numeric(sequences[0][0]):
-        symbol = _PLOT_SEGMENTS[0]
-        chart[params.n_rows - scaled(sequences[0][0])][config.offset - 1] = symbol
+    # if _is_numeric(sequences[0][0]):
+    #     chart[params.n_rows - scaled(sequences[0][0])][config.offset - 1] = _PLOT_SEGMENTS[0]
 
     for i, series_i in enumerate(sequences):
         color = config.colors[i % len(config.colors)]
 
         # add symbols corresponding to singular sequences
         for j in range(len(series_i) - 1):
-
-            # add x-axis segment
-            if config.display_x_axis:
-                if is_data_point(j):
-                    axis_symbol = _PLOT_SEGMENTS[-1]
-                else:
-                    axis_symbol = _PLOT_SEGMENTS[4]
-
-                chart[-1][j + config.offset] = axis_symbol
-
             value = series_i[j]
             following_value = series_i[j + 1]
 
@@ -123,10 +109,7 @@ def _add_sequences(sequences: _Sequences, chart: List[str], config: Config, para
             if symbol_index is not None:
                 symbol = _PLOT_SEGMENTS[symbol_index]
 
-                if params.n_rows - row_subtrahend == params.n_rows and config.display_x_axis and is_data_point(j):
-                    symbol = _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE[symbol]
-
-                chart[params.n_rows - row_subtrahend][j + config.offset] = colored(symbol, color)
+                chart[params.n_rows - row_subtrahend][j] = colored(symbol, color)
 
             else:
                 if y0 > y1:
@@ -136,27 +119,52 @@ def _add_sequences(sequences: _Sequences, chart: List[str], config: Config, para
                     symbol_y0 = _PLOT_SEGMENTS[8]
                     symbol_y1 = _PLOT_SEGMENTS[6]
 
-                if params.n_rows - y0 == params.n_rows and config.display_x_axis and is_data_point(j):
-                    symbol_y0 = _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE[symbol_y0]
-
-                chart[params.n_rows - y0][j + config.offset] = colored(symbol_y0, color)
-                chart[params.n_rows - y1][j + config.offset] = colored(symbol_y1, color)
+                chart[params.n_rows - y0][j] = colored(symbol_y0, color)
+                chart[params.n_rows - y1][j] = colored(symbol_y1, color)
 
                 start = min(y0, y1) + 1
                 end = max(y0, y1)
                 for y in range(start, end):
-                    chart[params.n_rows - y][j + config.offset] = colored(_PLOT_SEGMENTS[9], color)
+                    chart[params.n_rows - y][j] = colored(_PLOT_SEGMENTS[9], color)
 
-        if config.display_x_axis:
-            chart[-1][-1] = _PLOT_SEGMENTS[-1]
-            chart[params.n_rows-y1][-1] = colored(_PLOT_SEGMENTS[4], color)
 
-            chart[-1][config.offset - 1] = _PLOT_SEGMENTS[0]
+def _add_x_axis(chart: List[str], config: Config):
+    _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE = {
+        '┤': '┼',
+        '─': '┬',
+        '╰': '├',
+        '╯': '┤'
+    }
+
+    def is_data_point(point_index: int) -> bool:
+        return bool(point_index) and point_index % ((config.horizontal_point_spacing or 0) + 1) == 0
+
+    last_row = chart[-1]
+
+    # if is_data_point(j):
+    #     axis_symbol = _PLOT_SEGMENTS[-1]
+    # else:
+    #     axis_symbol = _PLOT_SEGMENTS[4]
+    #
+    # chart[-1][j + config.offset] = axis_symbol
+    #
+    # if params.n_rows - row_subtrahend == params.n_rows and config.display_x_axis and is_data_point(j):
+    #     symbol = _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE[symbol]
+    #
+    # if params.n_rows - y0 == params.n_rows and config.display_x_axis and is_data_point(j):
+    #     symbol_y0 = _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE[symbol_y0]
+    #
+    # if config.display_x_axis:
+    #     chart[-1][-1] = _PLOT_SEGMENTS[-1]
+    #     chart[params.n_rows - y1][-1] = colored(_PLOT_SEGMENTS[4], color)
+    #
+    #     chart[-1][config.offset - 1] = _PLOT_SEGMENTS[0]
 
 
 if __name__ == '__main__':
     print(plot([9] + list(range(4, 7)), config=Config(
         colors=[red],
         horizontal_point_spacing=3,
-        display_x_axis=True
+        display_x_axis=True,
+        offset=2
     )))

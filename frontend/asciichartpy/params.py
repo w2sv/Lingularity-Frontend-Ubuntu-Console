@@ -23,6 +23,6 @@ class Params:
 
         n_rows = maximum - minimum
 
-        width = max(map(len, sequences)) + config.offset
+        width = max(map(len, sequences))
 
         return cls(ratio, minimum, maximum, n_rows, width)
