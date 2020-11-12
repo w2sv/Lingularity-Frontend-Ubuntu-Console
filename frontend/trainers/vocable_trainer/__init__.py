@@ -1,7 +1,6 @@
-from typing import Optional, List, Any
+from typing import Optional
 from time import sleep
 
-import matplotlib.pyplot as plt
 from termcolor import colored
 
 from backend.trainers.components import VocableEntry
@@ -21,11 +20,10 @@ from frontend.state import State
 from frontend.utils import query, view
 from frontend.utils.output import (
     erase_lines,
-    centered_print,
-    centered_block_indentation,
+    centered,
+    block_centering_indentation,
     UndoPrint,
-    centered_print_indentation,
-    centered_input_query,
+    centering_indentation,
     colorize_chars,
     cursor_hider
 )
@@ -42,17 +40,17 @@ class VocableTrainerFrontend(TrainerFrontend):
 
     @staticmethod
     @cursor_hider
-    @view.view_creator(banner='lingularity/bloody', banner_color='red')
+    @view.creator(banner='lingularity/bloody', banner_color='red')
     def _exit_on_nonexistent_vocabulary() -> ReentryPointProvider:
         print('\n' * 5)
 
-        centered_print("You have to accumulate vocabulary by means of the "
+        centered("You have to accumulate vocabulary by means of the "
                        "SentenceTranslationTrainer or VocableAdder first "
                        "in order to use this training mode.\n\n")
 
         sleep(3)
 
-        centered_print('HIT ENTER IN ORDER TO RETURN TO TRAINING SELECTION')
+        centered('HIT ENTER IN ORDER TO RETURN TO TRAINING SELECTION')
         input()
 
         return lambda: ReentryPoint.TrainingSelection
@@ -98,16 +96,16 @@ class VocableTrainerFrontend(TrainerFrontend):
     # -----------------
     # Pre Training
     # -----------------
-    @view.view_creator()
+    @view.creator()
     def _display_new_vocabulary_if_desired(self):
         print(view.VERTICAL_OFFSET * 2)
-        centered_print('Would you like to see the vocable entries you recently created? (y)es/(n)o')
-        centered_print(' ', end='')
+        centered('Would you like to see the vocable entries you recently created? (y)es/(n)o')
+        centered(' ', end='')
 
         if query.relentlessly(query_message='', options=['yes', 'no']) == 'yes':
             self._display_new_vocable_entries()
 
-    @view.view_creator()
+    @view.creator()
     def _display_new_vocable_entries(self):
         assert self._backend.new_vocable_entries is not None
 
@@ -115,25 +113,25 @@ class VocableTrainerFrontend(TrainerFrontend):
 
         # display entry line representations
         line_reprs = list(map(lambda entry: str(entry), self._backend.new_vocable_entries))
-        indentation = centered_block_indentation(line_reprs)
+        indentation = block_centering_indentation(line_reprs)
         for line_repr in line_reprs:
             print(indentation, line_repr)
 
         # wait for key press
-        centered_print(f'{view.VERTICAL_OFFSET}PRESS ANY KEY TO CONTINUE')
-        centered_input_query()
+        centered(f'{view.VERTICAL_OFFSET}PRESS ANY KEY TO CONTINUE')
+        query.centered()
 
     # ------------------
     # Training
     # ------------------
-    @view.view_creator()
+    @view.creator()
     def _display_training_screen_header_section(self):
         # TODO: find better wording for 'imperfect entries', display forename origin country,
         #  elaborate usage instructions, functionality explanation
 
         # display number of retrieved vocables to be trained
-        centered_print(f'Found {self._backend.n_training_items} imperfect entries\n\n')
-        centered_print("Hit Enter to proceed after response evaluation\n")
+        centered(f'Found {self._backend.n_training_items} imperfect entries\n\n')
+        centered("Hit Enter to proceed after response evaluation\n")
 
         # display instructions
         self._training_options.display_instructions(
@@ -219,7 +217,7 @@ class VocableTrainerFrontend(TrainerFrontend):
 
             # display sentence pairs
             for sentence_pair in related_sentence_pairs:
-                centered_print(' - '.join(reversed(sentence_pair)), line_counter=self._undo_print)
+                centered(' - '.join(reversed(sentence_pair)), line_counter=self._undo_print)
             self._undo_print('')
 
             # increment/reassign attributes
@@ -231,11 +229,11 @@ class VocableTrainerFrontend(TrainerFrontend):
 
             # display absolute entry progress if n_trained_items divisible by 10
             if not self._n_trained_items % 10 and self._n_trained_items != self._backend.n_training_items:
-                centered_print(f'\n{self._n_trained_items} Entries faced, {self._backend.n_training_items - self._n_trained_items} more to go\n', line_counter=self._undo_print)
+                centered(f'\n{self._n_trained_items} Entries faced, {self._backend.n_training_items - self._n_trained_items} more to go\n', line_counter=self._undo_print)
             self._undo_print('')
 
             # query option/procedure, __call__ option if applicable
-            option_selection = query.relentlessly(query_message=f'{centered_print_indentation(" ")}$', options=self._training_options.keywords)
+            option_selection = query.relentlessly(query_message=f'{centering_indentation(" ")}$', options=self._training_options.keywords)
             self._undo_print.add_lines_to_buffer(1)
 
             if len(option_selection):
@@ -258,7 +256,7 @@ class VocableTrainerFrontend(TrainerFrontend):
         completed_string = '=' * int(BAR_LENGTH * percentage)
         impending_string = '-' * int(BAR_LENGTH - len(completed_string))
 
-        centered_print(f"[{completed_string}{impending_string}]", end=' ', line_counter=self._undo_print)
+        centered(f"[{completed_string}{impending_string}]", end=' ', line_counter=self._undo_print)
         self._undo_print(f'{int(round(percentage * 100))}%\n\n')
 
     def _display_streak(self):
@@ -274,7 +272,7 @@ class VocableTrainerFrontend(TrainerFrontend):
                 if self._streak >= 7:
                     background = ['on_green', 'on_yellow', 'on_blue', 'on_cyan', 'on_white'][min((self._streak - 7) // 2, 4)]
 
-            centered_print(f'Current streak: {colored(str(self._streak), "red", background, attrs=attrs)}', end='', line_counter=self._undo_print)
+            centered(f'Current streak: {colored(str(self._streak), "red", background, attrs=attrs)}', end='', line_counter=self._undo_print)
         self._undo_print('\n\n')
 
     def _update_streak(self, response_evaluation: ResponseEvaluation):

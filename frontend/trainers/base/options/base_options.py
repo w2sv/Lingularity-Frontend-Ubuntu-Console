@@ -18,7 +18,7 @@ class RectifyLatestAddedVocableEntry(TrainingOption):
 
     def __call__(self):
         if self._latest_created_vocable_entry is None:
-            output.centered_print("YOU HAVEN'T ADDED ANY VOCABLE ENTRY DURING THE CURRENT SESSION")
+            output.centered("YOU HAVEN'T ADDED ANY VOCABLE ENTRY DURING THE CURRENT SESSION")
             sleep(1.5)
             output.erase_lines(2)
         else:

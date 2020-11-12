@@ -7,7 +7,8 @@ from . import (
     post_signup_information,
     missing_internet_exit,
     language_addition,
-    exit
+    exit,
+    account_deletion
 )
 
 

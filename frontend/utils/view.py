@@ -9,7 +9,7 @@ from frontend.utils import output
 VERTICAL_OFFSET = '\n' * 2
 
 
-def view_creator(
+def creator(
         header: Optional[str] = None,
         title: Optional[str] = None,
         banner: Optional[str] = None,
@@ -38,7 +38,7 @@ def view_creator(
                     _display_banner(kind=banner, color=banner_color)
 
                 if header is not None:
-                    output.centered_print(header)
+                    output.centered(header)
 
                 print(VERTICAL_OFFSET, end='')
 
@@ -49,7 +49,7 @@ def view_creator(
 
 def _display_banner(kind: str, color='red'):
     banner = open(f'{os.getcwd()}/frontend/banners/{kind}.txt', 'r').read()
-    output.centered_print(colored(banner, color))
+    output.centered(colored(banner, color))
 
 
 def set_terminal_title(title: str):

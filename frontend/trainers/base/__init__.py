@@ -57,7 +57,7 @@ class TrainerFrontend(ABC):
         pass
 
     def _output_lets_go(self):
-        output.centered_print(either(language_metadata[self._backend.language]['translations'].get('letsGo'), default="Let's go!"), '\n' * 2)
+        output.centered(either(language_metadata[self._backend.language]['translations'].get('letsGo'), default="Let's go!"), '\n' * 2)
 
     # -----------------
     # Training
@@ -80,7 +80,7 @@ class TrainerFrontend(ABC):
         vocable_and_meaning = []
         for query_message in [f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']:
             if not len((field := input(f'{INDENTATION}{query_message}'))):
-                output.centered_print("INPUT FIELD LEFT UNFILLED")
+                output.centered("INPUT FIELD LEFT UNFILLED")
                 sleep(1)
                 return 3
             vocable_and_meaning.append(field)
@@ -104,7 +104,7 @@ class TrainerFrontend(ABC):
         old_vocable = vocable_entry.vocable
 
         # type indented old representation
-        KeyboardController().type(f'{output.centered_print_indentation(old_line_repr)}{old_line_repr}')
+        KeyboardController().type(f'{output.centering_indentation(old_line_repr)}{old_line_repr}')
         # TODO: debug print(centering_indentation) into KeyboardController().type(old_line_repr)
 
         # get new components, i.e. vocable + ground_truth
@@ -112,7 +112,7 @@ class TrainerFrontend(ABC):
 
         # exit in case of invalid alteration
         if len(new_entry_components) != 2:
-            output.centered_print('INVALID ALTERATION')
+            output.centered('INVALID ALTERATION')
             sleep(1)
             return 3
 

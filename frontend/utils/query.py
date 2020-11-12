@@ -3,6 +3,7 @@ import time
 
 from frontend.utils import output
 
+
 _INDISSOLUBILITY_MESSAGE = "COULDN'T RESOLVE INPUT"
 HORIZONTAL_OFFSET = output.column_percentual_indentation(percentage=0.1)
 
@@ -20,12 +21,12 @@ def _resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
 
 
 @output.cursor_hider
-def _indicate_indissolubility(n_deletion_lines: int, message=_INDISSOLUBILITY_MESSAGE, sleep_duration=1.0):
+def indicate_erroneous_input(n_deletion_lines: int, message=_INDISSOLUBILITY_MESSAGE, sleep_duration=1.0):
     """ - Display message communicating indissolubility reason,
         - freeze program for sleep duration
         - erase n_deletion_lines last output output lines or clear screen if n_deletion_lines = -1 """
 
-    output.centered_print(message)
+    output.centered(message)
 
     time.sleep(sleep_duration)
 
@@ -54,15 +55,29 @@ def repeat(function: Callable,
         Returns:
             result of function provided with args """
 
-    _indicate_indissolubility(n_deletion_lines, message, sleep_duration)
+    indicate_erroneous_input(n_deletion_lines, message, sleep_duration)
 
     return function(*args)
 
 
-def relentlessly(query_message: str, options: Sequence[str]) -> str:
+def relentlessly(query_message: str,
+                 options: Sequence[str],
+                 indentation_percentage=0.0) -> str:
+
     """ Repeats query defined by query_message until response unambiguously
         identifying singular option element has been given """
+
+    if indentation_percentage:
+        query_message = f'{output.column_percentual_indentation(indentation_percentage)}{query_message}'
 
     if (option_selection := _resolve_input(input(query_message), options=options)) is None:
         return repeat(relentlessly, n_deletion_lines=2, args=(query_message, options))
     return option_selection
+
+
+def centered(query_message: str = '') -> str:
+    return input(f'{output.centering_indentation(query_message)}{query_message}')
+
+
+YES_NO_QUERY_OUTPUT = '(Yes)/(N)o'
+YES_NO_OPTIONS = ['yes', 'no']

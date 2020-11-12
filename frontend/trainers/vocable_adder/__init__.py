@@ -36,7 +36,7 @@ class VocableAdderFrontend(TrainerFrontend):
     def _pluralized_item_name(self) -> str:
         return ''
 
-    @view.view_creator(banner='vocable-adder/ansi-shadow', banner_color='blue')
+    @view.creator(banner='vocable-adder/ansi-shadow', banner_color='blue')
     def _display_training_screen_header_section(self):
         self._training_options.display_instructions()
         print('\n')
@@ -51,7 +51,7 @@ class VocableAdderFrontend(TrainerFrontend):
 
             self._output_vocable_addition_confirmation()
 
-            response = query.relentlessly(f'{output.centered_print_indentation("Enter option/Proceed via Enter Stroke")}$', options=self._training_options.keywords)
+            response = query.relentlessly(f'{output.centering_indentation("Enter option/Proceed via Enter Stroke")}$', options=self._training_options.keywords)
             if len(response):
                 self._training_options[response].__call__()
 
@@ -61,4 +61,4 @@ class VocableAdderFrontend(TrainerFrontend):
             output.erase_lines(2)
 
     def _output_vocable_addition_confirmation(self):
-        output.centered_print(f'{colored("Added", color="cyan")} {str(self._latest_created_vocable_entry)}')
+        output.centered(f'{colored("Added", color="cyan")} {str(self._latest_created_vocable_entry)}')

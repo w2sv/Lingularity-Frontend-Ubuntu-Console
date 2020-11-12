@@ -3,8 +3,11 @@ import sys
 import platform
 
 
+_CLEAR_COMMAND = ['clear', 'cls'][platform.system() == 'Windows']
+
+
 def clear_screen():
-    subprocess.run(['clear', 'cls'][platform.system() == 'Windows'], shell=True)
+    subprocess.run(_CLEAR_COMMAND, shell=True)
 
 
 def _erase_previous_line():

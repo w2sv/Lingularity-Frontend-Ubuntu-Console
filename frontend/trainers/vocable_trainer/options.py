@@ -18,8 +18,8 @@ class DeleteVocableEntry(TrainingOption):
         self.keyword, self.explanation = 'delete', "delete the current vocable entry"
 
     def __call__(self):
-        output.centered_print(f"\nAre you sure you want to irreversibly delete {str(self._current_vocable_entry)}? (y)es/(n)o")
+        output.centered(f"\nAre you sure you want to irreversibly delete {str(self._current_vocable_entry)}? (y)es/(n)o")
 
-        if query.relentlessly(output.centered_print_indentation(' '), ['yes', 'no']) == 'yes':
+        if query.relentlessly(output.centering_indentation(' '), ['yes', 'no']) == 'yes':
             self._backend.mongodb_client.delete_vocable_entry(self._current_vocable_entry.as_dict)
         output.erase_lines(3)

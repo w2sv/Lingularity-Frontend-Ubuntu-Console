@@ -1,9 +1,12 @@
+import os
 import subprocess
-import time
+
+from termcolor import colored
 
 from frontend.utils import output
+from . import reference_language
 
-INTER_OPTION_INDENTATION = ' ' * 6
+INTER_OPTION_INDENTATION = ' ' * 7
 
 
 def maximize_console():
@@ -11,9 +14,16 @@ def maximize_console():
 
 
 def display_signum():
-    output.centered_print("W2SV", '\n\n')
+    output.centered("W2SV", '\n' * 2)
 
 
 def display_sentence_data_reference():
-    output.centered_print("Sentence data stemming from the Tatoeba Project to be found at"
-                          " http://www.manythings.org/anki", '\n' * 2)
+    output.centered("Sentence data stemming from the Tatoeba Project to be found at "
+                    f"{colored('http://www.manythings.org/anki', 'red')}", '\n' * 2)
+
+
+_USER_ENCRYPTION_FILE_PATH = f'{os.getcwd()}/.logged_in_user'
+
+
+def remove_user_from_disk():
+    os.remove(_USER_ENCRYPTION_FILE_PATH)

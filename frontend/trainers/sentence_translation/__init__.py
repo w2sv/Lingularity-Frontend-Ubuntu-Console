@@ -1,5 +1,6 @@
 from typing import Optional
 import time
+from functools import cached_property
 
 from termcolor import colored
 
@@ -10,12 +11,11 @@ from . import options
 from . import modes
 from frontend.trainers.base import TrainerFrontend
 from frontend.trainers.base.options import TrainingOptions, base_options
-from frontend.reentrypoint import ReentryPoint
 from frontend.utils import view, query
 from frontend.utils.output import (
     erase_lines,
-    centered_print,
-    centered_block_indentation,
+    centered,
+    block_centering_indentation,
     RedoPrint,
     cursor_hider,
     column_percentual_indentation
@@ -23,8 +23,6 @@ from frontend.utils.output import (
 
 
 class SentenceTranslationTrainerFrontend(TrainerFrontend):
-    _TRAINING_LOOP_INDENTATION = ' ' * 16
-
     def __init__(self):
         self._tts = TextToSpeech.get_instance()
 
@@ -76,11 +74,11 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         mode_selection = self._select_training_mode()
         self._backend.sentence_data_filter = modes.__getitem__(mode_selection).sentence_data_filter
 
-    @view.view_creator(header='TRAINING MODES')
+    @view.creator(header='TRAINING MODES')
     def _select_training_mode(self) -> str:
 
         # display eligible modes
-        indentation = centered_block_indentation(modes.explanations)
+        indentation = block_centering_indentation(modes.explanations)
         for keyword, explanation in zip(modes.keywords, modes.explanations):
             print(f'{indentation}{colored(f"{keyword}:", color="red")}')
             print(f'{indentation}\t{explanation}\n')
@@ -100,7 +98,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         if all([self._tts.available, not self._tts.language_variety, self._tts.language_variety_choices]):
             self._tts.language_variety = self._select_tts_language_variety()
 
-    @view.view_creator(title='TTS Language Variety Selection', banner='language-varieties/larry-3d', banner_color='blue')
+    @view.creator(title='TTS Language Variety Selection', banner='language-varieties/larry-3d', banner_color='blue')
     def _select_tts_language_variety(self) -> str:
         """ Returns:
                 selected language variety: element of language_variety_choices """
@@ -112,7 +110,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         # display eligible varieties
         common_start_length = len(common_start(self._tts.language_variety_choices))
         processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._tts.language_variety_choices]
-        indentation = centered_block_indentation(processed_varieties)
+        indentation = block_centering_indentation(processed_varieties)
         for variety in processed_varieties:
             print(indentation, variety)
         print('\n\n')
@@ -124,22 +122,32 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
     # -----------------
     # Training
     # -----------------
-    @view.view_creator(header=None)
+    @view.creator(header=None)
     def _display_training_screen_header_section(self):
         self._display_session_information()
         self._training_options.display_instructions(insertion_args=((3, 'TEXT-TO-SPEECH OPTIONS', True),))
-        self._output_lets_go()
+
+        if len(self._training_options) == 3:
+            print(view.VERTICAL_OFFSET)
+            self._output_lets_go()
+            print(view.VERTICAL_OFFSET)
+        else:
+            self._output_lets_go()
 
     def _display_session_information(self):
-        centered_print(f"Document comprises {self._backend.n_training_items:,d} sentences.\n")
+        centered(f"Document comprises {self._backend.n_training_items:,d} sentences.\n")
 
         # display picked country corresponding to replacement forenames
         if self._backend.forename_converter is not None:
             if demonym := self._backend.forename_converter.demonym:
-                centered_print(f'Employing {demonym} forenames.')
+                centered(f'Employing {demonym} forenames.')
             else:
-                centered_print(f'Employing forenames stemming from {self._backend.forename_converter.country}.')
+                centered(f'Employing forenames stemming from {self._backend.forename_converter.country}.')
         print('')
+
+    @cached_property
+    def _SENTENCE_INDENTATION(self) -> str:
+        return column_percentual_indentation(0.15)
 
     @cursor_hider
     def _run_training_loop(self):
@@ -169,8 +177,8 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
                 erase_lines(2)
 
                 # output translation_field
-                self._redo_print(f'{self._TRAINING_LOOP_INDENTATION}{translation}')
-                self._redo_print(f'{self._TRAINING_LOOP_INDENTATION}{colored("----------------", "red")}')
+                self._redo_print(f'{self._SENTENCE_INDENTATION}{translation}')
+                self._redo_print(f'{self._SENTENCE_INDENTATION}{colored("─────────────────", "red")}')
 
                 # play tts audio if available, otherwise suspend program
                 # for some time to incentivise gleaning over translation_field
@@ -201,13 +209,13 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
 
         reference_sentence, translation = sentence_pair
 
-        self._redo_print(f'{self._TRAINING_LOOP_INDENTATION}{reference_sentence}')
+        self._redo_print(f'{self._SENTENCE_INDENTATION}{reference_sentence}')
         self._pending_output()
 
         return translation
 
     def _pending_output(self):
-        print(colored(f"{self._TRAINING_LOOP_INDENTATION}pending... ", "cyan", attrs=['dark']))
+        print(colored(f"{self._SENTENCE_INDENTATION}pending... ", "cyan", attrs=['dark']))
 
     # -----------------
     # Post Training

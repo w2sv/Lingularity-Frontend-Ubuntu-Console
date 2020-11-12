@@ -12,7 +12,7 @@ from frontend.trainers import (
     VocableTrainerFrontend,
     VocableAdderFrontend
 )
-from frontend.screen.ops import INTER_OPTION_INDENTATION
+from .ops import INTER_OPTION_INDENTATION
 
 
 ActionOption = Union[
@@ -32,7 +32,7 @@ KEYWORD_2_ACTION: Dict[str, ActionOption] = {
 }
 
 
-@view.view_creator(banner='lingularity/3d-ascii', banner_color='green')
+@view.creator(banner='lingularity/3d-ascii', banner_color='green')
 def __call__(training_item_sequence: Optional[Iterable[int]] = None) -> ReentryPoint:
     view.set_terminal_title(f'{State.language} Training Selection')
 
@@ -63,7 +63,7 @@ def _display_constitution_query(username: str, language: str):
     else:
         constitution_queries = map(lambda query: query + f' {username}?', [f"What's up", f"How are you"])
 
-    output.centered_print(random.choice(list(constitution_queries)), '\n' * 2)
+    output.centered(random.choice(list(constitution_queries)), '\n' * 2)
 
 
 def _display_training_item_sequence(training_item_sequence: Iterable[int]):
@@ -80,20 +80,20 @@ def _display_training_item_sequence(training_item_sequence: Iterable[int]):
 
 
 def _display_last_session_conclusion(last_session_metrics: Dict[str, Any]):
-    output.centered_print(f"You faced {last_session_metrics['nFacedItems']} "
+    output.centered(f"You faced {last_session_metrics['nFacedItems']} "
                           f"{['sentences', 'vocables'][last_session_metrics['trainer'] == 'v']} "
                           f"during your last session {date.date_repr(last_session_metrics['date'])}", '\n' * 3)
 
 
 def _query_action_selection() -> ActionOption:
-    output.centered_print(f"{INTER_OPTION_INDENTATION}Translate (S)entences"
+    output.centered(f"{INTER_OPTION_INDENTATION}Translate (S)entences"
                           f"{INTER_OPTION_INDENTATION}Train (V)ocabulary"
                           f"{INTER_OPTION_INDENTATION}(A)dd Vocabulary"
                           f"{INTER_OPTION_INDENTATION}Return to (H)ome Screen"
-                          f"{INTER_OPTION_INDENTATION}(Q)uit")
+                          f"{INTER_OPTION_INDENTATION}(Q)uit", '\n')
 
     action_selection_keyword = query.relentlessly(
-        query_message=output.centered_print_indentation(' '),
+        query_message=output.centering_indentation(' '),
         options=list(KEYWORD_2_ACTION.keys())
     )
     return KEYWORD_2_ACTION[action_selection_keyword]

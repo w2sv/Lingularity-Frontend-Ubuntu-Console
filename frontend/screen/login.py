@@ -4,16 +4,12 @@ import os
 
 from backend import MongoDBClient
 
+from frontend.screen.ops import _USER_ENCRYPTION_FILE_PATH
 from frontend.state import State
 from frontend.utils import credentials, fernet, query, output, view
 
 
-_USER_ENCRYPTION_FILE_PATH = f'{os.getcwd()}/.logged_in_user'
 _QUERY_INDENTATION = output.column_percentual_indentation(percentage=0.4)
-
-
-def remove_user_from_disk():
-    os.remove(_USER_ENCRYPTION_FILE_PATH)
 
 
 # TODO
@@ -57,7 +53,7 @@ def _store_logged_in_user(username: str):
         user_encryption_file.write(fernet.encrypt(username))
 
 
-@view.view_creator(title='Login', banner='lingularity/isometric2', banner_color='blue')
+@view.creator(title='Login', banner='lingularity/isometric2', banner_color='blue')
 def _query_login_credentials() -> Tuple[str, bool]:
     """ Returns:
             username: str,
@@ -92,7 +88,7 @@ def _query_login_credentials() -> Tuple[str, bool]:
 def _sign_up(user: str, client: MongoDBClient, email_address: Optional[str] = None):
     EMAIL_QUERY = 'Enter email address: '
 
-    output.centered_print('Create a new account\n')
+    output.centered('Create a new account\n')
 
     if email_address is not None:
         print(f'{_QUERY_INDENTATION}{EMAIL_QUERY}{email_address}')

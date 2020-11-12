@@ -6,14 +6,13 @@ import cursor
 
 from ._utils import ansi_escape_code_stripped
 from .colorizing import colorize_chars
-from .undoable_printing import LineCounter, UndoPrint, RedoPrint
+from .undoing import LineCounter, UndoPrint, RedoPrint
 from .clearing import clear_screen, erase_lines
 from .percentual_indenting import column_percentual_indentation, row_percentual_indentation
-from .centered_printing import (
-    centered_print,
-    centered_print_indentation,
-    centered_block_indentation,
-    centered_input_query,
+from .centering import (
+    centered,
+    centering_indentation,
+    block_centering_indentation,
     align
 )
 

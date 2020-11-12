@@ -59,7 +59,7 @@ class TrainingOptions(dict):
             if i in insertion_indices:
                 args = insertion_args[insertion_indices.index(i)]
 
-                print(f"\n{[self._INSTRUCTION_INDENTATION, output.centered_print_indentation(args[1])][args[2]]}{args[1]}\n")
+                print(f"\n{[self._INSTRUCTION_INDENTATION, output.centering_indentation(args[1])][args[2]]}{args[1]}\n")
 
             print(f'{self._INSTRUCTION_INDENTATION}  {instruction_row}')
 

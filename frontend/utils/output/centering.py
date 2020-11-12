@@ -2,15 +2,15 @@ from typing import Optional, Sequence, List
 
 from backend.utils.iterables import longest_value
 
-from .undoable_printing import LineCounter
+from .undoing import LineCounter
 from ._utils import ansi_escape_code_stripped, _terminal_columns
 
 
-def centered_print_indentation(row: str) -> str:
+def centering_indentation(row: str) -> str:
     return " " * ((_terminal_columns() - len(ansi_escape_code_stripped(row))) // 2)
 
 
-def centered_print(*print_elements: str, end='\n', line_counter: Optional[LineCounter] = None):
+def centered(*print_elements: str, end='\n', line_counter: Optional[LineCounter] = None):
     printer = [print, line_counter][bool(line_counter)]
     assert printer is not None
 
@@ -25,21 +25,13 @@ def centered_print(*print_elements: str, end='\n', line_counter: Optional[LineCo
             # otherwise print writing in between newlines in uniformly indented manner
             else:
                 distinct_lines = print_element.split('\n')
-                indentation = centered_block_indentation(distinct_lines)
+                indentation = block_centering_indentation(distinct_lines)
 
                 for line in distinct_lines:
                     printer(indentation + line)
 
         else:
-            printer(centered_print_indentation(print_element) + print_element, end=['\n', end][i == len(print_elements) - 1])
-
-
-# ------------------
-# Centered Query
-# ------------------
-def centered_input_query(input_message: str = '', expected_response_length: int = 0) -> str:
-    print(f"{centered_print_indentation(input_message + ' ' * expected_response_length)}{input_message}", end='')
-    return input()
+            printer(centering_indentation(print_element) + print_element, end=['\n', end][i == len(print_elements) - 1])
 
 
 # ------------------
@@ -56,10 +48,10 @@ def align(column1: Sequence[str], column2: Sequence[str]) -> List[str]:
     return [f"{' ' * (max_length_first_column_element - len(column1[i]) + 1)}".join([column1[i], column2[i]]) for i in range(len(column1))]
 
 
-def centered_block_indentation(output_block: Sequence[str]) -> str:
+def block_centering_indentation(output_block: Sequence[str]) -> str:
     """ Returns:
             indentation determined by length of longest output output row comprised by output_block,
-            enabling centered positioning of the aforementioned row and the others to start on the same
+            enabling center_message positioning of the aforementioned row and the others to start on the same
             output column, resulting in an uniform writing appearance """
 
-    return centered_print_indentation(longest_value(output_block))
+    return centering_indentation(longest_value(output_block))
