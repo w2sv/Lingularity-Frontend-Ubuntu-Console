@@ -5,7 +5,8 @@ from frontend.utils import output
 
 
 _INDISSOLUBILITY_MESSAGE = "COULDN'T RESOLVE INPUT"
-HORIZONTAL_OFFSET = output.column_percentual_indentation(percentage=0.1)
+def horizontal_indentation() -> str:
+    return output.column_percentual_indentation(percentage=0.1)
 
 # ------------------
 # Input Resolution
@@ -21,19 +22,19 @@ def _resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
 
 
 @output.cursor_hider
-def indicate_erroneous_input(n_deletion_lines: int, message=_INDISSOLUBILITY_MESSAGE, sleep_duration=1.0):
+def indicate_erroneous_input(message=_INDISSOLUBILITY_MESSAGE, n_deletion_lines=0, sleep_duration=1.0):
     """ - Display message communicating indissolubility reason,
         - freeze program for sleep duration
         - erase n_deletion_lines last output output lines or clear screen if n_deletion_lines = -1 """
 
-    output.centered(message)
+    output.centered(f'\n{message}')
 
     time.sleep(sleep_duration)
 
     if n_deletion_lines == -1:
         output.clear_screen()
     else:
-        output.erase_lines(n_deletion_lines)
+        output.erase_lines(n_deletion_lines + 1)
 
 
 # ------------------
@@ -60,19 +61,28 @@ def repeat(function: Callable,
     return function(*args)
 
 
-def relentlessly(query_message: str,
-                 options: Sequence[str],
-                 indentation_percentage=0.0) -> str:
+def relentlessly(prompt: str,
+                 options: Optional[Sequence[str]] = None,
+                 correctness_verifier: Optional[Callable[[str], bool]] = None,
+                 indentation_percentage=0.0,
+                 error_indication_message=_INDISSOLUBILITY_MESSAGE,
+                 sleep_duration=1.0,
+                 query_method=input) -> str:
 
-    """ Repeats query defined by query_message until response unambiguously
+    args = tuple(locals().values())
+
+    """ Repeats query defined by prompt until response unambiguously
         identifying singular option element has been given """
 
-    if indentation_percentage:
-        query_message = f'{output.column_percentual_indentation(indentation_percentage)}{query_message}'
+    assert any([options, correctness_verifier])
 
-    if (option_selection := _resolve_input(input(query_message), options=options)) is None:
-        return repeat(relentlessly, n_deletion_lines=2, args=(query_message, options))
-    return option_selection
+    if indentation_percentage:
+        prompt = f'{output.column_percentual_indentation(indentation_percentage)}{prompt}'
+
+    response = query_method(prompt)
+    if options and (response := _resolve_input(response, options=options)) is None or correctness_verifier and not correctness_verifier(response):
+        return repeat(relentlessly, n_deletion_lines=2, message=error_indication_message, args=args)
+    return response
 
 
 def centered(query_message: str = '') -> str:

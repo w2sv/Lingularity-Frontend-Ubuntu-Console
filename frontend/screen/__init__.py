@@ -1,7 +1,7 @@
 from backend.utils.module_interfacing import abstractmodulemethod
 
 from . import (
-    login,
+    authentication,
     home,
     training_selection,
     post_signup_information,

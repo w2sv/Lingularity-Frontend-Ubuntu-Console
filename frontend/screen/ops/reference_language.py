@@ -22,7 +22,7 @@ def procure(eligible_languages: List[str]) -> str:
 def _query_user(eligible_languages: List[str]) -> str:
     eligible_languages.remove(string_resources.ENGLISH)
     selection = query.relentlessly(
-        f'{query.HORIZONTAL_OFFSET}Select reference language: ',
+        f'{query.horizontal_indentation()}Select reference language: ',
         options=eligible_languages
     )
 

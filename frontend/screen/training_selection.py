@@ -93,7 +93,7 @@ def _query_action_selection() -> ActionOption:
                           f"{INTER_OPTION_INDENTATION}(Q)uit", '\n')
 
     action_selection_keyword = query.relentlessly(
-        query_message=output.centering_indentation(' '),
+        prompt=output.centering_indentation(' '),
         options=list(KEYWORD_2_ACTION.keys())
     )
     return KEYWORD_2_ACTION[action_selection_keyword]

@@ -30,7 +30,7 @@ def __call__() -> ReentryPoint:
         print(indentation, language_group)
     print(view.VERTICAL_OFFSET)
 
-    # TODO: display legend
+    # TODO: display legend, add sentence volumes
 
     # query desired language
     selection = query.relentlessly('Select language: ', options=eligible_languages, indentation_percentage=0.35)

@@ -58,8 +58,8 @@ def __call__() -> ReentryPoint:
     output.centered(f'\n{OPTION_BLOCK}\n')
 
     # query language/options selection
-    selection = query.relentlessly(query_message='Select Language/Option: ',
-                                   options=list(State.user_languages) + _OPTION_KEYWORDS,
+    selection = query.relentlessly(prompt='Select Language/Option: ',
+                                   options=[[], list(State.user_languages)][bool(len(State.user_languages))] + _OPTION_KEYWORDS,
                                    indentation_percentage=0.35)
 
     # exit and reenter at respective reentry point in case of option selection

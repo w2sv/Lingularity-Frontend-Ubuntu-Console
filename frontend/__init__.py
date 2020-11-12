@@ -12,7 +12,7 @@ from frontend.trainers import (
 
 
 def __call__():
-    screen.login.__call__()
+    screen.authentication.__call__()
 
     if State.is_new_user:
         screen.post_signup_information.__call__()

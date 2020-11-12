@@ -15,7 +15,7 @@ from backend.trainers.vocable_trainer import (
 from . import options
 from frontend.trainers.base import TrainerFrontend
 from frontend.trainers.base.options import TrainingOptions, base_options
-from frontend.reentrypoint import ReentryPoint, ReentryPointProvider
+from frontend.reentrypoint import ReentryPointProvider
 from frontend.state import State
 from frontend.utils import query, view
 from frontend.utils.output import (
@@ -25,7 +25,8 @@ from frontend.utils.output import (
     UndoPrint,
     centering_indentation,
     colorize_chars,
-    cursor_hider
+    cursor_hider,
+    column_percentual_indentation
 )
 
 
@@ -41,19 +42,19 @@ class VocableTrainerFrontend(TrainerFrontend):
     @staticmethod
     @cursor_hider
     @view.creator(banner='lingularity/bloody', banner_color='red')
-    def _exit_on_nonexistent_vocabulary() -> ReentryPointProvider:
-        print('\n' * 5)
+    def _exit_on_nonexistent_vocabulary():
+        print(column_percentual_indentation(0.1))
 
         centered("You have to accumulate vocabulary by means of the "
-                       "SentenceTranslationTrainer or VocableAdder first "
-                       "in order to use this training mode.\n\n")
+                 "SentenceTranslationTrainer or VocableAdder first "
+                 "in order to use this training mode.", view.VERTICAL_OFFSET)
 
         sleep(3)
 
         centered('HIT ENTER IN ORDER TO RETURN TO TRAINING SELECTION')
         input()
 
-        return lambda: ReentryPoint.TrainingSelection
+        return lambda: None
 
     def __init__(self):
         super().__init__(backend_type=Backend)
@@ -102,7 +103,7 @@ class VocableTrainerFrontend(TrainerFrontend):
         centered('Would you like to see the vocable entries you recently created? (y)es/(n)o')
         centered(' ', end='')
 
-        if query.relentlessly(query_message='', options=['yes', 'no']) == 'yes':
+        if query.relentlessly(prompt='', options=['yes', 'no']) == 'yes':
             self._display_new_vocable_entries()
 
     @view.creator()
@@ -233,7 +234,7 @@ class VocableTrainerFrontend(TrainerFrontend):
             self._undo_print('')
 
             # query option/procedure, __call__ option if applicable
-            option_selection = query.relentlessly(query_message=f'{centering_indentation(" ")}$', options=self._training_options.keywords)
+            option_selection = query.relentlessly(prompt=f'{centering_indentation(" ")}$', options=self._training_options.keywords)
             self._undo_print.add_lines_to_buffer(1)
 
             if len(option_selection):

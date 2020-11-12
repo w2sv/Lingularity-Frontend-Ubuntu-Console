@@ -22,8 +22,8 @@ def display_sentence_data_reference():
                     f"{colored('http://www.manythings.org/anki', 'red')}", '\n' * 2)
 
 
-_USER_ENCRYPTION_FILE_PATH = f'{os.getcwd()}/.logged_in_user'
+USER_ENCRYPTION_FILE_PATH = f'{os.getcwd()}/.logged_in_user'
 
 
 def remove_user_from_disk():
-    os.remove(_USER_ENCRYPTION_FILE_PATH)
+    os.remove(USER_ENCRYPTION_FILE_PATH)

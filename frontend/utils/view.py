@@ -54,3 +54,6 @@ def _display_banner(kind: str, color='red'):
 
 def set_terminal_title(title: str):
     os.system(f'wmctrl -r :ACTIVE: -N "Lingularity - {title}"')
+
+
+DEFAULT_TITLE = 'Acquire Languages the Litboy Way'

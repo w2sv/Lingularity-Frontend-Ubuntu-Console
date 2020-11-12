@@ -1,16 +1,20 @@
-from frontend.utils import view, output
+from frontend.utils import view, output, query
 
 
-@view.creator(banner='lingularity/isometric2')
+@view.creator(title='General Usage Information', banner='lingularity/isometric2', banner_color='grey')
 def __call__():
-    print(output.row_percentual_indentation(0.2))
+    print(output.row_percentual_indentation(0.15))
 
-    output.centered("All requested inputs may be entered in lowercase, as well as merely "
-                          "up to a point, which allows for an unambiguous identification of the "
-                          "intended choice amongst the respectively eligible options,")
-    output.centered("e.g. the input of 'it' suffices for selecting Italian since there's "
-                          "no other eligible language starting on 'it'", '\n' * 2)
+    INFORMATION_BLOCK = ("All requested inputs may be entered in lowercase, as well as merely",
+                         "up to a point allowing for an unambiguous identification of the ",
+                         "intended choice amongst the respectively eligible options.",
+                         "E.g. the input of 'it' suffices for selecting Italian since there's ",
+                         "no other eligible language starting on 'it'")
 
-    output.centered('HIT ENTER TO PROCEED', end='')
+    INDENTATION = output.block_centering_indentation(INFORMATION_BLOCK)
+    for row in INFORMATION_BLOCK:
+        print(f'{INDENTATION}{row}')
+    print(view.VERTICAL_OFFSET)
 
-    input()
+    output.centered('HIT ENTER TO PROCEED')
+    query.centered()
