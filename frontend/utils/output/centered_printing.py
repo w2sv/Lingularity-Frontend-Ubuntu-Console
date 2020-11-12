@@ -3,7 +3,7 @@ from typing import Optional, Sequence, List
 from backend.utils.iterables import longest_value
 
 from .undoable_printing import LineCounter
-from .utils import ansi_escape_code_stripped, _terminal_columns
+from ._utils import ansi_escape_code_stripped, _terminal_columns
 
 
 def centered_print_indentation(row: str) -> str:

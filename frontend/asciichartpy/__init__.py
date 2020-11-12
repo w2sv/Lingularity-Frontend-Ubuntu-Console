@@ -32,9 +32,13 @@ def plot(*sequences: Sequence[float], config=Config()) -> str:
     serialized_chart = '\n'.join([''.join(row).rstrip() for row in _get_chart(sequences, config, params)])
 
     if config.title:
-        serialized_chart = ' ' * (config.offset + params.plot_width // 2 + len(config.title) // 2) + config.title + '\n' + serialized_chart
+        serialized_chart = _title_header(config, params) + serialized_chart
 
     return serialized_chart
+
+
+def _title_header(config: Config, params: Params) -> str:
+    return ' ' * (config.offset + params.plot_width // 2 + len(config.title) // 2) + config.title + '\n'
 
 
 def _get_chart(sequences: _Sequences, config: Config, params: Params) -> List[str]:

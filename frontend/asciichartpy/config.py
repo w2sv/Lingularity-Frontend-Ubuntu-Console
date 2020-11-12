@@ -36,7 +36,7 @@ class Config:
         self.max = max(self.max, max(filter(isfinite, itertools.chain(*sequences))))
 
         if self.min > self.max:
-            raise ValueError('The min value cannot exceed the max value.')
+            raise ValueError("min value shan't exceed max value.")
 
         if self.height is None:
             self.height = self.interval

@@ -1,4 +1,4 @@
-from .utils import _terminal_columns, _terminal_lines
+from ._utils import _terminal_columns, _terminal_lines
 
 
 def column_percentual_indentation(percentage: float) -> str:

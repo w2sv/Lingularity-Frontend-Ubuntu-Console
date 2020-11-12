@@ -1,5 +1,6 @@
 from typing import List, Type, Tuple, Sequence
 from abc import ABC, abstractmethod
+from functools import cached_property
 
 from termcolor import colored
 
@@ -38,8 +39,6 @@ class TrainingOption(FrontendExtender, ABC):
 
 
 class TrainingOptions(dict):
-    _INSTRUCTION_INDENTATION = output.column_percentual_indentation(percentage=0.35)
-
     def __init__(self, option_classes: Sequence[Type[TrainingOption]], frontend_instance: object):
         TrainingOption.exit_training = False
         TrainingOption.set_frontend_instance(instance=frontend_instance)
@@ -65,6 +64,10 @@ class TrainingOptions(dict):
             print(f'{self._INSTRUCTION_INDENTATION}  {instruction_row}')
 
         print('\n')
+        
+    @cached_property
+    def _INSTRUCTION_INDENTATION(self) -> str:
+        return output.column_percentual_indentation(percentage=0.35)
 
     @property
     def exit_training(self) -> bool:

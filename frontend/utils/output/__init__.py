@@ -4,7 +4,7 @@ from itertools import groupby
 
 import cursor
 
-from .utils import ansi_escape_code_stripped
+from ._utils import ansi_escape_code_stripped
 from .colorizing import colorize_chars
 from .undoable_printing import LineCounter, UndoPrint, RedoPrint
 from .clearing import clear_screen, erase_lines

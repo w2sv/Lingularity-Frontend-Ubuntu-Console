@@ -3,7 +3,7 @@ from abc import ABC
 from collections import deque
 
 from .clearing import erase_lines
-from .utils import _output_length, _terminal_columns
+from ._utils import _output_length, _terminal_columns
 
 
 class LineCounter(ABC):
