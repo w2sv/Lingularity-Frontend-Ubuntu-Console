@@ -20,15 +20,13 @@ def colored(string: str, color: str) -> str:
 
 
 _PLOT_SEGMENTS = ['┼', '┤', '╶', '╴', '─', '╰', '╭', '╮', '╯', '│', '┬']
+_Chart = List[List[str]]
 
 
-def plot(*sequences: Sequence[float], config=Config()) -> str:
-    sequences = list(sequences)  # type: ignore
+def plot(*sequences: List[float], config=Config()) -> str:
+    sequences = config.process(sequences)
 
-    config.process(sequences)
-    sequences = config.padded_sequences(sequences)
-
-    params = Params.compute(sequences, config)
+    params = Params(sequences, config)
     serialized_chart = '\n'.join([''.join(row).rstrip() for row in _get_chart(sequences, config, params)])
 
     if config.title:
@@ -38,10 +36,11 @@ def plot(*sequences: Sequence[float], config=Config()) -> str:
 
 
 def _title_header(config: Config, params: Params) -> str:
+    assert config.title is not None
     return ' ' * (config.offset + params.plot_width // 2 + len(config.title) // 2) + config.title + '\n'
 
 
-def _get_chart(sequences: _Sequences, config: Config, params: Params) -> List[str]:
+def _get_chart(sequences: _Sequences, config: Config, params: Params) -> _Chart:
     chart = [[' '] * params.chart_width for _ in range(params.n_rows + 1)]
     _add_y_axis(chart, config, params)
     last_row_indices = _add_sequences(sequences, chart, config, params)
@@ -52,21 +51,21 @@ def _get_chart(sequences: _Sequences, config: Config, params: Params) -> List[st
     return chart
 
 
-def _add_y_axis(chart: List[str], config: Config, params: Params):
+def _add_y_axis(chart: _Chart, config: Config, params: Params):
     divisor = [1, params.n_rows][bool(params.n_rows)]
 
     for i in range(params.min, params.max + 1):
-        label = config.format.format(config.max - ((i - params.min) * config.interval / divisor))
+        label = config.format.format(config.max - ((i - params.min) * config.y_value_spread / divisor))
         chart[i - params.min][max(config.offset - len(label), 0)] = label
         chart[i - params.min][config.offset - 1] = _PLOT_SEGMENTS[[1, 0][i == 0]]
 
 
-def _add_sequences(sequences: _Sequences, chart: List[str], config: Config, params: Params) -> List[int]:
+def _add_sequences(sequences: _Sequences, chart: _Chart, config: Config, params: Params) -> List[int]:
     _INIT_VALUE = -1
 
     def scaled(value: float):
         clamped_value = min(max(value, config.min), config.max)
-        return int(round(clamped_value * params.ratio) - params.min)
+        return int(round(clamped_value * config.ratio) - params.min)
 
     last_sequence_point_row_indices: List[int] = []
     for i, sequence in enumerate(sequences):
@@ -109,7 +108,7 @@ def _add_sequences(sequences: _Sequences, chart: List[str], config: Config, para
     return last_sequence_point_row_indices
 
 
-def _add_x_axis(chart: List[str], config: Config, last_sequence_point_row_indices: List[int]):
+def _add_x_axis(chart: _Chart, config: Config, last_sequence_point_row_indices: List[int]):
     _SEGMENT_2_X_AXIS_TOUCHING_SUBSTITUTE = {
         '┤': '┼',
         '─': '┬',

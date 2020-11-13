@@ -13,13 +13,11 @@ class VocableAdderFrontend(TrainerFrontend):
         super().__init__(backend_type=Backend)
         self._backend: Backend
 
-    def __call__(self) -> ReentryPoint:
+    def __call__(self):
         self._set_terminal_title()
 
         self._display_training_screen_header_section()
         self._run_training_loop()
-
-        return ReentryPoint.TrainingSelection
 
     @property
     def _training_designation(self) -> str:

@@ -5,6 +5,8 @@ from frontend.utils import output
 
 
 _INDISSOLUBILITY_MESSAGE = "COULDN'T RESOLVE INPUT"
+
+
 def horizontal_indentation() -> str:
     return output.column_percentual_indentation(percentage=0.1)
 

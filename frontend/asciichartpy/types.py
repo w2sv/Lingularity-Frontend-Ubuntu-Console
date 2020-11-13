@@ -1,3 +1,3 @@
-from typing import List, Sequence
+from typing import List, Tuple, Sequence
 
-_Sequences = List[Sequence[float]]
+_Sequences = Sequence[Sequence[float]]

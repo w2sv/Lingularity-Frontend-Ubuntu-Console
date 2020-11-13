@@ -1,4 +1,4 @@
-from typing import Optional, Type, Iterator, Sequence, Iterable
+from typing import Optional, Type, Iterator, Sequence, List
 from abc import ABC, abstractmethod
 from time import sleep
 import datetime
@@ -31,10 +31,10 @@ class TrainerFrontend(ABC):
     # -----------------
     # Driver
     # -----------------
-    TrainingItemSequence = Iterable[int]
+    TrainingItemSequence = List[int]
 
     @abstractmethod
-    def __call__(self) -> TrainingItemSequence:
+    def __call__(self) -> Optional[TrainingItemSequence]:
         """ Invokes trainer frontend
 
             Returns:

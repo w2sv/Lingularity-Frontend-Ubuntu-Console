@@ -59,7 +59,7 @@ def __call__() -> ReentryPoint:
 
     # query language/options selection
     selection = query.relentlessly(prompt='Select Language/Option: ',
-                                   options=[[], list(State.user_languages)][bool(len(State.user_languages))] + _OPTION_KEYWORDS,
+                                   options=list(State.user_languages) + _OPTION_KEYWORDS,
                                    indentation_percentage=0.35)
 
     # exit and reenter at respective reentry point in case of option selection
@@ -99,7 +99,7 @@ def _language_removal() -> ReentryPoint:
     # query removal language
     removal_language = query.relentlessly(
         'Enter language you wish to remove: ',
-        options=State.user_languages,
+        options=list(State.user_languages),
         indentation_percentage=0.3
     )
 

@@ -14,4 +14,4 @@ def __call__():
 
     output.centered('(L)og in/(S)ign Up')
     selection = query.relentlessly('', options=['log in', 'sign up'], indentation_percentage=0.5)
-    return _SELECTION_2_SCREEN[selection].__call__()
+    return _SELECTION_2_SCREEN[selection].__call__()  # type: ignore

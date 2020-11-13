@@ -1,4 +1,4 @@
-from typing import Dict, Any, Union, Type, Optional, Iterable
+from typing import Dict, Any, Union, Type, Optional, List
 import random
 
 from backend import language_metadata
@@ -10,7 +10,8 @@ from frontend.utils import query, output, view, date
 from frontend.trainers import (
     SentenceTranslationTrainerFrontend,
     VocableTrainerFrontend,
-    VocableAdderFrontend
+    VocableAdderFrontend,
+    TrainerFrontend
 )
 from .ops import INTER_OPTION_INDENTATION
 
@@ -33,7 +34,7 @@ KEYWORD_2_ACTION: Dict[str, ActionOption] = {
 
 
 @view.creator(banner='lingularity/3d-ascii', banner_color='green')
-def __call__(training_item_sequence: Optional[Iterable[int]] = None) -> ReentryPoint:
+def __call__(training_item_sequence: Optional[List[int]] = None) -> ReentryPoint:
     view.set_terminal_title(f'{State.language} Training Selection')
 
     if training_item_sequence is None:
@@ -48,13 +49,28 @@ def __call__(training_item_sequence: Optional[Iterable[int]] = None) -> ReentryP
 
     # instantiate frontend if selected
     if _is_trainer_frontend(action_selection):
-        return __call__(training_item_sequence=action_selection().__call__())  # type: ignore
+        trainer_frontend = action_selection()
+        return __call__(training_item_sequence=trainer_frontend.__call__())  # type: ignore
 
-    return action_selection()
+    return action_selection()  # type: ignore
+
+
+def _query_action_selection() -> ActionOption:
+    output.centered(f"{INTER_OPTION_INDENTATION}Translate (S)entences"
+                    f"{INTER_OPTION_INDENTATION}Train (V)ocabulary"
+                    f"{INTER_OPTION_INDENTATION}(A)dd Vocabulary"
+                    f"{INTER_OPTION_INDENTATION}Return to (H)ome Screen"
+                    f"{INTER_OPTION_INDENTATION}(Q)uit", '\n')
+
+    action_selection_keyword = query.relentlessly(
+        prompt=output.centering_indentation(' '),
+        options=list(KEYWORD_2_ACTION.keys())
+    )
+    return KEYWORD_2_ACTION[action_selection_keyword]
 
 
 def _is_trainer_frontend(action: ActionOption) -> bool:
-    return isinstance(action, type)
+    return isinstance(action, type) and issubclass(action, TrainerFrontend)
 
 
 def _display_constitution_query(username: str, language: str):
@@ -66,8 +82,8 @@ def _display_constitution_query(username: str, language: str):
     output.centered(random.choice(list(constitution_queries)), '\n' * 2)
 
 
-def _display_training_item_sequence(training_item_sequence: Iterable[int]):
-    chart = asciichartpy.plot(training_item_sequence, config=asciichartpy.Config(
+def _display_training_item_sequence(training_item_sequence: List[int]):
+    chart = asciichartpy.plot(training_item_sequence, config=asciichartpy.Config(  # type: ignore
         height=15,
         horizontal_point_spacing=5,
         offset=30,
@@ -81,19 +97,5 @@ def _display_training_item_sequence(training_item_sequence: Iterable[int]):
 
 def _display_last_session_conclusion(last_session_metrics: Dict[str, Any]):
     output.centered(f"You faced {last_session_metrics['nFacedItems']} "
-                          f"{['sentences', 'vocables'][last_session_metrics['trainer'] == 'v']} "
-                          f"during your last session {date.date_repr(last_session_metrics['date'])}", '\n' * 3)
-
-
-def _query_action_selection() -> ActionOption:
-    output.centered(f"{INTER_OPTION_INDENTATION}Translate (S)entences"
-                          f"{INTER_OPTION_INDENTATION}Train (V)ocabulary"
-                          f"{INTER_OPTION_INDENTATION}(A)dd Vocabulary"
-                          f"{INTER_OPTION_INDENTATION}Return to (H)ome Screen"
-                          f"{INTER_OPTION_INDENTATION}(Q)uit", '\n')
-
-    action_selection_keyword = query.relentlessly(
-        prompt=output.centering_indentation(' '),
-        options=list(KEYWORD_2_ACTION.keys())
-    )
-    return KEYWORD_2_ACTION[action_selection_keyword]
+                    f"{['sentences', 'vocables'][last_session_metrics['trainer'] == 'v']} "
+                    f"during your last session {date.date_repr(last_session_metrics['date'])}", '\n' * 3)
