@@ -37,7 +37,7 @@ class ChangePlaybackSpeed(TrainingOption):
         output.erase_lines(3)
 
     def _change_playback_speed(self):
-        print(f'Playback speed:\n{query.horizontal_indentation()}', end='')
+        print(f'Playback speed:\n{query.INDENTATION}', end='')
         Keyboard().type(str(self._tts.playback_speed))
         cursor.show()
 

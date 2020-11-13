@@ -4,17 +4,17 @@ import getpass
 from backend import MongoDBClient
 
 from frontend.utils import query, view
-from frontend.screen.authentication import _utils
+from frontend.screen.authentication._utils import authentication_screen, HORIZONTAL_INDENTATION
 
 
 @view.creator(title='Login', banner='lingularity/isometric2', banner_color='blue')
+@authentication_screen
 def __call__() -> Tuple[str, bool]:
     """ Returns:
-            username: str """
+            username: str,
+            is_new_user_flag: bool """
 
-    print(_utils.compute_vertical_indentation())
-
-    horizontal_indentation = _utils.compute_horizontal_indentation()
+    horizontal_indentation = HORIZONTAL_INDENTATION
     mongodb_client = MongoDBClient.get_instance()
 
     username = query.relentlessly(f'{horizontal_indentation}Enter username: ', correctness_verifier=lambda response: response in mongodb_client.usernames, error_indication_message='ENTERED MAILADDRESS NOT ASSOCIATED WITH AN ACCOUNT', sleep_duration=1.5)

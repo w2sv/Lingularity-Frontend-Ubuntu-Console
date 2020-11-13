@@ -1,6 +1,5 @@
 from typing import List, Type, Tuple, Sequence
 from abc import ABC, abstractmethod
-from functools import cached_property
 
 from termcolor import colored
 
@@ -38,6 +37,9 @@ class TrainingOption(FrontendExtender, ABC):
         pass
 
 
+_INSTRUCTION_INDENTATION = output.column_percentual_indentation(percentage=0.35)
+
+
 class TrainingOptions(dict):
     def __init__(self, option_classes: Sequence[Type[TrainingOption]], frontend_instance: object):
         TrainingOption.exit_training = False
@@ -54,20 +56,16 @@ class TrainingOptions(dict):
     def display_instructions(self, insertion_args: Tuple[Tuple[int, str, bool]] = ((-1, '', False),)):
         insertion_indices, *_ = unzip(insertion_args)
 
-        print(f'{self._INSTRUCTION_INDENTATION}Enter:')
+        print(f'{_INSTRUCTION_INDENTATION}Enter:')
         for i, instruction_row in enumerate(self.instructions):
             if i in insertion_indices:
                 args = insertion_args[insertion_indices.index(i)]
 
-                print(f"\n{[self._INSTRUCTION_INDENTATION, output.centering_indentation(args[1])][args[2]]}{args[1]}\n")
+                print(f"\n{[_INSTRUCTION_INDENTATION, output.centering_indentation(args[1])][args[2]]}{args[1]}\n")
 
-            print(f'{self._INSTRUCTION_INDENTATION}  {instruction_row}')
+            print(f'{_INSTRUCTION_INDENTATION}  {instruction_row}')
 
-        print('\n')
-        
-    @cached_property
-    def _INSTRUCTION_INDENTATION(self) -> str:
-        return output.column_percentual_indentation(percentage=0.35)
+        print(output.EMPTY_ROW)
 
     @property
     def exit_training(self) -> bool:

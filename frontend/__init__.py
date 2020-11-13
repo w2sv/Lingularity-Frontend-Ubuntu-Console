@@ -1,4 +1,4 @@
-from backend.database import instantiate_client
+__import__('subprocess').call('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz', shell=True)
 
 from frontend import screen
 from frontend.screen.ops import remove_user_from_disk
@@ -38,12 +38,8 @@ def reentry_at(reentry_point: ReentryPoint):
 
 
 if __name__ == '__main__':
-    from backend.logging import enable_backend_logging
-    import os
-
-    enable_backend_logging(file_path=f'{os.getcwd()}/logging.txt')
-
-    screen.ops.maximize_console()
+    from backend.database import instantiate_client
+    from . import logging
 
     if not instantiate_client():
         screen.missing_internet_exit.__call__()

@@ -3,18 +3,16 @@ from backend import MongoDBClient
 import getpass
 
 from frontend.utils import query, view
-from frontend.screen.authentication._utils import compute_vertical_indentation, compute_horizontal_indentation
+from frontend.screen.authentication._utils import authentication_screen, HORIZONTAL_INDENTATION
 
 
 @view.creator(title='Sign Up', banner='lingularity/isometric2', banner_color='blue')
+@authentication_screen
 def __call__() -> Tuple[str, bool]:
-    print(compute_vertical_indentation())
-
-    horizontal_indentation = compute_horizontal_indentation()
-    mailaddress = query.relentlessly(f'{horizontal_indentation}Enter mailaddress: ', correctness_verifier=_is_valid_mailaddress, error_indication_message='INVALID EMAIL ADDRESS')
-    username = query.relentlessly(f'{horizontal_indentation}Create username: ', correctness_verifier=_is_valid_username, error_indication_message='EMPTY USERNAME NOT ALLOWED')
-    password = query.relentlessly(f'{horizontal_indentation}Create password: ', correctness_verifier=_is_valid_password, error_indication_message='PASSWORD HAS TO COMPRISE AT LEAST 5 CHARACTERS', query_method=getpass.getpass)
-    query.relentlessly(f'{horizontal_indentation}Confirm password: ', correctness_verifier=lambda password_confirmation: password_confirmation == password, error_indication_message="PASSWORDS DON'T MATCH", query_method=getpass.getpass)
+    mailaddress = query.relentlessly(f'{HORIZONTAL_INDENTATION}Enter mailaddress: ', correctness_verifier=_is_valid_mailaddress, error_indication_message='INVALID EMAIL ADDRESS')
+    username = query.relentlessly(f'{HORIZONTAL_INDENTATION}Create username: ', correctness_verifier=_is_valid_username, error_indication_message='EMPTY USERNAME NOT ALLOWED')
+    password = query.relentlessly(f'{HORIZONTAL_INDENTATION}Create password: ', correctness_verifier=_is_valid_password, error_indication_message='PASSWORD HAS TO COMPRISE AT LEAST 5 CHARACTERS', query_method=getpass.getpass)
+    query.relentlessly(f'{HORIZONTAL_INDENTATION}Confirm password: ', correctness_verifier=lambda password_confirmation: password_confirmation == password, error_indication_message="PASSWORDS DON'T MATCH", query_method=getpass.getpass)
 
     MongoDBClient.get_instance().initialize_user(user=username, email_address=mailaddress, password=password)
     return username, True

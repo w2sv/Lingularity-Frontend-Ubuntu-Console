@@ -7,18 +7,18 @@ from frontend.utils import output
 _INDISSOLUBILITY_MESSAGE = "COULDN'T RESOLVE INPUT"
 
 
-def horizontal_indentation() -> str:
-    return output.column_percentual_indentation(percentage=0.1)
+INDENTATION = output.column_percentual_indentation(percentage=0.1)
 
 # ------------------
 # Input Resolution
 # ------------------
 def _resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:
-    options_starting_on_input = list(filter(lambda option: option.lower().startswith(_input.lower()), options))
+    processed_input = _input.lower().strip()
+    options_starting_on_input = list(filter(lambda option: option.lower().startswith(processed_input), options))
 
     if len(options_starting_on_input) == 1:
         return options_starting_on_input[0]
-    elif _input in options_starting_on_input:
+    elif processed_input in options_starting_on_input:
         return _input
     return None
 
@@ -58,7 +58,7 @@ def repeat(function: Callable,
         Returns:
             result of function provided with args """
 
-    indicate_erroneous_input(n_deletion_lines, message, sleep_duration)
+    indicate_erroneous_input(message, n_deletion_lines, sleep_duration)
 
     return function(*args)
 
@@ -71,12 +71,11 @@ def relentlessly(prompt: str,
                  sleep_duration=1.0,
                  query_method=input) -> str:
 
-    args = tuple(locals().values())
-
     """ Repeats query defined by prompt until response unambiguously
         identifying singular option element has been given """
 
     assert any([options, correctness_verifier])
+    args = tuple(locals().values())
 
     if indentation_percentage:
         prompt = f'{output.column_percentual_indentation(indentation_percentage)}{prompt}'

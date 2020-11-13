@@ -4,9 +4,9 @@ import os
 from backend import MongoDBClient
 
 from frontend.state import State
-from frontend.utils import fernet, query, output, view
+from frontend.utils import fernet
 from frontend.screen.ops import USER_ENCRYPTION_FILE_PATH
-from frontend.screen.authentication import selection as authentication_selection
+from frontend.screen.authentication import front as front_screen
 
 
 def __call__():
@@ -15,7 +15,7 @@ def __call__():
 
     # try to retrieve logged in user from disk
     if (username := _retrieve_logged_in_user_from_disk()) is None:
-        username, is_new_user = authentication_selection.__call__()
+        username, is_new_user = front_screen.__call__()
 
         # store username in encrypted manner
         _store_logged_in_user(username)

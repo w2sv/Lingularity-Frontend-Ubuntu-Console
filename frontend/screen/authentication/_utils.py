@@ -1,9 +1,12 @@
 from frontend.utils import output
 
 
-def compute_vertical_indentation() -> str:
-    return output.row_percentual_indentation(percentage=0.15)
+VERTICAL_INDENTATION = output.row_percentual_indentation(percentage=0.15)
+HORIZONTAL_INDENTATION = output.column_percentual_indentation(percentage=0.4)
 
 
-def compute_horizontal_indentation() -> str:
-    return output.column_percentual_indentation(percentage=0.4)
+def authentication_screen(func):
+    def wrapper(*args, **kwargs):
+        print(VERTICAL_INDENTATION)
+        return func(*args, **kwargs)
+    return wrapper

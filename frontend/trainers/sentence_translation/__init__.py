@@ -1,6 +1,5 @@
 from typing import Optional
 import time
-from functools import cached_property
 
 from termcolor import colored
 
@@ -20,6 +19,9 @@ from frontend.utils.output import (
     cursor_hider,
     column_percentual_indentation
 )
+
+
+_SENTENCE_INDENTATION = column_percentual_indentation(0.15)
 
 
 class SentenceTranslationTrainerFrontend(TrainerFrontend):
@@ -85,7 +87,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         print(view.VERTICAL_OFFSET)
 
         return query.relentlessly(
-            f'{query.horizontal_indentation}Enter desired mode: ',
+            f'{query.INDENTATION}Enter desired mode: ',
             options=modes.keywords
         )
 
@@ -146,10 +148,6 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
                 centered(f'Employing forenames stemming from {self._backend.forename_converter.country}.')
         print('')
 
-    @cached_property
-    def _SENTENCE_INDENTATION(self) -> str:
-        return column_percentual_indentation(0.15)
-
     @cursor_hider
     def _run_training_loop(self):
         translation = self._process_procured_sentence_pair()
@@ -178,8 +176,8 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
                 erase_lines(2)
 
                 # output translation_field
-                self._redo_print(f'{self._SENTENCE_INDENTATION}{translation}')
-                self._redo_print(f'{self._SENTENCE_INDENTATION}{colored("─────────────────", "red")}')
+                self._redo_print(f'{_SENTENCE_INDENTATION}{translation}')
+                self._redo_print(f'{_SENTENCE_INDENTATION}{colored("─────────────────", "red")}')
 
                 # play tts audio if available, otherwise suspend program
                 # for some time to incentivise gleaning over translation_field
@@ -210,13 +208,14 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
 
         reference_sentence, translation = sentence_pair
 
-        self._redo_print(f'{self._SENTENCE_INDENTATION}{reference_sentence}')
+        self._redo_print(f'{_SENTENCE_INDENTATION}{reference_sentence}')
         self._pending_output()
 
         return translation
 
-    def _pending_output(self):
-        print(colored(f"{self._SENTENCE_INDENTATION}pending... ", "cyan", attrs=['dark']))
+    @staticmethod
+    def _pending_output():
+        print(colored(f"{_SENTENCE_INDENTATION}pending... ", "cyan", attrs=['dark']))
 
     # -----------------
     # Post Training

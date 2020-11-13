@@ -3,14 +3,11 @@ import subprocess
 
 from termcolor import colored
 
-from frontend.utils import output
+from frontend.utils import output, view
 from . import reference_language
 
+
 INTER_OPTION_INDENTATION = ' ' * 7
-
-
-def maximize_console():
-    subprocess.call('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz', shell=True)
 
 
 def display_signum():
@@ -19,7 +16,7 @@ def display_signum():
 
 def display_sentence_data_reference():
     output.centered("Sentence data stemming from the Tatoeba Project to be found at "
-                    f"{colored('http://www.manythings.org/anki', 'red')}", '\n' * 2)
+                    f"{colored('http://www.manythings.org/anki', 'red')}", view.VERTICAL_OFFSET)
 
 
 USER_ENCRYPTION_FILE_PATH = f'{os.getcwd()}/.logged_in_user'
