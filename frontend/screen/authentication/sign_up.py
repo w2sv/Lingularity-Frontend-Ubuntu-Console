@@ -6,9 +6,13 @@ from frontend.utils import query, view
 from frontend.screen.authentication._utils import authentication_screen, HORIZONTAL_INDENTATION
 
 
-@view.creator(title='Sign Up', banner='lingularity/isometric2', banner_color='blue')
+@view.creator(title='Sign Up', banner='lingularity/isometric2', banner_color='red')
 @authentication_screen
 def __call__() -> Tuple[str, bool]:
+    """ Returns:
+            username: str,
+            is_new_user_flag: bool """
+
     mailaddress = query.relentlessly(f'{HORIZONTAL_INDENTATION}Enter mailaddress: ', correctness_verifier=_is_valid_mailaddress, error_indication_message='INVALID EMAIL ADDRESS')
     username = query.relentlessly(f'{HORIZONTAL_INDENTATION}Create username: ', correctness_verifier=_is_valid_username, error_indication_message='EMPTY USERNAME NOT ALLOWED')
     password = query.relentlessly(f'{HORIZONTAL_INDENTATION}Create password: ', correctness_verifier=_is_valid_password, error_indication_message='PASSWORD HAS TO COMPRISE AT LEAST 5 CHARACTERS', query_method=getpass.getpass)

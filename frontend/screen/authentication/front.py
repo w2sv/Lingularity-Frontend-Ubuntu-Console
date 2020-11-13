@@ -13,7 +13,7 @@ _SELECTION_2_SCREEN = {
 }
 
 
-@view.creator(title=view.DEFAULT_TITLE, banner='lingularity/isometric2', banner_color='blue')
+@view.creator(title=view.DEFAULT_TITLE, banner='lingularity/5line-oblique', banner_color='blue')
 @authentication_screen
 def __call__() -> Tuple[str, bool]:
     """ Returns:
