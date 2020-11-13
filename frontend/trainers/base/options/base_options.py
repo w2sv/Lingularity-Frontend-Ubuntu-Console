@@ -1,6 +1,6 @@
 from time import sleep
 
-from frontend.utils import output
+from frontend.utils import output, query
 from frontend.trainers.base.options import TrainingOption
 
 
@@ -27,9 +27,9 @@ class RectifyLatestAddedVocableEntry(TrainingOption):
 
 
 class AddVocable(TrainingOption):
-    def __init__(self):
+    def __init__(self, cancelable=False):
         self.keyword, self.explanation = 'new', 'add a new vocable'
+        self._cancelable = cancelable
 
-    def __call__(self):
-        n_printed_lines = self._add_vocable()
-        output.erase_lines(n_printed_lines + 1)
+    def __call__(self) -> bool:
+        return self._add_vocable(self._cancelable)

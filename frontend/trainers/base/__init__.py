@@ -11,7 +11,7 @@ from backend import language_metadata
 from backend.utils import date as date_utils, either
 
 from frontend.state import State
-from frontend.utils import output, view
+from frontend.utils import output, view, query
 from frontend.trainers.base.options import TrainingOptions
 
 
@@ -57,7 +57,7 @@ class TrainerFrontend(ABC):
         pass
 
     def _output_lets_go(self):
-        output.centered(either(language_metadata[self._backend.language]['translations'].get('letsGo'), default="Let's go!"), '\n' * 2)
+        output.centered(either(language_metadata[self._backend.language]['translations'].get('letsGo'), default="Let's go!"), view.VERTICAL_OFFSET)
 
     # -----------------
     # Training
@@ -66,7 +66,7 @@ class TrainerFrontend(ABC):
     def _run_training_loop(self):
         pass
 
-    def _add_vocable(self) -> int:
+    def _add_vocable(self, cancelable=False) -> bool:
         """ Query, create new vocable entry,
             Enter it into database
             Update State.vocabulary_available
@@ -78,11 +78,13 @@ class TrainerFrontend(ABC):
 
         # query vocable and meaning, exit if one of the two fields empty
         vocable_and_meaning = []
-        for query_message in [f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']:
-            if not len((field := input(f'{INDENTATION}{query_message}'))):
-                output.centered("INPUT FIELD LEFT UNFILLED")
-                sleep(1)
-                return 3
+        for i, query_message in enumerate([f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']):
+            if not len((field := [input, query.cancelably][cancelable](f'{INDENTATION}{query_message}'))):
+                query.indicate_erroneous_input("INPUT FIELD LEFT UNFILLED", n_deletion_lines=3, sleep_duration=1)
+                return False
+            elif field == query.CANCELLED:
+                return True
+
             vocable_and_meaning.append(field)
 
         # create new vocable entry, enter into database
@@ -90,10 +92,10 @@ class TrainerFrontend(ABC):
         self._backend.mongodb_client.insert_vocable_entry(self._latest_created_vocable_entry.as_dict)
 
         # update vocabulary_available flag in State
-        if not State.vocabulary_available:
-            State.vocabulary_available = True
+        State.vocabulary_available = True
 
-        return 2
+        output.erase_lines(2)
+        return False
 
     def _alter_vocable_entry(self, vocable_entry: VocableEntry) -> int:
         """ Returns:

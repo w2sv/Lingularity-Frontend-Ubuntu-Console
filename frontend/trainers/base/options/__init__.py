@@ -30,7 +30,7 @@ class FrontendExtender(ABC):
 class TrainingOption(FrontendExtender, ABC):
     exit_training: bool
 
-    __slots__ = ('keyword', 'explanation')
+    __slots__ = ('keyword', 'explanation', '_cancelable')
 
     @abstractmethod
     def __call__(self):

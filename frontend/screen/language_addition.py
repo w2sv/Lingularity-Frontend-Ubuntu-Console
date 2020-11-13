@@ -33,7 +33,9 @@ def __call__() -> ReentryPoint:
     # TODO: display legend, add sentence volumes
 
     # query desired language
-    selection = query.relentlessly('Select language: ', options=eligible_languages, indentation_percentage=0.35)
+    selection = query.relentlessly('Select language: ', options=eligible_languages, indentation_percentage=0.35, cancelable=True)
+    if selection == query.CANCELLED:
+        return ReentryPoint.Home
 
     # query desired reference language if English selected
     train_english = False

@@ -41,7 +41,7 @@ if __name__ == '__main__':
     from backend.database import instantiate_client
     from . import logging
 
-    if not instantiate_client():
+    if not instantiate_client():  # pymongo.errors.ServerSelectionTimeoutError
         screen.missing_internet_exit.__call__()
 
     __call__()

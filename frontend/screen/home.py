@@ -97,11 +97,13 @@ def _language_removal() -> ReentryPoint:
         return __call__()
 
     # query removal language
-    removal_language = query.relentlessly(
+    if (removal_language := query.relentlessly(
         'Enter language you wish to remove: ',
         options=list(State.user_languages),
-        indentation_percentage=0.3
-    )
+        indentation_percentage=0.3,
+        cancelable=True
+    )) == query.CANCELLED:
+        return __call__()
 
     output.erase_lines(1)
 

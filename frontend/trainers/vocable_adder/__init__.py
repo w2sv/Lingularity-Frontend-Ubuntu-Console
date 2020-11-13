@@ -2,7 +2,6 @@ from termcolor import colored
 
 from backend.trainers import VocableAdderBackend as Backend
 
-from frontend.reentrypoint import ReentryPoint
 from frontend.trainers.base import TrainerFrontend
 from frontend.trainers.base.options import TrainingOptions, base_options
 from frontend.utils import query, output, view
@@ -40,16 +39,17 @@ class VocableAdderFrontend(TrainerFrontend):
         print('\n')
 
     def _run_training_loop(self):
-        add_vocable = base_options.AddVocable()
+        add_vocable = base_options.AddVocable(cancelable=True)
 
         while True:
             print(output.EMPTY_ROW)
 
-            add_vocable()
+            if cancelled := add_vocable():
+                return
 
             self._output_vocable_addition_confirmation()
 
-            response = query.relentlessly(f'{output.centering_indentation("Enter option/Proceed via Enter Stroke")}$', options=self._training_options.keywords)
+            response = query.relentlessly('$', options=self._training_options.keywords, indentation_percentage=0.49)
             if len(response):
                 self._training_options[response].__call__()
 

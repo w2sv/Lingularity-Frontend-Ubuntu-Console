@@ -1,6 +1,8 @@
 from typing import Iterable, Optional, Callable, Tuple, Any, Sequence
 import time
 
+from pynput import keyboard
+
 from frontend.utils import output
 
 
@@ -63,12 +65,16 @@ def repeat(function: Callable,
     return function(*args)
 
 
+CANCELLED = '{CANCELLED}'
+
+
 def relentlessly(prompt: str,
                  options: Optional[Sequence[str]] = None,
                  correctness_verifier: Optional[Callable[[str], bool]] = None,
                  indentation_percentage=0.0,
                  error_indication_message=_INDISSOLUBILITY_MESSAGE,
                  sleep_duration=1.0,
+                 cancelable=False,
                  query_method=input) -> str:
 
     """ Repeats query defined by prompt until response unambiguously
@@ -80,10 +86,44 @@ def relentlessly(prompt: str,
     if indentation_percentage:
         prompt = f'{output.column_percentual_indentation(indentation_percentage)}{prompt}'
 
-    response = query_method(prompt)
+    if cancelable:
+        if (response := cancelably(prompt, query_method=query_method)) == CANCELLED:
+            return CANCELLED
+    else:
+        response = _leading_escape_unicode_stripped(query_method(prompt))
+
     if options and (response := _resolve_input(response, options=options)) is None or correctness_verifier and not correctness_verifier(response):
         return repeat(relentlessly, n_deletion_lines=2, message=error_indication_message, args=args)
     return response
+
+
+def cancelably(prompt: str, query_method=input) -> str:
+    print(prompt, end='', flush=True)
+
+    if _escape_key_pressed():
+        return CANCELLED
+
+    return _leading_escape_unicode_stripped(query_method())
+
+
+def _leading_escape_unicode_stripped(string: str) -> str:
+    if len(string) and ord(string[0]) == 27:
+        string = string[1:]
+    return string
+
+
+def _escape_key_pressed() -> bool:
+    pressed_key = None
+
+    def on_press(key):
+        nonlocal pressed_key
+        pressed_key = key
+        return False
+
+    with keyboard.Listener(on_press=on_press) as listener:
+        listener.join()
+
+    return pressed_key == keyboard.Key.esc
 
 
 def centered(query_message: str = '') -> str:
