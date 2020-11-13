@@ -36,7 +36,7 @@ class VocableAdderFrontend(TrainerFrontend):
     @view.creator(banner='vocable-adder/ansi-shadow', banner_color='blue')
     def _display_training_screen_header_section(self):
         self._training_options.display_instructions()
-        print('\n')
+        print(output.EMPTY_ROW)
 
     def _run_training_loop(self):
         add_vocable = base_options.AddVocable(cancelable=True)

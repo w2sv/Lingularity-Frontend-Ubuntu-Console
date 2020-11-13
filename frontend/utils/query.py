@@ -90,7 +90,7 @@ def relentlessly(prompt: str,
         if (response := cancelably(prompt, query_method=query_method)) == CANCELLED:
             return CANCELLED
     else:
-        response = _leading_escape_unicode_stripped(query_method(prompt))
+        response = _escape_unicode_stripped(query_method(prompt))
 
     if options and (response := _resolve_input(response, options=options)) is None or correctness_verifier and not correctness_verifier(response):
         return repeat(relentlessly, n_deletion_lines=2, message=error_indication_message, args=args)
@@ -103,13 +103,11 @@ def cancelably(prompt: str, query_method=input) -> str:
     if _escape_key_pressed():
         return CANCELLED
 
-    return _leading_escape_unicode_stripped(query_method())
+    return _escape_unicode_stripped(query_method())
 
 
-def _leading_escape_unicode_stripped(string: str) -> str:
-    if len(string) and ord(string[0]) == 27:
-        string = string[1:]
-    return string
+def _escape_unicode_stripped(string: str) -> str:
+    return string.replace('', '')
 
 
 def _escape_key_pressed() -> bool:
