@@ -1,3 +1,5 @@
+import locale
+
 from termcolor import colored
 
 from backend import string_resources, language_metadata
@@ -8,6 +10,9 @@ from frontend.state import State
 from frontend.reentrypoint import ReentryPoint
 from frontend.utils import view, query, output
 from frontend.screen.ops import reference_language
+
+
+locale.setlocale(locale.LC_ALL, '')
 
 
 @view.creator(banner='languages/3d-ascii', banner_color='cyan')
@@ -24,13 +29,24 @@ def __call__() -> ReentryPoint:
     # group by starting letter, color languages according to tts/tokenizing availability,
     # display in output-block-indented manner
     starting_letter_grouped_languages = output.group_by_starting_letter(eligible_languages, is_sorted=False)
-    colored_joined_language_groups = ['  '.join(map(_color_language_wrt_available_components, language_group)) for language_group in starting_letter_grouped_languages]
+    colored_joined_language_groups = [' '.join(map(lambda language: f'{_color_language_wrt_available_components(language)}({language_metadata[language].get("nSentences", -69):n})'.replace('-69', '∞'), language_group)) for language_group in starting_letter_grouped_languages]
+
     indentation = output.block_centering_indentation(colored_joined_language_groups)
     for language_group in colored_joined_language_groups:
         print(indentation, language_group)
-    print(view.VERTICAL_OFFSET)
+    print(output.EMPTY_ROW)
 
-    # TODO: display legend, add sentence volumes
+    # display legend
+    LEGEND_ELEMENT_INDENTATION = output.column_percentual_indentation(0.02)
+    print(f'{indentation} '
+          f'Legend:{LEGEND_ELEMENT_INDENTATION}'
+          f'{colored("low", _LOW_QUALITY_NORMALIZATION_COLOR)}/'
+          f'{colored("medium", _MEDIUM_QUALITY_NORMALIZATION_COLOR)}/'
+          f'{colored("high", _HIGH_QUALITY_NORMALIZATION_COLOR)} '
+          f'quality word normalization{LEGEND_ELEMENT_INDENTATION}'
+          f'{colored("text-to-speech available", attrs=["bold"])}{LEGEND_ELEMENT_INDENTATION}'
+          f'(number of available sentences)')
+    print(view.VERTICAL_OFFSET)
 
     # query desired language
     selection = query.relentlessly('Select language: ', options=eligible_languages, indentation_percentage=0.35, cancelable=True)
@@ -48,17 +64,23 @@ def __call__() -> ReentryPoint:
     return ReentryPoint.TrainingSelection
 
 
+_HIGH_QUALITY_NORMALIZATION_COLOR = 'red'
+_MEDIUM_QUALITY_NORMALIZATION_COLOR = 'magenta'
+_LOW_QUALITY_NORMALIZATION_COLOR = 'cyan'
+_TTS_ATTRS = ['bold']
+
+
 def _color_language_wrt_available_components(language: str) -> str:
     color, attrs = None, None
 
     if language in text_to_speech.AVAILABLE_LANGUAGES:
-        attrs = ['bold']
+        attrs = _TTS_ATTRS
 
     if language in lemmatizing.AVAILABLE_LANGUAGES:
-        color = 'red'
+        color = _HIGH_QUALITY_NORMALIZATION_COLOR
     elif language.lower() in stemming.AVAILABLE_LANGUAGES:
-        color = 'magenta'
+        color = _MEDIUM_QUALITY_NORMALIZATION_COLOR
     else:
-        color = 'cyan'
+        color = _LOW_QUALITY_NORMALIZATION_COLOR
 
     return colored(language, color=color, attrs=attrs)

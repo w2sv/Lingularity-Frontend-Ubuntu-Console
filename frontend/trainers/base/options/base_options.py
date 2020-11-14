@@ -1,6 +1,6 @@
 from time import sleep
 
-from frontend.utils import output, query
+from frontend.utils import output
 from frontend.trainers.base.options import TrainingOption
 
 

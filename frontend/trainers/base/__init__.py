@@ -80,7 +80,7 @@ class TrainerFrontend(ABC):
         vocable_and_meaning = []
         for i, query_message in enumerate([f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']):
             if not len((field := [input, query.cancelably][cancelable](f'{INDENTATION}{query_message}'))):
-                query.indicate_erroneous_input("INPUT FIELD LEFT UNFILLED", n_deletion_lines=3, sleep_duration=1)
+                query.indicate_erroneous_input("INPUT FIELD LEFT UNFILLED", n_deletion_lines=3 + i, sleep_duration=1)
                 return False
             elif field == query.CANCELLED:
                 return True
@@ -94,7 +94,7 @@ class TrainerFrontend(ABC):
         # update vocabulary_available flag in State
         State.vocabulary_available = True
 
-        output.erase_lines(2)
+        output.erase_lines(3)
         return False
 
     def _alter_vocable_entry(self, vocable_entry: VocableEntry) -> int:

@@ -28,7 +28,6 @@ _KEYWORD_2_ACTION: Dict[str, _ActionOption] = {
     'sentence': SentenceTranslationTrainerFrontend,
     'vocabulary': VocableTrainerFrontend,
     'add': VocableAdderFrontend,
-    'home': ReentryPoint.Home,
     'quit': ReentryPoint.Exit
 }
 
@@ -61,7 +60,6 @@ def _query_action_selection() -> str:
     output.centered(f"{INTER_OPTION_INDENTATION}Translate (S)entences"
                     f"{INTER_OPTION_INDENTATION}Train (V)ocabulary"
                     f"{INTER_OPTION_INDENTATION}(A)dd Vocabulary"
-                    f"{INTER_OPTION_INDENTATION}Return to (H)ome Screen"
                     f"{INTER_OPTION_INDENTATION}(Q)uit", '\n')
 
     return query.relentlessly(
