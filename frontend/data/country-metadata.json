@@ -1,0 +1,1034 @@
+{
+    "Ascension Island": {
+        "flag": "🇦🇨",
+        "RIS": "AC"
+    },
+    "Andorra": {
+        "flag": "🇦🇩",
+        "RIS": "AD"
+    },
+    "United Arab Emirates": {
+        "flag": "🇦🇪",
+        "RIS": "AE"
+    },
+    "Afghanistan": {
+        "flag": "🇦🇫",
+        "RIS": "AF"
+    },
+    "Antigua & Barbuda": {
+        "flag": "🇦🇬",
+        "RIS": "AG"
+    },
+    "Anguilla": {
+        "flag": "🇦🇮",
+        "RIS": "AI"
+    },
+    "Albania": {
+        "flag": "🇦🇱",
+        "RIS": "AL"
+    },
+    "Armenia": {
+        "flag": "🇦🇲",
+        "RIS": "AM"
+    },
+    "Angola": {
+        "flag": "🇦🇴",
+        "RIS": "AO"
+    },
+    "Antarctica": {
+        "flag": "🇦🇶",
+        "RIS": "AQ"
+    },
+    "Argentina": {
+        "flag": "🇦🇷",
+        "RIS": "AR"
+    },
+    "American Samoa": {
+        "flag": "🇦🇸",
+        "RIS": "AS"
+    },
+    "Austria": {
+        "flag": "🇦🇹",
+        "RIS": "AT"
+    },
+    "Australia": {
+        "flag": "🇦🇺",
+        "RIS": "AU"
+    },
+    "Aruba": {
+        "flag": "🇦🇼",
+        "RIS": "AW"
+    },
+    "Åland Islands": {
+        "flag": "🇦🇽",
+        "RIS": "AX"
+    },
+    "Azerbaijan": {
+        "flag": "🇦🇿",
+        "RIS": "AZ"
+    },
+    "Bosnia & Herzegovina": {
+        "flag": "🇧🇦",
+        "RIS": "BA"
+    },
+    "Barbados": {
+        "flag": "🇧🇧",
+        "RIS": "BB"
+    },
+    "Bangladesh": {
+        "flag": "🇧🇩",
+        "RIS": "BD"
+    },
+    "Belgium": {
+        "flag": "🇧🇪",
+        "RIS": "BE"
+    },
+    "Burkina Faso": {
+        "flag": "🇧🇫",
+        "RIS": "BF"
+    },
+    "Bulgaria": {
+        "flag": "🇧🇬",
+        "RIS": "BG"
+    },
+    "Bahrain": {
+        "flag": "🇧🇭",
+        "RIS": "BH"
+    },
+    "Burundi": {
+        "flag": "🇧🇮",
+        "RIS": "BI"
+    },
+    "Benin": {
+        "flag": "🇧🇯",
+        "RIS": "BJ"
+    },
+    "St. Barthélemy": {
+        "flag": "🇧🇱",
+        "RIS": "BL"
+    },
+    "Bermuda": {
+        "flag": "🇧🇲",
+        "RIS": "BM"
+    },
+    "Brunei": {
+        "flag": "🇧🇳",
+        "RIS": "BN"
+    },
+    "Bolivia": {
+        "flag": "🇧🇴",
+        "RIS": "BO"
+    },
+    "Caribbean Netherlands": {
+        "flag": "🇧🇶",
+        "RIS": "BQ"
+    },
+    "Brazil": {
+        "flag": "🇧🇷",
+        "RIS": "BR"
+    },
+    "Bahamas": {
+        "flag": "🇧🇸",
+        "RIS": "BS"
+    },
+    "Bhutan": {
+        "flag": "🇧🇹",
+        "RIS": "BT"
+    },
+    "Bouvet Island": {
+        "flag": "🇧🇻",
+        "RIS": "BV"
+    },
+    "Botswana": {
+        "flag": "🇧🇼",
+        "RIS": "BW"
+    },
+    "Belarus": {
+        "flag": "🇧🇾",
+        "RIS": "BY"
+    },
+    "Belize": {
+        "flag": "🇧🇿",
+        "RIS": "BZ"
+    },
+    "Canada": {
+        "flag": "🇨🇦",
+        "RIS": "CA"
+    },
+    "Cocos (Keeling) Islands": {
+        "flag": "🇨🇨",
+        "RIS": "CC"
+    },
+    "Congo - Kinshasa": {
+        "flag": "🇨🇩",
+        "RIS": "CD"
+    },
+    "Central African Republic": {
+        "flag": "🇨🇫",
+        "RIS": "CF"
+    },
+    "Congo - Brazzaville": {
+        "flag": "🇨🇬",
+        "RIS": "CG"
+    },
+    "Switzerland": {
+        "flag": "🇨🇭",
+        "RIS": "CH"
+    },
+    "Côte d'Ivoire": {
+        "flag": "🇨🇮",
+        "RIS": "CI"
+    },
+    "Cook Islands": {
+        "flag": "🇨🇰",
+        "RIS": "CK"
+    },
+    "Chile": {
+        "flag": "🇨🇱",
+        "RIS": "CL"
+    },
+    "Cameroon": {
+        "flag": "🇨🇲",
+        "RIS": "CM"
+    },
+    "China": {
+        "flag": "🇨🇳",
+        "RIS": "CN"
+    },
+    "Colombia": {
+        "flag": "🇨🇴",
+        "RIS": "CO"
+    },
+    "Clipperton Island": {
+        "flag": "🇨🇵",
+        "RIS": "CP"
+    },
+    "Costa Rica": {
+        "flag": "🇨🇷",
+        "RIS": "CR"
+    },
+    "Cuba": {
+        "flag": "🇨🇺",
+        "RIS": "CU"
+    },
+    "Cape Verde": {
+        "flag": "🇨🇻",
+        "RIS": "CV"
+    },
+    "Curaçao": {
+        "flag": "🇨🇼",
+        "RIS": "CW"
+    },
+    "Christmas Island": {
+        "flag": "🇨🇽",
+        "RIS": "CX"
+    },
+    "Cyprus": {
+        "flag": "🇨🇾",
+        "RIS": "CY"
+    },
+    "Czechia": {
+        "flag": "🇨🇿",
+        "RIS": "CZ"
+    },
+    "Germany": {
+        "flag": "🇩🇪",
+        "RIS": "DE"
+    },
+    "Diego Garcia": {
+        "flag": "🇩🇬",
+        "RIS": "DG"
+    },
+    "Djibouti": {
+        "flag": "🇩🇯",
+        "RIS": "DJ"
+    },
+    "Denmark": {
+        "flag": "🇩🇰",
+        "RIS": "DK"
+    },
+    "Dominica": {
+        "flag": "🇩🇲",
+        "RIS": "DM"
+    },
+    "Dominican Republic": {
+        "flag": "🇩🇴",
+        "RIS": "DO"
+    },
+    "Algeria": {
+        "flag": "🇩🇿",
+        "RIS": "DZ"
+    },
+    "Ceuta & Melilla": {
+        "flag": "🇪🇦",
+        "RIS": "EA"
+    },
+    "Ecuador": {
+        "flag": "🇪🇨",
+        "RIS": "EC"
+    },
+    "Estonia": {
+        "flag": "🇪🇪",
+        "RIS": "EE"
+    },
+    "Egypt": {
+        "flag": "🇪🇬",
+        "RIS": "EG"
+    },
+    "Western Sahara": {
+        "flag": "🇪🇭",
+        "RIS": "EH"
+    },
+    "Eritrea": {
+        "flag": "🇪🇷",
+        "RIS": "ER"
+    },
+    "Spain": {
+        "flag": "🇪🇸",
+        "RIS": "ES"
+    },
+    "Ethiopia": {
+        "flag": "🇪🇹",
+        "RIS": "ET"
+    },
+    "European Union": {
+        "flag": "🇪🇺",
+        "RIS": "EU"
+    },
+    "Finland": {
+        "flag": "🇫🇮",
+        "RIS": "FI"
+    },
+    "Fiji": {
+        "flag": "🇫🇯",
+        "RIS": "FJ"
+    },
+    "Falkland Islands": {
+        "flag": "🇫🇰",
+        "RIS": "FK"
+    },
+    "Micronesia": {
+        "flag": "🇫🇲",
+        "RIS": "FM"
+    },
+    "Faroe Islands": {
+        "flag": "🇫🇴",
+        "RIS": "FO"
+    },
+    "France": {
+        "flag": "🇫🇷",
+        "RIS": "FR"
+    },
+    "Gabon": {
+        "flag": "🇬🇦",
+        "RIS": "GA"
+    },
+    "United Kingdom": {
+        "flag": "🇬🇧",
+        "RIS": "GB"
+    },
+    "Grenada": {
+        "flag": "🇬🇩",
+        "RIS": "GD"
+    },
+    "Georgia": {
+        "flag": "🇬🇪",
+        "RIS": "GE"
+    },
+    "French Guiana": {
+        "flag": "🇬🇫",
+        "RIS": "GF"
+    },
+    "Guernsey": {
+        "flag": "🇬🇬",
+        "RIS": "GG"
+    },
+    "Ghana": {
+        "flag": "🇬🇭",
+        "RIS": "GH"
+    },
+    "Gibraltar": {
+        "flag": "🇬🇮",
+        "RIS": "GI"
+    },
+    "Greenland": {
+        "flag": "🇬🇱",
+        "RIS": "GL"
+    },
+    "Gambia": {
+        "flag": "🇬🇲",
+        "RIS": "GM"
+    },
+    "Guinea": {
+        "flag": "🇬🇳",
+        "RIS": "GN"
+    },
+    "Guadeloupe": {
+        "flag": "🇬🇵",
+        "RIS": "GP"
+    },
+    "Equatorial Guinea": {
+        "flag": "🇬🇶",
+        "RIS": "GQ"
+    },
+    "Greece": {
+        "flag": "🇬🇷",
+        "RIS": "GR"
+    },
+    "South Georgia & South Sandwich Islands": {
+        "flag": "🇬🇸",
+        "RIS": "GS"
+    },
+    "Guatemala": {
+        "flag": "🇬🇹",
+        "RIS": "GT"
+    },
+    "Guam": {
+        "flag": "🇬🇺",
+        "RIS": "GU"
+    },
+    "Guinea-Bissau": {
+        "flag": "🇬🇼",
+        "RIS": "GW"
+    },
+    "Guyana": {
+        "flag": "🇬🇾",
+        "RIS": "GY"
+    },
+    "Hong Kong SAR China": {
+        "flag": "🇭🇰",
+        "RIS": "HK"
+    },
+    "Heard & McDonald Islands": {
+        "flag": "🇭🇲",
+        "RIS": "HM"
+    },
+    "Honduras": {
+        "flag": "🇭🇳",
+        "RIS": "HN"
+    },
+    "Croatia": {
+        "flag": "🇭🇷",
+        "RIS": "HR"
+    },
+    "Haiti": {
+        "flag": "🇭🇹",
+        "RIS": "HT"
+    },
+    "Hungary": {
+        "flag": "🇭🇺",
+        "RIS": "HU"
+    },
+    "Canary Islands": {
+        "flag": "🇮🇨",
+        "RIS": "IC"
+    },
+    "Indonesia": {
+        "flag": "🇮🇩",
+        "RIS": "ID"
+    },
+    "Ireland": {
+        "flag": "🇮🇪",
+        "RIS": "IE"
+    },
+    "Israel": {
+        "flag": "🇮🇱",
+        "RIS": "IL"
+    },
+    "Isle of Man": {
+        "flag": "🇮🇲",
+        "RIS": "IM"
+    },
+    "India": {
+        "flag": "🇮🇳",
+        "RIS": "IN"
+    },
+    "British Indian Ocean Territory": {
+        "flag": "🇮🇴",
+        "RIS": "IO"
+    },
+    "Iraq": {
+        "flag": "🇮🇶",
+        "RIS": "IQ"
+    },
+    "Iran": {
+        "flag": "🇮🇷",
+        "RIS": "IR"
+    },
+    "Iceland": {
+        "flag": "🇮🇸",
+        "RIS": "IS"
+    },
+    "Italy": {
+        "flag": "🇮🇹",
+        "RIS": "IT"
+    },
+    "Jersey": {
+        "flag": "🇯🇪",
+        "RIS": "JE"
+    },
+    "Jamaica": {
+        "flag": "🇯🇲",
+        "RIS": "JM"
+    },
+    "Jordan": {
+        "flag": "🇯🇴",
+        "RIS": "JO"
+    },
+    "Japan": {
+        "flag": "🇯🇵",
+        "RIS": "JP"
+    },
+    "Kenya": {
+        "flag": "🇰🇪",
+        "RIS": "KE"
+    },
+    "Kyrgyzstan": {
+        "flag": "🇰🇬",
+        "RIS": "KG"
+    },
+    "Cambodia": {
+        "flag": "🇰🇭",
+        "RIS": "KH"
+    },
+    "Kiribati": {
+        "flag": "🇰🇮",
+        "RIS": "KI"
+    },
+    "Comoros": {
+        "flag": "🇰🇲",
+        "RIS": "KM"
+    },
+    "St. Kitts & Nevis": {
+        "flag": "🇰🇳",
+        "RIS": "KN"
+    },
+    "North Korea": {
+        "flag": "🇰🇵",
+        "RIS": "KP"
+    },
+    "South Korea": {
+        "flag": "🇰🇷",
+        "RIS": "KR"
+    },
+    "Kuwait": {
+        "flag": "🇰🇼",
+        "RIS": "KW"
+    },
+    "Cayman Islands": {
+        "flag": "🇰🇾",
+        "RIS": "KY"
+    },
+    "Kazakhstan": {
+        "flag": "🇰🇿",
+        "RIS": "KZ"
+    },
+    "Laos": {
+        "flag": "🇱🇦",
+        "RIS": "LA"
+    },
+    "Lebanon": {
+        "flag": "🇱🇧",
+        "RIS": "LB"
+    },
+    "St. Lucia": {
+        "flag": "🇱🇨",
+        "RIS": "LC"
+    },
+    "Liechtenstein": {
+        "flag": "🇱🇮",
+        "RIS": "LI"
+    },
+    "Sri Lanka": {
+        "flag": "🇱🇰",
+        "RIS": "LK"
+    },
+    "Liberia": {
+        "flag": "🇱🇷",
+        "RIS": "LR"
+    },
+    "Lesotho": {
+        "flag": "🇱🇸",
+        "RIS": "LS"
+    },
+    "Lithuania": {
+        "flag": "🇱🇹",
+        "RIS": "LT"
+    },
+    "Luxembourg": {
+        "flag": "🇱🇺",
+        "RIS": "LU"
+    },
+    "Latvia": {
+        "flag": "🇱🇻",
+        "RIS": "LV"
+    },
+    "Libya": {
+        "flag": "🇱🇾",
+        "RIS": "LY"
+    },
+    "Morocco": {
+        "flag": "🇲🇦",
+        "RIS": "MA"
+    },
+    "Monaco": {
+        "flag": "🇲🇨",
+        "RIS": "MC"
+    },
+    "Moldova": {
+        "flag": "🇲🇩",
+        "RIS": "MD"
+    },
+    "Montenegro": {
+        "flag": "🇲🇪",
+        "RIS": "ME"
+    },
+    "St. Martin": {
+        "flag": "🇲🇫",
+        "RIS": "MF"
+    },
+    "Madagascar": {
+        "flag": "🇲🇬",
+        "RIS": "MG"
+    },
+    "Marshall Islands": {
+        "flag": "🇲🇭",
+        "RIS": "MH"
+    },
+    "North Macedonia": {
+        "flag": "🇲🇰",
+        "RIS": "MK"
+    },
+    "Mali": {
+        "flag": "🇲🇱",
+        "RIS": "ML"
+    },
+    "Myanmar (Burma)": {
+        "flag": "🇲🇲",
+        "RIS": "MM"
+    },
+    "Mongolia": {
+        "flag": "🇲🇳",
+        "RIS": "MN"
+    },
+    "Macao SAR China": {
+        "flag": "🇲🇴",
+        "RIS": "MO"
+    },
+    "Northern Mariana Islands": {
+        "flag": "🇲🇵",
+        "RIS": "MP"
+    },
+    "Martinique": {
+        "flag": "🇲🇶",
+        "RIS": "MQ"
+    },
+    "Mauritania": {
+        "flag": "🇲🇷",
+        "RIS": "MR"
+    },
+    "Montserrat": {
+        "flag": "🇲🇸",
+        "RIS": "MS"
+    },
+    "Malta": {
+        "flag": "🇲🇹",
+        "RIS": "MT"
+    },
+    "Mauritius": {
+        "flag": "🇲🇺",
+        "RIS": "MU"
+    },
+    "Maldives": {
+        "flag": "🇲🇻",
+        "RIS": "MV"
+    },
+    "Malawi": {
+        "flag": "🇲🇼",
+        "RIS": "MW"
+    },
+    "Mexico": {
+        "flag": "🇲🇽",
+        "RIS": "MX"
+    },
+    "Malaysia": {
+        "flag": "🇲🇾",
+        "RIS": "MY"
+    },
+    "Mozambique": {
+        "flag": "🇲🇿",
+        "RIS": "MZ"
+    },
+    "Namibia": {
+        "flag": "🇳🇦",
+        "RIS": "NA"
+    },
+    "New Caledonia": {
+        "flag": "🇳🇨",
+        "RIS": "NC"
+    },
+    "Niger": {
+        "flag": "🇳🇪",
+        "RIS": "NE"
+    },
+    "Norfolk Island": {
+        "flag": "🇳🇫",
+        "RIS": "NF"
+    },
+    "Nigeria": {
+        "flag": "🇳🇬",
+        "RIS": "NG"
+    },
+    "Nicaragua": {
+        "flag": "🇳🇮",
+        "RIS": "NI"
+    },
+    "Netherlands": {
+        "flag": "🇳🇱",
+        "RIS": "NL"
+    },
+    "Norway": {
+        "flag": "🇳🇴",
+        "RIS": "NO"
+    },
+    "Nepal": {
+        "flag": "🇳🇵",
+        "RIS": "NP"
+    },
+    "Nauru": {
+        "flag": "🇳🇷",
+        "RIS": "NR"
+    },
+    "Niue": {
+        "flag": "🇳🇺",
+        "RIS": "NU"
+    },
+    "New Zealand": {
+        "flag": "🇳🇿",
+        "RIS": "NZ"
+    },
+    "Oman": {
+        "flag": "🇴🇲",
+        "RIS": "OM"
+    },
+    "Panama": {
+        "flag": "🇵🇦",
+        "RIS": "PA"
+    },
+    "Peru": {
+        "flag": "🇵🇪",
+        "RIS": "PE"
+    },
+    "French Polynesia": {
+        "flag": "🇵🇫",
+        "RIS": "PF"
+    },
+    "Papua New Guinea": {
+        "flag": "🇵🇬",
+        "RIS": "PG"
+    },
+    "Philippines": {
+        "flag": "🇵🇭",
+        "RIS": "PH"
+    },
+    "Pakistan": {
+        "flag": "🇵🇰",
+        "RIS": "PK"
+    },
+    "Poland": {
+        "flag": "🇵🇱",
+        "RIS": "PL"
+    },
+    "St. Pierre & Miquelon": {
+        "flag": "🇵🇲",
+        "RIS": "PM"
+    },
+    "Pitcairn Islands": {
+        "flag": "🇵🇳",
+        "RIS": "PN"
+    },
+    "Puerto Rico": {
+        "flag": "🇵🇷",
+        "RIS": "PR"
+    },
+    "Palestinian Territories": {
+        "flag": "🇵🇸",
+        "RIS": "PS"
+    },
+    "Portugal": {
+        "flag": "🇵🇹",
+        "RIS": "PT"
+    },
+    "Palau": {
+        "flag": "🇵🇼",
+        "RIS": "PW"
+    },
+    "Paraguay": {
+        "flag": "🇵🇾",
+        "RIS": "PY"
+    },
+    "Qatar": {
+        "flag": "🇶🇦",
+        "RIS": "QA"
+    },
+    "Réunion": {
+        "flag": "🇷🇪",
+        "RIS": "RE"
+    },
+    "Romania": {
+        "flag": "🇷🇴",
+        "RIS": "RO"
+    },
+    "Serbia": {
+        "flag": "🇷🇸",
+        "RIS": "RS"
+    },
+    "Russia": {
+        "flag": "🇷🇺",
+        "RIS": "RU"
+    },
+    "Rwanda": {
+        "flag": "🇷🇼",
+        "RIS": "RW"
+    },
+    "Saudi Arabia": {
+        "flag": "🇸🇦",
+        "RIS": "SA"
+    },
+    "Solomon Islands": {
+        "flag": "🇸🇧",
+        "RIS": "SB"
+    },
+    "Seychelles": {
+        "flag": "🇸🇨",
+        "RIS": "SC"
+    },
+    "Sudan": {
+        "flag": "🇸🇩",
+        "RIS": "SD"
+    },
+    "Sweden": {
+        "flag": "🇸🇪",
+        "RIS": "SE"
+    },
+    "Singapore": {
+        "flag": "🇸🇬",
+        "RIS": "SG"
+    },
+    "St. Helena": {
+        "flag": "🇸🇭",
+        "RIS": "SH"
+    },
+    "Slovenia": {
+        "flag": "🇸🇮",
+        "RIS": "SI"
+    },
+    "Svalbard & Jan Mayen": {
+        "flag": "🇸🇯",
+        "RIS": "SJ"
+    },
+    "Slovakia": {
+        "flag": "🇸🇰",
+        "RIS": "SK"
+    },
+    "Sierra Leone": {
+        "flag": "🇸🇱",
+        "RIS": "SL"
+    },
+    "San Marino": {
+        "flag": "🇸🇲",
+        "RIS": "SM"
+    },
+    "Senegal": {
+        "flag": "🇸🇳",
+        "RIS": "SN"
+    },
+    "Somalia": {
+        "flag": "🇸🇴",
+        "RIS": "SO"
+    },
+    "Suriname": {
+        "flag": "🇸🇷",
+        "RIS": "SR"
+    },
+    "South Sudan": {
+        "flag": "🇸🇸",
+        "RIS": "SS"
+    },
+    "São Tomé & Príncipe": {
+        "flag": "🇸🇹",
+        "RIS": "ST"
+    },
+    "El Salvador": {
+        "flag": "🇸🇻",
+        "RIS": "SV"
+    },
+    "Sint Maarten": {
+        "flag": "🇸🇽",
+        "RIS": "SX"
+    },
+    "Syria": {
+        "flag": "🇸🇾",
+        "RIS": "SY"
+    },
+    "Eswatini": {
+        "flag": "🇸🇿",
+        "RIS": "SZ"
+    },
+    "Tristan da Cunha": {
+        "flag": "🇹🇦",
+        "RIS": "TA"
+    },
+    "Turks & Caicos Islands": {
+        "flag": "🇹🇨",
+        "RIS": "TC"
+    },
+    "Chad": {
+        "flag": "🇹🇩",
+        "RIS": "TD"
+    },
+    "French Southern Territories": {
+        "flag": "🇹🇫",
+        "RIS": "TF"
+    },
+    "Togo": {
+        "flag": "🇹🇬",
+        "RIS": "TG"
+    },
+    "Thailand": {
+        "flag": "🇹🇭",
+        "RIS": "TH"
+    },
+    "Tajikistan": {
+        "flag": "🇹🇯",
+        "RIS": "TJ"
+    },
+    "Tokelau": {
+        "flag": "🇹🇰",
+        "RIS": "TK"
+    },
+    "Timor-Leste": {
+        "flag": "🇹🇱",
+        "RIS": "TL"
+    },
+    "Turkmenistan": {
+        "flag": "🇹🇲",
+        "RIS": "TM"
+    },
+    "Tunisia": {
+        "flag": "🇹🇳",
+        "RIS": "TN"
+    },
+    "Tonga": {
+        "flag": "🇹🇴",
+        "RIS": "TO"
+    },
+    "Turkey": {
+        "flag": "🇹🇷",
+        "RIS": "TR"
+    },
+    "Trinidad & Tobago": {
+        "flag": "🇹🇹",
+        "RIS": "TT"
+    },
+    "Tuvalu": {
+        "flag": "🇹🇻",
+        "RIS": "TV"
+    },
+    "Taiwan": {
+        "flag": "🇹🇼",
+        "RIS": "TW"
+    },
+    "Tanzania": {
+        "flag": "🇹🇿",
+        "RIS": "TZ"
+    },
+    "Ukraine": {
+        "flag": "🇺🇦",
+        "RIS": "UA"
+    },
+    "Uganda": {
+        "flag": "🇺🇬",
+        "RIS": "UG"
+    },
+    "U.S. Outlying Islands": {
+        "flag": "🇺🇲",
+        "RIS": "UM"
+    },
+    "United Nations": {
+        "flag": "🇺🇳",
+        "RIS": "UN"
+    },
+    "United States": {
+        "flag": "🇺🇸",
+        "RIS": "US"
+    },
+    "Uruguay": {
+        "flag": "🇺🇾",
+        "RIS": "UY"
+    },
+    "Uzbekistan": {
+        "flag": "🇺🇿",
+        "RIS": "UZ"
+    },
+    "Vatican City": {
+        "flag": "🇻🇦",
+        "RIS": "VA"
+    },
+    "St. Vincent & Grenadines": {
+        "flag": "🇻🇨",
+        "RIS": "VC"
+    },
+    "Venezuela": {
+        "flag": "🇻🇪",
+        "RIS": "VE"
+    },
+    "British Virgin Islands": {
+        "flag": "🇻🇬",
+        "RIS": "VG"
+    },
+    "U.S. Virgin Islands": {
+        "flag": "🇻🇮",
+        "RIS": "VI"
+    },
+    "Vietnam": {
+        "flag": "🇻🇳",
+        "RIS": "VN"
+    },
+    "Vanuatu": {
+        "flag": "🇻🇺",
+        "RIS": "VU"
+    },
+    "Wallis & Futuna": {
+        "flag": "🇼🇫",
+        "RIS": "WF"
+    },
+    "Samoa": {
+        "flag": "🇼🇸",
+        "RIS": "WS"
+    },
+    "Kosovo": {
+        "flag": "🇽🇰",
+        "RIS": "XK"
+    },
+    "Yemen": {
+        "flag": "🇾🇪",
+        "RIS": "YE"
+    },
+    "Mayotte": {
+        "flag": "🇾🇹",
+        "RIS": "YT"
+    },
+    "South Africa": {
+        "flag": "🇿🇦",
+        "RIS": "ZA"
+    },
+    "Zambia": {
+        "flag": "🇿🇲",
+        "RIS": "ZM"
+    },
+    "Zimbabwe": {
+        "flag": "🇿🇼",
+        "RIS": "ZW"
+    }
+}

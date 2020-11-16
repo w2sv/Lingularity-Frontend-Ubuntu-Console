@@ -5,6 +5,7 @@ from backend import string_resources
 from backend import MongoDBClient
 from termcolor import colored
 
+from frontend.metadata import main_country_flag
 from frontend.utils import query, output, view
 from frontend.state import State
 from frontend.reentrypoint import ReentryPoint, ReentryPointProvider
@@ -45,7 +46,7 @@ def __call__() -> ReentryPoint:
     # display languages already used by user
     output.centered(colorized_header('YOUR LANGUAGES'), "\n")
     for language_group in output.group_by_starting_letter(State.user_languages, is_sorted=False):
-        output.centered('  '.join(language_group))
+        output.centered('  '.join(map(lambda language: f'{language} {main_country_flag(language)}', language_group)))
 
     # display options
     DELIMITER = colorized_header('   |   ')
