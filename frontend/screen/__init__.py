@@ -6,6 +6,7 @@ from . import (
     training_selection,
     post_signup_information,
     missing_internet_exit,
+    connection_error_exit,
     language_addition,
     exit,
     account_deletion

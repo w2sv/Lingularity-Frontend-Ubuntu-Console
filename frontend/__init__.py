@@ -38,10 +38,16 @@ def reentry_at(reentry_point: ReentryPoint):
 
 
 if __name__ == '__main__':
+    from pymongo import errors
+
     from backend.database import instantiate_client
     from . import logging
 
-    if not instantiate_client():  # pymongo.errors.ServerSelectionTimeoutError
-        screen.missing_internet_exit.__call__()
+    if instantiation_error := instantiate_client():
+        if instantiation_error is errors.ServerSelectionTimeoutError:
+            screen.connection_error_exit.__call__()
+        else:  # errors.ConfigurationError
+            screen.missing_internet_exit.__call__()
 
-    __call__()
+    else:
+        __call__()
