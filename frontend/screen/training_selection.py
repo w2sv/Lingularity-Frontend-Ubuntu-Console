@@ -1,9 +1,9 @@
-from typing import Dict, Any, Union, Type, Optional, List
+from typing import Dict, Any, Union, Type, Optional
 import random
 
 from backend import language_metadata
+import asciichartpy_extended
 
-from frontend import asciichartpy
 from frontend.state import State
 from frontend.reentrypoint import ReentryPoint
 from frontend.utils import query, output, view, date
@@ -13,6 +13,7 @@ from frontend.trainers import (
     VocableAdderFrontend,
     TrainerFrontend
 )
+from frontend.trainers.base.sequence_plot_data import SequencePlotData
 from .ops import INTER_OPTION_INDENTATION
 
 
@@ -33,15 +34,15 @@ _KEYWORD_2_ACTION: Dict[str, _ActionOption] = {
 
 
 @view.creator(banner='lingularity/3d-ascii', banner_color='green')
-def __call__(training_item_sequence: Optional[List[int]] = None) -> ReentryPoint:
+def __call__(training_item_sequence_plot_data: Optional[SequencePlotData] = None) -> ReentryPoint:
     view.set_terminal_title(f'{State.language} Training Selection')
 
-    if training_item_sequence is None:
+    if not training_item_sequence_plot_data:
         _display_constitution_query(username=State.username, language=State.language)
 
     # display training item sequences corresponding to previous training action
     else:
-        _display_training_item_sequence(training_item_sequence)
+        _display_training_item_sequence(training_item_sequence_plot_data)
 
     # query desired action
     if (action_selection_keyword := _query_action_selection()) == query.CANCELLED:
@@ -51,7 +52,7 @@ def __call__(training_item_sequence: Optional[List[int]] = None) -> ReentryPoint
     # instantiate frontend if selected
     if _is_trainer_frontend(action_selection):
         trainer_frontend = action_selection()
-        return __call__(training_item_sequence=trainer_frontend.__call__())  # type: ignore
+        return __call__(training_item_sequence_plot_data=trainer_frontend.__call__())  # type: ignore
 
     return action_selection  # type: ignore
 
@@ -82,17 +83,26 @@ def _display_constitution_query(username: str, language: str):
     output.centered(random.choice(list(constitution_queries)), view.VERTICAL_OFFSET)
 
 
-def _display_training_item_sequence(training_item_sequence: List[int]):
-    chart = asciichartpy.plot(training_item_sequence, config=asciichartpy.Config(  # type: ignore
-        height=15,
-        horizontal_point_spacing=5,
-        offset=30,
-        format='{:8.0f}',
-        colors=[asciichartpy.colors.RED],
-        display_x_axis=True
+def _display_training_item_sequence(training_item_sequence_plot_data: SequencePlotData):
+    y_label_max_length = max(map(lambda label: len(str(label)), training_item_sequence_plot_data.sequence))
+    outer_left_x_label = 'two weeks ago'
+    color = [asciichartpy_extended.colors.BLUE, asciichartpy_extended.colors.RED][training_item_sequence_plot_data.item_name.startswith('s')]
+
+    chart = asciichartpy_extended.asciiize(training_item_sequence_plot_data.sequence, config=asciichartpy_extended.Config(  # type: ignore
+        plot_height=15,
+        columns_between_points=5,
+        label_column_offset=max(len(outer_left_x_label) // 2 - y_label_max_length, 0),
+        y_label_decimal_places=0,
+        sequence_colors=[color],
+        axis_description_color=color,
+        x_axis_label_color=asciichartpy_extended.colors.MAGENTA,
+        display_x_axis=True,
+        x_labels={0: outer_left_x_label, 14: 'today'},
+        x_axis_description='date',
+        y_axis_description=training_item_sequence_plot_data.item_name
     ))
 
-    print(chart, view.VERTICAL_OFFSET)
+    output.centered(chart, view.VERTICAL_OFFSET)
 
 
 def _display_last_session_conclusion(last_session_metrics: Dict[str, Any]):

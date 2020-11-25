@@ -1,4 +1,5 @@
-from typing import Optional
+from __future__ import annotations
+from typing import Optional, Union
 from time import sleep
 
 from termcolor import colored
@@ -13,7 +14,7 @@ from backend.trainers.vocable_trainer import (
 )
 
 from . import options
-from frontend.trainers.base import TrainerFrontend
+from frontend.trainers.base import TrainerFrontend, SequencePlotData
 from frontend.trainers.base.options import TrainingOptions, base_options
 from frontend.reentrypoint import ReentryPointProvider
 from frontend.state import State
@@ -34,7 +35,7 @@ from frontend.utils.output import (
 #  revisit score history system
 
 class VocableTrainerFrontend(TrainerFrontend):
-    def __new__(cls, *args, **kwargs) -> ReentryPointProvider:  # type: ignore
+    def __new__(cls, *args, **kwargs) -> Union[ReentryPointProvider, VocableTrainerFrontend]:  # type: ignore
         if not State.vocabulary_available:
             return cls._exit_on_nonexistent_vocabulary()
         return super().__new__(cls)
@@ -68,7 +69,7 @@ class VocableTrainerFrontend(TrainerFrontend):
 
         self._current_vocable_entry: Optional[VocableEntry] = None
 
-    def __call__(self) -> TrainerFrontend.TrainingItemSequence:
+    def __call__(self) -> SequencePlotData:
         self._set_terminal_title()
 
         self._backend.set_item_iterator()
@@ -81,7 +82,7 @@ class VocableTrainerFrontend(TrainerFrontend):
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
 
-        return self._training_item_sequence()
+        return self._training_item_sequence_plot_data()
 
     def _get_training_options(self) -> TrainingOptions:
         return TrainingOptions([base_options.AddVocable,

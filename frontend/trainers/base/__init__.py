@@ -13,6 +13,7 @@ from backend.utils import date as date_utils, either
 from frontend.state import State
 from frontend.utils import output, view, query
 from frontend.trainers.base.options import TrainingOptions
+from frontend.trainers.base.sequence_plot_data import SequencePlotData
 
 
 class TrainerFrontend(ABC):
@@ -34,7 +35,7 @@ class TrainerFrontend(ABC):
     TrainingItemSequence = List[int]
 
     @abstractmethod
-    def __call__(self) -> Optional[TrainingItemSequence]:
+    def __call__(self) -> Optional[SequencePlotData]:
         """ Invokes trainer frontend
 
             Returns:
@@ -131,7 +132,7 @@ class TrainerFrontend(ABC):
     # -----------------
     # Post Training
     # -----------------
-    def _training_item_sequence(self) -> TrainingItemSequence:
+    def _training_item_sequence_plot_data(self) -> SequencePlotData:
         DAY_DELTA = 14
 
         # query language training history of respective trainer
@@ -140,8 +141,11 @@ class TrainerFrontend(ABC):
 
         # get plotting dates
         dates = list(self._plotting_dates(training_dates=iter(training_history.keys()), day_delta=DAY_DELTA))
+
         # get training item sequences, conduct zero-padding on dates on which no training took place
-        return [training_history.get(date, 0) for date in dates]
+        sequence = [training_history.get(date, 0) for date in dates]
+
+        return SequencePlotData(sequence, dates, self._pluralized_item_name)
 
     def _training_chronic_axis_title(self, item_scores: Sequence[int]) -> str:
         if len(item_scores) == 2 and not item_scores[0]:

@@ -1,10 +1,12 @@
 from typing import Optional
 from functools import wraps
+import subprocess
 import os
 
 from termcolor import colored
 
 from frontend.utils import output
+
 
 VERTICAL_OFFSET = '\n' * 2
 
@@ -53,7 +55,7 @@ def _display_banner(kind: str, color='red'):
 
 
 def set_terminal_title(title: str):
-    os.system(f'wmctrl -r :ACTIVE: -N "Lingularity - {title}"')
+    subprocess.run(['wmctrl', '-r', ':ACTIVE:', '-N', f'"Lingularity - {title}"'])
 
 
 DEFAULT_TITLE = 'Acquire Languages the Litboy Way'

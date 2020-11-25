@@ -8,7 +8,7 @@ from backend.utils.strings import common_start, strip_multiple
 
 from . import options
 from . import modes
-from frontend.trainers.base import TrainerFrontend
+from frontend.trainers.base import TrainerFrontend, SequencePlotData
 from frontend.trainers.base.options import TrainingOptions, base_options
 from frontend.utils import view, query
 from frontend.utils.output import (
@@ -33,7 +33,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
 
         self._redo_print = RedoPrint()
 
-    def __call__(self) -> TrainerFrontend.TrainingItemSequence:
+    def __call__(self) -> SequencePlotData:
         self._set_terminal_title()
 
         self._set_tts_language_variety_if_applicable()
@@ -46,7 +46,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
 
-        return self._training_item_sequence()
+        return self._training_item_sequence_plot_data()
 
     def _get_training_options(self) -> TrainingOptions:
         option_classes = [base_options.AddVocable, base_options.RectifyLatestAddedVocableEntry, base_options.Exit]
