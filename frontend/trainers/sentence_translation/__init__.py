@@ -57,7 +57,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         if bool(self._tts.language_variety_choices):
             option_classes += [options.ChangeTTSLanguageVariety]
 
-        return TrainingOptions(option_classes=option_classes, frontend_instance=self)
+        return TrainingOptions(option_classes=option_classes, frontend_instance=self)  # type: ignore
 
     @property
     def _training_designation(self) -> str:

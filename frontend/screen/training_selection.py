@@ -51,8 +51,8 @@ def __call__(training_item_sequence_plot_data: Optional[SequencePlotData] = None
 
     # instantiate frontend if selected
     if _is_trainer_frontend(action_selection):
-        trainer_frontend = action_selection()
-        return __call__(training_item_sequence_plot_data=trainer_frontend.__call__())  # type: ignore
+        trainer_frontend = action_selection()  # type: ignore
+        return __call__(training_item_sequence_plot_data=trainer_frontend.__call__())
 
     return action_selection  # type: ignore
 
@@ -89,7 +89,7 @@ def _display_training_item_sequence(training_item_sequence_plot_data: SequencePl
     color = [asciichartpy_extended.colors.BLUE, asciichartpy_extended.colors.RED][training_item_sequence_plot_data.item_name.startswith('s')]
 
     try:
-        chart = asciichartpy_extended.asciiize(training_item_sequence_plot_data.sequence, config=asciichartpy_extended.Config(  # type: ignore
+        chart = asciichartpy_extended.asciiize(training_item_sequence_plot_data.sequence, config=asciichartpy_extended.Config(
             plot_height=15,
             columns_between_points=5,
             label_column_offset=max(len(outer_left_x_label) // 2 - y_label_max_length, 0),

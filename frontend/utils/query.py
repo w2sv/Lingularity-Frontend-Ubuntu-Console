@@ -92,9 +92,10 @@ def relentlessly(prompt: str,
     else:
         response = _escape_unicode_stripped(query_method(prompt))
 
-    if options and (response := _resolve_input(response, options=options)) is None or correctness_verifier and not correctness_verifier(response):
+    verified_response = None
+    if options and (verified_response := _resolve_input(response, options=options)) is None or correctness_verifier and not correctness_verifier(response):
         return repeat(relentlessly, n_deletion_lines=2, message=error_indication_message, args=args)
-    return response
+    return verified_response or response
 
 
 def cancelably(prompt: str, query_method=input) -> str:
