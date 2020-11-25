@@ -88,21 +88,24 @@ def _display_training_item_sequence(training_item_sequence_plot_data: SequencePl
     outer_left_x_label = 'two weeks ago'
     color = [asciichartpy_extended.colors.BLUE, asciichartpy_extended.colors.RED][training_item_sequence_plot_data.item_name.startswith('s')]
 
-    chart = asciichartpy_extended.asciiize(training_item_sequence_plot_data.sequence, config=asciichartpy_extended.Config(  # type: ignore
-        plot_height=15,
-        columns_between_points=5,
-        label_column_offset=max(len(outer_left_x_label) // 2 - y_label_max_length, 0),
-        y_label_decimal_places=0,
-        sequence_colors=[color],
-        axis_description_color=color,
-        x_axis_label_color=asciichartpy_extended.colors.MAGENTA,
-        display_x_axis=True,
-        x_labels={0: outer_left_x_label, 14: 'today'},
-        x_axis_description='date',
-        y_axis_description=training_item_sequence_plot_data.item_name
-    ))
+    try:
+        chart = asciichartpy_extended.asciiize(training_item_sequence_plot_data.sequence, config=asciichartpy_extended.Config(  # type: ignore
+            plot_height=15,
+            columns_between_points=5,
+            label_column_offset=max(len(outer_left_x_label) // 2 - y_label_max_length, 0),
+            y_label_decimal_places=0,
+            sequence_colors=[color],
+            axis_description_color=color,
+            x_axis_label_color=asciichartpy_extended.colors.MAGENTA,
+            display_x_axis=True,
+            x_labels={0: outer_left_x_label, 14: 'today'},
+            x_axis_description='date',
+            y_axis_description=training_item_sequence_plot_data.item_name
+        ))
+        output.centered(chart, view.VERTICAL_OFFSET)
 
-    output.centered(chart, view.VERTICAL_OFFSET)
+    except ZeroDivisionError:
+        pass
 
 
 def _display_last_session_conclusion(last_session_metrics: Dict[str, Any]):
