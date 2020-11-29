@@ -7,7 +7,7 @@ from termcolor import colored
 OFFSET = ' ' * 7
 
 
-def color_description(description: str, keyword_index: int, color: str) -> str:
+def color_description(description: str, keyword_index: int, color='red') -> str:
     description_splits = description.split(' ')
     for i, split in enumerate(description_splits):
         coloring_function: Callable[[str, str], str] = color_keyword if i == keyword_index else colored  # type: ignore
@@ -16,7 +16,7 @@ def color_description(description: str, keyword_index: int, color: str) -> str:
     return' '.join(description_splits)
 
 
-def color_keyword(keyword: str, color: str) -> str:
+def color_keyword(keyword: str, color='red') -> str:
     return '(' + colored(keyword[0], color) + ')' + colored(keyword[1:], color)
 
 
