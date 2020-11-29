@@ -10,10 +10,10 @@ from frontend.utils import query, output, view
 from frontend.state import State
 from frontend.reentrypoint import ReentryPoint, ReentryPointProvider
 from frontend.screen import account_deletion
-from frontend.screen.ops import option
+from frontend.screen import _action_option
 
 
-@view.creator(title='Acquire Languages the Litboy Way', banner_args=('lingularity/ansi-shadow', 'red'))
+@view.creator(title=view.terminal.DEFAULT_TITLE, banner_args=('lingularity/ansi-shadow', 'red'))
 def __call__() -> ReentryPoint:
     """ Displays languages already used by user, as well as additional procedure options of
             - adding a new language
@@ -51,13 +51,13 @@ def __call__() -> ReentryPoint:
 
     # display option descriptions
     DESCRIPTIONS = ['Add Language', 'Remove Language', 'Sign Out', 'Delete Account', 'Quit']
-    descriptions = list(map(lambda description: option.color_description(description, keyword_index=0, color='red'), DESCRIPTIONS))
+    descriptions = list(map(lambda description: _action_option.color_description(description, keyword_index=0, color='red'), DESCRIPTIONS))
 
     OPTION_CLASS_DELIMITER = colorized_header('   |   ')
 
     OPTION_BLOCK = (
-        f"{colorized_header('ADDITIONAL OPTIONS:')}{option.OFFSET}{descriptions[0]}{option.OFFSET}{descriptions[1]}"
-        f"{OPTION_CLASS_DELIMITER}{descriptions[2]}{option.OFFSET}{descriptions[3]}"
+        f"{colorized_header('ADDITIONAL OPTIONS:')}{_action_option.OFFSET}{descriptions[0]}{_action_option.OFFSET}{descriptions[1]}"
+        f"{OPTION_CLASS_DELIMITER}{descriptions[2]}{_action_option.OFFSET}{descriptions[3]}"
         f"{OPTION_CLASS_DELIMITER}{descriptions[4]}"
     )
     output.centered(f'\n{OPTION_BLOCK}\n')

@@ -1,12 +1,11 @@
 from typing import Optional, Tuple
 from functools import wraps
-import subprocess
 import os
 
 from termcolor import colored
 
 from frontend.utils import output
-
+from frontend.utils.view import terminal
 
 VERTICAL_OFFSET = '\n' * 2
 
@@ -42,7 +41,7 @@ def creator(title: Optional[str] = None,
 
             # set title if applicable
             if title is not None:
-                set_terminal_title(title=title)
+                terminal.set_title(title=title)
 
             # display banner or header with consecutive vertical offset
             if any([header, banner_args]):
@@ -62,12 +61,3 @@ def creator(title: Optional[str] = None,
 def _display_banner(kind: str, color='red'):
     banner = open(f'{os.getcwd()}/frontend/banners/{kind}.txt', 'r').read()
     output.centered(colored(banner, color))
-
-
-def set_terminal_title(title: str):
-    # TODO: fix on ubuntu 20.04
-
-    subprocess.run(['wmctrl', '-r', ':ACTIVE:', '-N', f'"Lingularity - {title}"'])
-
-
-DEFAULT_TITLE = 'Acquire Languages the Litboy Way'

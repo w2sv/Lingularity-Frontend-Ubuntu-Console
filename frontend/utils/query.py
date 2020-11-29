@@ -74,8 +74,7 @@ def relentlessly(prompt: str,
                  indentation_percentage=0.0,
                  error_indication_message=_INDISSOLUBILITY_MESSAGE,
                  sleep_duration=1.0,
-                 cancelable=False,
-                 query_method=input) -> str:
+                 cancelable=False) -> str:
 
     """ Repeats query defined by prompt until response unambiguously
         identifying singular option element has been given """
@@ -87,10 +86,10 @@ def relentlessly(prompt: str,
         prompt = f'{output.column_percentual_indentation(indentation_percentage)}{prompt}'
 
     if cancelable:
-        if (response := cancelably(prompt, query_method=query_method)) == CANCELLED:
+        if (response := cancelably(prompt)) == CANCELLED:
             return CANCELLED
     else:
-        response = _escape_unicode_stripped(query_method(prompt))
+        response = _escape_unicode_stripped(input(prompt))
 
     verified_response = None
     if options and (verified_response := _resolve_input(response, options=options)) is None or correctness_verifier and not correctness_verifier(response):
@@ -98,13 +97,13 @@ def relentlessly(prompt: str,
     return verified_response or response
 
 
-def cancelably(prompt: str, query_method=input) -> str:
+def cancelably(prompt: str) -> str:
     print(prompt, end='', flush=True)
 
     if _escape_key_pressed():
         return CANCELLED
 
-    return _escape_unicode_stripped(query_method())
+    return _escape_unicode_stripped(input(''))
 
 
 def _escape_unicode_stripped(string: str) -> str:

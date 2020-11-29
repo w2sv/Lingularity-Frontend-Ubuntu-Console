@@ -13,6 +13,6 @@ from . import (
 )
 
 
-@abstractmodulemethod
+@abstractmodulemethod(ignore_modules=['_action_option', '_ops'])
 def __call__():
     pass

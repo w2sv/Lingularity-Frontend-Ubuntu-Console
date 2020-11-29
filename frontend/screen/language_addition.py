@@ -13,6 +13,7 @@ from frontend.reentrypoint import ReentryPoint
 from frontend.utils import view, query, output
 
 
+# enable hundred delimiting by local convention
 locale.setlocale(locale.LC_ALL, '')
 
 
@@ -22,7 +23,7 @@ def __call__() -> ReentryPoint:
         tts/tokenization availability in block indented manner, writes selected
         language into global state """
 
-    view.set_terminal_title(['Add a new language', "Select a language you'd like to learn"][State.is_new_user])
+    view.terminal.set_title(['Add a new language', "Select a language you'd like to learn"][State.is_new_user])
 
     # strip languages already used by user from eligible ones
     eligible_languages = list(set(language_metadata.keys()) - State.user_languages)

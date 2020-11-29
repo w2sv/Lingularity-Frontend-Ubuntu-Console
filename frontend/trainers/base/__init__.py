@@ -43,7 +43,7 @@ class TrainerFrontend(ABC):
         pass
 
     def _set_terminal_title(self):
-        view.set_terminal_title(f'{self._backend.language} {self._training_designation}')
+        view.terminal.set_title(f'{self._backend.language} {self._training_designation}')
 
     @property
     @abstractmethod

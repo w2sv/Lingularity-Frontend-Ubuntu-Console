@@ -1,4 +1,4 @@
-from typing import Dict, Any, Union, Type, Optional
+from typing import Union, Type, Optional
 import random
 
 from backend import language_metadata
@@ -14,29 +14,20 @@ from frontend.trainers import (
     TrainerFrontend
 )
 from frontend.trainers.base.sequence_plot_data import SequencePlotData
-from .ops.option import Options, Option
-
-_ActionOption = Union[
-    Type[SentenceTranslationTrainerFrontend],
-    Type[VocableTrainerFrontend],
-    Type[VocableAdderFrontend],
-    ReentryPoint
-]
+from frontend.screen._action_option import Option, Options
 
 
-_options = Options(
-    options=[
-        Option('Translate Sentences', keyword_index=1, callback=SentenceTranslationTrainerFrontend),
-        Option('Train Vocabulary', keyword_index=1, callback=VocableTrainerFrontend),
-        Option('Add Vocabulary', keyword_index=0, callback=VocableAdderFrontend),
-        Option('Quit', callback=ReentryPoint.Exit)],
-    color='red'
-)
+_options = Options([
+    Option('Translate Sentences', keyword_index=1, callback=SentenceTranslationTrainerFrontend),
+    Option('Train Vocabulary', keyword_index=1, callback=VocableTrainerFrontend),
+    Option('Add Vocabulary', keyword_index=0, callback=VocableAdderFrontend),
+    Option('Quit', callback=ReentryPoint.Exit)
+])
 
 
 @view.creator(banner_args=('lingularity/3d-ascii', 'green'))
 def __call__(training_item_sequence_plot_data: Optional[SequencePlotData] = None) -> ReentryPoint:
-    view.set_terminal_title(f'{State.language} Training Selection')
+    view.terminal.set_title(f'{State.language} Training Selection')
 
     if not training_item_sequence_plot_data:
         _display_constitution_query(username=State.username, language=State.language)
@@ -67,7 +58,15 @@ def _query_action_selection() -> str:
     )
 
 
-def _is_trainer_frontend(action: _ActionOption) -> bool:
+_OptionCallbacks = Union[
+    Type[SentenceTranslationTrainerFrontend],
+    Type[VocableTrainerFrontend],
+    Type[VocableAdderFrontend],
+    ReentryPoint
+]
+
+
+def _is_trainer_frontend(action: _OptionCallbacks) -> bool:
     return isinstance(action, type) and issubclass(action, TrainerFrontend)
 
 
