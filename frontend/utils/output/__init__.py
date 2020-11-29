@@ -35,3 +35,8 @@ def group_by_starting_letter(strings: Iterable[str], is_sorted: bool) -> Iterato
 
 
 EMPTY_ROW = ''
+
+
+def empty_row(times=1):
+    for _ in range(times):
+        print()

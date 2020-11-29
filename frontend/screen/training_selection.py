@@ -33,7 +33,7 @@ _KEYWORD_2_ACTION: Dict[str, _ActionOption] = {
 }
 
 
-@view.creator(banner='lingularity/3d-ascii', banner_color='green')
+@view.creator(banner_args=('lingularity/3d-ascii', 'green'))
 def __call__(training_item_sequence_plot_data: Optional[SequencePlotData] = None) -> ReentryPoint:
     view.set_terminal_title(f'{State.language} Training Selection')
 

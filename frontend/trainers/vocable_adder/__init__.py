@@ -4,7 +4,7 @@ from backend.trainers import VocableAdderBackend as Backend
 
 from frontend.trainers.base import TrainerFrontend
 from frontend.trainers.base.options import TrainingOptions, base_options
-from frontend.utils import query, output, view
+from frontend.utils import query, output as op, view
 
 
 class VocableAdderFrontend(TrainerFrontend):
@@ -33,18 +33,18 @@ class VocableAdderFrontend(TrainerFrontend):
     def _pluralized_item_name(self) -> str:
         return ''
 
-    @view.creator(banner='vocable-adder/ansi-shadow', banner_color='blue')
+    @view.creator(banner_args=('vocable-adder/ansi-shadow', 'blue'))
     def _display_training_screen_header_section(self):
         self._training_options.display_instructions()
-        print(output.EMPTY_ROW)
+        op.empty_row()
 
     def _run_training_loop(self):
         add_vocable = base_options.AddVocable(cancelable=True)
 
         while True:
-            print(output.EMPTY_ROW)
+            op.empty_row()
 
-            if cancelled := add_vocable():
+            if add_vocable():
                 return
 
             self._output_vocable_addition_confirmation()
@@ -56,7 +56,7 @@ class VocableAdderFrontend(TrainerFrontend):
                 if self._training_options.exit_training:
                     return
 
-            output.erase_lines(2)
+            op.erase_lines(2)
 
     def _output_vocable_addition_confirmation(self):
-        output.centered(f'{colored("Added", color="cyan")} {str(self._latest_created_vocable_entry)}')
+        op.centered(f'{colored("Added", color="cyan")} {str(self._latest_created_vocable_entry)}')

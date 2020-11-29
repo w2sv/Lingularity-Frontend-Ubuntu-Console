@@ -6,7 +6,7 @@ from frontend.utils import query, view
 from frontend.screen.authentication._utils import authentication_screen, HORIZONTAL_INDENTATION
 
 
-@view.creator(title='Sign Up', banner='lingularity/isometric2', banner_color='red')
+@view.creator(title='Sign Up', banner_args=('lingularity/isometric2', 'red'))
 @authentication_screen
 def __call__() -> Tuple[str, bool]:
     """ Returns:

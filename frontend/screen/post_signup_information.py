@@ -1,7 +1,7 @@
 from frontend.utils import view, output, query
 
 
-@view.creator(title='General Usage Information', banner='lingularity/isometric2', banner_color='grey')
+@view.creator(title='General Usage Information', banner_args=('lingularity/isometric2', 'grey'))
 def __call__():
     print(output.row_percentual_indentation(0.15))
 

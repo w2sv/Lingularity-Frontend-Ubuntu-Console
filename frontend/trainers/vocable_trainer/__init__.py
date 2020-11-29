@@ -1,11 +1,10 @@
 from __future__ import annotations
 from typing import Optional, Union
-from time import sleep
+import time
 
 from termcolor import colored
-
+from backend.utils import strings
 from backend.trainers.components import VocableEntry
-from backend.utils.strings import split_at_uppercase, common_start
 from backend.trainers.vocable_trainer import (
     VocableTrainerBackend as Backend,
     ResponseEvaluation,
@@ -13,22 +12,12 @@ from backend.trainers.vocable_trainer import (
     deviation_masks
 )
 
-from . import options
+from frontend.state import State
+from frontend.utils import query, view, output as op
+from frontend.reentrypoint import ReentryPointProvider
 from frontend.trainers.base import TrainerFrontend, SequencePlotData
 from frontend.trainers.base.options import TrainingOptions, base_options
-from frontend.reentrypoint import ReentryPointProvider
-from frontend.state import State
-from frontend.utils import query, view
-from frontend.utils.output import (
-    erase_lines,
-    centered,
-    block_centering_indentation,
-    UndoPrint,
-    centering_indentation,
-    colorize_chars,
-    cursor_hider,
-    column_percentual_indentation
-)
+from frontend.trainers.vocable_trainer import options
 
 
 # TODO: set up modes
@@ -41,18 +30,18 @@ class VocableTrainerFrontend(TrainerFrontend):
         return super().__new__(cls)
 
     @staticmethod
-    @cursor_hider
-    @view.creator(banner='lingularity/bloody', banner_color='red')
+    @op.cursor_hider
+    @view.creator(banner_args=('lingularity/bloody', 'red'))
     def _exit_on_nonexistent_vocabulary():
-        print(column_percentual_indentation(0.1))
+        print(op.column_percentual_indentation(0.1))
 
-        centered("You have to accumulate vocabulary by means of the "
-                 "SentenceTranslationTrainer or VocableAdder first "
-                 "in order to use this training mode.", view.VERTICAL_OFFSET)
+        op.centered("You have to accumulate vocabulary by means of the "
+                    "SentenceTranslationTrainer or VocableAdder first "
+                    "in order to use this training mode.", view.VERTICAL_OFFSET)
 
-        sleep(3)
+        time.sleep(3)
 
-        centered('HIT ENTER IN ORDER TO RETURN TO TRAINING SELECTION')
+        op.centered('HIT ENTER IN ORDER TO RETURN TO TRAINING SELECTION')
         input()
 
         return lambda: None
@@ -61,7 +50,7 @@ class VocableTrainerFrontend(TrainerFrontend):
         super().__init__(backend_type=Backend)
         self._backend: Backend
 
-        self._undo_print = UndoPrint()
+        self._undo_print = op.UndoPrint()
 
         self._accumulated_score: float = 0.0
         self._streak: int = 0
@@ -98,29 +87,27 @@ class VocableTrainerFrontend(TrainerFrontend):
     # -----------------
     # Pre Training
     # -----------------
-    @view.creator()
+    @view.creator(vertical_offsets=0)
     def _display_new_vocabulary_if_desired(self):
-        print(view.VERTICAL_OFFSET * 2)
-        centered('Would you like to see the vocable entries you recently created? (y)es/(n)o')
-        centered(' ', end='')
+        print(op.column_percentual_indentation(0.45))
+        op.centered('Would you like to see the vocable entries you recently created? (y)es/(n)o')
+        op.centered(' ', end='')
 
         if query.relentlessly(prompt='', options=['yes', 'no']) == 'yes':
             self._display_new_vocable_entries()
 
-    @view.creator()
+    @view.creator(vertical_offsets=2)
     def _display_new_vocable_entries(self):
         assert self._backend.new_vocable_entries is not None
 
-        print(view.VERTICAL_OFFSET)
-
         # display entry line representations
         line_reprs = list(map(lambda entry: str(entry), self._backend.new_vocable_entries))
-        indentation = block_centering_indentation(line_reprs)
+        indentation = op.block_centering_indentation(line_reprs)
         for line_repr in line_reprs:
             print(indentation, line_repr)
 
         # wait for key press
-        centered(f'{view.VERTICAL_OFFSET}PRESS ANY KEY TO CONTINUE')
+        op.centered(f'{view.VERTICAL_OFFSET}PRESS ANY KEY TO CONTINUE')
         query.centered()
 
     # ------------------
@@ -132,8 +119,8 @@ class VocableTrainerFrontend(TrainerFrontend):
         #  elaborate usage instructions, functionality explanation
 
         # display number of retrieved vocables to be trained
-        centered(f'Found {self._backend.n_training_items} imperfect entries\n\n')
-        centered("Hit Enter to proceed after response evaluation\n")
+        op.centered(f'Found {self._backend.n_training_items} imperfect entries\n\n')
+        op.centered("Hit Enter to proceed after response evaluation\n")
 
         # display instructions
         self._training_options.display_instructions(
@@ -167,7 +154,7 @@ class VocableTrainerFrontend(TrainerFrontend):
             # english ground_truth amongst training vocables
             vocable_identification_aid = ''
             if synonyms := self._backend.paraphrases.get(entry.the_stripped_meaning):
-                vocable_identification_aid = entry.vocable[:len(common_start(synonyms)) + 1]
+                vocable_identification_aid = entry.vocable[:len(strings.common_start(synonyms)) + 1]
                 print(vocable_identification_aid, end='')
 
             response = input()
@@ -179,7 +166,7 @@ class VocableTrainerFrontend(TrainerFrontend):
             self._backend.mongodb_client.update_vocable_entry(entry.vocable, entry.score)
 
             # erase query line, redo ground_truth query
-            erase_lines(1)
+            op.erase_lines(1)
             self._undo_print(translation_query_output, end='')
 
             ground_truth_output = f'{colored(entry.vocable, "green")}'
@@ -193,10 +180,10 @@ class VocableTrainerFrontend(TrainerFrontend):
                 if response_evaluation is ResponseEvaluation.AlmostCorrect:
                     response_deviation_mask, ground_truth_deviation_mask = deviation_masks(response=response, ground_truth=entry.vocable)
 
-                    response = colorize_chars(response, char_mask=response_deviation_mask, color_kwargs={'color': "red"})
-                    ground_truth_output = colorize_chars(entry.vocable, char_mask=ground_truth_deviation_mask, color_kwargs={'color': 'green', 'attrs': ['underline']}, fallback_color_kwargs={'color': 'green'})
+                    response = op.colorize_chars(response, char_mask=response_deviation_mask, color_kwargs={'color': "red"})
+                    ground_truth_output = op.colorize_chars(entry.vocable, char_mask=ground_truth_deviation_mask, color_kwargs={'color': 'green', 'attrs': ['underline']}, fallback_color_kwargs={'color': 'green'})
 
-                self._undo_print(f'{response} | {colored(" ".join(split_at_uppercase(response_evaluation.name)).upper(), EVALUATION_2_COLOR[response_evaluation])}', end='')
+                self._undo_print(f'{response} | {colored(" ".join(strings.split_at_uppercase(response_evaluation.name)).upper(), EVALUATION_2_COLOR[response_evaluation])}', end='')
 
                 # display correct ground_truth in case of imperfect response
                 if response_evaluation is not ResponseEvaluation.Correct:
@@ -219,7 +206,7 @@ class VocableTrainerFrontend(TrainerFrontend):
 
             # display sentence pairs
             for sentence_pair in related_sentence_pairs:
-                centered(' - '.join(reversed(sentence_pair)), line_counter=self._undo_print)
+                op.centered(' - '.join(reversed(sentence_pair)), line_counter=self._undo_print)
             self._undo_print('')
 
             # increment/reassign attributes
@@ -231,11 +218,11 @@ class VocableTrainerFrontend(TrainerFrontend):
 
             # display absolute entry progress if n_trained_items divisible by 10
             if not self._n_trained_items % 10 and self._n_trained_items != self._backend.n_training_items:
-                centered(f'\n{self._n_trained_items} Entries faced, {self._backend.n_training_items - self._n_trained_items} more to go\n', line_counter=self._undo_print)
+                op.centered(f'\n{self._n_trained_items} Entries faced, {self._backend.n_training_items - self._n_trained_items} more to go\n', line_counter=self._undo_print)
             self._undo_print('')
 
             # query option/procedure, __call__ option if applicable
-            option_selection = query.relentlessly(prompt=f'{centering_indentation(" ")}$', options=self._training_options.keywords)
+            option_selection = query.relentlessly(prompt=f'{op.centering_indentation(" ")}$', options=self._training_options.keywords)
             self._undo_print.add_lines_to_buffer(1)
 
             if len(option_selection):
@@ -258,7 +245,7 @@ class VocableTrainerFrontend(TrainerFrontend):
         completed_string = '=' * int(BAR_LENGTH * percentage)
         impending_string = '-' * int(BAR_LENGTH - len(completed_string))
 
-        centered(f"[{completed_string}{impending_string}]", end=' ', line_counter=self._undo_print)
+        op.centered(f"[{completed_string}{impending_string}]", end=' ', line_counter=self._undo_print)
         self._undo_print(f'{int(round(percentage * 100))}%\n\n')
 
     def _display_streak(self):
@@ -274,7 +261,7 @@ class VocableTrainerFrontend(TrainerFrontend):
                 if self._streak >= 7:
                     background = ['on_green', 'on_yellow', 'on_blue', 'on_cyan', 'on_white'][min((self._streak - 7) // 2, 4)]
 
-            centered(f'Current streak: {colored(str(self._streak), "red", background, attrs=attrs)}', end='', line_counter=self._undo_print)
+            op.centered(f'Current streak: {colored(str(self._streak), "red", background, attrs=attrs)}', end='', line_counter=self._undo_print)
         self._undo_print('\n\n')
 
     def _update_streak(self, response_evaluation: ResponseEvaluation):

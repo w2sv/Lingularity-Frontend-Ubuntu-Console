@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple
 from functools import wraps
 import subprocess
 import os
@@ -11,35 +11,45 @@ from frontend.utils import output
 VERTICAL_OFFSET = '\n' * 2
 
 
-def creator(
-        header: Optional[str] = None,
-        title: Optional[str] = None,
-        banner: Optional[str] = None,
-        banner_color: Optional[str] = None
-):
-    """ Decorator for functions creating new output view,
+def creator(title: Optional[str] = None,
+            header: Optional[str] = None,
+            banner_args: Optional[Tuple[str, str]] = None,
+            vertical_offsets: int = 1):
+
+    """ Decorator for functions creating new screen view,
         serving both documentation purposes as well as initializing the latter
         by
             clearing screen,
-            outputting vertical offset,
+            outputting vertical offset(s),
 
             and eventually:
-              displaying passed header with vertical offset """
+              displaying passed header/colored banner with vertical offset
+
+        Args:
+            title: terminal title
+            header: displayed in centered manner in case of reception
+            banner_args: tuple of relative banner path from banner directory, banner color
+            vertical_offsets: inserted after banner/header """
 
     def outer_wrapper(function):
         @wraps(function)
         def wrapper(*args, **kwargs):
+            # clear screen, output vertical offsets
             output.clear_screen()
-            print(VERTICAL_OFFSET)
 
+            for _ in range(vertical_offsets):
+                print(VERTICAL_OFFSET)
+
+            # set title if applicable
             if title is not None:
                 set_terminal_title(title=title)
 
-            if any([title, banner]):
-                if banner is not None:
-                    _display_banner(kind=banner, color=banner_color)
+            # display banner or header with consecutive vertical offset
+            if any([header, banner_args]):
+                if banner_args is not None:
+                    _display_banner(kind=banner_args[0], color=banner_args[1])
 
-                if header is not None:
+                elif header is not None:
                     output.centered(header)
 
                 print(VERTICAL_OFFSET, end='')
@@ -55,6 +65,8 @@ def _display_banner(kind: str, color='red'):
 
 
 def set_terminal_title(title: str):
+    # TODO: fix on ubuntu 20.04
+
     subprocess.run(['wmctrl', '-r', ':ACTIVE:', '-N', f'"Lingularity - {title}"'])
 
 

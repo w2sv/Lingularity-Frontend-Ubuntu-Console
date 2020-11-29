@@ -15,7 +15,7 @@ from frontend.screen.ops import reference_language
 locale.setlocale(locale.LC_ALL, '')
 
 
-@view.creator(banner='languages/3d-ascii', banner_color='cyan')
+@view.creator(banner_args=('languages/3d-ascii', 'cyan'))
 def __call__() -> ReentryPoint:
     """ Displays languages not yet used by user, colorized with regards to their
         tts/tokenization availability in block indented manner, writes selected

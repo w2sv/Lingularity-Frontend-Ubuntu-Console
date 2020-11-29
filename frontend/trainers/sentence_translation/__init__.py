@@ -3,25 +3,16 @@ import time
 
 from termcolor import colored
 
+from backend.utils import strings
 from backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend, TextToSpeech
-from backend.utils.strings import common_start, strip_multiple
 
-from . import options
-from . import modes
+from frontend.utils import view, query, output as op
 from frontend.trainers.base import TrainerFrontend, SequencePlotData
 from frontend.trainers.base.options import TrainingOptions, base_options
-from frontend.utils import view, query
-from frontend.utils.output import (
-    erase_lines,
-    centered,
-    block_centering_indentation,
-    RedoPrint,
-    cursor_hider,
-    column_percentual_indentation
-)
+from frontend.trainers.sentence_translation import modes, options
 
 
-_SENTENCE_INDENTATION = column_percentual_indentation(0.15)
+_SENTENCE_INDENTATION = op.column_percentual_indentation(0.15)
 
 
 class SentenceTranslationTrainerFrontend(TrainerFrontend):
@@ -31,7 +22,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         super().__init__(backend_type=Backend)
         self._backend: Backend
 
-        self._redo_print = RedoPrint()
+        self._redo_print = op.RedoPrint()
 
     def __call__(self) -> SequencePlotData:
         self._set_terminal_title()
@@ -80,7 +71,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
     def _select_training_mode(self) -> str:
 
         # display eligible modes
-        indentation = block_centering_indentation(modes.explanations)
+        indentation = op.block_centering_indentation(modes.explanations)
         for keyword, explanation in zip(modes.keywords, modes.explanations):
             print(f'{indentation}{colored(f"{keyword}:", color="red")}')
             print(f'{indentation}\t{explanation}\n')
@@ -100,32 +91,31 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         if all([self._tts.available, not self._tts.language_variety, self._tts.language_variety_choices]):
             self._tts.language_variety = self._select_tts_language_variety()
 
-    @view.creator(title='TTS Language Variety Selection', banner='language-varieties/larry-3d', banner_color='blue')
+    @view.creator(title='TTS Language Variety Selection', banner_args=('language-varieties/larry-3d', 'blue'), vertical_offsets=2)
     def _select_tts_language_variety(self) -> str:
         """ Returns:
                 selected language variety: element of language_variety_choices """
 
         assert self._tts.language_variety_choices is not None
 
-        print(view.VERTICAL_OFFSET)
+        # discard overlapping variety parts
+        common_start_length = len(strings.common_start(self._tts.language_variety_choices))
+        processed_varieties = [strings.strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._tts.language_variety_choices]
 
         # display eligible varieties
-        common_start_length = len(common_start(self._tts.language_variety_choices))
-        processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._tts.language_variety_choices]
-        indentation = block_centering_indentation(processed_varieties)
+        indentation = op.block_centering_indentation(processed_varieties)
         for variety in processed_varieties:
             print(indentation, variety)
-        print('\n\n')
+        op.empty_row(times=2)
 
         # query variety
-        dialect_selection = query.relentlessly(
-            prompt=f'{column_percentual_indentation(percentage=0.37)}Enter desired variety: ', options=processed_varieties)
+        dialect_selection = query.relentlessly(prompt=f'{op.column_percentual_indentation(percentage=0.37)}Enter desired variety: ', options=processed_varieties)
         return self._tts.language_variety_choices[processed_varieties.index(dialect_selection)]
 
     # -----------------
     # Training
     # -----------------
-    @view.creator(header=None)
+    @view.creator()
     def _display_training_screen_header_section(self):
         self._display_session_information()
         self._training_options.display_instructions(insertion_args=((3, 'TEXT-TO-SPEECH OPTIONS', True),))
@@ -138,17 +128,20 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
             self._output_lets_go()
 
     def _display_session_information(self):
-        centered(f"Document comprises {self._backend.n_training_items:,d} sentences.\n")
+        """ Displays magnitude of underlying sentence data,
+            country conversion forenames originating from if applicable """
+
+        op.centered(f"Document comprises {self._backend.n_training_items:,d} sentences.\n")
 
         # display picked country corresponding to replacement forenames
         if self._backend.forename_converter is not None:
             if demonym := self._backend.forename_converter.demonym:
-                centered(f'Employing {demonym} forenames.')
+                op.centered(f'Employing {demonym} forenames.')
             else:
-                centered(f'Employing forenames stemming from {self._backend.forename_converter.country}.')
-        print('')
+                op.centered(f'Employing forenames stemming from {self._backend.forename_converter.country}.')
+        op.empty_row()
 
-    @cursor_hider
+    @op.cursor_hider
     def _run_training_loop(self):
         translation = self._process_procured_sentence_pair()
 
@@ -173,7 +166,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
                 # ----ENTER-STROKE----
 
                 # erase pending... + entered option identifier
-                erase_lines(2)
+                op.erase_lines(2)
 
                 # output translation_field
                 self._redo_print(f'{_SENTENCE_INDENTATION}{translation}')

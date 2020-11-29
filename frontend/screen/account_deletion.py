@@ -5,7 +5,7 @@ from frontend.reentrypoint import ReentryPoint
 from frontend.screen.ops import remove_user_from_disk
 
 
-@view.creator(banner='lingularity/impossible', banner_color='yellow')
+@view.creator(banner_args=('lingularity/impossible', 'yellow'))
 def __call__() -> ReentryPoint:
     print(output.row_percentual_indentation(percentage=0.15))
 

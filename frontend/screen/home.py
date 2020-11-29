@@ -12,7 +12,7 @@ from frontend.reentrypoint import ReentryPoint, ReentryPointProvider
 from frontend.screen import account_deletion, ops
 
 
-@view.creator(title='Acquire Languages the Litboy Way', banner='lingularity/ansi-shadow', banner_color='red')
+@view.creator(title='Acquire Languages the Litboy Way', banner_args=('lingularity/ansi-shadow', 'red'))
 def __call__() -> ReentryPoint:
     """ Displays languages already used by user, as well as additional procedure options of
             - adding a new language
