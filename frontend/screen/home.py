@@ -10,6 +10,7 @@ from frontend.utils import query, output, view
 from frontend.state import State
 from frontend.reentrypoint import ReentryPoint, ReentryPointProvider
 from frontend.screen import account_deletion, ops
+from frontend.screen.ops import option
 
 
 @view.creator(title='Acquire Languages the Litboy Way', banner_args=('lingularity/ansi-shadow', 'red'))
@@ -48,14 +49,17 @@ def __call__() -> ReentryPoint:
     for language_group in output.group_by_starting_letter(State.user_languages, is_sorted=False):
         output.centered('  '.join(map(lambda language: f'{language} {main_country_flag(language)}', language_group)))
 
-    # display options
-    DELIMITER = colorized_header('   |   ')
-    OPTION_BLOCK = (
-        f"{colorized_header('ADDITIONAL OPTIONS:')}{ops.INTER_OPTION_INDENTATION}(A)dd Language{ops.INTER_OPTION_INDENTATION}(R)emove Language"
-        f"{DELIMITER}(S)ign Out{ops.INTER_OPTION_INDENTATION}(D)elete Account"
-        f"{DELIMITER}(Q)uit"
-    )
+    # display option descriptions
+    DESCRIPTIONS = ['Add Language', 'Remove Language', 'Sign Out', 'Delete Account', 'Quit']
+    descriptions = list(map(lambda description: option.color_description(description, keyword_index=0, color='red'), DESCRIPTIONS))
 
+    OPTION_CLASS_DELIMITER = colorized_header('   |   ')
+
+    OPTION_BLOCK = (
+        f"{colorized_header('ADDITIONAL OPTIONS:')}{option.OFFSET}{descriptions[0]}{option.OFFSET}{descriptions[1]}"
+        f"{OPTION_CLASS_DELIMITER}{descriptions[2]}{option.OFFSET}{descriptions[3]}"
+        f"{OPTION_CLASS_DELIMITER}{descriptions[4]}"
+    )
     output.centered(f'\n{OPTION_BLOCK}\n')
 
     # query language/options selection
@@ -71,9 +75,7 @@ def __call__() -> ReentryPoint:
         return reentry_point_provider()
 
     # query reference language in case of English being selected
-    train_english = False
-    if selection == string_resources.ENGLISH:
-        train_english = True
+    if train_english := selection == string_resources.ENGLISH:
         selection = ops.reference_language.query_database()
 
     # write selected language into state

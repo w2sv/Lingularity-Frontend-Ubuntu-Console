@@ -6,7 +6,7 @@ import asciichartpy_extended
 
 from frontend.state import State
 from frontend.reentrypoint import ReentryPoint
-from frontend.utils import query, output, view, date
+from frontend.utils import query, output, view
 from frontend.trainers import (
     SentenceTranslationTrainerFrontend,
     VocableTrainerFrontend,
@@ -14,8 +14,7 @@ from frontend.trainers import (
     TrainerFrontend
 )
 from frontend.trainers.base.sequence_plot_data import SequencePlotData
-from .ops import INTER_OPTION_INDENTATION
-
+from .ops.option import Options, Option
 
 _ActionOption = Union[
     Type[SentenceTranslationTrainerFrontend],
@@ -25,12 +24,14 @@ _ActionOption = Union[
 ]
 
 
-_KEYWORD_2_ACTION: Dict[str, _ActionOption] = {
-    'sentence': SentenceTranslationTrainerFrontend,
-    'vocabulary': VocableTrainerFrontend,
-    'add': VocableAdderFrontend,
-    'quit': ReentryPoint.Exit
-}
+_options = Options(
+    options=[
+        Option('Translate Sentences', keyword_index=1, callback=SentenceTranslationTrainerFrontend),
+        Option('Train Vocabulary', keyword_index=1, callback=VocableTrainerFrontend),
+        Option('Add Vocabulary', keyword_index=0, callback=VocableAdderFrontend),
+        Option('Quit', callback=ReentryPoint.Exit)],
+    color='red'
+)
 
 
 @view.creator(banner_args=('lingularity/3d-ascii', 'green'))
@@ -47,25 +48,21 @@ def __call__(training_item_sequence_plot_data: Optional[SequencePlotData] = None
     # query desired action
     if (action_selection_keyword := _query_action_selection()) == query.CANCELLED:
         return ReentryPoint.Home
-    action_selection = _KEYWORD_2_ACTION[action_selection_keyword]
+    option_callback = _options[action_selection_keyword]
 
     # instantiate frontend if selected
-    if _is_trainer_frontend(action_selection):
-        trainer_frontend = action_selection()  # type: ignore
+    if _is_trainer_frontend(option_callback):
+        trainer_frontend = option_callback()
         return __call__(training_item_sequence_plot_data=trainer_frontend.__call__())
 
-    return action_selection  # type: ignore
+    return option_callback
 
 
 def _query_action_selection() -> str:
-    output.centered(f"{INTER_OPTION_INDENTATION}Translate (S)entences"
-                    f"{INTER_OPTION_INDENTATION}Train (V)ocabulary"
-                    f"{INTER_OPTION_INDENTATION}(A)dd Vocabulary"
-                    f"{INTER_OPTION_INDENTATION}(Q)uit", '\n')
-
+    output.centered(_options.display_row, '\n')
     return query.relentlessly(
         prompt=output.centering_indentation(' '),
-        options=list(_KEYWORD_2_ACTION.keys()),
+        options=_options.keywords,
         cancelable=True
     )
 
@@ -106,9 +103,3 @@ def _display_training_item_sequence(training_item_sequence_plot_data: SequencePl
 
     except ZeroDivisionError:
         pass
-
-
-def _display_last_session_conclusion(last_session_metrics: Dict[str, Any]):
-    output.centered(f"You faced {last_session_metrics['nFacedItems']} "
-                    f"{['sentences', 'vocables'][last_session_metrics['trainer'] == 'v']} "
-                    f"during your last session {date.date_repr(last_session_metrics['date'])}", '\n' * 3)

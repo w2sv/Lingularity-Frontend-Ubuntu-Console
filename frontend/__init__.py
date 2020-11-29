@@ -1,7 +1,7 @@
 __import__('subprocess').call('wmctrl -r :ACTIVE: -b add,maximized_vert,maximized_horz', shell=True)
 
 from frontend import screen
-from frontend.screen.ops import remove_user_from_disk
+from frontend.screen.ops import remove_cached_user_login
 from frontend.state import State
 from frontend.reentrypoint import ReentryPoint
 from frontend.trainers import (
@@ -22,7 +22,7 @@ def __call__():
 
 def reentry_at(reentry_point: ReentryPoint):
     if reentry_point is ReentryPoint.Login:
-        remove_user_from_disk()
+        remove_cached_user_login()
         return __call__()
 
     elif reentry_point is ReentryPoint.Exit:
