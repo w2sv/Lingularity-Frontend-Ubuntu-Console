@@ -9,7 +9,7 @@ from frontend.metadata import main_country_flag
 from frontend.utils import query, output, view
 from frontend.state import State
 from frontend.reentrypoint import ReentryPoint, ReentryPointProvider
-from frontend.screen import account_deletion, ops
+from frontend.screen import account_deletion
 from frontend.screen.ops import option
 
 
@@ -76,7 +76,10 @@ def __call__() -> ReentryPoint:
 
     # query reference language in case of English being selected
     if train_english := selection == string_resources.ENGLISH:
-        selection = ops.reference_language.query_database()
+        mongodb_client = MongoDBClient.get_instance()
+
+        selection = mongodb_client.query_reference_language()
+        mongodb_client.set_reference_language(reference_language=selection)
 
     # write selected language into state
     State.set_language(non_english_language=selection, train_english=train_english)
@@ -93,6 +96,7 @@ def _language_removal() -> ReentryPoint:
 
     # erase everything until before option row
     output.erase_lines(3)
+    output.empty_row(2)
 
     # exit in case of nonexistence of removable languages
     if not len(State.user_languages):

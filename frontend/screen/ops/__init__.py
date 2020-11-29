@@ -3,7 +3,6 @@ import os
 from termcolor import colored
 
 from frontend.utils import output, view
-from . import reference_language
 
 
 def display_signum():

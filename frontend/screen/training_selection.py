@@ -73,9 +73,9 @@ def _is_trainer_frontend(action: _ActionOption) -> bool:
 
 def _display_constitution_query(username: str, language: str):
     if constitution_query_templates := language_metadata[language]['translations'].get('constitutionQuery'):
-        constitution_queries = map(lambda query: query.replace('{}', username), constitution_query_templates)
+        constitution_queries = map(lambda query_corpus: query_corpus.replace('{}', username), constitution_query_templates)
     else:
-        constitution_queries = map(lambda query: query + f' {username}?', [f"What's up", f"How are you"])
+        constitution_queries = map(lambda query_corpus: query_corpus + f' {username}?', [f"What's up", f"How are you"])
 
     output.centered(random.choice(list(constitution_queries)), view.VERTICAL_OFFSET)
 
