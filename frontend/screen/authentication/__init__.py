@@ -6,6 +6,12 @@ from frontend.screen.authentication import front as front_screen
 
 
 def __call__():
+    """ Attempts to retrieve locally cashed user,
+        if unfeasible proceeds to front screen into
+        either log in/sign up
+
+        Inserts user, is_new_user flag into State, mongodb client """
+
     mongodb_client = MongoDBClient.get_instance()
     is_new_user = False
 
