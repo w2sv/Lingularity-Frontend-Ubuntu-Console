@@ -93,10 +93,10 @@ class VocableTrainerFrontend(TrainerFrontend):
     @view.creator(vertical_offsets=0)
     def _display_new_vocabulary_if_desired(self):
         print(op.column_percentual_indentation(0.45))
-        op.centered('Would you like to see the vocable entries you recently created? (y)es/(n)o')
+        op.centered(f'Would you like to see the vocable entries you recently created? {query.YES_NO_QUERY_OUTPUT}')
         op.centered(' ', end='')
 
-        if query.relentlessly(prompt='', options=['yes', 'no']) == 'yes':
+        if query.relentlessly(prompt='', options=query.YES_NO_OPTIONS) == query.YES:
             self._display_new_vocable_entries()
 
     @view.creator(vertical_offsets=2)
@@ -249,7 +249,7 @@ class VocableTrainerFrontend(TrainerFrontend):
         impending_string = '-' * int(BAR_LENGTH - len(completed_string))
 
         op.centered(f"[{completed_string}{impending_string}]", end=' ', line_counter=self._undo_print)
-        self._undo_print(f'{int(round(percentage * 100))}%\n\n')
+        self._undo_print(f'{int(round(percentage * 100))}%{view.VERTICAL_OFFSET}')
 
     def _display_streak(self):
         attrs = ['bold']
