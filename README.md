@@ -4,7 +4,7 @@
 
 ## COMMANDS
 - install by means of `make-install`
-- for reinstalling an altered backend, residing in the same directory as frontend, run `source make-backend.shg`
+- for reinstalling an altered backend, residing in the same directory as frontend, run `source make-backend.sh`
 - start program by running `source run.sh`
 
 ## TODO
