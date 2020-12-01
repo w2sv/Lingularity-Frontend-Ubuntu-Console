@@ -1,14 +1,6 @@
 SHELL=/bin/bash
 
-LOCAL_CONDA_EXECUTABLE=/home/w2sv/miniconda3/ec/profile.d/conda.sh
-
-# for some reason not necessarily required
-if test -f "LOCAL_CONDA_EXECUTABLE"; then
-  source LOCAL_CONDA_EXECUTABLE
-else
-  echo "$LOCAL_CONDA_EXECUTABLE does not exist. Rectification of path to local conda executable required"
-  return
-fi
+source .source-conda-executable.sh
 
 cd ../backend || exit
 conda activate ./env
