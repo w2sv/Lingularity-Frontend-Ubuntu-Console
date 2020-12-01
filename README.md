@@ -1,4 +1,4 @@
-# FRONTEND
+# LINGULARITY FRONTEND
 
 **Conceived for ubuntu 18.04 / 20.04 gnome terminal**
 
