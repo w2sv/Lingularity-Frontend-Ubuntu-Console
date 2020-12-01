@@ -1,8 +1,6 @@
 __all__ = ['ChangeTTSLanguageVariety', 'EnableTTS',
            'DisableTTS', 'ChangePlaybackSpeed']
 
-from functools import partial
-
 import cursor
 from pynput.keyboard import Controller as Keyboard
 
@@ -37,24 +35,24 @@ class ChangePlaybackSpeed(TrainingOption):
         output.erase_lines(3)
 
     def _change_playback_speed(self):
-        print(f'Playback speed:\n{query.INDENTATION}', end='')
-        Keyboard().type(str(self._tts.playback_speed))
-        cursor.show()
+        def display_prompt():
+            print(f'Playback speed:\n{query.INDENTATION}', end='')
+            Keyboard().type(str(self._tts.playback_speed))
+            cursor.show()
 
-        _recurse = partial(query.repeat, function=self._change_playback_speed, message='INVALID INPUT', n_deletion_lines=3)
+        altered_playback_speed = query.relentlessly(prompt='',
+                                                    prompt_display_function=display_prompt,
+                                                    applicability_verifier=self._tts.is_valid_playback_speed,
+                                                    error_indication_message='PLAYBACK SPEED HAS TO LIE BETWEEN 0.5 AND 2',
+                                                    cancelable=True,
+                                                    n_deletion_rows=3,
+                                                    sleep_duration=1.5)
+        cursor.hide()
 
-        try:
-            altered_playback_speed = float(input())
-            cursor.hide()
+        if altered_playback_speed == query.CANCELLED:
+            return
 
-            if not self._tts.is_valid_playback_speed(altered_playback_speed):
-                return _recurse()
-
-            self._tts.playback_speed = altered_playback_speed
-
-        except ValueError:
-            return _recurse()
-
+        self._tts.playback_speed = float(altered_playback_speed)
 
 class ChangeTTSLanguageVariety(TrainingOption):
     def __init__(self):

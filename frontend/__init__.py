@@ -49,7 +49,7 @@ def reentry_at(reentry_point: ReentryPoint):
         return reentry_at(reentry_point=screen.training_selection.__call__())
 
     elif reentry_point is ReentryPoint.Exit:
-        return screen.exit.__call__()
+        return screen.exit.regular.__call__()
 
 
 if __name__ == '__main__':
@@ -65,8 +65,8 @@ if __name__ == '__main__':
     # run program
     if instantiation_error := instantiate_client(server_selection_timeout=1_500):
         if instantiation_error is errors.ServerSelectionTimeoutError:
-            screen.connection_error_exit.__call__()
+            screen.exit.on_connection_error.__call__()
         elif instantiation_error is errors.ConfigurationError:
-            screen.missing_internet_exit.__call__()
+            screen.exit.on_missing_internet.__call__()
     else:
         __call__()

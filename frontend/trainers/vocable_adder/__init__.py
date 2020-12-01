@@ -49,7 +49,7 @@ class VocableAdderFrontend(TrainerFrontend):
 
             self._output_vocable_addition_confirmation()
 
-            response = query.relentlessly('$', options=self._training_options.keywords, indentation_percentage=0.49)
+            response = query.relentlessly('$', indentation_percentage=0.49, options=self._training_options.keywords)
             if len(response):
                 self._training_options[response].__call__()
 

@@ -25,6 +25,9 @@ from frontend.trainers.vocable_trainer import options
 
 class VocableTrainerFrontend(TrainerFrontend):
     def __new__(cls, *args, **kwargs) -> Union[ReentryPointProvider, VocableTrainerFrontend]:  # type: ignore
+        """ Check whether vocabulary available for language, invoke vocabulary
+            existence necessity information screen if not and exit afterwards """
+
         if not State.vocabulary_available:
             return cls._exit_on_nonexistent_vocabulary()
         return super().__new__(cls)
@@ -115,11 +118,10 @@ class VocableTrainerFrontend(TrainerFrontend):
     # ------------------
     @view.creator()
     def _display_training_screen_header_section(self):
-        # TODO: find better wording for 'imperfect entries', display forename origin country,
-        #  elaborate usage instructions, functionality explanation
+        # TODO: elaborate usage instructions, functionality explanation
 
         # display number of retrieved vocables to be trained
-        op.centered(f'Found {self._backend.n_training_items} imperfect entries\n\n')
+        op.centered(f'Found {self._backend.n_training_items} entries to be practiced{view.VERTICAL_OFFSET}')
         op.centered("Hit Enter to proceed after response evaluation\n")
 
         # display instructions
@@ -222,8 +224,9 @@ class VocableTrainerFrontend(TrainerFrontend):
             self._undo_print('')
 
             # query option/procedure, __call__ option if applicable
-            option_selection = query.relentlessly(prompt=f'{op.centering_indentation(" ")}$', options=self._training_options.keywords)
-            self._undo_print.add_lines_to_buffer(1)
+            option_selection = query.relentlessly(prompt=f'{op.centering_indentation(" ")}$',
+                                                  options=self._training_options.keywords)
+            self._undo_print.add_rows_to_buffer(1)
 
             if len(option_selection):
                 self._training_options[option_selection].__call__()

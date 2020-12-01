@@ -8,7 +8,7 @@ from ._utils import _output_length, _terminal_columns
 
 class LineCounter(ABC):
     """ Interface for classes being capable of buffering the output
-        passed to them and counting the number of output output rows
+        passed to them and counting the number of rows
         the output of the aforementioned resulted in """
 
     def __init__(self, buffer_container: Union[List, Deque]):
@@ -19,7 +19,17 @@ class LineCounter(ABC):
     def _n_buffered_terminal_rows(self) -> int:
         """ Returns:
                 number of occupied output rows if currently stored buffer content
-                were to be displayed """
+                were to be displayed
+
+            >>> line_counter = UndoPrint()
+            >>> line_counter('sickline')
+            sickline
+            >>> line_counter('sickerline\\n\\n')
+            sickerline
+
+
+            >>> line_counter._n_buffered_terminal_rows
+            4 """
 
         return sum(map(self._n_comprised_terminal_output_rows, self._buffer))
 
@@ -71,12 +81,13 @@ class UndoPrint(LineCounter):
         self._buffer.clear()
         self._append_to_last_element = False
 
-    def add_lines_to_buffer(self, n_lines: int):
-        # TODO
+    def add_rows_to_buffer(self, n_rows: int):
+        """ In order to enable undoing of rows which couldn't be displayed
+            by undo print and hence aren't represented within buffer """
 
         self._append_to_last_element = False
 
-        for _ in range(n_lines):
+        for _ in range(n_rows):
             self._buffer.append('')
 
 
@@ -86,13 +97,24 @@ class RedoPrint(LineCounter):
     def __init__(self):
         super().__init__(buffer_container=deque())
 
-    def redo_partially(self, n_deletion_lines: int):
-        """ Remove the first n_deletion_lines buffer elements and
-            redo the remaining buffer content """
+    def redo_partially(self, n_deletion_rows: int):
+        """ Remove the first n_deletion_rows buffer elements and
+            redo the remaining buffer content
+
+            >>> redo_print = RedoPrint()
+            >>> redo_print('first')
+            first
+            >>> redo_print('second')
+            second
+            >>> redo_print('third')
+            third
+            >>> redo_print.redo_partially(1)
+            second
+            third """
 
         erase_lines(self._n_buffered_terminal_rows)
 
-        for _ in range(n_deletion_lines):
+        for _ in range(n_deletion_rows):
             self._buffer.popleft()  # type: ignore
 
         self.redo()

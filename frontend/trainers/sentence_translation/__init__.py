@@ -77,10 +77,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
             print(f'{indentation}\t{explanation}\n')
         print(view.VERTICAL_OFFSET)
 
-        return query.relentlessly(
-            f'{query.INDENTATION}Enter desired mode: ',
-            options=modes.keywords
-        )
+        return query.relentlessly(f'{query.INDENTATION}Enter desired mode: ', options=modes.keywords)
 
     # -----------------
     # .TTS Language Variety
@@ -109,7 +106,9 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         op.empty_row(times=2)
 
         # query variety
-        dialect_selection = query.relentlessly(prompt=f'{op.column_percentual_indentation(percentage=0.37)}Enter desired variety: ', options=processed_varieties)
+        dialect_selection = query.relentlessly(
+            prompt=f'{op.column_percentual_indentation(percentage=0.37)}Enter desired variety: ',
+            options=processed_varieties)
         return self._tts.language_variety_choices[processed_varieties.index(dialect_selection)]
 
     # -----------------
@@ -182,7 +181,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
                 self._n_trained_items += 1
 
                 if self._n_trained_items >= 5:
-                    self._redo_print.redo_partially(n_deletion_lines=3)
+                    self._redo_print.redo_partially(n_deletion_rows=3)
 
                 translation = self._process_procured_sentence_pair()
 

@@ -7,7 +7,7 @@ _CLEAR_COMMAND = ['clear', 'cls'][platform.system() == 'Windows']
 
 
 def clear_screen():
-    subprocess.run(_CLEAR_COMMAND, shell=True)
+    subprocess.run([_CLEAR_COMMAND])
 
 
 def _erase_previous_line():

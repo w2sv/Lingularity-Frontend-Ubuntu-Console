@@ -65,7 +65,7 @@ class TrainingOptions(dict):
 
             print(f'{_INSTRUCTION_INDENTATION}  {instruction_row}')
 
-        print(output.EMPTY_ROW)
+        output.empty_row()
 
     @property
     def exit_training(self) -> bool:

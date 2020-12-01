@@ -8,7 +8,7 @@ from pynput.keyboard import Controller as KeyboardController
 from backend.trainers import TrainerBackend
 from backend.trainers.components import VocableEntry
 from backend import language_metadata
-from backend.utils import date as date_utils, either
+from backend.utils import date as date_utils
 
 from frontend.state import State
 from frontend.utils import output, view, query
@@ -58,7 +58,7 @@ class TrainerFrontend(ABC):
         pass
 
     def _output_lets_go(self):
-        output.centered(either(language_metadata[self._backend.language]['translations'].get('letsGo'), default="Let's go!"), view.VERTICAL_OFFSET)
+        output.centered(language_metadata[self._backend.language]['translations'].get('letsGo') or "Let's go!", view.VERTICAL_OFFSET)
 
     # -----------------
     # Training
@@ -73,23 +73,21 @@ class TrainerFrontend(ABC):
             Update State.vocabulary_available
 
             Returns:
-                number of printed lines: int """
-
-        INDENTATION = output.column_percentual_indentation(percentage=0.32)
+                cancellation_flag: bool """
 
         # query vocable and meaning, exit if one of the two fields empty
-        vocable_and_meaning = []
+        entry_fields = ['', '']
         for i, query_message in enumerate([f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']):
-            if not len((field := [input, query.cancelably][cancelable](f'{INDENTATION}{query_message}'))):
-                query.indicate_erroneous_input("INPUT FIELD LEFT UNFILLED", n_deletion_lines=3 + i, sleep_duration=1)
-                return False
-            elif field == query.CANCELLED:
+            if (field := query.relentlessly(
+                    prompt=f'{output.column_percentual_indentation(percentage=0.32)}{query_message}',
+                    applicability_verifier=lambda response: bool(len(response)),
+                    error_indication_message="INPUT FIELD LEFT UNFILLED", cancelable=cancelable)) == query.CANCELLED:
                 return True
 
-            vocable_and_meaning.append(field)
+            entry_fields[i] = field
 
         # create new vocable entry, enter into database
-        self._latest_created_vocable_entry = VocableEntry.new(*vocable_and_meaning)
+        self._latest_created_vocable_entry = VocableEntry.new(*entry_fields)
         self._backend.mongodb_client.insert_vocable_entry(self._latest_created_vocable_entry.as_dict)
 
         # update vocabulary_available flag in State

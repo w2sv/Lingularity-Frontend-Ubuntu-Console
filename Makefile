@@ -19,7 +19,7 @@ pytest:
 	coverage run -m pytest -vv tests/
 
 doctest:
-	python -m pytest -vv --doctest-modules --doctest-continue-on-failure ./lingularity/
+	python -m pytest -vv --doctest-modules --doctest-continue-on-failure ./frontend/
 
 # ----------Building-------------
 

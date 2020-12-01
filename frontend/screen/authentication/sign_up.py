@@ -14,27 +14,24 @@ def __call__() -> Optional[Tuple[str, bool]]:
             is_new_user_flag: bool """
 
     if (mailaddress := query.relentlessly(f'{HORIZONTAL_INDENTATION}Enter mailaddress: ',
-                                          correctness_verifier=_is_valid_mailaddress,
-                                          error_indication_message='INVALID EMAIL ADDRESS',
-                                          cancelable=True)) == query.CANCELLED:
+                                          applicability_verifier=_is_valid_mailaddress,
+                                          error_indication_message='INVALID EMAIL ADDRESS', cancelable=True)) == query.CANCELLED:
         return None
 
     elif (username := query.relentlessly(f'{HORIZONTAL_INDENTATION}Create username: ',
-                                         correctness_verifier=_is_valid_username,
-                                         error_indication_message='EMPTY USERNAME NOT ALLOWED',
-                                         cancelable=True)) == query.CANCELLED:
+                                         applicability_verifier=_is_valid_username,
+                                         error_indication_message='EMPTY USERNAME NOT ALLOWED', cancelable=True)) == query.CANCELLED:
         return None
 
     elif (password := query.relentlessly(f'{HORIZONTAL_INDENTATION}Create password: ',
-                                         correctness_verifier=_is_valid_password,
+                                         applicability_verifier=_is_valid_password,
                                          error_indication_message='PASSWORD HAS TO COMPRISE AT LEAST 5 CHARACTERS',
                                          cancelable=True)) == query.CANCELLED:
         return None
 
     elif query.relentlessly(f'{HORIZONTAL_INDENTATION}Confirm password: ',
-                            correctness_verifier=lambda password_confirmation: password_confirmation == password,
-                            error_indication_message="PASSWORDS DON'T MATCH",
-                            cancelable=True) == query.CANCELLED:
+                            applicability_verifier=lambda password_confirmation: password_confirmation == password,
+                            error_indication_message="PASSWORDS DON'T MATCH", cancelable=True) == query.CANCELLED:
         return None
 
     MongoDBClient.get_instance().initialize_user(user=username, email_address=mailaddress, password=password)

@@ -20,7 +20,7 @@ def __call__() -> Tuple[str, bool]:
 
     output.centered(AUTHENTICATION_OPTIONS.display_row, '\n')
 
-    selection = query.relentlessly('', options=AUTHENTICATION_OPTIONS.keywords, indentation_percentage=0.49)
+    selection = query.relentlessly('', indentation_percentage=0.49, options=AUTHENTICATION_OPTIONS.keywords)
 
     if authentication_result := AUTHENTICATION_OPTIONS[selection].__call__():
         return authentication_result

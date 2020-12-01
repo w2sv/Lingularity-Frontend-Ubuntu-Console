@@ -46,7 +46,8 @@ def __call__() -> ReentryPoint:
           f'(number of available sentences)', view.VERTICAL_OFFSET)
 
     # query desired language
-    selection = query.relentlessly('Select language: ', options=eligible_languages, indentation_percentage=0.35, cancelable=True)
+    selection = query.relentlessly('Select language: ', indentation_percentage=0.35, options=eligible_languages,
+                                   cancelable=True)
     if selection == query.CANCELLED:
         return ReentryPoint.Home
 
@@ -63,7 +64,7 @@ def _display_eligible_languages(grouped_eligible_languages: List[str]) -> str:
     indentation = output.block_centering_indentation(grouped_eligible_languages)
     for language_group in grouped_eligible_languages:
         print(indentation, language_group)
-    print(output.EMPTY_ROW)
+    output.empty_row()
 
     return indentation
 
@@ -97,7 +98,8 @@ def _reference_language_selection_screen() -> ReentryPoint:
     _display_eligible_languages(grouped_eligible_languages=[' '.join(map(lambda language: f'{colored(language, _HIGH_QUALITY_NORMALIZATION_COLOR, attrs=_TTS_ATTRS)}({language_metadata[language]["nSentences"]:n})', language_group)) for language_group in starting_letter_grouped_languages])
 
     # query desired language
-    selection = query.relentlessly('Select reference language: ', options=eligible_languages, indentation_percentage=0.35, cancelable=True)
+    selection = query.relentlessly('Select reference language: ', indentation_percentage=0.35,
+                                   options=eligible_languages, cancelable=True)
     if selection == query.CANCELLED:
         return ReentryPoint.LanguageAddition
 

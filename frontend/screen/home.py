@@ -63,9 +63,8 @@ def __call__() -> ReentryPoint:
     output.centered(f'\n{OPTION_BLOCK}\n')
 
     # query language/options selection
-    selection = query.relentlessly(prompt='Select Language/Option: ',
-                                   options=list(State.user_languages) + _OPTION_KEYWORDS,
-                                   indentation_percentage=0.35)
+    selection = query.relentlessly(prompt='Select Language/Option: ', indentation_percentage=0.35,
+                                   options=list(State.user_languages) + _OPTION_KEYWORDS)
 
     # exit and reenter at respective reentry point in case of option selection
     if reentry_point := _OPTION_2_REENTRY_POINT.get(selection):
@@ -104,12 +103,8 @@ def _language_removal() -> ReentryPoint:
         return __call__()
 
     # query removal language
-    if (removal_language := query.relentlessly(
-        'Enter language you wish to remove: ',
-        options=list(State.user_languages),
-        indentation_percentage=0.3,
-        cancelable=True
-    )) == query.CANCELLED:
+    if (removal_language := query.relentlessly('Enter language you wish to remove: ', indentation_percentage=0.3,
+                                               options=list(State.user_languages), cancelable=True)) == query.CANCELLED:
         return __call__()
 
     output.erase_lines(1)
@@ -117,7 +112,7 @@ def _language_removal() -> ReentryPoint:
     # query confirmation, remove language from user languages stored in State,
     # respective user data from database
     output.centered(f'Are you sure you want to irretrievably erase all {removal_language} user data? {query.YES_NO_QUERY_OUTPUT}')
-    if query.relentlessly('', options=query.YES_NO_OPTIONS, indentation_percentage=0.5) == 'yes':
+    if query.relentlessly('', indentation_percentage=0.5, options=query.YES_NO_OPTIONS) == 'yes':
         MongoDBClient.get_instance().remove_language_data(removal_language)
         State.user_languages.remove(removal_language)
 

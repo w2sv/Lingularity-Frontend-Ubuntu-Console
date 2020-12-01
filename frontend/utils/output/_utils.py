@@ -22,7 +22,10 @@ def _output_length(string: str) -> int:
             string: string free of '\n's
 
         Returns:
-            length of output output which the passed string would produce """
+            length of output output which the passed string would produce
+
+        >>> _output_length('[35mHello Görl![0m\t\t')
+        27 """
 
     return len(ansi_escape_code_stripped(string)) + string.count('\t') * (_TAB_OUTPUT_LENGTH - 1)
 

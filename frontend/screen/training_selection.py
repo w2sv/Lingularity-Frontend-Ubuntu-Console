@@ -51,11 +51,7 @@ def __call__(training_item_sequence_plot_data: Optional[SequencePlotData] = None
 
 def _query_action_selection() -> str:
     output.centered(_options.display_row, '\n')
-    return query.relentlessly(
-        prompt=output.centering_indentation(' '),
-        options=_options.keywords,
-        cancelable=True
-    )
+    return query.relentlessly(prompt=output.centering_indentation(' '), options=_options.keywords, cancelable=True)
 
 
 _OptionCallbacks = Union[

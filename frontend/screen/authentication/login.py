@@ -18,17 +18,14 @@ def __call__() -> Optional[Tuple[str, bool]]:
     mongodb_client = MongoDBClient.get_instance()
 
     if (username := query.relentlessly(f'{horizontal_indentation}Enter username: ',
-                                       correctness_verifier=lambda response: response in mongodb_client.usernames,
+                                       applicability_verifier=lambda response: response in mongodb_client.usernames,
                                        error_indication_message='ENTERED MAILADDRESS NOT ASSOCIATED WITH AN ACCOUNT',
-                                       sleep_duration=1.5,
-                                       cancelable=True)) == query.CANCELLED:
+                                       sleep_duration=1.5, cancelable=True)) == query.CANCELLED:
         return None
 
     elif query.relentlessly(f'{horizontal_indentation}Enter password: ',
-                            correctness_verifier=lambda response: response == mongodb_client.query_password(username),
-                            error_indication_message='INCORRECT, TRY AGAIN',
-                            sleep_duration=1.5,
-                            cancelable=True) == query.CANCELLED:
+                            applicability_verifier=lambda response: response == mongodb_client.query_password(username),
+                            error_indication_message='INCORRECT, TRY AGAIN', sleep_duration=1.5, cancelable=True) == query.CANCELLED:
         return None
 
     return username, False
