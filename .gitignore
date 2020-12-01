@@ -12,13 +12,11 @@ logging.txt
 *.mp3
 /lingularity/backend/data/sentence-data/
 
-
 # Envs
 /env/
 
 # Keys
-.keys/.fernet_key
-.keys/.logged_in_user
+/.keys/
 
 # Build
 /build/
