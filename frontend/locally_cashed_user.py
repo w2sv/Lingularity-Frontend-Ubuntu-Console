@@ -4,7 +4,7 @@ import os
 from frontend.utils import fernet
 
 
-USER_ENCRYPTION_FILE_PATH = f'{os.getcwd()}/.logged_in_user'
+USER_ENCRYPTION_FILE_PATH = f'{os.getcwd()}/.keys/user'
 
 
 def retrieve() -> Optional[str]:

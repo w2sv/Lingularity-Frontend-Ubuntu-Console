@@ -17,8 +17,8 @@ logging.txt
 /env/
 
 # Keys
-.fernet_key
-.logged_in_user
+.keys/.fernet_key
+.keys/.logged_in_user
 
 # Build
 /build/

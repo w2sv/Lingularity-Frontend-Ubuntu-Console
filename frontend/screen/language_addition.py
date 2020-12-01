@@ -51,8 +51,10 @@ def __call__() -> ReentryPoint:
     if selection == query.CANCELLED:
         return ReentryPoint.Home
 
+    MongoDBClient.get_instance().insert_dummy_entry(selection)
+
     # query desired reference language if English selected
-    elif selection == string_resources.ENGLISH:
+    if selection == string_resources.ENGLISH:
         return _reference_language_selection_screen()
 
     # write language selection into state

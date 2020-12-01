@@ -33,7 +33,9 @@ class State(StaticClass):
 
     @staticmethod
     def set_user(username: str, is_new_user: bool):
-        """ Sets:
+        """ Assumes previous setting of user in database
+
+            Sets:
                 username
                 user_languages queried from database """
 
@@ -44,7 +46,9 @@ class State(StaticClass):
 
     @staticmethod
     def set_language(non_english_language: str, train_english: bool):
-        """ Sets:
+        """ Assumes previous setting of user in database
+
+            Sets:
                 non_english_language
                 train_english
                 language

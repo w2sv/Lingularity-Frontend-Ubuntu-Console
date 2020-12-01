@@ -1,64 +1,16 @@
 # TODO
 
 ## GENERIC:
-    - [x] clean up options
-    - [ ] do something about repetitive entering of 'to' when adding 
-          english verb meanings
-    - [ ] incentivise entering of noun with article if applicable,
-          entering of adjectives in consistent gender flection
-
-    - write impending tests:
-        - [ ] token maps
-        - [ ] sentence index query
-        - [ ] sentence data -> translation deduction
-        - [ ] forename conversion
-        - [ ] forename scraping
-        - [ ] deviation masks
-   
-## VOCABLE TRAINER:
-    - [ ] refactor training loop
-    - [ ] merely display related sentences possessing sufficiently low levenshtein 
-      with respect to one another
-    - [ ] enable english training
-    - [ ] repeat faulty vocable entries within one vocable training session,
-      present constant amount of entries, 
-      prevent repeated successful training of same vocable entries
-    - [ ] override lets go translation row on first streak occurrence
-    - [ ] enable display of first vocable char on vocables user struggling with
-    - [ ] tts output vocables no response was given to
-    - [ ] block training loop after option entrance
-    - [ ] improve sentence index query
-    - [ ] display rectification proposals on adding of supposedly incorrect vocables
-    - [ ] enable lemma query
-    - [ ] favor related sentences which haven't yet been shown
-    - [ ] display incorrectly answered vocable entries after session termination and 
-          number of perfected entries 
-    
-    - SET UP MODES:
-        - [ ] vocables user struggling with
-        - [ ] morphologically similar vocables (scopare, scossare, etc.)
-        - [ ] random old vocables
-
-## SENTENCE TRAINER:
-    - SET UP MODES:
-        - tenses:
-            - [ ] simple past
-            - [ ] perfect
-            - [ ] past perfect
-            - [ ] simple present
-            - [ ] gerund (present, past)
-            - [ ] future
-            - [ ] future perfect
-            
-        - modes:
-            - [ ] imperative
-            - [ ] conditional I
-            - [ ] conditional II
-            - [ ] subjunctive where existent
-            
-        - constructs:
-            - [ ] negation
-            - [ ] prepositions
-            - [ ] conjunctions
-        
-__get better at writing markdowns__
+    - [] enable canceling of commenced options by means of ESC stroke
+    - [] FIX: display of flag emojis
+    - [] add flag emojis to terminal title for all language related actions
+    - [] FIX: setting of terminal titles
+    - [] abort display of escape sequences on arrow strokes during input
+    - [] FIX: abort ability to erase beyond prompt query occurring at times
+    - [] block echoing of input when no input query
+    - [] elaborate on/debug training chronic display via asciichartpy
+    - [] enable adding of vocables by means of vocabulary file
+    - [] FIX: vocable trainer row deletion issue in specific cases which are yet to be determined
+    - [] elaborate training selection screen: display number of added vocables, display 
+            of last session statistics etc. 
+    - [] inhibit entering of vocable if already existent and thereupon merely merge meanings

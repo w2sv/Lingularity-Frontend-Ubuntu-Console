@@ -14,7 +14,7 @@ def decrypt(encrypted_message: bytes) -> str:
 # ---------------
 # Key
 # ---------------
-_KEY_FILE_PATH = f'{os.getcwd()}/.fernet_key'
+_KEY_FILE_PATH = f'{os.getcwd()}/.keys/fernet'
 
 
 def _key_existent() -> bool:
