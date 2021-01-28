@@ -10,8 +10,8 @@ dependencies:
   - pip:
      - git+https://W2SV@bitbucket.org/W2SV/backend.git@master
      - git+https://W2SV@bitbucket.org/W2SV/asciichartpy_extended.git@master
-#    - /home/w2sv/W2SV/python/projects/lingularity/dist/backend-0.1.2-py3-none-any.whl
-#    - /home/w2sv/W2SV/python/projects/lingularity/dist/asciichartpy_extended-0.0.1-py3-none-any.whl
+#    - ../backend/dist/backend-0.1.2-py3-none-any.whl
+#    - ../backend/dist/asciichartpy_extended-0.0.1-py3-none-any.whl
     - coverage  # dev
     - pynput==1.6.8
     - cursor==1.3.4

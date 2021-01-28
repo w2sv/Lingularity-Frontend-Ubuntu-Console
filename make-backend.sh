@@ -6,7 +6,7 @@ cd ../backend || exit
 conda activate ./env
 make wheel
 
-cd ../dist || exit
+cd dist || exit
 dist_dir_path=$(realpath .)
 latest_backend_wheel=$(find . -type f -name "backend*" | head -n 1)
 
