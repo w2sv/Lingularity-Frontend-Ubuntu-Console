@@ -1,6 +1,6 @@
 # Lingularity Frontend for Ubuntu console
 
-**Conceived for ubuntu 18.04 / 20.04 gnome terminal**
+**Conceived for >= 18.04 GNOME terminal**
 
 ## Commands
 - install by means of `make-install`
