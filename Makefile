@@ -3,10 +3,10 @@ SHELL=/bin/bash
 # ----------Installation--------------
 
 install:
-	bash os-dependencies.sh
+	bash install-linux-dependencies.sh
 
 	rm -rf env
-	conda env create -f environment.yml --prefix ./env
+	mamba env create -f environment.yml --prefix ./env
 
 # ----------Testing----------
 

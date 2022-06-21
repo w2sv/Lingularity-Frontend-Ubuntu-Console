@@ -51,20 +51,28 @@ def __call__() -> ReentryPoint:
 
     # display option descriptions
     DESCRIPTIONS = ['Add Language', 'Remove Language', 'Sign Out', 'Delete Account', 'Quit']
-    descriptions = list(map(lambda description: _action_option.color_description(description, keyword_index=0, color='red'), DESCRIPTIONS))
+    descriptions = list(
+        map(
+            lambda description: _action_option.color_description(description, keyword_index=0, color='red'),
+            DESCRIPTIONS
+        )
+    )
 
     OPTION_CLASS_DELIMITER = colorized_header('   |   ')
 
     OPTION_BLOCK = (
-        f"{colorized_header('ADDITIONAL OPTIONS:')}{_action_option.OFFSET}{descriptions[0]}{_action_option.OFFSET}{descriptions[1]}"
+        f"{colorized_header('ADDITIONAL OPTIONS:')}{_action_option.OFFSET}{descriptions[0]}{_action_option.OFFSET}"
+        f"{descriptions[1]}"
         f"{OPTION_CLASS_DELIMITER}{descriptions[2]}{_action_option.OFFSET}{descriptions[3]}"
         f"{OPTION_CLASS_DELIMITER}{descriptions[4]}"
     )
     output.centered(f'\n{OPTION_BLOCK}\n')
 
     # query language/options selection
-    selection = query.relentlessly(prompt='Select Language/Option: ', indentation_percentage=0.35,
-                                   options=list(State.user_languages) + _OPTION_KEYWORDS)
+    selection = query.relentlessly(
+        prompt='Select Language/Option: ', indentation_percentage=0.35,
+        options=list(State.user_languages) + _OPTION_KEYWORDS
+    )
 
     # exit and reenter at respective reentry point in case of option selection
     if reentry_point := _OPTION_2_REENTRY_POINT.get(selection):
@@ -103,15 +111,19 @@ def _language_removal() -> ReentryPoint:
         return __call__()
 
     # query removal language
-    if (removal_language := query.relentlessly('Enter language you wish to remove: ', indentation_percentage=0.3,
-                                               options=list(State.user_languages), cancelable=True)) == query.CANCELLED:
+    if (removal_language := query.relentlessly(
+            'Enter language you wish to remove: ', indentation_percentage=0.3,
+            options=list(State.user_languages), cancelable=True
+    )) == query.CANCELLED:
         return __call__()
 
     output.erase_lines(1)
 
     # query confirmation, remove language from user languages stored in State,
     # respective user data from database
-    output.centered(f'Are you sure you want to irretrievably erase all {removal_language} user data? {query.YES_NO_QUERY_OUTPUT}')
+    output.centered(
+        f'Are you sure you want to irretrievably erase all {removal_language} user data? {query.YES_NO_QUERY_OUTPUT}'
+    )
     if query.relentlessly('', indentation_percentage=0.5, options=query.YES_NO_OPTIONS) == 'yes':
         MongoDBClient.get_instance().remove_language_data(removal_language)
         State.user_languages.remove(removal_language)

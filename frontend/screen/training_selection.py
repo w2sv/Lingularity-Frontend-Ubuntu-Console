@@ -2,7 +2,7 @@ from typing import Union, Type, Optional
 import random
 
 from backend import language_metadata
-import asciichartpy_extended
+import asciiplot
 
 from frontend.state import State
 from frontend.reentrypoint import ReentryPoint
@@ -78,22 +78,23 @@ def _display_constitution_query(username: str, language: str):
 def _display_training_item_sequence(training_item_sequence_plot_data: SequencePlotData):
     y_label_max_length = max(map(lambda label: len(str(label)), training_item_sequence_plot_data.sequence))
     outer_left_x_label = 'two weeks ago'
-    color = [asciichartpy_extended.colors.BLUE, asciichartpy_extended.colors.RED][training_item_sequence_plot_data.item_name.startswith('s')]
+    color = [asciiplot.Color.BLUE, asciiplot.Color.RED][training_item_sequence_plot_data.item_name.startswith(
+        's')]
 
     try:
-        chart = asciichartpy_extended.asciiize(training_item_sequence_plot_data.sequence, config=asciichartpy_extended.Config(
-            plot_height=15,
-            columns_between_points=5,
-            label_column_offset=max(len(outer_left_x_label) // 2 - y_label_max_length, 0),
-            y_label_decimal_places=0,
+        chart = asciiplot.asciiize(
+            training_item_sequence_plot_data.sequence,
+            height=15,
+            inter_points_margin=5,
+            indentation=max(len(outer_left_x_label) // 2 - y_label_max_length, 0),
+            y_ticks_decimal_places=0,
             sequence_colors=[color],
             axis_description_color=color,
-            x_axis_label_color=asciichartpy_extended.colors.MAGENTA,
-            display_x_axis=True,
-            x_labels={0: outer_left_x_label, 14: 'today'},
+            label_color=asciiplot.Color.MAGENTA,
+            x_ticks={0: outer_left_x_label, 14: 'today'},
             x_axis_description='date',
             y_axis_description=training_item_sequence_plot_data.item_name
-        ))
+        )
         output.centered(chart, view.VERTICAL_OFFSET)
 
     except ZeroDivisionError:

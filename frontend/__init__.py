@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     logging.enable_backend_logging()
 
-    # check for pymongo related, insurmountable initialization errors,
+    # check for pymongo-related, insurmountable initialization errors,
     # invoke corresponding exit screen in case of occurrence, otherwise
     # run program
     if instantiation_error := instantiate_client(server_selection_timeout=1_500):

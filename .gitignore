@@ -16,7 +16,7 @@ logging.txt
 /env/
 
 # Keys
-/.keys/
+/.keys/*
 
 # Build
 /build/

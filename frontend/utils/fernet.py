@@ -22,9 +22,8 @@ def _key_existent() -> bool:
 
 
 def _write_key():
-    key = Fernet.generate_key()
     with open(_KEY_FILE_PATH, 'wb') as key_file:
-        key_file.write(key)
+        key_file.write(Fernet.generate_key())
 
 
 if not _key_existent():
