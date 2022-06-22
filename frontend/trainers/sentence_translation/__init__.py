@@ -4,7 +4,7 @@ import time
 from termcolor import colored
 
 from backend.utils import strings
-from backend.trainers.sentence_translation import SentenceTranslationTrainerBackend as Backend, TextToSpeech
+from backend.trainers.sentence_translation import SentenceTranslationTrainerBackend
 
 from frontend.utils import view, query, output as op
 from frontend.trainers.base import TrainerFrontend, SequencePlotData
@@ -17,10 +17,12 @@ _SENTENCE_INDENTATION = op.column_percentual_indentation(0.15)
 
 class SentenceTranslationTrainerFrontend(TrainerFrontend):
     def __init__(self):
-        self._tts = TextToSpeech.get_instance()
-
-        super().__init__(backend_type=Backend)
-        self._backend: Backend
+        super().__init__(
+            backend_type=SentenceTranslationTrainerBackend,
+            item_name='sentence',
+            item_name_plural='sentences',
+            training_designation='Sentence Translation'
+        )
 
         self._redo_print = op.RedoPrint()
 
@@ -42,17 +44,13 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
     def _get_training_options(self) -> TrainingOptions:
         option_classes = [base_options.AddVocable, base_options.RectifyLatestAddedVocableEntry, base_options.Exit]
 
-        if self._tts.available:
+        if self._backend.tts.available:
             option_classes += [options.EnableTTS, options.DisableTTS, options.ChangePlaybackSpeed]
 
-        if bool(self._tts.language_variety_choices):
+        if bool(self._backend.tts.language_variety_choices):
             option_classes += [options.ChangeTTSLanguageVariety]
 
         return TrainingOptions(option_classes=option_classes, frontend_instance=self)  # type: ignore
-
-    @property
-    def _training_designation(self) -> str:
-        return 'Sentence Translation'
 
     # -----------------
     # Property Selection
@@ -85,19 +83,19 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
     def _set_tts_language_variety_if_applicable(self):
         """ Invokes variety selection method, forwards selected variety to tts """
 
-        if all([self._tts.available, not self._tts.language_variety, self._tts.language_variety_choices]):
-            self._tts.language_variety = self._select_tts_language_variety()
+        if all([self._backend.tts.available, not self._backend.tts.language_variety, self._backend.tts.language_variety_choices]):
+            self._backend.tts.language_variety = self._select_tts_language_variety()
 
     @view.creator(title='TTS Language Variety Selection', banner_args=('language-varieties/larry-3d', 'blue'), vertical_offsets=2)
     def _select_tts_language_variety(self) -> str:
         """ Returns:
                 selected language variety: element of language_variety_choices """
 
-        assert self._tts.language_variety_choices is not None
+        assert self._backend.tts.language_variety_choices is not None
 
         # discard overlapping variety parts
-        common_start_length = len(strings.common_start(self._tts.language_variety_choices))
-        processed_varieties = [strings.strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._tts.language_variety_choices]
+        common_start_length = len(strings.common_start(self._backend.tts.language_variety_choices))
+        processed_varieties = [strings.strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._backend.tts.language_variety_choices]
 
         # display eligible varieties
         indentation = op.block_centering_indentation(processed_varieties)
@@ -109,7 +107,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         dialect_selection = query.relentlessly(
             prompt=f'{op.column_percentual_indentation(percentage=0.37)}Enter desired variety: ',
             options=processed_varieties)
-        return self._tts.language_variety_choices[processed_varieties.index(dialect_selection)]
+        return self._backend.tts.language_variety_choices[processed_varieties.index(dialect_selection)]
 
     # -----------------
     # Training
@@ -145,8 +143,12 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         translation = self._process_procured_sentence_pair()
 
         while translation is not None:
-            if self._tts.employ() and self._tts.audio_file is None:
-                self._tts.download_audio_file(translation)
+            if self._backend.tts.employ and self._backend.tts.audio_file is None:
+                try:
+                    self._backend.tts.download_audio_file(translation)
+                except ValueError:
+                    # TODO: log
+                    pass
 
             # get response, run selected option if applicable
             response = query.relentlessly('$', options=self._training_options.keywords)
@@ -173,8 +175,8 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
 
                 # play tts audio if available, otherwise suspend program
                 # for some time to incentivise gleaning over translation_field
-                if self._tts.employ():
-                    self._tts.play_audio()
+                if self._backend.tts.employ:
+                    self._backend.tts.play_audio()
                 else:
                     time.sleep(len(translation) * 0.05)
 
@@ -208,14 +210,3 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
     @staticmethod
     def _pending_output():
         print(colored(f"{_SENTENCE_INDENTATION}pending... ", "cyan", attrs=['dark']))
-
-    # -----------------
-    # Post Training
-    # -----------------
-    @property
-    def _item_name(self) -> str:
-        return 'sentence'
-
-    @property
-    def _pluralized_item_name(self) -> str:
-        return 'sentences'

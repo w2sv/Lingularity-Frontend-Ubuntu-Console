@@ -9,7 +9,7 @@ from frontend.utils import query, output as op, view
 
 class VocableAdderFrontend(TrainerFrontend):
     def __init__(self):
-        super().__init__(backend_type=Backend)
+        super().__init__(backend_type=Backend, item_name=str(), item_name_plural=str(), training_designation='Vocable Adding')
         self._backend: Backend
 
     def __call__(self):
@@ -18,20 +18,8 @@ class VocableAdderFrontend(TrainerFrontend):
         self._display_training_screen_header_section()
         self._run_training_loop()
 
-    @property
-    def _training_designation(self) -> str:
-        return 'Vocable Adding'
-
     def _get_training_options(self) -> TrainingOptions:
         return TrainingOptions(option_classes=[base_options.RectifyLatestAddedVocableEntry, base_options.Exit], frontend_instance=self)
-
-    @property
-    def _item_name(self) -> str:
-        return ''
-
-    @property
-    def _pluralized_item_name(self) -> str:
-        return ''
 
     @view.creator(banner_args=('vocable-adder/ansi-shadow', 'blue'))
     def _display_training_screen_header_section(self):

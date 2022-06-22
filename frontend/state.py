@@ -42,7 +42,7 @@ class State(StaticClass):
         State.username = username
         State.is_new_user = is_new_user
 
-        State.user_languages = set(MongoDBClient.get_instance().query_languages())
+        State.user_languages = set(MongoDBClient.instance().query_languages())
 
     @staticmethod
     def set_language(non_english_language: str, train_english: bool):
@@ -62,4 +62,4 @@ class State(StaticClass):
         State.language = [non_english_language, string_resources.ENGLISH][train_english]
         State.user_languages.add(State.language)
 
-        State.vocabulary_available = State.language in set(MongoDBClient.get_instance().query_vocabulary_possessing_languages())
+        State.vocabulary_available = State.language in set(MongoDBClient.instance().query_vocabulary_possessing_languages())

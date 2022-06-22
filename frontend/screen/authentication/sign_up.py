@@ -34,7 +34,7 @@ def __call__() -> Optional[Tuple[str, bool]]:
                             error_indication_message="PASSWORDS DON'T MATCH", cancelable=True) == query.CANCELLED:
         return None
 
-    MongoDBClient.get_instance().initialize_user(user=username, email_address=mailaddress, password=password)
+    MongoDBClient.instance().initialize_user(user=username, email_address=mailaddress, password=password)
     return username, True
 
 

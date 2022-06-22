@@ -15,7 +15,7 @@ class FrontendExtender(ABC):
         FrontendExtender._FRONTEND_INSTANCE = instance
 
     def __setattr__(self, key, value):
-        if key in self.__class__.__slots__:
+        if key in self.__slots__:
             super().__setattr__(key, value)
 
         else:

@@ -1,4 +1,5 @@
 import subprocess
+
 subprocess.run(['wmctrl', '-r', ':ACTIVE:', '-b', 'add,maximized_vert,maximized_horz'])  # maximize terminal, DON'T ALTER THE POSITION OF THIS LINE
 
 from frontend import screen
@@ -54,7 +55,7 @@ def reentry_at(reentry_point: ReentryPoint):
 
 if __name__ == '__main__':
     from pymongo import errors
-    from backend.database import instantiate_client
+    from backend.database import instantiate_database_client
 
     from frontend import logging
 
@@ -63,7 +64,7 @@ if __name__ == '__main__':
     # check for pymongo-related, insurmountable initialization errors,
     # invoke corresponding exit screen in case of occurrence, otherwise
     # run program
-    if instantiation_error := instantiate_client(server_selection_timeout=1_500):
+    if instantiation_error := instantiate_database_client(server_selection_timeout=1_500):
         if instantiation_error is errors.ServerSelectionTimeoutError:
             screen.exit.on_connection_error.__call__()
         elif instantiation_error is errors.ConfigurationError:

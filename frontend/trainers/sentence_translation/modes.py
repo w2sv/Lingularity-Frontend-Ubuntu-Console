@@ -9,7 +9,7 @@ class TrainingMode:
     def __init__(self, mode_module: ModuleType, explanation: str):
         self.keyword: str = strings.snake_case_to_title(snake_case_string=mode_module.__name__.split('.')[-1])
         self.explanation: str = explanation
-        self.sentence_data_filter: modes.SentenceDataFilter = mode_module.filter_sentence_data  # type: ignore
+        self.sentence_data_filter: modes.SentenceDataFilter = mode_module.filter_sentence_data
 
 
 _modes = list(starmap(TrainingMode, (

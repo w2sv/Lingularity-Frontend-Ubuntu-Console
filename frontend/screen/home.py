@@ -83,7 +83,7 @@ def __call__() -> ReentryPoint:
 
     # query reference language in case of English being selected
     if train_english := selection == string_resources.ENGLISH:
-        mongodb_client = MongoDBClient.get_instance()
+        mongodb_client = MongoDBClient.instance()
 
         selection = mongodb_client.query_reference_language()
         mongodb_client.set_reference_language(reference_language=selection)
@@ -125,7 +125,7 @@ def _language_removal() -> ReentryPoint:
         f'Are you sure you want to irretrievably erase all {removal_language} user data? {query.YES_NO_QUERY_OUTPUT}'
     )
     if query.relentlessly('', indentation_percentage=0.5, options=query.YES_NO_OPTIONS) == 'yes':
-        MongoDBClient.get_instance().remove_language_data(removal_language)
+        MongoDBClient.instance().remove_language_data(removal_language)
         State.user_languages.remove(removal_language)
 
     return __call__()

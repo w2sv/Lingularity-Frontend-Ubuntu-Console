@@ -50,7 +50,12 @@ class VocableTrainerFrontend(TrainerFrontend):
         return lambda: None
 
     def __init__(self):
-        super().__init__(backend_type=Backend)
+        super().__init__(
+            backend_type=Backend,
+            item_name='vocable entry',
+            item_name_plural='vocable entries',
+            training_designation='Vocable Training'
+        )
         self._backend: Backend
 
         self._undo_print = op.UndoPrint()
@@ -82,10 +87,6 @@ class VocableTrainerFrontend(TrainerFrontend):
                                 options.AlterCurrentVocableEntry,
                                 options.DeleteVocableEntry,
                                 base_options.Exit], frontend_instance=self)
-
-    @property
-    def _training_designation(self) -> str:
-        return 'Vocable Training'
 
     # -----------------
     # Pre Training
@@ -277,14 +278,3 @@ class VocableTrainerFrontend(TrainerFrontend):
 
         else:
             self._streak = 0
-
-    # -----------------
-    # Post Training
-    # -----------------
-    @property
-    def _item_name(self) -> str:
-        return 'vocable entry'
-
-    @property
-    def _pluralized_item_name(self) -> str:
-        return 'vocable entries'

@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
 from backend import language_metadata
-from backend.utils import data
+from backend.utils import io
 from textacy.similarity import levenshtein
 import numpy as np
 
@@ -9,7 +9,7 @@ from frontend.metadata import COUNTRY_METADATA_PATH, MAIN_COUNTRY_DATA_PATH
 
 
 if __name__ == '__main__':
-    country_metadata = data.load_json(COUNTRY_METADATA_PATH)
+    country_metadata = io.load_json(COUNTRY_METADATA_PATH)
     countries = list(country_metadata.keys())
 
     language_2_main_country: Dict[str, Optional[str]] = {}
@@ -32,4 +32,4 @@ if __name__ == '__main__':
         else:
             language_2_main_country[language] = None
 
-    data.write_json(language_2_main_country, file_path=MAIN_COUNTRY_DATA_PATH)
+    io.write_json(language_2_main_country, file_path=MAIN_COUNTRY_DATA_PATH)

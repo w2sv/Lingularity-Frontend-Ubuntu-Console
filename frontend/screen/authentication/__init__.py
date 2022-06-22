@@ -12,7 +12,7 @@ def __call__():
 
         Inserts user, is_new_user flag into State, mongodb client """
 
-    mongodb_client = MongoDBClient.get_instance()
+    mongodb_client = MongoDBClient.instance()
     is_new_user = False
 
     # try to retrieve logged in user from disk

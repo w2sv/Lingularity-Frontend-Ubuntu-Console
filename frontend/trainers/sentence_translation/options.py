@@ -13,7 +13,7 @@ class EnableTTS(TrainingOption):
         self.keyword, self.explanation = 'enable', 'enable speech output'
 
     def __call__(self):
-        self._tts.enabled = True
+        self._backend.tts.enabled = True
         output.erase_lines(1)
 
 
@@ -22,7 +22,7 @@ class DisableTTS(TrainingOption):
         self.keyword, self.explanation = 'disable', 'disable speech output'
 
     def __call__(self):
-        self._tts.enabled = False
+        self._backend.tts.enabled = False
         output.erase_lines(1)
 
 
@@ -52,7 +52,7 @@ class ChangePlaybackSpeed(TrainingOption):
         if altered_playback_speed == query.CANCELLED:
             return
 
-        self._tts.playback_speed = float(altered_playback_speed)
+        self._backend.tts.playback_speed = float(altered_playback_speed)
 
 class ChangeTTSLanguageVariety(TrainingOption):
     def __init__(self):
@@ -60,7 +60,7 @@ class ChangeTTSLanguageVariety(TrainingOption):
 
     def __call__(self):
         selected_variety = self._select_tts_language_variety()
-        self._tts.language_variety = selected_variety
+        self._backend.tts.language_variety = selected_variety
 
         # redo previous output output
         self._display_training_screen_header_section()

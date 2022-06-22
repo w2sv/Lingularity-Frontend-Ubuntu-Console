@@ -17,13 +17,23 @@ from frontend.trainers.base.sequence_plot_data import SequencePlotData
 
 
 class TrainerFrontend(ABC):
-    def __init__(self, backend_type: Type[TrainerBackend]):
+    def __init__(self,
+                 backend_type: Type[TrainerBackend],
+                 item_name: str,
+                 item_name_plural: str,
+                 training_designation: str):
+
         self._backend: TrainerBackend = backend_type(State.non_english_language, State.train_english)
 
         self._training_options: TrainingOptions = self._get_training_options()
 
         self._n_trained_items: int = 0
         self._latest_created_vocable_entry: Optional[VocableEntry] = None
+
+        self._item_name = item_name
+        self._item_name_plural = item_name_plural
+
+        self._training_designation = training_designation
 
     @abstractmethod
     def _get_training_options(self) -> TrainingOptions:
@@ -44,11 +54,6 @@ class TrainerFrontend(ABC):
 
     def _set_terminal_title(self):
         view.terminal.set_title(f'{self._backend.language} {self._training_designation}')
-
-    @property
-    @abstractmethod
-    def _training_designation(self) -> str:
-        pass
 
     # -----------------
     # Pre Training
@@ -143,28 +148,18 @@ class TrainerFrontend(ABC):
         # get training item sequences, conduct zero-padding on dates on which no training took place
         sequence = [training_history.get(date, 0) for date in dates]
 
-        return SequencePlotData(sequence, dates, self._pluralized_item_name)
+        return SequencePlotData(sequence, dates, self._item_name_plural)
 
     def _training_chronic_axis_title(self, item_scores: Sequence[int]) -> str:
         if len(item_scores) == 2 and not item_scores[0]:
             return "Let's get that graph inflation goin'"
 
         yesterday_exceedance_difference = item_scores[-1] - item_scores[-2] + 1
-        item_name = [self._pluralized_item_name, self._item_name][yesterday_exceedance_difference in [-1, 0]]
+        item_name = [self._item_name_plural, self._item_name][yesterday_exceedance_difference in [-1, 0]]
 
         if yesterday_exceedance_difference >= 0:
             return f"Exceeded yesterdays score by {yesterday_exceedance_difference + 1} {item_name}"
         return f"{abs(yesterday_exceedance_difference)} {item_name} left to top yesterdays score"
-
-    @property
-    @abstractmethod
-    def _pluralized_item_name(self) -> str:
-        pass
-
-    @property
-    @abstractmethod
-    def _item_name(self) -> str:
-        pass
 
     @staticmethod
     def _plotting_dates(training_dates: Iterator[str], day_delta: int) -> Iterator[str]:

@@ -15,7 +15,7 @@ def __call__() -> Optional[Tuple[str, bool]]:
             is_new_user_flag: bool """
 
     horizontal_indentation = HORIZONTAL_INDENTATION
-    mongodb_client = MongoDBClient.get_instance()
+    mongodb_client = MongoDBClient.instance()
 
     if (username := query.relentlessly(f'{horizontal_indentation}Enter username: ',
                                        applicability_verifier=lambda response: response in mongodb_client.usernames,

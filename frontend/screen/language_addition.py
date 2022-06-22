@@ -51,7 +51,7 @@ def __call__() -> ReentryPoint:
     if selection == query.CANCELLED:
         return ReentryPoint.Home
 
-    MongoDBClient.get_instance().insert_dummy_entry(selection)
+    MongoDBClient.instance().insert_dummy_entry(selection)
 
     # query desired reference language if English selected
     if selection == string_resources.ENGLISH:
@@ -83,7 +83,7 @@ def _color_language_wrt_available_components(language: str) -> str:
     if language in text_to_speech.AVAILABLE_LANGUAGES:
         attrs = _TTS_ATTRS
 
-    if language in lemmatizing.AVAILABLE_LANGUAGES:
+    if language in lemmatizing.spacy_models.AVAILABLE_LANGUAGES:
         color = _HIGH_QUALITY_NORMALIZATION_COLOR
     elif language.lower() in stemming.AVAILABLE_LANGUAGES:
         color = _MEDIUM_QUALITY_NORMALIZATION_COLOR
@@ -105,6 +105,6 @@ def _reference_language_selection_screen() -> ReentryPoint:
     if selection == query.CANCELLED:
         return ReentryPoint.LanguageAddition
 
-    MongoDBClient.get_instance().set_reference_language(reference_language=selection)
+    MongoDBClient.instance().set_reference_language(reference_language=selection)
     State.set_language(non_english_language=selection, train_english=True)
     return ReentryPoint.TrainingSelection

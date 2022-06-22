@@ -1,5 +1,3 @@
-from backend.utils.module_interfacing import abstractmodulemethod
-
 from . import (
     authentication,
     home,
@@ -9,8 +7,3 @@ from . import (
     exit,
     account_deletion
 )
-
-
-@abstractmodulemethod(ignore_modules=['_action_option', '_ops'])
-def __call__():
-    pass
