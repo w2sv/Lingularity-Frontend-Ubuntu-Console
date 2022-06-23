@@ -5,6 +5,9 @@ from backend import MongoDBClient
 from backend import string_resources
 
 
+# TODO
+
+
 class StaticClass(ABC):
     """ Baseclass disallowing instantiation of subclasses """
 
