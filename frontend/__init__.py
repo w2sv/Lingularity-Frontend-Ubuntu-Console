@@ -1,4 +1,4 @@
 from pathlib import Path
 
 
-key_dir_path = Path().cwd() / '.keys'
+KEYS_DIR_PATH = Path().cwd() / '.keys'

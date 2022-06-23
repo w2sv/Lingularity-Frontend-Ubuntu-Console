@@ -6,7 +6,7 @@ from termcolor import colored
 from backend import MongoDBClient
 from backend import string_resources, language_metadata
 from backend.ops.normalizing import stemming, lemmatizing
-from backend.ops.google import text_to_speech
+from backend.components.tts import GoogleTTSClient
 
 from frontend.state import State
 from frontend.reentrypoint import ReentryPoint
@@ -14,7 +14,7 @@ from frontend.utils import view, query, output
 
 
 # enable hundred delimiting by local convention
-locale.setlocale(locale.LC_ALL, '')
+locale.setlocale(locale.LC_ALL, str())
 
 
 @view.creator(banner_args=('languages/3d-ascii', 'cyan'))
@@ -80,7 +80,7 @@ _TTS_ATTRS = ['bold']
 def _color_language_wrt_available_components(language: str) -> str:
     color, attrs = None, None
 
-    if language in text_to_speech.AVAILABLE_LANGUAGES:
+    if language in GoogleTTSClient.AVAILABLE_LANGUAGES:
         attrs = _TTS_ATTRS
 
     if language in lemmatizing.spacy_models.AVAILABLE_LANGUAGES:

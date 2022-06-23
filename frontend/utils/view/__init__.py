@@ -1,11 +1,11 @@
 from typing import Optional, Tuple
 from functools import wraps
-import os
 
 from termcolor import colored
 
-from frontend.utils import output
+from frontend.utils import DATA_DIR_PATH, output
 from frontend.utils.view import terminal
+
 
 VERTICAL_OFFSET = '\n' * 2
 
@@ -59,5 +59,5 @@ def creator(title: Optional[str] = None,
 
 
 def _display_banner(kind: str, color='red'):
-    banner = open(f'{os.getcwd()}/frontend/banners/{kind}.txt', 'r').read()
-    output.centered(colored(banner, color))
+    with open(DATA_DIR_PATH / 'banners' / f'{kind}.txt') as f:
+        output.centered(colored(f.read(), color))

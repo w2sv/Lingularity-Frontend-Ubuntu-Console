@@ -1,10 +1,10 @@
 from typing import Optional
 
-from frontend import key_dir_path
+from frontend import KEYS_DIR_PATH
 from frontend.utils import fernet
 
 
-_user_encryption_fp = key_dir_path / 'user'
+_user_encryption_fp = KEYS_DIR_PATH / 'user'
 
 
 def retrieve() -> Optional[str]:

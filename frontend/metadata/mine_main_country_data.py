@@ -8,6 +8,9 @@ import numpy as np
 from frontend.metadata import COUNTRY_METADATA_PATH, MAIN_COUNTRY_DATA_PATH
 
 
+# TODO: move to mining repo
+
+
 if __name__ == '__main__':
     country_metadata = io.load_json(COUNTRY_METADATA_PATH)
     countries = list(country_metadata.keys())

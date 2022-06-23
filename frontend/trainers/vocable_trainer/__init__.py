@@ -5,10 +5,13 @@ from typing import cast, Optional, Union
 
 from backend.components import VocableEntry
 from backend.trainers.vocable_trainer import (
-    deviation_masks,
-    get_response_evaluation,
-    ResponseEvaluation,
     VocableTrainerBackend
+)
+from backend.trainers.vocable_trainer.deviation_masks import deviation_masks
+from backend.trainers.vocable_trainer.response_evaluation import (
+    EVALUATION_2_SCORE,
+    get_response_evaluation,
+    ResponseEvaluation
 )
 from backend.utils import strings
 from termcolor import colored
@@ -196,7 +199,7 @@ class VocableTrainerFrontend(TrainerFrontend):
                     self._undo_print(f" | Correct translation: {ground_truth_output}", end='')
 
             # display new score in case of change having taken place
-            if response_evaluation not in [ResponseEvaluation.NoResponse, ResponseEvaluation.Wrong]:
+            if response_evaluation not in {ResponseEvaluation.NoResponse, ResponseEvaluation.Wrong}:
                 if entry.score < 5:
                     self._undo_print(f" | New Score: {[int(entry.score), entry.score][bool(entry.score % 1)]}", end='')
                 else:
@@ -218,7 +221,7 @@ class VocableTrainerFrontend(TrainerFrontend):
             # increment/reassign attributes
             # entry.increment_times_faced()
             self._n_trained_items += 1
-            self._accumulated_score += response_evaluation.value
+            self._accumulated_score += EVALUATION_2_SCORE[response_evaluation]
             self._current_vocable_entry = entry
             self._update_streak(response_evaluation)
 
@@ -272,12 +275,13 @@ class VocableTrainerFrontend(TrainerFrontend):
         self._undo_print('\n\n')
 
     def _update_streak(self, response_evaluation: ResponseEvaluation):
-        if response_evaluation in [ResponseEvaluation.WrongArticle,
-                                   ResponseEvaluation.MissingArticle,
-                                   ResponseEvaluation.AccentError,
-                                   ResponseEvaluation.AlmostCorrect,
-                                   ResponseEvaluation.Correct]:
+        if response_evaluation in {
+            ResponseEvaluation.WrongArticle,
+            ResponseEvaluation.MissingArticle,
+            ResponseEvaluation.AccentError,
+            ResponseEvaluation.AlmostCorrect,
+            ResponseEvaluation.Correct
+        }:
             self._streak += 1
-
         else:
             self._streak = 0

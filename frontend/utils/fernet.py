@@ -1,9 +1,9 @@
 from cryptography.fernet import Fernet
 
-from frontend import key_dir_path
+from frontend import KEYS_DIR_PATH
 
 
-_key_fp = key_dir_path / 'fernet'
+_key_fp = KEYS_DIR_PATH / 'fernet'
 
 
 def encrypt(message: str) -> bytes:
