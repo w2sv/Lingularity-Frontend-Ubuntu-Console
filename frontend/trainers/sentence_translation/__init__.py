@@ -1,15 +1,14 @@
-from typing import Optional
 import time
+from typing import cast, Optional
 
+from backend.trainers.sentence_translation import SentenceTranslationTrainerBackend
+from backend.utils import strings
 from termcolor import colored
 
-from backend.utils import strings
-from backend.trainers.sentence_translation import SentenceTranslationTrainerBackend
-
-from frontend.utils import view, query, output as op
-from frontend.trainers.base import TrainerFrontend, SequencePlotData
-from frontend.trainers.base.options import TrainingOptions, base_options
+from frontend.trainers.base import SequencePlotData, TrainerFrontend
+from frontend.trainers.base.options import base_options, TrainingOptions
 from frontend.trainers.sentence_translation import modes, options
+from frontend.utils import output as op, query, view
 
 
 _SENTENCE_INDENTATION = op.column_percentual_indentation(0.15)
@@ -23,6 +22,9 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
             item_name_plural='sentences',
             training_designation='Sentence Translation'
         )
+
+        # retype _backend to specific type; enables linting, type checking however remains disfunctional
+        self._backend = cast(SentenceTranslationTrainerBackend, self._backend)
 
         self._redo_print = op.RedoPrint()
 
@@ -143,9 +145,9 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         translation = self._process_procured_sentence_pair()
 
         while translation is not None:
-            if self._backend.tts.employ and self._backend.tts.audio_file is None:
+            if self._backend.tts.employ and self._backend.tts.audio is None:
                 try:
-                    self._backend.tts.download_audio_file(translation)
+                    self._backend.tts.download_audio(translation)
                 except ValueError:
                     # TODO: log
                     pass

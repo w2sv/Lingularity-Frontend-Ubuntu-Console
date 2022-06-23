@@ -8,7 +8,10 @@ make wheel
 
 cd ./dist || exit
 dist_dir_path=$(realpath .)
-latest_backend_wheel=$(find . -type f -name "backend*" | head -n 1)
+# shellcheck disable=SC2012
+latest_backend_wheel=$(ls -t | head -n1)
+
+echo Determined latest backend wheel: "$latest_backend_wheel"
 
 cd ../../Lingularity-Frontend-Ubuntu-Console || exit
 conda activate ./env

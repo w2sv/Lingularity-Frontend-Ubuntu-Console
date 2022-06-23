@@ -1,19 +1,18 @@
-from typing import Optional, Type, Iterator, Sequence, List
 from abc import ABC, abstractmethod
-from time import sleep
 import datetime
+from time import sleep
+from typing import Iterator, List, Optional, Sequence, Type
 
+from backend import language_metadata
+from backend.components import VocableEntry
+from backend.trainers import TrainerBackend
+from backend.utils import date as date_utils
 from pynput.keyboard import Controller as KeyboardController
 
-from backend.trainers import TrainerBackend
-from backend.trainers.components import VocableEntry
-from backend import language_metadata
-from backend.utils import date as date_utils
-
 from frontend.state import State
-from frontend.utils import output, view, query
 from frontend.trainers.base.options import TrainingOptions
 from frontend.trainers.base.sequence_plot_data import SequencePlotData
+from frontend.utils import output, query, view
 
 
 class TrainerFrontend(ABC):

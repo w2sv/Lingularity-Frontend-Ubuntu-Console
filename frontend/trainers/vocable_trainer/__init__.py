@@ -1,23 +1,24 @@
 from __future__ import annotations
-from typing import Optional, Union
+
 import time
+from typing import cast, Optional, Union
 
-from termcolor import colored
-from backend.utils import strings
-from backend.trainers.components import VocableEntry
+from backend.components import VocableEntry
 from backend.trainers.vocable_trainer import (
-    VocableTrainerBackend as Backend,
-    ResponseEvaluation,
+    deviation_masks,
     get_response_evaluation,
-    deviation_masks
+    ResponseEvaluation,
+    VocableTrainerBackend
 )
+from backend.utils import strings
+from termcolor import colored
 
-from frontend.state import State
-from frontend.utils import query, view, output as op
 from frontend.reentrypoint import ReentryPointProvider
-from frontend.trainers.base import TrainerFrontend, SequencePlotData
-from frontend.trainers.base.options import TrainingOptions, base_options
+from frontend.state import State
+from frontend.trainers.base import SequencePlotData, TrainerFrontend
+from frontend.trainers.base.options import base_options, TrainingOptions
 from frontend.trainers.vocable_trainer import options
+from frontend.utils import output as op, query, view
 
 
 # TODO: set up modes
@@ -51,12 +52,14 @@ class VocableTrainerFrontend(TrainerFrontend):
 
     def __init__(self):
         super().__init__(
-            backend_type=Backend,
+            backend_type=VocableTrainerBackend,
             item_name='vocable entry',
             item_name_plural='vocable entries',
             training_designation='Vocable Training'
         )
-        self._backend: Backend
+
+        # retype _backend to specific type; enables linting, type checking however remains disfunctional
+        self._backend = cast(VocableTrainerBackend, self._backend)
 
         self._undo_print = op.UndoPrint()
 
