@@ -1,10 +1,10 @@
-from pathlib import Path
 from typing import Optional
 
+from frontend import key_dir_path
 from frontend.utils import fernet
 
 
-_user_encryption_fp = Path().cwd() / '.keys' / 'user'
+_user_encryption_fp = key_dir_path / 'user'
 
 
 def retrieve() -> Optional[str]:
@@ -16,8 +16,8 @@ def retrieve() -> Optional[str]:
 
 
 def store(username: str):
-    with open(_user_encryption_fp, 'wb+') as user_encryption_file:
-        user_encryption_file.write(fernet.encrypt(username))
+    with open(_user_encryption_fp, 'wb+') as f:
+        f.write(fernet.encrypt(username))
 
 
 def remove():

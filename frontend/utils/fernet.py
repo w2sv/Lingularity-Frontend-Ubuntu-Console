@@ -1,9 +1,14 @@
-import os
-
 from cryptography.fernet import Fernet
+
+from frontend import key_dir_path
+
+
+_key_fp = key_dir_path / 'fernet'
 
 
 def encrypt(message: str,) -> bytes:
+    if not _key_fp.exists():
+        _write_generated_key()
     return Fernet(key=_load_key()).encrypt(message.encode())
 
 
@@ -12,23 +17,13 @@ def decrypt(encrypted_message: bytes) -> str:
 
 
 # ---------------
-# Key
+# Key IO
 # ---------------
-_KEY_FILE_PATH = f'{os.getcwd()}/.keys/fernet'
 
-
-def _key_existent() -> bool:
-    return os.path.exists(_KEY_FILE_PATH)
-
-
-def _write_key():
-    with open(_KEY_FILE_PATH, 'wb') as key_file:
-        key_file.write(Fernet.generate_key())
-
-
-if not _key_existent():
-    _write_key()
+def _write_generated_key():
+    with open(_key_fp, 'wb') as f:
+        f.write(Fernet.generate_key())
 
 
 def _load_key() -> bytes:
-    return open(_KEY_FILE_PATH, "rb").read()
+    return open(_key_fp, 'rb').read()
