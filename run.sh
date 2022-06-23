@@ -10,7 +10,7 @@ source .source-conda-executable.sh
 conda activate ./env
 
 # run program
-python -m frontend.__init__
+python -m frontend
 
 # uncomment to keep terminal open when failing
-#$SHELL
+$SHELL
