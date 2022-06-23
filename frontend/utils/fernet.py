@@ -6,7 +6,7 @@ from frontend import key_dir_path
 _key_fp = key_dir_path / 'fernet'
 
 
-def encrypt(message: str,) -> bytes:
+def encrypt(message: str) -> bytes:
     if not _key_fp.exists():
         _write_generated_key()
     return Fernet(key=_load_key()).encrypt(message.encode())
