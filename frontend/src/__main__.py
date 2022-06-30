@@ -13,8 +13,7 @@ from frontend.src.state import State
 from frontend.src.reentrypoint import ReentryPoint
 
 
-@State.receiver
-def __call__(state: State):
+def __call__():
     """ Program entry point
 
         Triggers authentication and consecutively invokes procedure depending
@@ -25,10 +24,9 @@ def __call__(state: State):
     # display post signup information, reentry at language addition
     # in case of new user, otherwise proceed directly to home screen
     # of locally cached user
-    if state.is_new_user:
+    if State.instance().is_new_user:
         screen.post_signup_information.__call__()
         return reentry_at(reentry_point=screen.language_addition.__call__())
-
     return reentry_at(reentry_point=screen.home.__call__())
 
 

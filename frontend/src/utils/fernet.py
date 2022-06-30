@@ -1,6 +1,6 @@
 from cryptography.fernet import Fernet
 
-from frontend.src import KEYS_DIR_PATH
+from frontend.src.paths import KEYS_DIR_PATH
 
 
 _key_fp = KEYS_DIR_PATH / 'fernet'

@@ -1,9 +1,9 @@
-from frontend.src.utils import output
-from frontend.src.utils import view
 from frontend.src.screen.exit._error_exit_screen import error_exit_screen
+from frontend.src.utils import output, view
+from frontend.src.utils.view import terminal
 
 
-@view.creator(title=frontend.src.utils.view.terminal.DEFAULT_TITLE, banner_args=('lingularity/ticks-slant', 'blue'), vertical_offsets=2)
+@view.creator(title=terminal.DEFAULT_TERMINAL_TITLE, banner_args=('lingularity/ticks-slant', 'blue'), vertical_offsets=2)
 @output.cursor_hider
 @error_exit_screen
 def __call__():

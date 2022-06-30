@@ -1,14 +1,14 @@
 from pynput import keyboard
 
 
-CANCELLED = '{CANCELLED}'
+QUERY_CANCELLED = '{QUERY_CANCELLED}'
 
 
 def _cancelable(prompt: str) -> str:
     print(prompt, end='', flush=True)
 
     if _escape_key_pressed():
-        return CANCELLED
+        return QUERY_CANCELLED
 
     return _escape_unicode_stripped(input(''))
 

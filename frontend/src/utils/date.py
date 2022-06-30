@@ -1,4 +1,4 @@
-from backend.utils.date import string_2_date, today
+from backend.src.utils.date import string_2_date, today
 
 
 def date_repr(date: str) -> str:

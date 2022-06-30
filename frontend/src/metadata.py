@@ -1,10 +1,9 @@
 from backend.src.utils import io
-from frontend.src.utils import DATA_DIR_PATH
+from frontend.src.paths import DATA_DIR_PATH
 
 
 COUNTRY_METADATA_PATH = DATA_DIR_PATH / 'country-metadata.json'
 MAIN_COUNTRY_DATA_PATH = DATA_DIR_PATH / 'main-countries.json'
-
 
 country_metadata = io.load_json(COUNTRY_METADATA_PATH)
 

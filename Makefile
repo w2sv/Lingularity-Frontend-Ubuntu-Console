@@ -18,10 +18,10 @@ reinstall-backend:
 test: mypy pytest doctest  # run with -k flag in order to continue in case of recipe failure
 
 mypy:
-	mypy frontend/
+	mypy frontend/src/
 
 pytest:
 	coverage run -m pytest -vv tests/
 
 doctest:
-	python -m pytest -vv --doctest-modules --doctest-continue-on-failure ./frontend/
+	python -m pytest -vv --doctest-modules --doctest-continue-on-failure ./frontend/src/

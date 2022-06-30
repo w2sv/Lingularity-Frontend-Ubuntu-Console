@@ -1,19 +1,19 @@
 from typing import Optional, Sequence, Callable, Iterable, Tuple, Any
 
 from frontend.src.utils import output
-from frontend.src.utils.query._cancelling import CANCELLED, _cancelable, _escape_unicode_stripped
+from frontend.src.utils.query.cancelling import QUERY_CANCELLED, _cancelable, _escape_unicode_stripped
 from frontend.src.utils.query._ops import indicate_erroneous_input, _INDISSOLUBILITY_MESSAGE
 
 
-def relentlessly(prompt: str = '',
-                 indentation_percentage=0.0,
-                 prompt_display_function: Optional[Callable] = None,
-                 options: Optional[Sequence[str]] = None,
-                 applicability_verifier: Optional[Callable[[str], bool]] = None,
-                 error_indication_message=_INDISSOLUBILITY_MESSAGE,
-                 sleep_duration=1.0,
-                 cancelable=False,
-                 n_deletion_rows=2) -> str:
+def query_relentlessly(prompt: str = '',
+                       indentation_percentage=0.0,
+                       prompt_display_function: Optional[Callable] = None,
+                       options: Optional[Sequence[str]] = None,
+                       applicability_verifier: Optional[Callable[[str], bool]] = None,
+                       error_indication_message=_INDISSOLUBILITY_MESSAGE,
+                       sleep_duration=1.0,
+                       cancelable=False,
+                       n_deletion_rows=2) -> str:
 
     """ Args:
             prompt: to be repeatedly displayed on query
@@ -50,8 +50,8 @@ def relentlessly(prompt: str = '',
 
     # query in a cancelable manner if applicable, otherwise normally
     if cancelable:
-        if (response := _cancelable(prompt)) == CANCELLED:
-            return CANCELLED
+        if (response := _cancelable(prompt)) == QUERY_CANCELLED:
+            return QUERY_CANCELLED
     else:
         response = _escape_unicode_stripped(input(prompt))
 
@@ -61,7 +61,7 @@ def relentlessly(prompt: str = '',
         return resolved_response
     elif applicability_verifier and applicability_verifier(response):
         return response
-    return _repeat(relentlessly, n_deletion_rows=n_deletion_rows, message=error_indication_message, args=args)
+    return _repeat(query_relentlessly, n_deletion_rows=n_deletion_rows, message=error_indication_message, args=args)
 
 
 def _resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:

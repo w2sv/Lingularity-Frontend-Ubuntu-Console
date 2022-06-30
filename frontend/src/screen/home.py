@@ -1,8 +1,8 @@
 from typing import Dict
 import itertools
 
-from backend.database import UserMongoDBClient
-from backend.string_resources import string_resources
+from backend.src.database import UserMongoDBClient
+from backend.src.string_resources import string_resources
 from termcolor import colored
 
 from frontend.src.metadata import main_country_flag
@@ -10,10 +10,14 @@ from frontend.src.utils import query, output
 from frontend.src.utils import view
 from frontend.src.state import State
 from frontend.src.reentrypoint import ReentryPoint, ReentryPointProvider
-from frontend.src.screen import _action_option, account_deletion
+from frontend.src.screen import action_option, account_deletion
+from frontend.src.utils.query.cancelling import QUERY_CANCELLED
+from frontend.src.utils.query._ops import indicate_erroneous_input
+from frontend.src.utils.query.repetition import query_relentlessly
+from frontend.src.utils.view import terminal
 
 
-@view.creator(title=frontend.src.utils.view.terminal.DEFAULT_TITLE, banner_args=('lingularity/ansi-shadow', 'red'))
+@view.creator(title=terminal.DEFAULT_TERMINAL_TITLE, banner_args=('lingularity/ansi-shadow', 'red'))
 @State.receiver
 def __call__(state: State) -> ReentryPoint:
     """ Displays languages already used by user, as well as additional procedure options of
@@ -54,7 +58,7 @@ def __call__(state: State) -> ReentryPoint:
     DESCRIPTIONS = ['Add Language', 'Remove Language', 'Sign Out', 'Delete Account', 'Quit']
     descriptions = list(
         map(
-            lambda description: _action_option.color_description(description, keyword_index=0, color='red'),
+            lambda description: action_option.color_description(description, keyword_index=0, color='red'),
             DESCRIPTIONS
         )
     )
@@ -62,15 +66,15 @@ def __call__(state: State) -> ReentryPoint:
     OPTION_CLASS_DELIMITER = colorized_header('   |   ')
 
     OPTION_BLOCK = (
-        f"{colorized_header('ADDITIONAL OPTIONS:')}{_action_option.OFFSET}{descriptions[0]}{_action_option.OFFSET}"
+        f"{colorized_header('ADDITIONAL OPTIONS:')}{action_option.OFFSET}{descriptions[0]}{action_option.OFFSET}"
         f"{descriptions[1]}"
-        f"{OPTION_CLASS_DELIMITER}{descriptions[2]}{_action_option.OFFSET}{descriptions[3]}"
+        f"{OPTION_CLASS_DELIMITER}{descriptions[2]}{action_option.OFFSET}{descriptions[3]}"
         f"{OPTION_CLASS_DELIMITER}{descriptions[4]}"
     )
     output.centered(f'\n{OPTION_BLOCK}\n')
 
     # query language/options selection
-    selection = query.relentlessly(
+    selection = query_relentlessly(
         prompt='Select Language/Option: ', indentation_percentage=0.35,
         options=list(state.user_languages) + _OPTION_KEYWORDS
     )
@@ -109,14 +113,14 @@ def _language_removal(state: State) -> ReentryPoint:
 
     # exit in case of nonexistence of removable languages
     if not len(state.user_languages):
-        query.indicate_erroneous_input('THERE ARE NO LANGUAGES TO BE REMOVED', sleep_duration=1.5)
+        indicate_erroneous_input('THERE ARE NO LANGUAGES TO BE REMOVED', sleep_duration=1.5)
         return __call__()
 
     # query removal language
-    if (removal_language := query.relentlessly(
+    if (removal_language := query_relentlessly(
             'Enter language you wish to remove: ', indentation_percentage=0.3,
             options=list(state.user_languages), cancelable=True
-    )) == query.CANCELLED:
+    )) == QUERY_CANCELLED:
         return __call__()
 
     output.erase_lines(1)
@@ -126,7 +130,7 @@ def _language_removal(state: State) -> ReentryPoint:
     output.centered(
         f'Are you sure you want to irretrievably erase all {removal_language} user data? {query.YES_NO_QUERY_OUTPUT}'
     )
-    if query.relentlessly('', indentation_percentage=0.5, options=query.YES_NO_OPTIONS) == 'yes':
+    if query_relentlessly('', indentation_percentage=0.5, options=query.YES_NO_OPTIONS) == 'yes':
         UserMongoDBClient.instance().remove_language_data(removal_language)
         state.user_languages.remove(removal_language)
 

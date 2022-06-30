@@ -13,6 +13,7 @@ from frontend.src.trainers.sentence_translation import options
 from frontend.src.trainers.sentence_translation import modes
 from frontend.src.utils import output as op, query
 from frontend.src.utils import view
+from frontend.src.utils.query.repetition import query_relentlessly
 
 
 _SENTENCE_INDENTATION = op.column_percentual_indentation(0.15)
@@ -50,13 +51,13 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
     def _get_training_options(self) -> TrainingOptions:
         option_classes = [base_options.AddVocable, base_options.RectifyLatestAddedVocableEntry, base_options.Exit]
 
-        if self._backend.tts.available:
+        if self._backend.tts_available:
             option_classes += [options.EnableTTS, options.DisableTTS, options.ChangePlaybackSpeed]
 
-        if bool(self._backend.tts.language_variety_choices):
-            option_classes += [options.ChangeTTSLanguageVariety]
+            if bool(self._backend.tts.language_variety_choices):
+                option_classes += [options.ChangeTTSLanguageVariety]
 
-        return TrainingOptions(option_classes=option_classes, frontend_instance=self)  # type: ignore
+        return TrainingOptions(option_classes=option_classes, frontend_instance=self)
 
     # -----------------
     # Property Selection
@@ -81,7 +82,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
             print(f'{indentation}\t{explanation}\n')
         print(view.VERTICAL_OFFSET)
 
-        return query.relentlessly(f'{query.INDENTATION}Enter desired mode: ', options=modes.keywords)
+        return query_relentlessly(f'{query.INDENTATION}Enter desired mode: ', options=modes.keywords)
 
     # -----------------
     # .TTS Language Variety
@@ -110,7 +111,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         op.empty_row(times=2)
 
         # query variety
-        dialect_selection = query.relentlessly(
+        dialect_selection = query_relentlessly(
             prompt=f'{op.column_percentual_indentation(percentage=0.37)}Enter desired variety: ',
             options=processed_varieties)
         return self._backend.tts.language_variety_choices[processed_varieties.index(dialect_selection)]
@@ -157,7 +158,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
                     pass
 
             # get response, run selected option if applicable
-            response = query.relentlessly('$', options=self._training_options.keywords)
+            response = query_relentlessly('$', options=self._training_options.keywords)
 
             if len(response):
 

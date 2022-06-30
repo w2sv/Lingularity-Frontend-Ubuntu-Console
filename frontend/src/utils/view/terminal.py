@@ -7,4 +7,4 @@ def set_title(title: str):
     subprocess.run(['wmctrl', '-r', ':ACTIVE:', '-N', f'"Lingularity - {title}"'])
 
 
-DEFAULT_TITLE = 'Acquire Languages the Litboy Way'
+DEFAULT_TERMINAL_TITLE = 'Acquire Languages the Litboy Way'

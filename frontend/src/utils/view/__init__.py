@@ -3,7 +3,8 @@ from functools import wraps
 
 from termcolor import colored
 
-from frontend.src.utils import RESOURCE_DIR_PATH, output
+from frontend.src.utils import output
+from frontend.src.paths import RESOURCE_DIR_PATH
 from frontend.src.utils.view import terminal
 
 

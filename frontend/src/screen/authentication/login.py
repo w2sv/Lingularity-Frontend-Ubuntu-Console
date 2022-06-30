@@ -1,6 +1,6 @@
 from typing import Tuple, Optional
 
-from backend.database import UserTranscendentMongoDBClient
+from backend.src.database import UserTranscendentMongoDBClient
 
 from frontend.src.utils import query
 from frontend.src.utils import view

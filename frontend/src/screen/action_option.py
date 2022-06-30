@@ -39,15 +39,3 @@ def color_description(description: str, keyword_index: int, color='red') -> str:
 
 def _color_keyword(keyword: str, color='red') -> str:
     return '(' + colored(keyword[0], color) + ')' + colored(keyword[1:], color)
-
-
-if __name__ == '__main__':
-    _options = Options(
-        options=[
-            Option('Translate Sentences', keyword_index=1, callback=None),
-            Option('Train Vocabulary', keyword_index=1, callback=None),
-            Option('Add Vocabulary', keyword_index=0, callback=None),
-            Option('Quit', callback=None)],
-        color='red'
-    )
-

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from frontend.src import KEYS_DIR_PATH
+from frontend.src.paths import KEYS_DIR_PATH
 from frontend.src.utils import fernet
 
 

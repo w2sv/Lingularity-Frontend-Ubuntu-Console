@@ -1,21 +1,18 @@
-from typing import Union, Type, Optional
 import random
+from typing import Optional, Type, Union
 
 import asciiplot
 from backend.src.metadata import language_metadata
 
-from frontend.src.state import State
 from frontend.src.reentrypoint import ReentryPoint
-from frontend.src.utils import query, output
-from frontend.src.utils import view
-from frontend.src.trainers import (
-    SentenceTranslationTrainerFrontend,
-    VocableTrainerFrontend,
-    VocableAdderFrontend,
-    TrainerFrontend
-)
+from frontend.src.screen.action_option import Option, Options
+from frontend.src.state import State
+from frontend.src.trainers import (SentenceTranslationTrainerFrontend, TrainerFrontend, VocableAdderFrontend, VocableTrainerFrontend)
 from frontend.src.trainers.base.sequence_plot_data import SequencePlotData
-from frontend.src.screen._action_option import Option, Options
+from frontend.src.utils import output, view
+from frontend.src.utils.query.cancelling import QUERY_CANCELLED
+from frontend.src.utils.query.repetition import query_relentlessly
+from frontend.src.utils.view import terminal
 
 
 _options = Options([
@@ -29,7 +26,7 @@ _options = Options([
 @view.creator(banner_args=('lingularity/3d-ascii', 'green'))
 @State.receiver
 def __call__(state: State, training_item_sequence_plot_data: Optional[SequencePlotData] = None) -> ReentryPoint:
-    frontend.src.utils.view.terminal.set_title(f'{state.language} Training Selection')
+    terminal.set_title(f'{state.language} Training Selection')
 
     if not training_item_sequence_plot_data:
         _display_constitution_query(username=state.username, language=state.language)
@@ -39,7 +36,7 @@ def __call__(state: State, training_item_sequence_plot_data: Optional[SequencePl
         _display_training_item_sequence(training_item_sequence_plot_data)
 
     # query desired action
-    if (action_selection_keyword := _query_action_selection()) == query.CANCELLED:
+    if (action_selection_keyword := _query_action_selection()) == QUERY_CANCELLED:
         return ReentryPoint.Home
     option_callback = _options[action_selection_keyword]
 
@@ -53,7 +50,7 @@ def __call__(state: State, training_item_sequence_plot_data: Optional[SequencePl
 
 def _query_action_selection() -> str:
     output.centered(_options.display_row, '\n')
-    return query.relentlessly(prompt=output.centering_indentation(' '), options=_options.keywords, cancelable=True)
+    return query_relentlessly(prompt=output.centering_indentation(' '), options=_options.keywords, cancelable=True)
 
 
 _OptionCallbacks = Union[

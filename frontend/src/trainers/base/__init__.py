@@ -12,8 +12,10 @@ from pynput.keyboard import Controller as KeyboardController
 from frontend.src.state import State
 from frontend.src.trainers.base.options import TrainingOptions
 from frontend.src.trainers.base.sequence_plot_data import SequencePlotData
-from frontend.src.utils import output, query
-from frontend.src.utils import view
+from frontend.src.utils import output, view
+from frontend.src.utils.query.cancelling import QUERY_CANCELLED
+from frontend.src.utils.query.repetition import query_relentlessly
+from frontend.src.utils.view import terminal
 
 
 class TrainerFrontend(ABC):
@@ -55,7 +57,7 @@ class TrainerFrontend(ABC):
         pass
 
     def _set_terminal_title(self):
-        frontend.src.utils.view.terminal.set_title(f'{self._backend.language} {self._training_designation}')
+        terminal.set_title(f'{self._backend.language} {self._training_designation}')
 
     # -----------------
     # Pre Training
@@ -85,10 +87,10 @@ class TrainerFrontend(ABC):
         # query vocable and meaning, exit if one of the two fields empty
         entry_fields = ['', '']
         for i, query_message in enumerate([f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']):
-            if (field := query.relentlessly(
+            if (field := query_relentlessly(
                     prompt=f'{output.column_percentual_indentation(percentage=0.32)}{query_message}',
                     applicability_verifier=lambda response: bool(len(response)),
-                    error_indication_message="INPUT FIELD LEFT UNFILLED", cancelable=cancelable)) == query.CANCELLED:
+                    error_indication_message="INPUT FIELD LEFT UNFILLED", cancelable=cancelable)) == QUERY_CANCELLED:
                 return True
 
             entry_fields[i] = field

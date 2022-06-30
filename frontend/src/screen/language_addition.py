@@ -1,17 +1,19 @@
-from typing import List
 import locale
+from typing import List
 
+from backend.src.components.tts import GoogleTTSClient
 from backend.src.database import UserMongoDBClient
 from backend.src.metadata import language_metadata
 from backend.src.ops import spacy_models, stemming
 from backend.src.string_resources import string_resources
 from termcolor import colored
-from backend.src.components.tts import GoogleTTSClient
 
-from frontend.src.state import State
 from frontend.src.reentrypoint import ReentryPoint
-from frontend.src.utils import query, output
-from frontend.src.utils import view
+from frontend.src.state import State
+from frontend.src.utils import output, view
+from frontend.src.utils.query.cancelling import QUERY_CANCELLED
+from frontend.src.utils.query.repetition import query_relentlessly
+from frontend.src.utils.view import terminal
 
 
 # enable hundred delimiting by local convention
@@ -25,7 +27,7 @@ def __call__(state: State) -> ReentryPoint:
         tts/tokenization availability in block indented manner, writes selected
         language into global state """
 
-    frontend.src.utils.view.terminal.set_title(['Add a new language', "Select a language you'd like to learn"][state.is_new_user])
+    terminal.set_title(['Add a new language', "Select a language you'd like to learn"][state.is_new_user])
 
     # strip languages already used by user from eligible ones
     eligible_languages = list(set(language_metadata.keys()) - state.user_languages)
@@ -48,9 +50,9 @@ def __call__(state: State) -> ReentryPoint:
           f'(number of available sentences)', view.VERTICAL_OFFSET)
 
     # query desired language
-    selection = query.relentlessly('Select language: ', indentation_percentage=0.35, options=eligible_languages,
+    selection = query_relentlessly('Select language: ', indentation_percentage=0.35, options=eligible_languages,
                                    cancelable=True)
-    if selection == query.CANCELLED:
+    if selection == QUERY_CANCELLED:
         return ReentryPoint.Home
 
     UserMongoDBClient.instance().insert_dummy_entry(selection)
@@ -103,9 +105,9 @@ def _reference_language_selection_screen(state: State) -> ReentryPoint:
     _display_eligible_languages(grouped_eligible_languages=[' '.join(map(lambda language: f'{colored(language, _HIGH_QUALITY_NORMALIZATION_COLOR, attrs=_TTS_ATTRS)}({language_metadata[language]["nSentences"]:n})', language_group)) for language_group in starting_letter_grouped_languages])
 
     # query desired language
-    selection = query.relentlessly('Select reference language: ', indentation_percentage=0.35,
+    selection = query_relentlessly('Select reference language: ', indentation_percentage=0.35,
                                    options=eligible_languages, cancelable=True)
-    if selection == query.CANCELLED:
+    if selection == QUERY_CANCELLED:
         return ReentryPoint.LanguageAddition
 
     UserMongoDBClient.instance().set_reference_language(reference_language=selection)
