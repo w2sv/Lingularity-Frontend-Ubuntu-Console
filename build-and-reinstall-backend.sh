@@ -4,7 +4,7 @@ source .source-conda-executable.sh
 
 cd ../Lingularity-Backend || exit
 conda activate ./env
-make wheel
+poetry build -vvv
 
 cd ./dist || exit
 dist_dir_path=$(realpath .)

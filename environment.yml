@@ -2,15 +2,18 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.8
+  - python=3.9
   - pip=20.0.2
   - pytest  # dev
   - mypy  # dev
   - coverage  # dev
   - pip:
-    - pynput==1.6.8
+    - pynput
     - cursor==1.3.4
     - screeninfo==0.6.5
     - termcolor
-    - git+https://github.com/w2sv/Lingularity-Backend.git
+    - types-termcolor  # dev
+    - monostate==0.0.9
+    - more_itertools
+#    - git+https://github.com/w2sv/Lingularity-Backend.git
     - git+https://github.com/w2sv/asciiplot.git
