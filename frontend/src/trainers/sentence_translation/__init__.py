@@ -1,17 +1,22 @@
+from __future__ import annotations
+
 import time
-from typing import Optional
 
 from backend.src.trainers.sentence_translation import SentenceTranslationTrainerBackend
 from backend.src.utils.strings.extraction import longest_common_prefix
 from backend.src.utils.strings.transformation import strip_multiple
+from cursor import cursor
+from pynput.keyboard import Controller as Keyboard
 from termcolor import colored
 
-from frontend.src.trainers.base import SequencePlotData, TrainerFrontend
-from frontend.src.trainers.base.options import base_options, TrainingOptions
-from frontend.src.trainers.sentence_translation import modes, options
 from frontend.src.trainers.sentence_translation.modes import MODE_2_EXPLANATION, sentence_filter, SentenceFilterMode
-from frontend.src.utils import output as op, query, view
-from frontend.src.utils.query.repetition import query_relentlessly
+from frontend.src.trainers.sequence_plot_data import SequencePlotData
+from frontend.src.trainers.trainer_frontend import TrainerFrontend
+from frontend.src.utils import output, output as op, query, view
+from frontend.src.utils.output.percentual_indenting import IndentedPrint
+from frontend.src.utils.query import PROMPT_INDENTATION
+from frontend.src.utils.query.cancelling import QUERY_CANCELLED
+from frontend.src.utils.query.repetition import prompt_relentlessly
 
 
 _SENTENCE_INDENTATION = op.column_percentual_indentation(0.15)
@@ -23,9 +28,16 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
             backend_type=SentenceTranslationTrainerBackend,
             item_name='sentence',
             item_name_plural='sentences',
-            training_designation='Sentence Translation'
+            training_designation='Sentence Translation',
+            option_keyword_2_instruction_and_function={
+                'enable': ('Enable text-to-speech', self._enable_tts),
+                'disable': ('Disable text-to-speech', self._disable_tts),
+                'speed': ('Change text-to-speech playback speed', self._change_playback_speed),
+                'accent': ('Change text-to-speech accent', self._change_accent)
+            }
         )
 
+        self._current_translation = str()
         self._redo_print = op.RedoPrint()
 
     def __call__(self) -> SequencePlotData:
@@ -37,22 +49,11 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         self._backend.set_item_iterator()
 
         self._display_training_screen_header_section()
-        self._run_training_loop()
+        self._training_loop()
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
 
         return self._training_item_sequence_plot_data()
-
-    def _get_training_options(self) -> TrainingOptions:
-        option_classes = [base_options.AddVocable, base_options.RectifyLatestAddedVocableEntry, base_options.Exit]
-
-        if self._backend.tts_available:
-            option_classes += [options.EnableTTS, options.DisableTTS, options.ChangePlaybackSpeed]
-
-            if bool(self._backend.tts.language_variety_choices):
-                option_classes += [options.ChangeTTSLanguageVariety]
-
-        return TrainingOptions(option_classes=option_classes, frontend_instance=self)
 
     # -----------------
     # Property Selection
@@ -71,13 +72,17 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
     def _select_training_mode(self) -> SentenceFilterMode:
 
         # display eligible modes
-        indentation = op.block_centering_indentation(MODE_2_EXPLANATION.values())
+        _print = IndentedPrint(indentation=op.block_centering_indentation(MODE_2_EXPLANATION.values()))
         for mode, explanation in MODE_2_EXPLANATION.items():
-            print(f'{indentation}{colored(f"{mode.name}:", color="red")}')
-            print(f'{indentation}\t{explanation}\n')
+            _print(colored(f'{mode.display_name}:', color='red'))
+            _print(f'\t{explanation}\n')
+
         print(view.VERTICAL_OFFSET)
 
-        keyword = query_relentlessly(f'{query.INDENTATION}Enter desired mode: ', options=MODE_2_EXPLANATION.keys())
+        keyword = prompt_relentlessly(
+            f'{PROMPT_INDENTATION}Enter desired mode: ',
+            options=[mode.name for mode in MODE_2_EXPLANATION]
+        )
         return SentenceFilterMode[keyword]
 
     # -----------------
@@ -86,7 +91,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
     def _set_tts_language_variety_if_applicable(self):
         """ Invokes variety selection method, forwards selected variety to tts """
 
-        if all([self._backend.tts_available, not self._backend.tts.language_variety, self._backend.tts.language_variety_choices]):
+        if self._backend.tts_available and len(self._backend.tts.language_variety_choices) and self._backend.tts.language_variety is None:
             self._backend.tts.language_variety = self._select_tts_language_variety()
 
     @view.creator(title='TTS Language Variety Selection', banner_args=('language-varieties/larry-3d', 'blue'), vertical_offsets=2)
@@ -107,7 +112,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         op.empty_row(times=2)
 
         # query variety
-        dialect_selection = query_relentlessly(
+        dialect_selection = prompt_relentlessly(
             prompt=f'{op.column_percentual_indentation(percentage=0.37)}Enter desired variety: ',
             options=processed_varieties)
         return self._backend.tts.language_variety_choices[processed_varieties.index(dialect_selection)]
@@ -118,9 +123,11 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
     @view.creator()
     def _display_training_screen_header_section(self):
         self._display_session_information()
-        self._training_options.display_instructions(insertion_args=((3, 'TEXT-TO-SPEECH OPTIONS', True),))
+        self._options.display_instructions(
+            row_index_2_insertion_string={2: 'TEXT-TO-SPEECH OPTIONS'}
+        )
 
-        if len(self._training_options) == 3:
+        if len(self._options) == 3:
             print(view.VERTICAL_OFFSET)
             self._output_lets_go()
             print(view.VERTICAL_OFFSET)
@@ -142,23 +149,16 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         op.empty_row()
 
     @op.cursor_hider
-    def _run_training_loop(self):
-        translation = self._process_procured_sentence_pair()
+    def _training_loop(self):
+        if translation := self._process_procured_sentence_pair():
+            self._current_translation = translation
 
-        while translation is not None:
             if self._backend.tts_available and not self._backend.tts.audio_available:
                 self._backend.tts.download_audio(translation)
 
             # get response, run selected option if applicable
-            response = query_relentlessly('$', options=self._training_options.keywords)
-
-            # ----OPTION SELECTED----
-            if len(response):
-                self._training_options[response].__call__()
-
-                if self._training_options.exit_training:
-                    return
-
+            if self._inquire_option_selection() and self.exit_training:
+                return
             else:
 
                 # ----ENTER-STROKE----
@@ -181,12 +181,11 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
 
                 if self._n_trained_items >= 5:
                     self._redo_print.redo_partially(n_deletion_rows=3)
+            return self._training_loop()
 
-                translation = self._process_procured_sentence_pair()
+        print('\nSentence data depleted')
 
-        print('\nSentence data file depleted')
-
-    def _process_procured_sentence_pair(self) -> Optional[str]:
+    def _process_procured_sentence_pair(self) -> str | None:
         """ Returns:
                 translation_field of procured sentence pair, None in case of depleted item iterator """
 
@@ -207,3 +206,46 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
     @staticmethod
     def _pending_output():
         print(colored(f"{_SENTENCE_INDENTATION}pending... ", "cyan", attrs=['dark']))
+
+    def _enable_tts(self):
+        self._backend.tts.enabled = True
+        output.erase_lines(1)
+
+    def _disable_tts(self):
+        self._backend.tts.enabled = False
+        output.erase_lines(1)
+
+    def _change_playback_speed(self):
+        def display_prompt():
+            print(f'Playback speed:\n{query.PROMPT_INDENTATION}', end='')
+            Keyboard().type(str(self._backend.tts.playback_speed))
+            cursor.show()
+
+        altered_playback_speed = prompt_relentlessly(
+            prompt='',
+            prompt_display_function=display_prompt,
+            applicability_verifier=self._backend.tts.is_valid_playback_speed,
+            error_indication_message='PLAYBACK SPEED HAS TO LIE BETWEEN 0.5 AND 2',
+            cancelable=True,
+            n_deletion_rows=3,
+            sleep_duration=1.5
+        )
+        cursor.hide()
+
+        if altered_playback_speed == QUERY_CANCELLED:
+            return
+
+        self._backend.tts.playback_speed = float(altered_playback_speed)
+
+        output.erase_lines(3)
+
+    def _change_accent(self):
+        selected_variety = self._select_tts_language_variety()
+        self._backend.tts.language_variety = selected_variety
+        if self._backend.tts.audio_available:
+            self._backend.tts.download_audio(self._current_translation)
+
+        # redo previous output output
+        self._display_training_screen_header_section()
+        self._redo_print.redo()
+        self._pending_output()

@@ -2,12 +2,17 @@ from enum import Enum
 
 from backend.src.trainers.sentence_translation import modes
 from backend.src.trainers.sentence_translation.modes import SentenceDataFilter
+from backend.src.utils.strings.splitting import split_at_uppercase
 
 
-class SentenceFilterMode(Enum, str):
+class SentenceFilterMode(Enum):
     DictionExpansion = 'diction_expansion'
     Simple = 'simple'
     Random = 'random'
+
+    @property
+    def display_name(self) -> str:
+        return ' '.join(split_at_uppercase(self.name))
 
 
 MODE_2_EXPLANATION = {

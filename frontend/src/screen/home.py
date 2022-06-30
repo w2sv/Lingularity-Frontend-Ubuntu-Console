@@ -13,7 +13,7 @@ from frontend.src.reentrypoint import ReentryPoint, ReentryPointProvider
 from frontend.src.screen import action_option, account_deletion
 from frontend.src.utils.query.cancelling import QUERY_CANCELLED
 from frontend.src.utils.query._ops import indicate_erroneous_input
-from frontend.src.utils.query.repetition import query_relentlessly
+from frontend.src.utils.query.repetition import prompt_relentlessly
 from frontend.src.utils.view import terminal
 
 
@@ -74,7 +74,7 @@ def __call__(state: State) -> ReentryPoint:
     output.centered(f'\n{OPTION_BLOCK}\n')
 
     # query language/options selection
-    selection = query_relentlessly(
+    selection = prompt_relentlessly(
         prompt='Select Language/Option: ', indentation_percentage=0.35,
         options=list(state.user_languages) + _OPTION_KEYWORDS
     )
@@ -117,7 +117,7 @@ def _language_removal(state: State) -> ReentryPoint:
         return __call__()
 
     # query removal language
-    if (removal_language := query_relentlessly(
+    if (removal_language := prompt_relentlessly(
             'Enter language you wish to remove: ', indentation_percentage=0.3,
             options=list(state.user_languages), cancelable=True
     )) == QUERY_CANCELLED:
@@ -130,7 +130,7 @@ def _language_removal(state: State) -> ReentryPoint:
     output.centered(
         f'Are you sure you want to irretrievably erase all {removal_language} user data? {query.YES_NO_QUERY_OUTPUT}'
     )
-    if query_relentlessly('', indentation_percentage=0.5, options=query.YES_NO_OPTIONS) == 'yes':
+    if prompt_relentlessly('', indentation_percentage=0.5, options=query.YES_NO_OPTIONS) == 'yes':
         UserMongoDBClient.instance().remove_language_data(removal_language)
         state.user_languages.remove(removal_language)
 

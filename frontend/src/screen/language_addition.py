@@ -12,7 +12,7 @@ from frontend.src.reentrypoint import ReentryPoint
 from frontend.src.state import State
 from frontend.src.utils import output, view
 from frontend.src.utils.query.cancelling import QUERY_CANCELLED
-from frontend.src.utils.query.repetition import query_relentlessly
+from frontend.src.utils.query.repetition import prompt_relentlessly
 from frontend.src.utils.view import terminal
 
 
@@ -50,7 +50,7 @@ def __call__(state: State) -> ReentryPoint:
           f'(number of available sentences)', view.VERTICAL_OFFSET)
 
     # query desired language
-    selection = query_relentlessly('Select language: ', indentation_percentage=0.35, options=eligible_languages,
+    selection = prompt_relentlessly('Select language: ', indentation_percentage=0.35, options=eligible_languages,
                                    cancelable=True)
     if selection == QUERY_CANCELLED:
         return ReentryPoint.Home
@@ -105,7 +105,7 @@ def _reference_language_selection_screen(state: State) -> ReentryPoint:
     _display_eligible_languages(grouped_eligible_languages=[' '.join(map(lambda language: f'{colored(language, _HIGH_QUALITY_NORMALIZATION_COLOR, attrs=_TTS_ATTRS)}({language_metadata[language]["nSentences"]:n})', language_group)) for language_group in starting_letter_grouped_languages])
 
     # query desired language
-    selection = query_relentlessly('Select reference language: ', indentation_percentage=0.35,
+    selection = prompt_relentlessly('Select reference language: ', indentation_percentage=0.35,
                                    options=eligible_languages, cancelable=True)
     if selection == QUERY_CANCELLED:
         return ReentryPoint.LanguageAddition

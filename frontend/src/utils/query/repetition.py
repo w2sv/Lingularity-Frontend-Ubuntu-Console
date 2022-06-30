@@ -5,15 +5,15 @@ from frontend.src.utils.query.cancelling import QUERY_CANCELLED, _cancelable, _e
 from frontend.src.utils.query._ops import indicate_erroneous_input, _INDISSOLUBILITY_MESSAGE
 
 
-def query_relentlessly(prompt: str = '',
-                       indentation_percentage=0.0,
-                       prompt_display_function: Optional[Callable] = None,
-                       options: Optional[Sequence[str]] = None,
-                       applicability_verifier: Optional[Callable[[str], bool]] = None,
-                       error_indication_message=_INDISSOLUBILITY_MESSAGE,
-                       sleep_duration=1.0,
-                       cancelable=False,
-                       n_deletion_rows=2) -> str:
+def prompt_relentlessly(prompt: str = '',
+                        indentation_percentage=0.0,
+                        prompt_display_function: Optional[Callable] = None,
+                        options: Optional[Sequence[str]] = None,
+                        applicability_verifier: Optional[Callable[[str], bool]] = None,
+                        error_indication_message=_INDISSOLUBILITY_MESSAGE,
+                        sleep_duration=1.0,
+                        cancelable=False,
+                        n_deletion_rows=2) -> str:
 
     """ Args:
             prompt: to be repeatedly displayed on query
@@ -61,7 +61,7 @@ def query_relentlessly(prompt: str = '',
         return resolved_response
     elif applicability_verifier and applicability_verifier(response):
         return response
-    return _repeat(query_relentlessly, n_deletion_rows=n_deletion_rows, message=error_indication_message, args=args)
+    return _repeat(prompt_relentlessly, n_deletion_rows=n_deletion_rows, message=error_indication_message, args=args)
 
 
 def _resolve_input(_input: str, options: Iterable[str]) -> Optional[str]:

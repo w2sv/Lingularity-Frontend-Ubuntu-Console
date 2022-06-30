@@ -41,7 +41,7 @@ def align(column1: Sequence[str], column2: Sequence[str]) -> List[str]:
     """ Args:
             column1 to be of equal length as column2
 
-        Joins rows of column1 and column2 such that respective column beginnings
+        Join rows of column1 and column2 such that respective column beginnings
         vertically aligned """
 
     max_length_first_column_element = max(map(len, column1))

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import time
-from typing import Optional
 
 from backend.src.trainers.vocable_trainer import (
     VocableTrainerBackend
@@ -19,15 +18,13 @@ from termcolor import colored
 
 from frontend.src.reentrypoint import ReentryPointProvider
 from frontend.src.state import State
-from frontend.src.trainers.base import SequencePlotData, TrainerFrontend
-from frontend.src.trainers.base.options import base_options, TrainingOptions
-from frontend.src.trainers.vocable_trainer import options
-from frontend.src.utils import output as op, query, view
-from frontend.src.utils.query.repetition import query_relentlessly
+from frontend.src.trainers.trainer_frontend import SequencePlotData, TrainerFrontend
+from frontend.src.utils import output, output as op, query, view
+from frontend.src.utils.query.repetition import prompt_relentlessly
 
 
 class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
-    def __new__(cls, *args, **kwargs) -> ReentryPointProvider | VocableTrainerFrontend:
+    def __new__(cls, *args, **kwargs) -> ReentryPointProvider | VocableTrainerFrontend:  # type: ignore
         """ Check whether vocabulary available for language, invoke vocabulary
             existence necessity information screen if not and exit afterwards """
 
@@ -57,7 +54,11 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
             backend_type=VocableTrainerBackend,
             item_name='vocable entry',
             item_name_plural='vocable entries',
-            training_designation='Vocable Training'
+            training_designation='Vocable Training',
+            option_keyword_2_instruction_and_function={
+                'alter': ('alter the current vocable', self._alter_vocable_entry),
+                'delete': ('delete the current vocable entry', self._delete_vocable_entry)
+            }
         )
 
         self._undo_print = op.UndoPrint()
@@ -66,7 +67,7 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
         self._streak: int = 0
         self._n_perfected_entries: int = 0
 
-        self._current_vocable_entry: Optional[VocableEntry] = None
+        self._current_vocable_entry: VocableEntry = None
 
     def __call__(self) -> SequencePlotData:
         self._set_terminal_title()
@@ -77,18 +78,11 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
             self._display_new_vocabulary_if_desired()
 
         self._display_training_screen_header_section()
-        self._run_training_loop()
+        self._training_loop()
 
         self._backend.enter_session_statistics_into_database(self._n_trained_items)
 
         return self._training_item_sequence_plot_data()
-
-    def _get_training_options(self) -> TrainingOptions:
-        return TrainingOptions([base_options.AddVocable,
-                                base_options.RectifyLatestAddedVocableEntry,
-                                options.AlterCurrentVocableEntry,
-                                options.DeleteVocableEntry,
-                                base_options.Exit], frontend_instance=self)
 
     # -----------------
     # Pre Training
@@ -99,7 +93,7 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
         op.centered(f'Would you like to see the vocable entries you recently created? {query.YES_NO_QUERY_OUTPUT}')
         op.centered(' ', end='')
 
-        if query_relentlessly(prompt='', options=query.YES_NO_OPTIONS) == query.YES:
+        if prompt_relentlessly(prompt='', options=query.YES_NO_OPTIONS) == query.YES:
             self._display_new_vocable_entries()
 
     @view.creator(vertical_offsets=2)
@@ -121,21 +115,21 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
     # ------------------
     @view.creator()
     def _display_training_screen_header_section(self):
-        # TODO: elaborate usage instructions, functionality explanation
+        # TODO: elaborate usage information, functionality explanation
 
         # display number of retrieved vocables to be trained
         op.centered(f'Found {self._backend.n_training_items} entries to be practiced{view.VERTICAL_OFFSET}')
         op.centered("Hit Enter to proceed after response evaluation\n")
 
-        # display instructions
-        self._training_options.display_instructions(
-            insertion_args=((3, "    NOTE: distinct translations are to be delimited by ', '", False),)
+        # display information
+        self._options.display_instructions(
+            row_index_2_insertion_string={3: "NOTE: distinct translations are to be delimited by ', '"}
         )
 
         # display lets go
         self._output_lets_go()
 
-    def _run_training_loop(self):
+    def _training_loop(self):
         EVALUATION_2_COLOR = {
              ResponseEvaluation.Wrong: 'red',
              ResponseEvaluation.AccentError: 'yellow',
@@ -145,9 +139,7 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
              ResponseEvaluation.Correct: 'green'
         }
 
-        entry: Optional[VocableEntry] = self._backend.get_training_item()
-
-        while entry is not None:
+        if (entry := self._backend.get_training_item()) is not None:
             self._display_streak()
             self._display_progress_bar()
 
@@ -227,20 +219,15 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
             self._undo_print('')
 
             # query option/procedure, __call__ option if applicable
-            option_selection = query_relentlessly(prompt=f'{op.centering_indentation(" ")}$',
-                                                  options=self._training_options.keywords)
             self._undo_print.add_rows_to_buffer(1)
 
-            if len(option_selection):
-                self._training_options[option_selection].__call__()
-
-                if self._training_options.exit_training:
-                    return
+            if self._inquire_option_selection(indentation_percentage=0.49) and self.exit_training:
+                return
 
             # clear screen part pertaining to current entry
             self._undo_print.undo()
 
-            entry = self._backend.get_training_item()
+            return self._training_loop()
         # TODO: make display bar advance to 100% after completion of last vocable
 
     def _display_progress_bar(self):
@@ -281,3 +268,14 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
             self._streak += 1
         else:
             self._streak = 0
+
+    def _alter_vocable_entry(self, _):
+        n_printed_lines = super()._alter_vocable_entry(self._current_vocable_entry)
+        output.erase_lines(n_printed_lines - 1)
+
+    def _delete_vocable_entry(self):
+        output.centered(f"\nAre you sure you want to irreversibly delete {str(self._current_vocable_entry)}? {query.YES_NO_QUERY_OUTPUT}")
+
+        if prompt_relentlessly(output.centering_indentation(' '), options=query.YES_NO_OPTIONS) == query.YES:
+            self._backend.user_mongo_client.delete_vocable_entry(self._current_vocable_entry.as_dict)
+        output.erase_lines(3)

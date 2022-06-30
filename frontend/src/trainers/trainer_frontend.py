@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 import datetime
 from time import sleep
-from typing import Generic, Iterator, List, Optional, Sequence, Type, TypeVar
+
+from typing import Callable, Generic, Iterator, Sequence, Type, TypeVar
 
 from backend.src.metadata import language_metadata
 from backend.src.trainers import TrainerBackend
@@ -10,49 +13,57 @@ from backend.src.utils import date as date_utils
 from pynput.keyboard import Controller as KeyboardController
 
 from frontend.src.state import State
-from frontend.src.trainers.base.options import TrainingOptions
-from frontend.src.trainers.base.sequence_plot_data import SequencePlotData
+from frontend.src.trainers.option_collection import OptionCollection
+from frontend.src.trainers.sequence_plot_data import SequencePlotData
 from frontend.src.utils import output, view
 from frontend.src.utils.query.cancelling import QUERY_CANCELLED
-from frontend.src.utils.query.repetition import query_relentlessly
+from frontend.src.utils.query.repetition import prompt_relentlessly
 from frontend.src.utils.view import terminal
 
 
 _Backend = TypeVar('_Backend', bound=TrainerBackend)
+_Frontend = TypeVar('_Frontend', bound='TrainerFrontend')
 
 
 class TrainerFrontend(ABC, Generic[_Backend]):
+    OptionKeyword2InstructionAndFunction = dict[str, tuple[str, Callable[[_Frontend], None]]]
+
     @State.receiver
     def __init__(self,
                  backend_type: Type[_Backend],
                  item_name: str,
                  item_name_plural: str,
                  training_designation: str,
-                 state: State):
+                 state: State,
+                 option_keyword_2_instruction_and_function: OptionKeyword2InstructionAndFunction | None = None):
 
         self._backend: _Backend = backend_type(state.non_english_language, state.train_english)
 
-        self._training_options: TrainingOptions = self._get_training_options()
+        self._options: OptionCollection = self._assemble_options_collection(option_keyword_2_instruction_and_function)
 
         self._n_trained_items: int = 0
-        self._latest_created_vocable_entry: Optional[VocableEntry] = None
+        self._latest_created_vocable_entry: VocableEntry | None = None
 
         self._item_name = item_name
         self._item_name_plural = item_name_plural
 
         self._training_designation = training_designation
 
-    @abstractmethod
-    def _get_training_options(self) -> TrainingOptions:
-        pass
+        self.exit_training = False
+
+    def _assemble_options_collection(self, keyword_2_instruction_and_function: OptionKeyword2InstructionAndFunction | None) -> OptionCollection:
+        return OptionCollection(
+            {
+                'quit': ('Quit and return to training selection screen', self._quit),
+                'add': (f'Add a new vocable to your {State.instance().language} list', self._add_vocable)
+            } | (keyword_2_instruction_and_function or {})
+        )
 
     # -----------------
     # Driver
     # -----------------
-    TrainingItemSequence = List[int]
-
     @abstractmethod
-    def __call__(self) -> Optional[SequencePlotData]:
+    def __call__(self) -> SequencePlotData | None:
         """ Invokes trainer frontend
 
             Returns:
@@ -76,8 +87,21 @@ class TrainerFrontend(ABC, Generic[_Backend]):
     # Training
     # -----------------
     @abstractmethod
-    def _run_training_loop(self):
+    def _training_loop(self):
         pass
+
+    def _inquire_option_selection(self, indentation_percentage=0.0) -> bool:
+        response = prompt_relentlessly(
+            '$',
+            indentation_percentage=indentation_percentage,
+            options=list(self._options.keys()) + [str()]
+        )
+
+        try:
+            self._options[response]()
+            return True
+        except KeyError:
+            return False
 
     def _add_vocable(self, cancelable=False) -> bool:
         """ Query, create new vocable entry,
@@ -90,7 +114,7 @@ class TrainerFrontend(ABC, Generic[_Backend]):
         # query vocable and meaning, exit if one of the two fields empty
         entry_fields = ['', '']
         for i, query_message in enumerate([f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']):
-            if (field := query_relentlessly(
+            if (field := prompt_relentlessly(
                     prompt=f'{output.column_percentual_indentation(percentage=0.32)}{query_message}',
                     applicability_verifier=lambda response: bool(len(response)),
                     error_indication_message="INPUT FIELD LEFT UNFILLED", cancelable=cancelable)) == QUERY_CANCELLED:
@@ -138,6 +162,9 @@ class TrainerFrontend(ABC, Generic[_Backend]):
             self._backend.user_mongo_client.alter_vocable_entry(old_vocable, vocable_entry.as_dict)
 
         return 2
+
+    def _quit(self):
+        self.exit_training = True
 
     # -----------------
     # Post Training
@@ -208,4 +235,3 @@ class TrainerFrontend(ABC, Generic[_Backend]):
                 return converted_date
 
         raise AttributeError
-

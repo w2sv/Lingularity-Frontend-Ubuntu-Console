@@ -7,11 +7,14 @@ from backend.src.metadata import language_metadata
 from frontend.src.reentrypoint import ReentryPoint
 from frontend.src.screen.action_option import Option, Options
 from frontend.src.state import State
-from frontend.src.trainers import (SentenceTranslationTrainerFrontend, TrainerFrontend, VocableAdderFrontend, VocableTrainerFrontend)
-from frontend.src.trainers.base.sequence_plot_data import SequencePlotData
+from frontend.src.trainers.sentence_translation import SentenceTranslationTrainerFrontend
+from frontend.src.trainers.sequence_plot_data import SequencePlotData
+from frontend.src.trainers.trainer_frontend import TrainerFrontend
+from frontend.src.trainers.vocable_adder import VocableAdderFrontend
+from frontend.src.trainers.vocable_trainer import VocableTrainerFrontend
 from frontend.src.utils import output, view
 from frontend.src.utils.query.cancelling import QUERY_CANCELLED
-from frontend.src.utils.query.repetition import query_relentlessly
+from frontend.src.utils.query.repetition import prompt_relentlessly
 from frontend.src.utils.view import terminal
 
 
@@ -50,7 +53,7 @@ def __call__(state: State, training_item_sequence_plot_data: Optional[SequencePl
 
 def _query_action_selection() -> str:
     output.centered(_options.display_row, '\n')
-    return query_relentlessly(prompt=output.centering_indentation(' '), options=_options.keywords, cancelable=True)
+    return prompt_relentlessly(prompt=output.centering_indentation(' '), options=_options.keywords, cancelable=True)
 
 
 _OptionCallbacks = Union[

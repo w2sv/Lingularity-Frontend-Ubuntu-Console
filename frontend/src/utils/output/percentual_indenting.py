@@ -19,4 +19,12 @@ def row_percentual_indentation(percentage: float) -> str:
     """ Args:
             percentage: in decimal form """
 
-    return "\n" * int(_terminal_lines() * percentage)
+    return '\n' * int(_terminal_lines() * percentage)
+
+
+class IndentedPrint:
+    def __init__(self, indentation: str):
+        self._indentation = indentation
+
+    def __call__(self, *args, **kwargs):
+        print(self._indentation, *args, **kwargs)

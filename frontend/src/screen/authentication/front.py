@@ -4,7 +4,7 @@ from frontend.src.screen.action_option import Option, Options
 from frontend.src.screen.authentication import login, sign_up
 from frontend.src.screen.authentication._utils import authentication_screen_renderer
 from frontend.src.utils import output, view
-from frontend.src.utils.query.repetition import query_relentlessly
+from frontend.src.utils.query.repetition import prompt_relentlessly
 from frontend.src.utils.view.terminal import DEFAULT_TERMINAL_TITLE
 
 
@@ -22,7 +22,7 @@ def __call__() -> Tuple[str, bool]:
 
     output.centered(AUTHENTICATION_OPTIONS.display_row, '\n')
 
-    selection = query_relentlessly('', indentation_percentage=0.49, options=AUTHENTICATION_OPTIONS.keywords)
+    selection = prompt_relentlessly('', indentation_percentage=0.49, options=AUTHENTICATION_OPTIONS.keywords)
 
     if authentication_result := AUTHENTICATION_OPTIONS[selection].__call__():
         return authentication_result

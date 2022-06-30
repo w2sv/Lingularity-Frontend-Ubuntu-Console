@@ -1,7 +1,7 @@
 from frontend.src.utils import output
 
 
-INDENTATION = output.column_percentual_indentation(percentage=0.1)
+PROMPT_INDENTATION = output.column_percentual_indentation(percentage=0.1)
 
 
 def centered(query_message: str = '') -> str:
