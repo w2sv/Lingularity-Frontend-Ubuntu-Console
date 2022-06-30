@@ -9,4 +9,4 @@ def test_action_options():
             Option('Add Vocabulary', keyword_index=0, callback=None),
             Option('Quit', callback=None)],
         color='red'
-    ).keywords == []
+    ).keywords == ['sentences', 'vocabulary', 'add', 'quit']

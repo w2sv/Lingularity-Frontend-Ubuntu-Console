@@ -25,3 +25,7 @@ pytest:
 
 doctest:
 	python -m pytest -vv --doctest-modules --doctest-continue-on-failure ./frontend/src/
+
+coverage-report:
+	coverage xml
+	coverage report

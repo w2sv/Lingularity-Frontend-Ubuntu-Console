@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import datetime
 from time import sleep
-from typing import Iterator, List, Optional, Sequence, Type
+from typing import Generic, Iterator, List, Optional, Sequence, Type, TypeVar
 
 from backend.src.metadata import language_metadata
 from backend.src.trainers import TrainerBackend
@@ -18,16 +18,19 @@ from frontend.src.utils.query.repetition import query_relentlessly
 from frontend.src.utils.view import terminal
 
 
-class TrainerFrontend(ABC):
+_Backend = TypeVar('_Backend', bound=TrainerBackend)
+
+
+class TrainerFrontend(ABC, Generic[_Backend]):
     @State.receiver
     def __init__(self,
-                 backend_type: Type[TrainerBackend],
+                 backend_type: Type[_Backend],
                  item_name: str,
                  item_name_plural: str,
                  training_designation: str,
                  state: State):
 
-        self._backend: TrainerBackend = backend_type(state.non_english_language, state.train_english)
+        self._backend: _Backend = backend_type(state.non_english_language, state.train_english)
 
         self._training_options: TrainingOptions = self._get_training_options()
 

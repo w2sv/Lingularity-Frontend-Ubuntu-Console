@@ -1,5 +1,5 @@
 import time
-from typing import cast, Optional
+from typing import Optional
 
 from backend.src.trainers.sentence_translation import SentenceTranslationTrainerBackend
 from backend.src.utils.strings.extraction import longest_common_prefix
@@ -7,19 +7,16 @@ from backend.src.utils.strings.transformation import strip_multiple
 from termcolor import colored
 
 from frontend.src.trainers.base import SequencePlotData, TrainerFrontend
-from frontend.src.trainers.base.options import TrainingOptions
-from frontend.src.trainers.base.options import base_options
-from frontend.src.trainers.sentence_translation import options
-from frontend.src.trainers.sentence_translation import modes
-from frontend.src.utils import output as op, query
-from frontend.src.utils import view
+from frontend.src.trainers.base.options import base_options, TrainingOptions
+from frontend.src.trainers.sentence_translation import modes, options
+from frontend.src.utils import output as op, query, view
 from frontend.src.utils.query.repetition import query_relentlessly
 
 
 _SENTENCE_INDENTATION = op.column_percentual_indentation(0.15)
 
 
-class SentenceTranslationTrainerFrontend(TrainerFrontend):
+class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrainerBackend]):
     def __init__(self):
         super().__init__(
             backend_type=SentenceTranslationTrainerBackend,
@@ -27,9 +24,6 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
             item_name_plural='sentences',
             training_designation='Sentence Translation'
         )
-
-        # retype _backend to specific type; enables linting, type checking however remains disfunctional
-        self._backend = cast(SentenceTranslationTrainerBackend, self._backend)
 
         self._redo_print = op.RedoPrint()
 
@@ -90,7 +84,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
     def _set_tts_language_variety_if_applicable(self):
         """ Invokes variety selection method, forwards selected variety to tts """
 
-        if all([self._backend.tts.available, not self._backend.tts.language_variety, self._backend.tts.language_variety_choices]):
+        if all([self._backend.tts_available, not self._backend.tts.language_variety, self._backend.tts.language_variety_choices]):
             self._backend.tts.language_variety = self._select_tts_language_variety()
 
     @view.creator(title='TTS Language Variety Selection', banner_args=('language-varieties/larry-3d', 'blue'), vertical_offsets=2)
@@ -150,24 +144,18 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
         translation = self._process_procured_sentence_pair()
 
         while translation is not None:
-            if self._backend.tts.employ and self._backend.tts.audio is None:
-                try:
-                    self._backend.tts.download_audio(translation)
-                except ValueError:
-                    # TODO: log
-                    pass
+            if self._backend.tts_available and not self._backend.tts.audio_available:
+                self._backend.tts.download_audio(translation)
 
             # get response, run selected option if applicable
             response = query_relentlessly('$', options=self._training_options.keywords)
 
+            # ----OPTION SELECTED----
             if len(response):
+                self._training_options[response].__call__()
 
-                # ----OPTION SELECTED----
-                if len(response):
-                    self._training_options[response].__call__()
-
-                    if self._training_options.exit_training:
-                        return
+                if self._training_options.exit_training:
+                    return
 
             else:
 
@@ -181,8 +169,8 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend):
                 self._redo_print(f'{_SENTENCE_INDENTATION}{colored("─────────────────", "red")}')
 
                 # play tts audio if available, otherwise suspend program
-                # for some time to incentivise gleaning over translation_field
-                if self._backend.tts.employ:
+                # for some time to encourage gleaning over translation_field
+                if self._backend.tts_available and self._backend.tts.enabled and self._backend.tts.audio_available:
                     self._backend.tts.play_audio()
                 else:
                     time.sleep(len(translation) * 0.05)

@@ -15,5 +15,5 @@ dependencies:
     - types-termcolor  # dev
     - monostate==0.0.9
     - more_itertools
-    - git+https://github.com/w2sv/Lingularity-Backend.git
+    - git+https://github.com/w2sv/Lingularity-_Backend.git
     - git+https://github.com/w2sv/asciiplot.git

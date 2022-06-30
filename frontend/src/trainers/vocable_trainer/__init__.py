@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from typing import cast, Optional
+from typing import Optional
 
 from backend.src.trainers.vocable_trainer import (
     VocableTrainerBackend
@@ -23,12 +23,10 @@ from frontend.src.trainers.base import SequencePlotData, TrainerFrontend
 from frontend.src.trainers.base.options import base_options, TrainingOptions
 from frontend.src.trainers.vocable_trainer import options
 from frontend.src.utils import output as op, query, view
-# TODO: set up modes
-#  revisit score history system
 from frontend.src.utils.query.repetition import query_relentlessly
 
 
-class VocableTrainerFrontend(TrainerFrontend):
+class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
     def __new__(cls, *args, **kwargs) -> ReentryPointProvider | VocableTrainerFrontend:
         """ Check whether vocabulary available for language, invoke vocabulary
             existence necessity information screen if not and exit afterwards """
@@ -61,9 +59,6 @@ class VocableTrainerFrontend(TrainerFrontend):
             item_name_plural='vocable entries',
             training_designation='Vocable Training'
         )
-
-        # retype _backend to specific type; enables linting, type checking however remains disfunctional
-        self._backend = cast(VocableTrainerBackend, self._backend)
 
         self._undo_print = op.UndoPrint()
 

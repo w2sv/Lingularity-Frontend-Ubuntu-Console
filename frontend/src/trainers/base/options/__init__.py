@@ -17,7 +17,6 @@ class FrontendExtender(ABC):
     def __setattr__(self, key, value):
         if key in self.__slots__:
             super().__setattr__(key, value)
-
         else:
             assert hasattr(self._FRONTEND_INSTANCE, key)
 
@@ -37,9 +36,6 @@ class TrainingOption(FrontendExtender, ABC):
         pass
 
 
-_INSTRUCTION_INDENTATION = output.column_percentual_indentation(percentage=0.35)
-
-
 class TrainingOptions(dict):
     def __init__(self, option_classes: Sequence[Type[TrainingOption]], frontend_instance: object):
         TrainingOption.exit_training = False
@@ -51,16 +47,30 @@ class TrainingOptions(dict):
         self.instructions: List[str] = self._compose_instruction()
 
     def _compose_instruction(self) -> List[str]:
-        return output.align(*unzip(map(lambda option: (colored(option.keyword, 'red'), f'to {option.explanation}'), self.values())))
+        return output.align(
+            *map(
+                list,
+                unzip(
+                    map(
+                        lambda option: (
+                            colored(option.keyword, 'red'),
+                            f'to {option.explanation}'
+                        ),
+                        self.values()
+                    )
+                )
+            )
+        )
 
     def display_instructions(self, insertion_args: Tuple[Tuple[int, str, bool]] = ((-1, '', False),)):
-        insertion_indices, *_ = unzip(insertion_args)
+        _INSTRUCTION_INDENTATION = output.column_percentual_indentation(percentage=0.35)
+
+        insertion_indices, *_ = list(unzip(insertion_args))
 
         print(f'{_INSTRUCTION_INDENTATION}Enter:')
         for i, instruction_row in enumerate(self.instructions):
             if i in insertion_indices:
                 args = insertion_args[insertion_indices.index(i)]
-
                 print(f"\n{[_INSTRUCTION_INDENTATION, output.centering_indentation(args[1])][args[2]]}{args[1]}\n")
 
             print(f'{_INSTRUCTION_INDENTATION}  {instruction_row}')
