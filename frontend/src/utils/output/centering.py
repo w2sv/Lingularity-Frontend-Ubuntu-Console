@@ -1,9 +1,9 @@
-from typing import Optional, Sequence, List
+from typing import Iterable, List, Optional, Sequence
 
 from backend.src.utils.iterables import longest_value
 
+from ._utils import _terminal_columns, ansi_escape_code_stripped
 from .undoing import LineCounter
-from ._utils import ansi_escape_code_stripped, _terminal_columns
 
 
 def centering_indentation(row: str) -> str:
@@ -48,7 +48,7 @@ def align(column1: Sequence[str], column2: Sequence[str]) -> List[str]:
     return [f"{' ' * (max_length_first_column_element - len(column1[i]) + 1)}".join([column1[i], column2[i]]) for i in range(len(column1))]
 
 
-def block_centering_indentation(output_block: Sequence[str]) -> str:
+def block_centering_indentation(output_block: Iterable[str]) -> str:
     """ Returns:
             indentation determined by length of longest output output row comprised by output_block,
             enabling center_message positioning of the aforementioned row and the others to start on the same

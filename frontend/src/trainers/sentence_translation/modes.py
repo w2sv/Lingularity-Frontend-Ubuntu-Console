@@ -1,27 +1,21 @@
-from itertools import starmap
-from types import ModuleType
+from enum import Enum
 
 from backend.src.trainers.sentence_translation import modes
-from backend.src.utils.strings.transformation import snake_case_to_title
-from more_itertools import unzip
+from backend.src.trainers.sentence_translation.modes import SentenceDataFilter
 
 
-class TrainingMode:
-    def __init__(self, mode_module: ModuleType, explanation: str):
-        self.keyword: str = snake_case_to_title(snake_case_string=mode_module.__name__.split('.')[-1])
-        self.explanation: str = explanation
-        self.sentence_data_filter: modes.SentenceDataFilter = mode_module.filter_sentence_data
+class SentenceFilterMode(Enum, str):
+    DictionExpansion = 'diction_expansion'
+    Simple = 'simple'
+    Random = 'random'
 
 
-_modes = list(starmap(TrainingMode, (
-    (modes.diction_expansion, 'show me sentences containing rather infrequently used vocabulary'),
-    (modes.simple, 'show me sentences comprising exclusively commonly used vocabulary'),
-    (modes.random, 'just hit me with dem sentences'))))
+MODE_2_EXPLANATION = {
+    SentenceFilterMode.DictionExpansion: 'show me sentences containing rather infrequently used vocabulary',
+    SentenceFilterMode.Simple: 'show me sentences comprising exclusively commonly used vocabulary',
+    SentenceFilterMode.Random: 'just hit me with dem sentences'
+}
 
 
-keywords, explanations = unzip(map(lambda mode: (mode.keyword, mode.explanation), _modes))
-_keyword_2_mode = {mode.keyword: mode for mode in _modes}
-
-
-def __getitem__(item: str) -> TrainingMode:
-    return _keyword_2_mode[item]
+def sentence_filter(mode: SentenceFilterMode) -> SentenceDataFilter:
+    return getattr(modes, mode.value).filter_sentence_data

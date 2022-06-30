@@ -9,6 +9,7 @@ from termcolor import colored
 from frontend.src.trainers.base import SequencePlotData, TrainerFrontend
 from frontend.src.trainers.base.options import base_options, TrainingOptions
 from frontend.src.trainers.sentence_translation import modes, options
+from frontend.src.trainers.sentence_translation.modes import MODE_2_EXPLANATION, sentence_filter, SentenceFilterMode
 from frontend.src.utils import output as op, query, view
 from frontend.src.utils.query.repetition import query_relentlessly
 
@@ -64,19 +65,20 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         """ Invokes training mode selection method, forwards backend_type of selected mode to backend_type """
 
         mode_selection = self._select_training_mode()
-        self._backend.sentence_data_filter = modes.__getitem__(mode_selection).sentence_data_filter
+        self._backend.sentence_data_filter = sentence_filter(mode_selection)
 
     @view.creator(header='TRAINING MODES')
-    def _select_training_mode(self) -> str:
+    def _select_training_mode(self) -> SentenceFilterMode:
 
         # display eligible modes
-        indentation = op.block_centering_indentation(modes.explanations)
-        for keyword, explanation in zip(modes.keywords, modes.explanations):
-            print(f'{indentation}{colored(f"{keyword}:", color="red")}')
+        indentation = op.block_centering_indentation(MODE_2_EXPLANATION.values())
+        for mode, explanation in MODE_2_EXPLANATION.items():
+            print(f'{indentation}{colored(f"{mode.name}:", color="red")}')
             print(f'{indentation}\t{explanation}\n')
         print(view.VERTICAL_OFFSET)
 
-        return query_relentlessly(f'{query.INDENTATION}Enter desired mode: ', options=modes.keywords)
+        keyword = query_relentlessly(f'{query.INDENTATION}Enter desired mode: ', options=MODE_2_EXPLANATION.keys())
+        return SentenceFilterMode[keyword]
 
     # -----------------
     # .TTS Language Variety
