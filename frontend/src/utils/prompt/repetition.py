@@ -1,8 +1,8 @@
 from typing import Optional, Sequence, Callable, Iterable, Tuple, Any
 
 from frontend.src.utils import output
-from frontend.src.utils.query.cancelling import QUERY_CANCELLED, _cancelable, _escape_unicode_stripped
-from frontend.src.utils.query._ops import indicate_erroneous_input, _INDISSOLUBILITY_MESSAGE
+from frontend.src.utils.prompt.cancelling import QUERY_CANCELLED, _cancelable, _escape_unicode_stripped
+from frontend.src.utils.prompt._ops import indicate_erroneous_input, _INDISSOLUBILITY_MESSAGE
 
 
 def prompt_relentlessly(prompt: str = '',

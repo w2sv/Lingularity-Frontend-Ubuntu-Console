@@ -16,8 +16,8 @@ from frontend.src.state import State
 from frontend.src.trainers.option_collection import OptionCollection
 from frontend.src.trainers.sequence_plot_data import SequencePlotData
 from frontend.src.utils import output, view
-from frontend.src.utils.query.cancelling import QUERY_CANCELLED
-from frontend.src.utils.query.repetition import prompt_relentlessly
+from frontend.src.utils.prompt.cancelling import QUERY_CANCELLED
+from frontend.src.utils.prompt.repetition import prompt_relentlessly
 from frontend.src.utils.view import terminal
 
 

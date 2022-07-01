@@ -2,7 +2,7 @@ from backend.src.database import UserMongoDBClient
 
 from frontend.src import logged_in_user
 from frontend.src.state import State
-from frontend.src.screen.authentication import front as front_screen
+from frontend.src.screen.authentication import landing as front_screen
 
 
 def __call__():

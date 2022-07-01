@@ -28,7 +28,7 @@ class OptionCollection(dict):
         return iter(
             output.align(
                 *map(  # type: ignore
-                    list,  # type: ignore
+                    list,
                     unzip(
                         starmap(
                             lambda keyword, instruction: (

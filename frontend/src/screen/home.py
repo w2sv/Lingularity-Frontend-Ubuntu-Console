@@ -1,23 +1,21 @@
-from typing import Dict
-import itertools
-
 from backend.src.database import UserMongoDBClient
 from backend.src.string_resources import string_resources
 from termcolor import colored
 
 from frontend.src.metadata import main_country_flag
-from frontend.src.utils import query, output
-from frontend.src.utils import view
+from frontend.src.reentrypoint import ReentryPoint
+from frontend.src.screen import account_deletion
+from frontend.src import option
+from frontend.src.option import Option, OptionCollection
 from frontend.src.state import State
-from frontend.src.reentrypoint import ReentryPoint, ReentryPointProvider
-from frontend.src.screen import action_option, account_deletion
-from frontend.src.utils.query.cancelling import QUERY_CANCELLED
-from frontend.src.utils.query._ops import indicate_erroneous_input
-from frontend.src.utils.query.repetition import prompt_relentlessly
-from frontend.src.utils.view import terminal
+from frontend.src.utils import output, prompt, view
+from frontend.src.utils.prompt._ops import indicate_erroneous_input
+from frontend.src.utils.prompt.cancelling import QUERY_CANCELLED
+from frontend.src.utils.prompt.repetition import prompt_relentlessly
+from frontend.src.utils.view import Banner, terminal
 
 
-@view.creator(title=terminal.DEFAULT_TERMINAL_TITLE, banner_args=('lingularity/ansi-shadow', 'red'))
+@view.creator(title=terminal.DEFAULT_TERMINAL_TITLE, banner=Banner('lingularity/ansi-shadow', 'red'))
 @State.receiver
 def __call__(state: State) -> ReentryPoint:
     """ Displays languages already used by user, as well as additional procedure options of
@@ -33,58 +31,53 @@ def __call__(state: State) -> ReentryPoint:
                 all of which are denoted in _OPTION_2_REENTRY_POINT and _OPTION_2_REENTRY_POINT_PROVIDER,
                 ReentryPoint.TrainingSelection in case of language selection """
 
-    _OPTION_2_REENTRY_POINT: Dict[str, ReentryPoint] = {
-        'add language': ReentryPoint.LanguageAddition,
-        'sign out': ReentryPoint.Login,
-        'quit': ReentryPoint.Exit,
-    }
+    options = OptionCollection(
+        [
+            Option('add', 'Add language', ReentryPoint.LanguageAddition),
+            Option('sign', 'Sign Out', ReentryPoint.Login),
+            Option('quit', 'Quit', ReentryPoint.Exit),
 
-    _OPTION_2_REENTRY_POINT_PROVIDER: Dict[str, ReentryPointProvider] = {
-        'remove language': _language_removal,
-        'delete account': account_deletion.__call__
-    }
+            Option('remove', 'Remove language', _language_removal),
+            Option('delete', 'Delete Account', account_deletion.__call__)
+        ]
+    )
 
-    _OPTION_KEYWORDS = list(itertools.chain(_OPTION_2_REENTRY_POINT.keys(), _OPTION_2_REENTRY_POINT_PROVIDER.keys()))
+    _render_screen(options)
+    return _proceed(options)
 
-    def colorized_header(header: str) -> str:
-        return colored(header, 'blue')
+
+@State.receiver
+def _render_screen(options: OptionCollection, state: State):
+    _colored = lambda header: colored(header, 'blue')
 
     # display languages already used by user
-    output.centered(colorized_header('YOUR LANGUAGES'), "\n")
+    output.centered(_colored('YOUR LANGUAGES'), "\n")
     for language_group in output.group_by_starting_letter(state.user_languages, is_sorted=False):
         output.centered('  '.join(map(lambda language: f'{language} {main_country_flag(language)}', language_group)))
 
-    # display option descriptions
-    DESCRIPTIONS = ['Add Language', 'Remove Language', 'Sign Out', 'Delete Account', 'Quit']
-    descriptions = list(
-        map(
-            lambda description: action_option.color_description(description, keyword_index=0, color='red'),
-            DESCRIPTIONS
-        )
-    )
-
-    OPTION_CLASS_DELIMITER = colorized_header('   |   ')
+    OPTION_CLASS_DELIMITER = _colored('   |   ')
 
     OPTION_BLOCK = (
-        f"{colorized_header('ADDITIONAL OPTIONS:')}{action_option.OFFSET}{descriptions[0]}{action_option.OFFSET}"
-        f"{descriptions[1]}"
-        f"{OPTION_CLASS_DELIMITER}{descriptions[2]}{action_option.OFFSET}{descriptions[3]}"
-        f"{OPTION_CLASS_DELIMITER}{descriptions[4]}"
+        f"{_colored('ADDITIONAL OPTIONS:')}{option.OFFSET}{options.formatted_descriptions[0]}{option.OFFSET}"
+        f"{options.formatted_descriptions[1]}"
+        f"{OPTION_CLASS_DELIMITER}{options.formatted_descriptions[2]}{option.OFFSET}{options.formatted_descriptions[3]}"
+        f"{OPTION_CLASS_DELIMITER}{options.formatted_descriptions[4]}"
     )
     output.centered(f'\n{OPTION_BLOCK}\n')
 
-    # query language/options selection
+
+@State.receiver
+def _proceed(options: OptionCollection, state: State) -> ReentryPoint:
     selection = prompt_relentlessly(
-        prompt='Select Language/Option: ', indentation_percentage=0.35,
-        options=list(state.user_languages) + _OPTION_KEYWORDS
+        prompt='Select Language/Option: ',
+        indentation_percentage=0.35,
+        options=list(state.user_languages) + list(options)
     )
 
-    # exit and reenter at respective reentry point in case of option selection
-    if reentry_point := _OPTION_2_REENTRY_POINT.get(selection):
-        return reentry_point
-
-    elif reentry_point_provider := _OPTION_2_REENTRY_POINT_PROVIDER.get(selection):
-        return reentry_point_provider()
+    if (callback := options.get(selection)) is not None:
+        if isinstance(callback, ReentryPoint):
+            return callback
+        return callback()
 
     # query reference language in case of English being selected
     if train_english := selection == string_resources['english']:
@@ -118,8 +111,10 @@ def _language_removal(state: State) -> ReentryPoint:
 
     # query removal language
     if (removal_language := prompt_relentlessly(
-            'Enter language you wish to remove: ', indentation_percentage=0.3,
-            options=list(state.user_languages), cancelable=True
+            'Enter language you wish to remove: ',
+            indentation_percentage=0.3,
+            options=list(state.user_languages),
+            cancelable=True
     )) == QUERY_CANCELLED:
         return __call__()
 
@@ -128,9 +123,9 @@ def _language_removal(state: State) -> ReentryPoint:
     # query confirmation, remove language from user languages stored in State,
     # respective user data from database
     output.centered(
-        f'Are you sure you want to irretrievably erase all {removal_language} user data? {query.YES_NO_QUERY_OUTPUT}'
+        f'Are you sure you want to irretrievably erase all {removal_language} user data? {prompt.YES_NO_QUERY_OUTPUT}'
     )
-    if prompt_relentlessly('', indentation_percentage=0.5, options=query.YES_NO_OPTIONS) == 'yes':
+    if prompt_relentlessly('', indentation_percentage=0.5, options=prompt.YES_NO_OPTIONS) == 'yes':
         UserMongoDBClient.instance().remove_language_data(removal_language)
         state.user_languages.remove(removal_language)
 

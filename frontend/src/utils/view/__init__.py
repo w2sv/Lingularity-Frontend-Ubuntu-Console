@@ -1,20 +1,34 @@
-from typing import Optional, Tuple
+from __future__ import annotations
+
+from dataclasses import dataclass
 from functools import wraps
 
+from backend.src.utils.io import PathLike
 from termcolor import colored
 
-from frontend.src.utils import output
 from frontend.src.paths import RESOURCE_DIR_PATH
+from frontend.src.utils import output
 from frontend.src.utils.view import terminal
 
 
 VERTICAL_OFFSET = '\n' * 2
 
 
-def creator(title: Optional[str] = None,
-            header: Optional[str] = None,
-            banner_args: Optional[Tuple[str, str]] = None,
-            vertical_offsets: int = 1):
+@dataclass(frozen=True)
+class Banner:
+    kind: PathLike
+    color: str
+
+    def display(self):
+        with open(RESOURCE_DIR_PATH / 'banners' / f'{self.kind}.txt') as f:
+            output.centered(colored(f.read(), self.color))
+
+
+def creator(title: str | None = None,
+            header: str | None = None,
+            banner: Banner | None = None,
+            vertical_offsets: int = 1,
+            additional_vertical_offset: str | None = None):
 
     """ Decorator for functions creating new screen view,
         serving both documentation purposes as well as initializing the latter
@@ -28,7 +42,7 @@ def creator(title: Optional[str] = None,
         Args:
             title: terminal title
             header: displayed in centered manner in case of reception
-            banner_args: tuple of relative banner path from banner directory, banner color
+            banner: tuple of relative banner path from banner directory, banner highlight_color
             vertical_offsets: inserted after banner/header """
 
     def outer_wrapper(function):
@@ -45,20 +59,16 @@ def creator(title: Optional[str] = None,
                 terminal.set_title(title=title)
 
             # display banner or header with consecutive vertical offset
-            if any([header, banner_args]):
-                if banner_args is not None:
-                    _display_banner(kind=banner_args[0], color=banner_args[1])
-
+            if any([header, banner]):
+                if banner is not None:
+                    banner.display()
                 elif header is not None:
                     output.centered(header)
 
                 print(VERTICAL_OFFSET, end='')
+                if additional_vertical_offset:
+                    print(additional_vertical_offset)
 
             return function(*args, **kwargs)
         return wrapper
     return outer_wrapper
-
-
-def _display_banner(kind: str, color='red'):
-    with open(RESOURCE_DIR_PATH / 'banners' / f'{kind}.txt') as f:
-        output.centered(colored(f.read(), color))

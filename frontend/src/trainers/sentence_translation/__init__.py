@@ -12,11 +12,12 @@ from termcolor import colored
 from frontend.src.trainers.sentence_translation.modes import MODE_2_EXPLANATION, sentence_filter, SentenceFilterMode
 from frontend.src.trainers.sequence_plot_data import SequencePlotData
 from frontend.src.trainers.trainer_frontend import TrainerFrontend
-from frontend.src.utils import output, output as op, query, view
+from frontend.src.utils import output, output as op, prompt, view
 from frontend.src.utils.output.percentual_indenting import IndentedPrint
-from frontend.src.utils.query import PROMPT_INDENTATION
-from frontend.src.utils.query.cancelling import QUERY_CANCELLED
-from frontend.src.utils.query.repetition import prompt_relentlessly
+from frontend.src.utils.prompt import PROMPT_INDENTATION
+from frontend.src.utils.prompt.cancelling import QUERY_CANCELLED
+from frontend.src.utils.prompt.repetition import prompt_relentlessly
+from frontend.src.utils.view import Banner
 
 
 _SENTENCE_INDENTATION = op.column_percentual_indentation(0.15)
@@ -94,7 +95,11 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         if self._backend.tts_available and len(self._backend.tts.language_variety_choices) and self._backend.tts.language_variety is None:
             self._backend.tts.language_variety = self._select_tts_language_variety()
 
-    @view.creator(title='TTS Language Variety Selection', banner_args=('language-varieties/larry-3d', 'blue'), vertical_offsets=2)
+    @view.creator(
+        title='TTS Language Variety Selection',
+        banner=Banner('language-varieties/larry-3d', 'blue'),
+        vertical_offsets=2
+    )
     def _select_tts_language_variety(self) -> str:
         """ Returns:
                 selected language variety: element of language_variety_choices """
@@ -217,7 +222,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
 
     def _change_playback_speed(self):
         def display_prompt():
-            print(f'Playback speed:\n{query.PROMPT_INDENTATION}', end='')
+            print(f'Playback speed:\n{prompt.PROMPT_INDENTATION}', end='')
             Keyboard().type(str(self._backend.tts.playback_speed))
             cursor.show()
 

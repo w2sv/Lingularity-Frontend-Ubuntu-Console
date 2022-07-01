@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import time
-
 from backend.src.trainers.vocable_trainer import (
     VocableTrainerBackend
 )
@@ -16,39 +14,12 @@ from backend.src.utils.strings.extraction import longest_common_prefix
 from backend.src.utils.strings.splitting import split_at_uppercase
 from termcolor import colored
 
-from frontend.src.reentrypoint import ReentryPointProvider
-from frontend.src.state import State
 from frontend.src.trainers.trainer_frontend import SequencePlotData, TrainerFrontend
-from frontend.src.utils import output, output as op, query, view
-from frontend.src.utils.query.repetition import prompt_relentlessly
+from frontend.src.utils import output, output as op, prompt, view
+from frontend.src.utils.prompt.repetition import prompt_relentlessly
 
 
 class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
-    def __new__(cls, *args, **kwargs) -> ReentryPointProvider | VocableTrainerFrontend:  # type: ignore
-        """ Check whether vocabulary available for language, invoke vocabulary
-            existence necessity information screen if not and exit afterwards """
-
-        if not State.instance().vocabulary_available:
-            return cls._exit_on_nonexistent_vocabulary()
-        return super().__new__(cls)
-
-    @staticmethod
-    @op.cursor_hider
-    @view.creator(banner_args=('lingularity/bloody', 'red'))
-    def _exit_on_nonexistent_vocabulary():
-        print(op.column_percentual_indentation(0.1))
-
-        op.centered("You have to accumulate vocabulary by means of the "
-                    "SentenceTranslationTrainer or VocableAdder first "
-                    "in order to use this training mode.", view.VERTICAL_OFFSET)
-
-        time.sleep(3)
-
-        op.centered('HIT ENTER IN ORDER TO RETURN TO TRAINING SELECTION')
-        input()
-
-        return lambda: None
-
     def __init__(self):
         super().__init__(
             backend_type=VocableTrainerBackend,
@@ -90,10 +61,10 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
     @view.creator(vertical_offsets=0)
     def _display_new_vocabulary_if_desired(self):
         print(op.column_percentual_indentation(0.45))
-        op.centered(f'Would you like to see the vocable entries you recently created? {query.YES_NO_QUERY_OUTPUT}')
+        op.centered(f'Would you like to see the vocable entries you recently created? {prompt.YES_NO_QUERY_OUTPUT}')
         op.centered(' ', end='')
 
-        if prompt_relentlessly(prompt='', options=query.YES_NO_OPTIONS) == query.YES:
+        if prompt_relentlessly(prompt='', options=prompt.YES_NO_OPTIONS) == prompt.YES:
             self._display_new_vocable_entries()
 
     @view.creator(vertical_offsets=2)
@@ -108,7 +79,7 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
 
         # wait for key press
         op.centered(f'{view.VERTICAL_OFFSET}PRESS ANY KEY TO CONTINUE')
-        query.centered()
+        prompt.centered()
 
     # ------------------
     # Training
@@ -177,8 +148,8 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
                 if response_evaluation is ResponseEvaluation.AlmostCorrect:
                     response_deviation_mask, ground_truth_deviation_mask = deviation_masks(response=response, ground_truth=entry.vocable)
 
-                    response = op.colorize_chars(response, char_mask=response_deviation_mask, color_kwargs={'color': "red"})
-                    ground_truth_output = op.colorize_chars(entry.vocable, char_mask=ground_truth_deviation_mask, color_kwargs={'color': 'green', 'attrs': ['underline']}, fallback_color_kwargs={'color': 'green'})
+                    response = op.colorize_chars(response, char_mask=response_deviation_mask, color_kwargs={'highlight_color': "red"})
+                    ground_truth_output = op.colorize_chars(entry.vocable, char_mask=ground_truth_deviation_mask, color_kwargs={'highlight_color': 'green', 'attrs': ['underline']}, fallback_color_kwargs={'highlight_color': 'green'})
 
                 self._undo_print(f'{response} | {colored(" ".join(split_at_uppercase(response_evaluation.name)).upper(), EVALUATION_2_COLOR[response_evaluation])}', end='')
 
@@ -274,8 +245,8 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
         output.erase_lines(n_printed_lines - 1)
 
     def _delete_vocable_entry(self):
-        output.centered(f"\nAre you sure you want to irreversibly delete {str(self._current_vocable_entry)}? {query.YES_NO_QUERY_OUTPUT}")
+        output.centered(f"\nAre you sure you want to irreversibly delete {str(self._current_vocable_entry)}? {prompt.YES_NO_QUERY_OUTPUT}")
 
-        if prompt_relentlessly(output.centering_indentation(' '), options=query.YES_NO_OPTIONS) == query.YES:
+        if prompt_relentlessly(output.centering_indentation(' '), options=prompt.YES_NO_OPTIONS) == prompt.YES:
             self._backend.user_mongo_client.delete_vocable_entry(self._current_vocable_entry.as_dict)
         output.erase_lines(3)

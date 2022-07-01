@@ -1,11 +1,12 @@
 import random
-from typing import Optional, Type, Union
+from typing import Optional
 
 import asciiplot
+from backend.src.database import UserMongoDBClient
 from backend.src.metadata import language_metadata
 
 from frontend.src.reentrypoint import ReentryPoint
-from frontend.src.screen.action_option import Option, Options
+from frontend.src.option import Option, OptionCollection
 from frontend.src.state import State
 from frontend.src.trainers.sentence_translation import SentenceTranslationTrainerFrontend
 from frontend.src.trainers.sequence_plot_data import SequencePlotData
@@ -13,59 +14,56 @@ from frontend.src.trainers.trainer_frontend import TrainerFrontend
 from frontend.src.trainers.vocable_adder import VocableAdderFrontend
 from frontend.src.trainers.vocable_trainer import VocableTrainerFrontend
 from frontend.src.utils import output, view
-from frontend.src.utils.query.cancelling import QUERY_CANCELLED
-from frontend.src.utils.query.repetition import prompt_relentlessly
-from frontend.src.utils.view import terminal
+from frontend.src.utils.prompt.cancelling import QUERY_CANCELLED
+from frontend.src.utils.prompt.repetition import prompt_relentlessly
+from frontend.src.utils.view import Banner, terminal
 
 
-_options = Options([
-    Option('Translate Sentences', keyword_index=1, callback=SentenceTranslationTrainerFrontend),
-    Option('Train Vocabulary', keyword_index=1, callback=VocableTrainerFrontend),
-    Option('Add Vocabulary', keyword_index=0, callback=VocableAdderFrontend),
-    Option('Quit', callback=ReentryPoint.Exit)
-])
-
-
-@view.creator(banner_args=('lingularity/3d-ascii', 'green'))
+@view.creator(banner=Banner('lingularity/3d-ascii', 'green'))
 @State.receiver
 def __call__(state: State, training_item_sequence_plot_data: Optional[SequencePlotData] = None) -> ReentryPoint:
     terminal.set_title(f'{state.language} Training Selection')
 
-    if not training_item_sequence_plot_data:
+    if training_item_sequence_plot_data:
+        _display_training_item_sequence(training_item_sequence_plot_data)
+    else:
         _display_constitution_query(username=state.username, language=state.language)
 
-    # display training item sequences corresponding to previous training action
-    else:
-        _display_training_item_sequence(training_item_sequence_plot_data)
+    options = _get_options()
 
     # query desired action
-    if (action_selection_keyword := _query_action_selection()) == QUERY_CANCELLED:
+    if (action_selection_keyword := _query_action_selection(options)) == QUERY_CANCELLED:
         return ReentryPoint.Home
-    option_callback = _options[action_selection_keyword]
+
+    callback = options[action_selection_keyword]
 
     # instantiate frontend if selected
-    if _is_trainer_frontend(option_callback):
-        trainer_frontend = option_callback()
+    if issubclass(callback, TrainerFrontend):
+        trainer_frontend = callback()
         return __call__(training_item_sequence_plot_data=trainer_frontend.__call__())
-
-    return option_callback
-
-
-def _query_action_selection() -> str:
-    output.centered(_options.display_row, '\n')
-    return prompt_relentlessly(prompt=output.centering_indentation(' '), options=_options.keywords, cancelable=True)
+    return callback
 
 
-_OptionCallbacks = Union[
-    Type[SentenceTranslationTrainerFrontend],
-    Type[VocableTrainerFrontend],
-    Type[VocableAdderFrontend],
-    ReentryPoint
-]
+@UserMongoDBClient.receiver
+def _get_options(user_mongo_client: UserMongoDBClient) -> OptionCollection:
+    options = [Option('sentences', 'Translate Sentences', callback=SentenceTranslationTrainerFrontend)]
+
+    if user_mongo_client.language in user_mongo_client.query_vocabulary_possessing_languages():
+        options.append(Option('vocabulary', 'Train Vocabulary', callback=VocableTrainerFrontend))
+
+    options.append(Option('add', 'Add Vocabulary', callback=VocableAdderFrontend))
+    options.append(Option('quit', 'Quit', callback=ReentryPoint.Exit))
+
+    return OptionCollection(options)
 
 
-def _is_trainer_frontend(action: _OptionCallbacks) -> bool:
-    return isinstance(action, type) and issubclass(action, TrainerFrontend)
+def _query_action_selection(options: OptionCollection) -> str:
+    output.centered(options.as_row(), '\n')
+    return prompt_relentlessly(
+        prompt=output.centering_indentation(' '),
+        options=list(options),
+        cancelable=True
+    )
 
 
 def _display_constitution_query(username: str, language: str):
@@ -80,8 +78,7 @@ def _display_constitution_query(username: str, language: str):
 def _display_training_item_sequence(training_item_sequence_plot_data: SequencePlotData):
     y_label_max_length = max(map(lambda label: len(str(label)), training_item_sequence_plot_data.sequence))
     outer_left_x_label = 'two weeks ago'
-    color = [asciiplot.Color.BLUE, asciiplot.Color.RED][training_item_sequence_plot_data.item_name.startswith(
-        's')]
+    color = [asciiplot.Color.BLUE, asciiplot.Color.RED][training_item_sequence_plot_data.item_name.startswith('s')]
 
     try:
         chart = asciiplot.asciiize(
@@ -98,6 +95,5 @@ def _display_training_item_sequence(training_item_sequence_plot_data: SequencePl
             y_axis_description=training_item_sequence_plot_data.item_name
         )
         output.centered(chart, view.VERTICAL_OFFSET)
-
     except ZeroDivisionError:
         pass

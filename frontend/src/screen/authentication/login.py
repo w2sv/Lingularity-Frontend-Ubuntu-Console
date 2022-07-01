@@ -2,14 +2,15 @@ from typing import Optional, Tuple
 
 from backend.src.database import UserTranscendentMongoDBClient
 
-from frontend.src.screen.authentication._utils import authentication_screen_renderer, HORIZONTAL_INDENTATION
+from frontend.src.screen.authentication._utils import authentication_screen, HORIZONTAL_INDENTATION
 from frontend.src.utils import view
-from frontend.src.utils.query.cancelling import QUERY_CANCELLED
-from frontend.src.utils.query.repetition import prompt_relentlessly
+from frontend.src.utils.prompt.cancelling import QUERY_CANCELLED
+from frontend.src.utils.prompt.repetition import prompt_relentlessly
+from frontend.src.utils.view import Banner
 
 
-@view.creator(title='Login', banner_args=('lingularity/isometric1', 'red'))
-@authentication_screen_renderer
+@view.creator(title='Login', banner=Banner('lingularity/isometric1', 'red'))
+@authentication_screen
 @UserTranscendentMongoDBClient.receiver
 def __call__(user_transcendent_mongodb: UserTranscendentMongoDBClient) -> Optional[Tuple[str, bool]]:
     """ Returns:

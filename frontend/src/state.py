@@ -19,7 +19,6 @@ class State(MonoState):
         self.user_languages: Set[str] = set(UserMongoDBClient.instance().query_languages())
 
         self._language: str = None  # type: ignore
-        self.vocabulary_available: bool = None  # type: ignore
 
         self.non_english_language: str = None  # type: ignore
         self.train_english: bool = None  # type: ignore
@@ -32,7 +31,6 @@ class State(MonoState):
     def language(self, new: str):
         self._language = new
         self.user_languages.add(new)
-        self.vocabulary_available = new in set(UserMongoDBClient.instance().query_vocabulary_possessing_languages())
 
     def set_language(self, non_english_language: str, train_english: bool):
         """ Assumes previous setting of user in database

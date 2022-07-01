@@ -3,6 +3,7 @@ from termcolor import colored
 
 from frontend.src.trainers.trainer_frontend import TrainerFrontend
 from frontend.src.utils import output, view
+from frontend.src.utils.view import Banner
 
 
 class VocableAdderFrontend(TrainerFrontend):
@@ -21,7 +22,7 @@ class VocableAdderFrontend(TrainerFrontend):
         self._display_training_screen_header_section()
         self._training_loop()
 
-    @view.creator(banner_args=('vocable-adder/ansi-shadow', 'blue'))
+    @view.creator(banner=Banner('vocable-adder/ansi-shadow', 'blue'))
     def _display_training_screen_header_section(self):
         self._options.display_instructions()
         output.empty_row()

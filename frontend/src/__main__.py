@@ -49,7 +49,7 @@ def reentry_at(reentry_point: ReentryPoint):
         return reentry_at(reentry_point=screen.training_selection.__call__())
 
     elif reentry_point is ReentryPoint.Exit:
-        return screen.exit.regular.__call__()
+        return screen.exit.generic.__call__()
 
 
 enable_backend_logging(file_path=Path.cwd() / 'logging.txt')
