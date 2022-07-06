@@ -1,4 +1,4 @@
-from backend.src.database import UserMongoDBClient
+from backend.src.database.user_database import UserDatabase
 
 from frontend.src import logged_in_user
 from frontend.src.state import State
@@ -23,6 +23,5 @@ def __call__():
 
     assert username is not None
 
-    # set state, database variables
-    UserMongoDBClient(username, str())
+    UserDatabase(username, language=str())
     State(username, is_new_user=is_new_user)

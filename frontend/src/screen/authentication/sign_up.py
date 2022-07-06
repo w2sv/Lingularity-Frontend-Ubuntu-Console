@@ -1,6 +1,6 @@
-from typing import Optional, Tuple
+from __future__ import annotations
 
-from backend.src.database import UserTranscendentMongoDBClient
+from backend.src.database.credentials_database import CredentialsDatabase
 
 from frontend.src.screen.authentication._utils import authentication_screen, HORIZONTAL_INDENTATION
 from frontend.src.utils import view
@@ -11,7 +11,8 @@ from frontend.src.utils.view import Banner
 
 @view.creator(title='Sign Up', banner=Banner('lingularity/isometric2', 'red'))
 @authentication_screen
-def __call__() -> Optional[Tuple[str, bool]]:
+@CredentialsDatabase.receiver
+def __call__(credentials_database: CredentialsDatabase) -> tuple[str, bool] | None:
     """ Returns:
             username: str,
             is_new_user_flag: bool """
@@ -45,7 +46,7 @@ def __call__() -> Optional[Tuple[str, bool]]:
     ) == QUERY_CANCELLED:
         return None
 
-    UserTranscendentMongoDBClient.instance().initialize_user(
+    credentials_database.initialize_user(
         username=username,
         email_address=mail_address,
         password=password

@@ -3,6 +3,7 @@ __pycache__
 /.idea/
 /.mypy_cache/
 logging.txt
+/coverage.xml
 
 # coverage
 /.coverage
@@ -10,13 +11,9 @@ logging.txt
 
 # Data
 *.mp3
-/lingularity/backend/data/sentence-data/
 
 # Envs
 /env/
 
 # Keys
 /.keys/*
-
-# Build
-/build/

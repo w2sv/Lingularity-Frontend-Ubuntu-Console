@@ -14,7 +14,7 @@ from backend.src.utils.strings.extraction import longest_common_prefix
 from backend.src.utils.strings.splitting import split_at_uppercase
 from termcolor import colored
 
-from frontend.src.trainers.trainer_frontend import SequencePlotData, TrainerFrontend
+from frontend.src.trainer_frontends.trainer_frontend import SequencePlotData, TrainerFrontend
 from frontend.src.utils import output, output as op, prompt, view
 from frontend.src.utils.prompt.repetition import prompt_relentlessly
 

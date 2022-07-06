@@ -2,17 +2,17 @@ import random
 from typing import Optional
 
 import asciiplot
-from backend.src.database import UserMongoDBClient
+from backend.src.database.user_database import UserDatabase
 from backend.src.metadata import language_metadata
 
 from frontend.src.reentrypoint import ReentryPoint
 from frontend.src.option import Option, OptionCollection
 from frontend.src.state import State
-from frontend.src.trainers.sentence_translation import SentenceTranslationTrainerFrontend
-from frontend.src.trainers.sequence_plot_data import SequencePlotData
-from frontend.src.trainers.trainer_frontend import TrainerFrontend
-from frontend.src.trainers.vocable_adder import VocableAdderFrontend
-from frontend.src.trainers.vocable_trainer import VocableTrainerFrontend
+from frontend.src.trainer_frontends.sentence_translation import SentenceTranslationTrainerFrontend
+from frontend.src.trainer_frontends.sequence_plot_data import SequencePlotData
+from frontend.src.trainer_frontends.trainer_frontend import TrainerFrontend
+from frontend.src.trainer_frontends.vocable_adder import VocableAdderFrontend
+from frontend.src.trainer_frontends.vocable_trainer import VocableTrainerFrontend
 from frontend.src.utils import output, view
 from frontend.src.utils.prompt.cancelling import QUERY_CANCELLED
 from frontend.src.utils.prompt.repetition import prompt_relentlessly
@@ -44,15 +44,15 @@ def __call__(state: State, training_item_sequence_plot_data: Optional[SequencePl
     return callback
 
 
-@UserMongoDBClient.receiver
-def _get_options(user_mongo_client: UserMongoDBClient) -> OptionCollection:
-    options = [Option('sentences', 'Translate Sentences', callback=SentenceTranslationTrainerFrontend)]
+@UserDatabase.receiver
+def _get_options(user_database: UserDatabase) -> OptionCollection:
+    options = [Option('Translate Sentences', callback=SentenceTranslationTrainerFrontend, keyword='sentences')]
 
-    if user_mongo_client.language in user_mongo_client.query_vocabulary_possessing_languages():
-        options.append(Option('vocabulary', 'Train Vocabulary', callback=VocableTrainerFrontend))
+    if user_database.language in user_database.vocabulary_collection.vocabulary_possessing_languages():
+        options.append(Option('Train Vocabulary', callback=VocableTrainerFrontend, keyword='vocabulary'))
 
-    options.append(Option('add', 'Add Vocabulary', callback=VocableAdderFrontend))
-    options.append(Option('quit', 'Quit', callback=ReentryPoint.Exit))
+    options.append(Option('Add Vocabulary', callback=VocableAdderFrontend))
+    options.append(Option('Quit', callback=ReentryPoint.Exit))
 
     return OptionCollection(options)
 

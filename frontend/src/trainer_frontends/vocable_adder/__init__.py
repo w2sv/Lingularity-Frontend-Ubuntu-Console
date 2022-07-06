@@ -1,7 +1,7 @@
 from backend.src.trainers import VocableAdderBackend
 from termcolor import colored
 
-from frontend.src.trainers.trainer_frontend import TrainerFrontend
+from frontend.src.trainer_frontends.trainer_frontend import TrainerFrontend
 from frontend.src.utils import output, view
 from frontend.src.utils.view import Banner
 

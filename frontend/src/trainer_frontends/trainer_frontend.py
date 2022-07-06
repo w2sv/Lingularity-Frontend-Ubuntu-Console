@@ -7,14 +7,14 @@ from time import sleep
 from typing import Callable, Generic, Iterator, Sequence, Type, TypeVar
 
 from backend.src.metadata import language_metadata
-from backend.src.trainers import TrainerBackend
+from backend.src.trainers.trainer_backend import TrainerBackend
 from backend.src.types.vocable_entry import VocableEntry
 from backend.src.utils import date as date_utils
 from pynput.keyboard import Controller as KeyboardController
 
 from frontend.src.state import State
-from frontend.src.trainers.option_collection import OptionCollection
-from frontend.src.trainers.sequence_plot_data import SequencePlotData
+from frontend.src.trainer_frontends.option_collection import OptionCollection
+from frontend.src.trainer_frontends.sequence_plot_data import SequencePlotData
 from frontend.src.utils import output, view
 from frontend.src.utils.prompt.cancelling import QUERY_CANCELLED
 from frontend.src.utils.prompt.repetition import prompt_relentlessly
@@ -159,7 +159,7 @@ class TrainerFrontend(ABC, Generic[_Backend]):
 
         # insert altered entry into database in case of alteration actually having taken place
         if str(vocable_entry) != old_line_repr:
-            self._backend.user_mongo_client.alter_vocable_entry(old_vocable, vocable_entry.as_dict)
+            self._backend.user_database.vocabulary_collection.alter_entry(old_vocable, vocable_entry)
 
         return 2
 

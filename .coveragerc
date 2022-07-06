@@ -1,0 +1,7 @@
+# https://coverage.readthedocs.io/en/latest/config.html
+
+[run]
+source=frontend/src
+omit =
+    tests/*
+    *logging*

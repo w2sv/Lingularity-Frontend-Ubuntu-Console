@@ -2,7 +2,7 @@ import locale
 from typing import List
 
 from backend.src.components.tts import GoogleTTSClient
-from backend.src.database import UserMongoDBClient
+from backend.src.database.user_database import UserDatabase
 from backend.src.metadata import language_metadata
 from backend.src.ops import spacy_models, stemming
 from backend.src.string_resources import string_resources
@@ -31,7 +31,7 @@ def __call__(state: State) -> ReentryPoint:
     eligible_languages = list(set(language_metadata.keys()) - state.user_languages)
 
     _render_screen(eligible_languages, state)
-    return _proceed(eligible_languages, state)
+    return _proceed(eligible_languages)
 
 
 def _render_screen(eligible_languages: list[str], state: State):
@@ -89,7 +89,9 @@ def _color_language_wrt_available_components(language: str) -> str:
     return colored(language, color=color, attrs=attrs)
 
 
-def _proceed(eligible_languages: list[str], state: State) -> ReentryPoint:
+@State.receiver
+@UserDatabase.receiver
+def _proceed(eligible_languages: list[str], state: State, user_database: UserDatabase) -> ReentryPoint:
     selection = prompt_relentlessly(
         'Select language: ',
         indentation_percentage=0.35,
@@ -99,7 +101,7 @@ def _proceed(eligible_languages: list[str], state: State) -> ReentryPoint:
     if selection == QUERY_CANCELLED:
         return ReentryPoint.Home
 
-    UserMongoDBClient.instance().insert_dummy_entry(selection)
+    user_database.training_chronic_collection.upsert_language_placeholder_document(language=selection)
 
     # query desired reference language if English selected
     if selection == string_resources['english']:
@@ -112,7 +114,8 @@ def _proceed(eligible_languages: list[str], state: State) -> ReentryPoint:
 
 @view.creator(title='Reference Language Selection', banner=Banner('languages/3d-ascii', 'yellow'))
 @State.receiver
-def _reference_language_selection_screen(state: State) -> ReentryPoint:
+@UserDatabase.receiver
+def _reference_language_selection_screen(state: State, user_database: UserDatabase) -> ReentryPoint:
     eligible_languages = list(set(language_metadata.keys()) - {string_resources.ENGLISH})
     starting_letter_grouped_languages = output.group_by_starting_letter(eligible_languages, is_sorted=False)
     _display_eligible_languages(
@@ -131,6 +134,6 @@ def _reference_language_selection_screen(state: State) -> ReentryPoint:
     if selection == QUERY_CANCELLED:
         return ReentryPoint.LanguageAddition
 
-    UserMongoDBClient.instance().set_reference_language(reference_language=selection)
+    user_database.language_metadata_collection.set_reference_language(reference_language=selection)
     state.set_language(non_english_language=selection, train_english=True)
     return ReentryPoint.TrainingSelection

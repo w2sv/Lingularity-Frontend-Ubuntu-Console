@@ -1,4 +1,4 @@
-from backend.src.database import UserMongoDBClient
+from backend.src.database.user_database import UserDatabase
 from backend.src.string_resources import string_resources
 from termcolor import colored
 
@@ -16,8 +16,7 @@ from frontend.src.utils.view import Banner, terminal
 
 
 @view.creator(title=terminal.DEFAULT_TERMINAL_TITLE, banner=Banner('lingularity/ansi-shadow', 'red'))
-@State.receiver
-def __call__(state: State) -> ReentryPoint:
+def __call__() -> ReentryPoint:
     """ Displays languages already used by user, as well as additional procedure options of
             - adding a new language
             - signing into another account
@@ -33,12 +32,12 @@ def __call__(state: State) -> ReentryPoint:
 
     options = OptionCollection(
         [
-            Option('add', 'Add language', ReentryPoint.LanguageAddition),
-            Option('sign', 'Sign Out', ReentryPoint.Login),
-            Option('quit', 'Quit', ReentryPoint.Exit),
+            Option('Add language', ReentryPoint.LanguageAddition),
+            Option('Sign Out', ReentryPoint.Login),
+            Option('Quit', ReentryPoint.Exit),
 
-            Option('remove', 'Remove language', _language_removal),
-            Option('delete', 'Delete Account', account_deletion.__call__)
+            Option('Remove language', _language_removal),
+            Option('Delete Account', account_deletion.__call__)
         ]
     )
 
@@ -81,10 +80,10 @@ def _proceed(options: OptionCollection, state: State) -> ReentryPoint:
 
     # query reference language in case of English being selected
     if train_english := selection == string_resources['english']:
-        mongodb_client = UserMongoDBClient.instance()
+        user_database: UserDatabase = UserDatabase.instance()
 
-        selection = mongodb_client.query_reference_language()
-        mongodb_client.set_reference_language(reference_language=selection)
+        selection = user_database.language_metadata_collection.query_reference_language()
+        user_database.language_metadata_collection.set_reference_language(reference_language=selection)
 
     # write selected language into state
     state.set_language(non_english_language=selection, train_english=train_english)
@@ -126,7 +125,7 @@ def _language_removal(state: State) -> ReentryPoint:
         f'Are you sure you want to irretrievably erase all {removal_language} user data? {prompt.YES_NO_QUERY_OUTPUT}'
     )
     if prompt_relentlessly('', indentation_percentage=0.5, options=prompt.YES_NO_OPTIONS) == 'yes':
-        UserMongoDBClient.instance().remove_language_data(removal_language)
+        UserDatabase.instance().remove_language_related_documents()
         state.user_languages.remove(removal_language)
 
     return __call__()

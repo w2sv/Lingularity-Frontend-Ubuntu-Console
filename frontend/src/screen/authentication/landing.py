@@ -16,8 +16,8 @@ def __call__() -> tuple[str, bool]:
 
     options = OptionCollection(
         [
-            Option('log', 'Log In', callback=login.__call__),
-            Option('sign', 'Sign Up', callback=sign_up.__call__)
+            Option('Log In', callback=login.__call__),
+            Option('Sign Up', callback=sign_up.__call__)
         ]
     )
 

@@ -10,9 +10,13 @@ from frontend.src.reentrypoint import ReentryPoint
 
 @dataclasses.dataclass
 class Option:
-    keyword: str
     description: str
     callback: Callable | ReentryPoint
+    keyword: str = str()
+
+    def __post_init__(self):
+        if not self.keyword:
+            self.keyword = self.description.split()[0].lower()
 
 
 OFFSET = ' ' * 7

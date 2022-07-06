@@ -9,9 +9,9 @@ from cursor import cursor
 from pynput.keyboard import Controller as Keyboard
 from termcolor import colored
 
-from frontend.src.trainers.sentence_translation.modes import MODE_2_EXPLANATION, sentence_filter, SentenceFilterMode
-from frontend.src.trainers.sequence_plot_data import SequencePlotData
-from frontend.src.trainers.trainer_frontend import TrainerFrontend
+from frontend.src.trainer_frontends.sentence_translation.modes import MODE_2_EXPLANATION, sentence_filter, SentenceFilterMode
+from frontend.src.trainer_frontends.sequence_plot_data import SequencePlotData
+from frontend.src.trainer_frontends.trainer_frontend import TrainerFrontend
 from frontend.src.utils import output, output as op, prompt, view
 from frontend.src.utils.output.percentual_indenting import IndentedPrint
 from frontend.src.utils.prompt import PROMPT_INDENTATION
@@ -92,23 +92,23 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
     def _set_tts_language_variety_if_applicable(self):
         """ Invokes variety selection method, forwards selected variety to tts """
 
-        if self._backend.tts_available and len(self._backend.tts.language_variety_choices) and self._backend.tts.language_variety is None:
-            self._backend.tts.language_variety = self._select_tts_language_variety()
+        if self._backend.tts_available and len(self._backend.tts.accent_choices) and self._backend.tts.accent is None:
+            self._backend.tts.accent = self._select_tts_accent()
 
     @view.creator(
         title='TTS Language Variety Selection',
         banner=Banner('language-varieties/larry-3d', 'blue'),
         vertical_offsets=2
     )
-    def _select_tts_language_variety(self) -> str:
+    def _select_tts_accent(self) -> str:
         """ Returns:
                 selected language variety: element of language_variety_choices """
 
-        assert self._backend.tts.language_variety_choices is not None
+        assert self._backend.tts.accent_choices is not None
 
         # discard overlapping variety parts
-        common_start_length = len(longest_common_prefix(self._backend.tts.language_variety_choices))
-        processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._backend.tts.language_variety_choices]
+        common_start_length = len(longest_common_prefix(self._backend.tts.accent_choices))
+        processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._backend.tts.accent_choices]
 
         # display eligible varieties
         indentation = op.block_centering_indentation(processed_varieties)
@@ -120,7 +120,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         dialect_selection = prompt_relentlessly(
             prompt=f'{op.column_percentual_indentation(percentage=0.37)}Enter desired variety: ',
             options=processed_varieties)
-        return self._backend.tts.language_variety_choices[processed_varieties.index(dialect_selection)]
+        return self._backend.tts.accent_choices[processed_varieties.index(dialect_selection)]
 
     # -----------------
     # Training
@@ -164,28 +164,28 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
             # get response, run selected option if applicable
             if self._inquire_option_selection() and self.exit_training:
                 return
+
+            # ----ENTER-STROKE----
+
+            # erase pending... + entered option identifier
+            op.erase_lines(2)
+
+            # output translation_field
+            self._redo_print(f'{_SENTENCE_INDENTATION}{translation}')
+            self._redo_print(f'{_SENTENCE_INDENTATION}{colored("─────────────────", "red")}')
+
+            # play tts audio if available, otherwise suspend program
+            # for some time to encourage gleaning over translation_field
+            if self._backend.tts_available and self._backend.tts.enabled and self._backend.tts.audio_available:
+                self._backend.tts.play_audio()
             else:
+                time.sleep(len(translation) * 0.05)
 
-                # ----ENTER-STROKE----
+            self._n_trained_items += 1
 
-                # erase pending... + entered option identifier
-                op.erase_lines(2)
+            if self._n_trained_items >= 5:
+                self._redo_print.redo_partially(n_deletion_rows=3)
 
-                # output translation_field
-                self._redo_print(f'{_SENTENCE_INDENTATION}{translation}')
-                self._redo_print(f'{_SENTENCE_INDENTATION}{colored("─────────────────", "red")}')
-
-                # play tts audio if available, otherwise suspend program
-                # for some time to encourage gleaning over translation_field
-                if self._backend.tts_available and self._backend.tts.enabled and self._backend.tts.audio_available:
-                    self._backend.tts.play_audio()
-                else:
-                    time.sleep(len(translation) * 0.05)
-
-                self._n_trained_items += 1
-
-                if self._n_trained_items >= 5:
-                    self._redo_print.redo_partially(n_deletion_rows=3)
             return self._training_loop()
 
         print('\nSentence data depleted')
@@ -245,8 +245,8 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         output.erase_lines(3)
 
     def _change_accent(self):
-        selected_variety = self._select_tts_language_variety()
-        self._backend.tts.language_variety = selected_variety
+        accent = self._select_tts_accent()
+        self._backend.tts.accent = accent
         if self._backend.tts.audio_available:
             self._backend.tts.download_audio(self._current_translation)
 

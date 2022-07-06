@@ -1,6 +1,4 @@
-from typing import Set
-
-from backend.src.database import UserMongoDBClient
+from backend.src.database.user_database import UserDatabase
 from backend.src.string_resources import string_resources
 from monostate import MonoState
 
@@ -10,13 +8,14 @@ class State(MonoState):
         of integral user data required by a multitude of components
         and thus allowing for prevention of redundant database queries """
 
-    def __init__(self, username: str, is_new_user: bool):
-        super().__init__(instance_kwarg_name='state')
+    @UserDatabase.receiver
+    def __init__(self, username: str, is_new_user: bool, user_database: UserDatabase):
+        super().__init__()
 
         self.username = username
         self.is_new_user = is_new_user
 
-        self.user_languages: Set[str] = set(UserMongoDBClient.instance().query_languages())
+        self.user_languages: set[str] = set(user_database.training_chronic_collection.languages())
 
         self._language: str = None  # type: ignore
 
