@@ -227,7 +227,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
             cursor.show()
 
         altered_playback_speed = prompt_relentlessly(
-            prompt='',
+            prompt=str(),
             prompt_display_function=display_prompt,
             applicability_verifier=self._backend.tts.is_valid_playback_speed,
             error_indication_message='PLAYBACK SPEED HAS TO LIE BETWEEN 0.5 AND 2',

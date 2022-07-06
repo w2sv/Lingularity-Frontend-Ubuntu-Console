@@ -40,14 +40,6 @@ def __call__(training_item_sequence_plot_data: SequencePlotData | None = None) -
     return __call__(training_item_sequence_plot_data=trainer_frontend())
 
 
-@State.receiver
-def _render_screen(training_item_sequence_plot_data: SequencePlotData | None, state: State):
-    if training_item_sequence_plot_data:
-        _display_training_item_sequence(training_item_sequence_plot_data)
-    else:
-        _display_constitution_query(username=state.username, language=state.language)
-
-
 @UserDatabase.receiver
 def _get_options(user_database: UserDatabase) -> OptionCollection:
     options = [Option('Translate Sentences', callback=SentenceTranslationTrainerFrontend, keyword='sentences')]
@@ -68,6 +60,14 @@ def _query_action_selection(options: OptionCollection) -> str:
         options=list(options),
         cancelable=True
     )
+
+
+@State.receiver
+def _render_screen(training_item_sequence_plot_data: SequencePlotData | None, state: State):
+    if training_item_sequence_plot_data:
+        _display_training_item_sequence(training_item_sequence_plot_data)
+    else:
+        _display_constitution_query(username=state.username, language=state.language)
 
 
 def _display_constitution_query(username: str, language: str):
