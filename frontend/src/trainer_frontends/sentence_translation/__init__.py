@@ -10,7 +10,7 @@ from pynput.keyboard import Controller as Keyboard
 from termcolor import colored
 
 from frontend.src.trainer_frontends.sentence_translation.modes import MODE_2_EXPLANATION, sentence_filter, SentenceFilterMode
-from frontend.src.trainer_frontends.sequence_plot_data import SequencePlotData
+from frontend.src.sequence_plot_data import SequencePlotData
 from frontend.src.trainer_frontends.trainer_frontend import TrainerFrontend
 from frontend.src.utils import output, output as op, prompt, view
 from frontend.src.utils.output.percentual_indenting import IndentedPrint
@@ -254,3 +254,9 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         self._display_training_screen_header_section()
         self._redo_print.redo()
         self._pending_output()
+
+    def _training_item_sequence_plot_data(self) -> SequencePlotData:
+        return SequencePlotData.assemble(
+            self._backend.shortform,
+            item_name_plural=self._item_name_plural
+        )

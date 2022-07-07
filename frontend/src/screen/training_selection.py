@@ -10,7 +10,7 @@ from frontend.src.reentrypoint import ReentryPoint
 from frontend.src.option import Option, OptionCollection
 from frontend.src.state import State
 from frontend.src.trainer_frontends.sentence_translation import SentenceTranslationTrainerFrontend
-from frontend.src.trainer_frontends.sequence_plot_data import SequencePlotData
+from frontend.src.sequence_plot_data import SequencePlotData
 from frontend.src.trainer_frontends.trainer_frontend import TrainerFrontend
 from frontend.src.trainer_frontends.vocable_adder import VocableAdderFrontend
 from frontend.src.trainer_frontends.vocable_trainer import VocableTrainerFrontend

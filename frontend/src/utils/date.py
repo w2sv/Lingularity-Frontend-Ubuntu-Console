@@ -1,4 +1,6 @@
-from backend.src.utils.date import string_2_date, today
+import datetime
+
+from backend.src.utils.date import string_2_date
 
 
 def date_repr(date: str) -> str:
@@ -7,14 +9,14 @@ def date_repr(date: str) -> str:
             'yesterday' if date equaling yesterday's date
             'the {DAY}th of {MONTH} {YEAR}' otherwise
 
-        >>> date_repr(date=str(today))
+        >>> date_repr(date=str(datetime.date.today()))
         'today' """
 
     converted_date = string_2_date(date)
 
-    if today == converted_date:
+    if datetime.date.today() == converted_date:
         return 'today'
-    elif (today - converted_date).days == 1:
+    elif (datetime.date.today() - converted_date).days == 1:
         return 'yesterday'
     else:
         return f'the {converted_date.day}th of {converted_date.strftime("%B")} {converted_date.year}'
