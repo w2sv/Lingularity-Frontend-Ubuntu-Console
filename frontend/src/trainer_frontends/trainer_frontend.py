@@ -68,7 +68,6 @@ class TrainerFrontend(ABC, Generic[_Backend]):
 
             Returns:
                 reentry point """
-        pass
 
     def _set_terminal_title(self):
         terminal.set_title(f'{self._backend.language} {self._training_designation}')
@@ -114,20 +113,21 @@ class TrainerFrontend(ABC, Generic[_Backend]):
         # query vocable and meaning, exit if one of the two fields empty
         entry_fields = ['', '']
         for i, query_message in enumerate([f'Enter {self._backend.language} word/phrase: ', 'Enter meaning(s): ']):
-            if (field := prompt_relentlessly(
-                    prompt=f'{output.column_percentual_indentation(percentage=0.32)}{query_message}',
-                    applicability_verifier=lambda response: bool(len(response)),
-                    error_indication_message="INPUT FIELD LEFT UNFILLED", cancelable=cancelable)) == QUERY_CANCELLED:
+            if (
+                    field := prompt_relentlessly(
+                        prompt=f'{output.column_percentual_indentation(percentage=0.32)}{query_message}',
+                        applicability_verifier=lambda response: bool(len(response)),
+                        error_indication_message="INPUT FIELD LEFT UNFILLED",
+                        cancelable=cancelable
+                    )
+            ) == QUERY_CANCELLED:
                 return True
 
             entry_fields[i] = field
 
         # create new vocable entry, enter into database
         self._latest_created_vocable_entry = VocableEntry.new(*entry_fields)
-        self._backend.user_mongo_client.insert_vocable_entry(self._latest_created_vocable_entry.as_dict)
-
-        # update vocabulary_available flag in State
-        State.vocabulary_available = True
+        self._backend.user_database.vocabulary_collection.upsert_entry(self._latest_created_vocable_entry)
 
         output.erase_lines(3)
         return False
@@ -173,8 +173,10 @@ class TrainerFrontend(ABC, Generic[_Backend]):
         DAY_DELTA = 14
 
         # query language training history of respective trainer
-        training_history = self._backend.user_mongo_client.query_training_chronic()
-        training_history = {date: trainer_dict[str(self._backend)] for date, trainer_dict in training_history.items() if trainer_dict.get(str(self._backend))}
+        training_history = self._backend.user_database.training_chronic_collection.training_chronic()
+        training_history = {
+            date: trainer_dict[self._backend.shortform] for date, trainer_dict in training_history.items() if trainer_dict.get(self._backend.shortform)
+        }
 
         # get plotting dates
         dates = list(self._plotting_dates(training_dates=iter(training_history.keys()), day_delta=DAY_DELTA))
@@ -189,7 +191,7 @@ class TrainerFrontend(ABC, Generic[_Backend]):
             return "Let's get that graph inflation goin'"
 
         yesterday_exceedance_difference = item_scores[-1] - item_scores[-2] + 1
-        item_name = [self._item_name_plural, self._item_name][yesterday_exceedance_difference in [-1, 0]]
+        item_name = [self._item_name_plural, self._item_name][yesterday_exceedance_difference in {-1, 0}]
 
         if yesterday_exceedance_difference >= 0:
             return f"Exceeded yesterdays score by {yesterday_exceedance_difference + 1} {item_name}"
@@ -203,7 +205,6 @@ class TrainerFrontend(ABC, Generic[_Backend]):
                 going up to todays date
 
         e.g.:
-
             today = '2020-10-20'
             training_dates = ('2020-07-19', '2020-08-05', '2020-08-10', '2020-08-12', '2020-08-13', '2020-08-14',
             '2020-08-15', '2020-08-16', '2020-09-18', '2020-09-19', '2020-09-20', '2020-09-21', '2020-09-22',
@@ -218,7 +219,7 @@ class TrainerFrontend(ABC, Generic[_Backend]):
 
         starting_date = TrainerFrontend._get_starting_date(training_dates, day_delta)
 
-        while starting_date <= date_utils.today:
+        while starting_date <= date_utils.today():
             yield str(starting_date)
             starting_date += datetime.timedelta(days=1)
 
@@ -228,10 +229,9 @@ class TrainerFrontend(ABC, Generic[_Backend]):
                 earliest date comprised within training_dates for which (todays date - respective date) <= day_delta
                 holds true """
 
-        earliest_possible_date: datetime.date = (date_utils.today - datetime.timedelta(days=day_delta))
+        earliest_possible_date: datetime.date = (date_utils.today() - datetime.timedelta(days=day_delta))
 
         for training_date in training_dates:
             if (converted_date := date_utils.string_2_date(training_date)) >= earliest_possible_date:
                 return converted_date
-
         raise AttributeError
