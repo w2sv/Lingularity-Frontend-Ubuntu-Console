@@ -5,6 +5,7 @@ from backend.src.components.tts import GoogleTTSClient
 from backend.src.database.user_database import UserDatabase
 from backend.src.metadata import language_metadata
 from backend.src.ops import spacy_models, stemming
+from backend.src.ops.spacy_models.download import download_model
 from backend.src.string_resources import string_resources
 from termcolor import colored
 
@@ -102,6 +103,9 @@ def _proceed(eligible_languages: list[str], state: State, user_database: UserDat
         return ReentryPoint.Home
 
     user_database.training_chronic_collection.upsert_language_placeholder_document(language=selection)
+
+    if selection in spacy_models.AVAILABLE_LANGUAGES:
+        download_model(selection)
 
     # query desired reference language if English selected
     if selection == string_resources['english']:

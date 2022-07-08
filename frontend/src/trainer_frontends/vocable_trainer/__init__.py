@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from backend.src.database.user_database import UserDatabase
 from backend.src.trainers.vocable_trainer import (
     VocableTrainerBackend
 )
@@ -51,7 +52,7 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
         self._display_training_screen_header_section()
         self._training_loop()
 
-        self._backend.enter_session_statistics_into_database(self._n_trained_items)
+        self._upload_training_statistics_into_database()
 
         return self._training_item_sequence_plot_data()
 
@@ -115,7 +116,7 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
             self._display_progress_bar()
 
             # display vocable in reference language, query ground_truth
-            translation_query_output = f'\t\t{entry.meaning} = '
+            translation_query_output = f'\t\t{entry.translation} = '
             self._undo_print(translation_query_output, end='')
 
             # get vocable identification aid if synonyms with identical
@@ -130,8 +131,8 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
             # concatenate vocable identification aid, get response evaluation,
             # update vocable score, enter update into database
             response, response_evaluation = get_response_evaluation(response, entry.vocable, vocable_identification_aid)
-            entry.update_score(response_evaluation.value)
-            self._backend.user_mongo_client.update_vocable_entry(entry.vocable, entry.score)
+            entry.update_post_training_encounter(increment=response_evaluation.value)
+            UserDatabase.instance().vocabulary_collection.update_entry(entry.vocable, entry.score)
 
             # erase query line, redo ground_truth query
             op.erase_lines(1)
@@ -192,7 +193,7 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
             # query option/procedure, __call__ option if applicable
             self._undo_print.add_rows_to_buffer(1)
 
-            if self._inquire_option_selection(indentation_percentage=0.49) and self.exit_training:
+            if self._inquire_option_selection(indentation_percentage=0.49) and self._quit_training:
                 return
 
             # clear screen part pertaining to current entry
@@ -244,9 +245,10 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
         n_printed_lines = super()._alter_vocable_entry(self._current_vocable_entry)
         output.erase_lines(n_printed_lines - 1)
 
-    def _delete_vocable_entry(self):
-        output.centered(f"\nAre you sure you want to irreversibly delete {str(self._current_vocable_entry)}? {prompt.YES_NO_QUERY_OUTPUT}")
+    @UserDatabase.receiver
+    def _delete_vocable_entry(self, user_database: UserDatabase):
+        output.centered(f"\nAre you sure you want to irreversibly delete {self._current_vocable_entry}? {prompt.YES_NO_QUERY_OUTPUT}")
 
         if prompt_relentlessly(output.centering_indentation(' '), options=prompt.YES_NO_OPTIONS) == prompt.YES:
-            self._backend.user_mongo_client.delete_vocable_entry(self._current_vocable_entry.as_dict)
+            user_database.vocabulary_collection.delete_entry(self._current_vocable_entry)
         output.erase_lines(3)

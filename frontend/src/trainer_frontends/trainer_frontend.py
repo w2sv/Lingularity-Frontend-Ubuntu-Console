@@ -5,6 +5,7 @@ from time import sleep
 
 from typing import Callable, Generic, Type, TypeVar
 
+from backend.src.database.user_database import UserDatabase
 from backend.src.metadata import language_metadata
 from backend.src.trainers.trainer_backend import TrainerBackend
 from backend.src.types.vocable_entry import VocableEntry
@@ -47,7 +48,18 @@ class TrainerFrontend(ABC, Generic[_Backend]):
 
         self._training_designation = training_designation
 
-        self.exit_training = False
+        self._quit_training = False
+
+    @property
+    def _shortform(self) -> str:
+        return self.__class__.__name__[0].lower()
+
+    @UserDatabase.receiver
+    def _upload_training_statistics_into_database(self, user_database: UserDatabase):
+        user_database.training_chronic_collection.upsert_session_statistics(
+            self._shortform,
+            n_faced_items=self._n_trained_items
+        )
 
     def _assemble_options_collection(self, keyword_2_instruction_and_function: OptionKeyword2InstructionAndFunction | None) -> OptionCollection:
         return OptionCollection(
@@ -100,7 +112,8 @@ class TrainerFrontend(ABC, Generic[_Backend]):
         except KeyError:
             return False
 
-    def _add_vocable(self, cancelable=False) -> bool:
+    @UserDatabase.receiver
+    def _add_vocable(self, user_database: UserDatabase, cancelable=False) -> bool:
         """ Query, create new vocable entry,
             Enter it into database
             Update State.vocabulary_available
@@ -125,12 +138,13 @@ class TrainerFrontend(ABC, Generic[_Backend]):
 
         # create new vocable entry, enter into database
         self._latest_created_vocable_entry = VocableEntry.new(*entry_fields)
-        self._backend.user_database.vocabulary_collection.upsert_entry(self._latest_created_vocable_entry)
+        user_database.vocabulary_collection.upsert_entry(self._latest_created_vocable_entry)
 
         output.erase_lines(3)
         return False
 
-    def _alter_vocable_entry(self, vocable_entry: VocableEntry) -> int:
+    @UserDatabase.receiver
+    def _alter_vocable_entry(self, vocable_entry: VocableEntry, user_database: UserDatabase) -> int:
         """ Returns:
                 number of printed lines: int """
 
@@ -157,13 +171,15 @@ class TrainerFrontend(ABC, Generic[_Backend]):
 
         # insert altered entry into database in case of alteration actually having taken place
         if str(vocable_entry) != old_line_repr:
-            self._backend.user_database.vocabulary_collection.alter_entry(old_vocable, vocable_entry)
+            user_database.vocabulary_collection.alter_entry(old_vocable, vocable_entry)
 
         return 2
 
     def _quit(self):
-        self.exit_training = True
+        self._quit_training = True
 
-    # -----------------
-    # Post Training
-    # -----------------
+    def _training_item_sequence_plot_data(self) -> SequencePlotData:
+        return SequencePlotData.assemble(
+            self._shortform,
+            item_name_plural=self._item_name_plural
+        )

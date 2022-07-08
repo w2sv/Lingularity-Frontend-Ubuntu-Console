@@ -35,7 +35,7 @@ class VocableAdderFrontend(TrainerFrontend):
 
         self._output_vocable_addition_confirmation()
 
-        if self._inquire_option_selection(indentation_percentage=0.49) and self.exit_training:
+        if self._inquire_option_selection(indentation_percentage=0.49) and self._quit_training:
             return
 
         output.erase_lines(2)

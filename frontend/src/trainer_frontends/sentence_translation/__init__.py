@@ -52,7 +52,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         self._display_training_screen_header_section()
         self._training_loop()
 
-        self._backend.enter_session_statistics_into_database(self._n_trained_items)
+        self._upload_training_statistics_into_database()
 
         return self._training_item_sequence_plot_data()
 
@@ -162,7 +162,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
                 self._backend.tts.download_audio(translation)
 
             # get response, run selected option if applicable
-            if self._inquire_option_selection() and self.exit_training:
+            if self._inquire_option_selection() and self._quit_training:
                 return
 
             # ----ENTER-STROKE----
@@ -254,9 +254,3 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         self._display_training_screen_header_section()
         self._redo_print.redo()
         self._pending_output()
-
-    def _training_item_sequence_plot_data(self) -> SequencePlotData:
-        return SequencePlotData.assemble(
-            self._backend.shortform,
-            item_name_plural=self._item_name_plural
-        )

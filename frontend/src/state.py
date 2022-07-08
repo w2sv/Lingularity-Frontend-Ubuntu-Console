@@ -15,7 +15,7 @@ class State(MonoState):
         self.username = username
         self.is_new_user = is_new_user
 
-        self.user_languages: set[str] = set(user_database.training_chronic_collection.languages())
+        self.user_languages: set[str] = user_database.training_chronic_collection.comprised_languages()
 
         self._language: str = None  # type: ignore
 
