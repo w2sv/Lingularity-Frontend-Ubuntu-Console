@@ -16,7 +16,7 @@ class OptionCollection(dict):
 
         super().__init__(dict(zip(keyword_2_description_and_function, functions)))
 
-        self._information_rows: Iterator[str] = self._get_information_rows(
+        self._information_rows: list[str] = self._get_information_rows(
             keyword_description_pairs=zip(
                 keyword_2_description_and_function,
                 descriptions
@@ -24,9 +24,8 @@ class OptionCollection(dict):
         )
 
     @staticmethod
-    def _get_information_rows(keyword_description_pairs: Iterable[tuple[str, str]]) -> Iterator[str]:
-        return iter(
-            output.align(
+    def _get_information_rows(keyword_description_pairs: Iterable[tuple[str, str]]) -> list[str]:
+        return output.align(
                 *map(  # type: ignore
                     list,
                     unzip(
@@ -40,7 +39,6 @@ class OptionCollection(dict):
                     )
                 )
             )
-        )
 
     def display_instructions(self, row_index_2_insertion_string: dict[int, str] | None = None):
         if not row_index_2_insertion_string:
@@ -50,12 +48,13 @@ class OptionCollection(dict):
 
         _print('Enter:')
 
+        row_iterator = iter(self._information_rows)
         for i in count(0, step=1):
             if (string := row_index_2_insertion_string.get(i)) is not None:
                 output.centered(f'\n{string}\n')
             else:
                 try:
-                    _print(f'    {next(self._information_rows)}')
+                    _print(f'    {next(row_iterator)}')
                 except StopIteration:
                     break
 

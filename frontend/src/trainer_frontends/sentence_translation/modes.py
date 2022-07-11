@@ -22,5 +22,5 @@ MODE_2_EXPLANATION = {
 }
 
 
-def sentence_filter(mode: SentenceFilterMode) -> SentenceDataFilter:
+def get_sentence_filter(mode: SentenceFilterMode) -> SentenceDataFilter:
     return getattr(modes, mode.value).filter_sentence_data

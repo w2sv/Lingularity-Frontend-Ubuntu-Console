@@ -10,7 +10,7 @@ from frontend.src.reentrypoint import ReentryPoint
 from frontend.src.option import Option, OptionCollection
 from frontend.src.state import State
 from frontend.src.trainer_frontends.sentence_translation import SentenceTranslationTrainerFrontend
-from frontend.src.sequence_plot_data import SequencePlotData
+from frontend.src.plot_parameters import PlotParameters
 from frontend.src.trainer_frontends.trainer_frontend import TrainerFrontend
 from frontend.src.trainer_frontends.vocable_adder import VocableAdderFrontend
 from frontend.src.trainer_frontends.vocable_trainer import VocableTrainerFrontend
@@ -21,13 +21,18 @@ from frontend.src.utils.view import Banner
 
 
 @view.creator(banner=Banner('lingularity/3d-ascii', 'green'), title='Training Selection')
-def __call__(training_item_sequence_plot_data: SequencePlotData | None = None) -> ReentryPoint:
-    _render_screen(training_item_sequence_plot_data)
-
+def __call__(training_item_sequence_plot_data: PlotParameters | None = None) -> ReentryPoint:
     options = _get_options()
 
+    _render_screen(training_item_sequence_plot_data, options)
+
     # query desired action
-    if (action_selection_keyword := _query_action_selection(options)) == QUERY_CANCELLED:
+    if (action_selection_keyword := prompt_relentlessly(
+            prompt=output.centering_indentation(' '),
+            options=list(options),
+            cancelable=True
+        )
+    ) == QUERY_CANCELLED:
         return ReentryPoint.Home
 
     callback = options[action_selection_keyword]
@@ -53,24 +58,17 @@ def _get_options(user_database: UserDatabase) -> OptionCollection:
     return OptionCollection(options)
 
 
-def _query_action_selection(options: OptionCollection) -> str:
-    output.centered(options.as_row(), '\n')
-    return prompt_relentlessly(
-        prompt=output.centering_indentation(' '),
-        options=list(options),
-        cancelable=True
-    )
-
-
 @State.receiver
-def _render_screen(training_item_sequence_plot_data: SequencePlotData | None, state: State):
+def _render_screen(training_item_sequence_plot_data: PlotParameters | None, options: OptionCollection, state: State):
     if training_item_sequence_plot_data:
         _display_training_item_sequence(training_item_sequence_plot_data)
     else:
-        _display_constitution_query(username=state.username, language=state.language)
+        _display_whats_up(username=state.username, language=state.language)
+
+    output.centered(options.as_row(), '\n')
 
 
-def _display_constitution_query(username: str, language: str):
+def _display_whats_up(username: str, language: str):
     if constitution_query_templates := language_metadata[language]['translations'].get('constitutionQuery'):
         constitution_queries = map(lambda query_corpus: query_corpus.replace('{}', username), constitution_query_templates)
     else:
@@ -79,7 +77,7 @@ def _display_constitution_query(username: str, language: str):
     output.centered(random.choice(list(constitution_queries)), view.VERTICAL_OFFSET)
 
 
-def _display_training_item_sequence(training_item_sequence_plot_data: SequencePlotData):
+def _display_training_item_sequence(training_item_sequence_plot_data: PlotParameters):
     y_label_max_length = max(map(lambda label: len(str(label)), training_item_sequence_plot_data.sequence))
     outer_left_x_label = 'two weeks ago'
     color = [asciiplot.Color.BLUE, asciiplot.Color.RED][training_item_sequence_plot_data.item_name.startswith('s')]

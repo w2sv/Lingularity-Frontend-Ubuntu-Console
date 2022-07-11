@@ -33,7 +33,11 @@ class OptionCollection(dict):
             )
         )
 
-    def as_row(self, inter_indentation=OFFSET) -> str:
+    def as_row(self, inter_indentation=OFFSET, with_delimiter=True) -> str:
+        if with_delimiter:
+            indentation_chars = list(inter_indentation)
+            indentation_chars[len(indentation_chars) // 2] = '|'
+            inter_indentation = str().join(indentation_chars)
         return inter_indentation.join(self.formatted_descriptions)
 
 

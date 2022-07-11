@@ -13,7 +13,7 @@ from pynput.keyboard import Controller as KeyboardController
 
 from frontend.src.state import State
 from frontend.src.trainer_frontends.option_collection import OptionCollection
-from frontend.src.sequence_plot_data import SequencePlotData
+from frontend.src.plot_parameters import PlotParameters
 from frontend.src.utils import output, view
 from frontend.src.utils.prompt.cancelling import QUERY_CANCELLED
 from frontend.src.utils.prompt.repetition import prompt_relentlessly
@@ -55,7 +55,7 @@ class TrainerFrontend(ABC, Generic[_Backend]):
         return self.__class__.__name__[0].lower()
 
     @UserDatabase.receiver
-    def _upload_training_statistics_into_database(self, user_database: UserDatabase):
+    def _upsert_session_statistics(self, user_database: UserDatabase):
         user_database.training_chronic_collection.upsert_session_statistics(
             self._shortform,
             n_faced_items=self._n_trained_items
@@ -73,7 +73,7 @@ class TrainerFrontend(ABC, Generic[_Backend]):
     # Driver
     # -----------------
     @abstractmethod
-    def __call__(self) -> SequencePlotData | None:
+    def __call__(self) -> PlotParameters | None:
         """ Invokes trainer frontend
 
             Returns:
@@ -178,8 +178,8 @@ class TrainerFrontend(ABC, Generic[_Backend]):
     def _quit(self):
         self._quit_training = True
 
-    def _training_item_sequence_plot_data(self) -> SequencePlotData:
-        return SequencePlotData.assemble(
+    def _training_item_sequence_plot_data(self) -> PlotParameters:
+        return PlotParameters.assemble(
             self._shortform,
             item_name_plural=self._item_name_plural
         )

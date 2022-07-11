@@ -2,11 +2,10 @@ from backend.src.database.user_database import UserDatabase
 from backend.src.string_resources import string_resources
 from termcolor import colored
 
-from frontend.src.metadata import main_country_flag
-from frontend.src.reentrypoint import ReentryPoint
-from frontend.src.screen import account_deletion
 from frontend.src import option
 from frontend.src.option import Option, OptionCollection
+from frontend.src.reentrypoint import ReentryPoint
+from frontend.src.screen import account_deletion
 from frontend.src.state import State
 from frontend.src.utils import output, prompt, view
 from frontend.src.utils.prompt._ops import indicate_erroneous_input
@@ -33,11 +32,12 @@ def __call__() -> ReentryPoint:
     options = OptionCollection(
         [
             Option('Add language', ReentryPoint.LanguageAddition),
-            Option('Sign Out', ReentryPoint.Login),
-            Option('Quit', ReentryPoint.Exit),
-
             Option('Remove language', _language_removal),
-            Option('Delete Account', account_deletion.__call__)
+
+            Option('Sign Out', ReentryPoint.Login),
+            Option('Delete Account', account_deletion.__call__),
+
+            Option('Quit', ReentryPoint.Exit)
         ]
     )
 
@@ -51,16 +51,16 @@ def _render_screen(options: OptionCollection, state: State):
 
     # display languages already used by user
     output.centered(_colored('YOUR LANGUAGES'), "\n")
-    for language_group in output.group_by_starting_letter(state.user_languages, is_sorted=False):
-        output.centered('  '.join(map(lambda language: f'{language} {main_country_flag(language)}', language_group)))
+    for language in state.user_languages:
+        output.centered(language)
 
-    OPTION_CLASS_DELIMITER = _colored('   |   ')
+    option_delimiter = _colored('   |   ')
 
     OPTION_BLOCK = (
-        f"{_colored('ADDITIONAL OPTIONS:')}{option.OFFSET}{options.formatted_descriptions[0]}{option.OFFSET}"
+        f"{_colored('OPTIONS:')}{option.OFFSET}{options.formatted_descriptions[0]}{option.OFFSET}"
         f"{options.formatted_descriptions[1]}"
-        f"{OPTION_CLASS_DELIMITER}{options.formatted_descriptions[2]}{option.OFFSET}{options.formatted_descriptions[3]}"
-        f"{OPTION_CLASS_DELIMITER}{options.formatted_descriptions[4]}"
+        f"{option_delimiter}{options.formatted_descriptions[2]}{option.OFFSET}{options.formatted_descriptions[3]}"
+        f"{option_delimiter}{options.formatted_descriptions[4]}"
     )
     output.centered(f'\n{OPTION_BLOCK}\n')
 

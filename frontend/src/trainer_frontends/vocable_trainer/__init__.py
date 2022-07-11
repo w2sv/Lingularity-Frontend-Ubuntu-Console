@@ -15,7 +15,7 @@ from backend.src.utils.strings.extraction import longest_common_prefix
 from backend.src.utils.strings.splitting import split_at_uppercase
 from termcolor import colored
 
-from frontend.src.trainer_frontends.trainer_frontend import SequencePlotData, TrainerFrontend
+from frontend.src.trainer_frontends.trainer_frontend import PlotParameters, TrainerFrontend
 from frontend.src.utils import output, output as op, prompt, view
 from frontend.src.utils.prompt.repetition import prompt_relentlessly
 
@@ -41,7 +41,7 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
 
         self._current_vocable_entry: VocableEntry = None
 
-    def __call__(self) -> SequencePlotData:
+    def __call__(self) -> PlotParameters:
         self._set_terminal_title()
 
         self._backend.set_item_iterator()
@@ -52,7 +52,7 @@ class VocableTrainerFrontend(TrainerFrontend[VocableTrainerBackend]):
         self._display_training_screen_header_section()
         self._training_loop()
 
-        self._upload_training_statistics_into_database()
+        self._upsert_session_statistics()
 
         return self._training_item_sequence_plot_data()
 

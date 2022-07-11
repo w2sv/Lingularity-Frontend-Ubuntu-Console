@@ -3,21 +3,18 @@ from __future__ import annotations
 import time
 
 from backend.src.trainers.sentence_translation import SentenceTranslationTrainerBackend
-from backend.src.utils.strings.extraction import longest_common_prefix
-from backend.src.utils.strings.transformation import strip_multiple
 from cursor import cursor
 from pynput.keyboard import Controller as Keyboard
+import stringcase
 from termcolor import colored
 
-from frontend.src.trainer_frontends.sentence_translation.modes import MODE_2_EXPLANATION, sentence_filter, SentenceFilterMode
-from frontend.src.sequence_plot_data import SequencePlotData
+from frontend.src.plot_parameters import PlotParameters
+from frontend.src.trainer_frontends.sentence_translation.modes import get_sentence_filter, MODE_2_EXPLANATION, SentenceFilterMode
+from frontend.src.trainer_frontends.sentence_translation.screens import mode_selection, tts_accent_selection
 from frontend.src.trainer_frontends.trainer_frontend import TrainerFrontend
 from frontend.src.utils import output, output as op, prompt, view
-from frontend.src.utils.output.percentual_indenting import IndentedPrint
-from frontend.src.utils.prompt import PROMPT_INDENTATION
 from frontend.src.utils.prompt.cancelling import QUERY_CANCELLED
 from frontend.src.utils.prompt.repetition import prompt_relentlessly
-from frontend.src.utils.view import Banner
 
 
 _SENTENCE_INDENTATION = op.column_percentual_indentation(0.15)
@@ -38,13 +35,14 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
             }
         )
 
+        self._mode: SentenceFilterMode = None  # type: ignore
         self._current_translation = str()
         self._redo_print = op.RedoPrint()
 
-    def __call__(self) -> SequencePlotData:
+    def __call__(self) -> PlotParameters:
         self._set_terminal_title()
 
-        self._set_tts_language_variety_if_applicable()
+        self._set_tts_accent_if_applicable()
 
         self._set_training_mode()
         self._backend.set_item_iterator()
@@ -52,7 +50,7 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         self._display_training_screen_header_section()
         self._training_loop()
 
-        self._upload_training_statistics_into_database()
+        self._upsert_session_statistics()
 
         return self._training_item_sequence_plot_data()
 
@@ -66,61 +64,17 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
     def _set_training_mode(self):
         """ Invokes training mode selection method, forwards backend_type of selected mode to backend_type """
 
-        mode_selection = self._select_training_mode()
-        self._backend.sentence_data_filter = sentence_filter(mode_selection)
-
-    @view.creator(header='TRAINING MODES')
-    def _select_training_mode(self) -> SentenceFilterMode:
-
-        # display eligible modes
-        _print = IndentedPrint(indentation=op.block_centering_indentation(MODE_2_EXPLANATION.values()))
-        for mode, explanation in MODE_2_EXPLANATION.items():
-            _print(colored(f'{mode.display_name}:', color='red'))
-            _print(f'\t{explanation}\n')
-
-        print(view.VERTICAL_OFFSET)
-
-        keyword = prompt_relentlessly(
-            f'{PROMPT_INDENTATION}Enter desired mode: ',
-            options=[mode.name for mode in MODE_2_EXPLANATION]
-        )
-        return SentenceFilterMode[keyword]
+        self._mode = mode_selection.__call__()
+        self._backend.sentence_data_filter = get_sentence_filter(self._mode)
 
     # -----------------
     # .TTS Language Variety
     # -----------------
-    def _set_tts_language_variety_if_applicable(self):
+    def _set_tts_accent_if_applicable(self):
         """ Invokes variety selection method, forwards selected variety to tts """
 
-        if self._backend.tts_available and len(self._backend.tts.accent_choices) and self._backend.tts.accent is None:
-            self._backend.tts.accent = self._select_tts_accent()
-
-    @view.creator(
-        title='TTS Language Variety Selection',
-        banner=Banner('language-varieties/larry-3d', 'blue'),
-        vertical_offsets=2
-    )
-    def _select_tts_accent(self) -> str:
-        """ Returns:
-                selected language variety: element of language_variety_choices """
-
-        assert self._backend.tts.accent_choices is not None
-
-        # discard overlapping variety parts
-        common_start_length = len(longest_common_prefix(self._backend.tts.accent_choices))
-        processed_varieties = [strip_multiple(dialect[common_start_length:], strings=list('()')) for dialect in self._backend.tts.accent_choices]
-
-        # display eligible varieties
-        indentation = op.block_centering_indentation(processed_varieties)
-        for variety in processed_varieties:
-            print(indentation, variety)
-        op.empty_row(times=2)
-
-        # query variety
-        dialect_selection = prompt_relentlessly(
-            prompt=f'{op.column_percentual_indentation(percentage=0.37)}Enter desired variety: ',
-            options=processed_varieties)
-        return self._backend.tts.accent_choices[processed_varieties.index(dialect_selection)]
+        if self._backend.tts_available and len(self._backend.tts.accent_choices):
+            self._backend.tts.accent = tts_accent_selection.__call__(tts_accent_choices=self._backend.tts.accent_choices)
 
     # -----------------
     # Training
@@ -131,26 +85,26 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         self._options.display_instructions(
             row_index_2_insertion_string={2: 'TEXT-TO-SPEECH OPTIONS'}
         )
-
-        if len(self._options) == 3:
-            print(view.VERTICAL_OFFSET)
-            self._output_lets_go()
-            print(view.VERTICAL_OFFSET)
-        else:
-            self._output_lets_go()
+        self._output_lets_go()
 
     def _display_session_information(self):
         """ Displays magnitude of underlying sentence data,
             country conversion forenames originating from if applicable """
 
-        op.centered(f"Document comprises {self._backend.n_training_items:,d} sentences.\n")
+        op.centered(f'{stringcase.titlecase(self._mode.name)} mode comprises {self._backend.n_training_items:,d} sentences.')
 
-        # display picked country corresponding to replacement forenames
-        if self._backend.forename_converter is not None:
+        if self._backend.forename_converter:
+            op.empty_row()
+
             if demonym := self._backend.forename_converter.demonym:
                 op.centered(f'Employing {demonym} forenames.')
             else:
-                op.centered(f'Employing forenames stemming from {self._backend.forename_converter.country}.')
+                op.centered(f'Employing forenames from {self._backend.forename_converter.country}.')
+        if self._backend.tts.accent:
+            op.empty_row()
+
+            op.centered(f'TTS Accent Region: {self._backend.tts.accent}')
+
         op.empty_row()
 
     @op.cursor_hider
@@ -245,12 +199,12 @@ class SentenceTranslationTrainerFrontend(TrainerFrontend[SentenceTranslationTrai
         output.erase_lines(3)
 
     def _change_accent(self):
-        accent = self._select_tts_accent()
-        self._backend.tts.accent = accent
+        self._set_tts_accent_if_applicable()
+
         if self._backend.tts.audio_available:
             self._backend.tts.download_audio(self._current_translation)
 
-        # redo previous output output
+        # redo previous output
         self._display_training_screen_header_section()
         self._redo_print.redo()
         self._pending_output()

@@ -1,13 +1,15 @@
 from dataclasses import dataclass
 import datetime
-from typing import Iterator
+from typing import Iterable, Iterator
 
 from backend.src.database.user_database import UserDatabase
 from backend.src.utils.date import string_2_date
 
+from frontend.src.utils.iterables import first
+
 
 @dataclass(frozen=True)
-class SequencePlotData:
+class PlotParameters:
     sequence: list[float]
     dates: list[str]
     item_name: str
@@ -15,19 +17,19 @@ class SequencePlotData:
     @classmethod
     @UserDatabase.receiver
     def assemble(cls, trainer_shortform: str, item_name_plural: str, user_database: UserDatabase):
-        DAY_DELTA = 14
-
         # query language training history of respective trainer
-        training_history = user_database.training_chronic_collection.training_chronic()
-        training_history = {
-            date: trainer_dict[trainer_shortform] for date, trainer_dict in training_history.items() if trainer_dict.get(trainer_shortform)
+        training_chronic = user_database.training_chronic_collection.training_chronic()
+        training_chronic = {
+            date: day_dict[trainer_shortform] for date, day_dict in training_chronic.items() if day_dict and day_dict.get(trainer_shortform)  # faulty None's amongst trainer dicts
         }
 
         # get plotting dates
-        dates = list(_plotting_dates(training_dates=iter(training_history.keys()), day_delta=DAY_DELTA))
+        STARTING_DATE_DELTA = 14
+
+        dates = list(_plotting_dates(training_dates=iter(training_chronic.keys()), starting_date_delta=STARTING_DATE_DELTA))
 
         # get training item sequences, conduct zero-padding on dates on which no training took place
-        sequence = [training_history.get(date, 0) for date in dates]
+        sequence = [training_chronic.get(date, 0) for date in dates]
 
         return cls(sequence, dates, item_name=item_name_plural)
 
@@ -43,10 +45,10 @@ class SequencePlotData:
     #     return f"{abs(yesterday_exceedance_difference)} {item_name} left to top yesterdays score"
 
 
-def _plotting_dates(training_dates: Iterator[str], day_delta: int) -> Iterator[str]:
+def _plotting_dates(training_dates: Iterable[str], starting_date_delta: int) -> Iterator[str]:
     """ Returns:
             continuous sequences of plotting dates to be seized as x-axis ticks
-            starting from earliest day with (todays date - respective date) <= day_delta,
+            starting from earliest day with (todays date - respective date) <= starting_date_delta,
             going up to todays date
 
     e.g.:
@@ -57,26 +59,26 @@ def _plotting_dates(training_dates: Iterator[str], day_delta: int) -> Iterator[s
         '2020-10-06', '2020-10-12', '2020-10-13', '2020-10-14', '2020-10-15', '2020-10-16', '2020-10-17',
         '2020-10-19', '2020-10-20')
 
-        TrainerFrontend._plotting_dates(_training_dates, day_delta=14)
+        TrainerFrontend._plotting_dates(_training_dates, starting_date_delta=14)
         ['2020-10-06', '2020-10-07', '2020-10-08', '2020-10-09', '2020-10-10', '2020-10-11', '2020-10-12',
         '2020-10-13', '2020-10-14', '2020-10-15', '2020-10-16', '2020-10-17', '2020-10-18', '2020-10-19',
         '2020-10-20'] """
 
-    starting_date = _get_starting_date(training_dates, day_delta)
+    starting_date = _get_starting_date(training_dates, starting_date_delta)
 
     while starting_date <= datetime.date.today():
         yield str(starting_date)
         starting_date += datetime.timedelta(days=1)
 
 
-def _get_starting_date(training_dates: Iterator[str], day_delta: int) -> datetime.date:
+def _get_starting_date(training_dates: Iterable[str], day_delta: int) -> datetime.date:
     """ Returns:
-            earliest date comprised within training_dates for which (todays date - respective date) <= day_delta
+            earliest date comprised within training_dates for which (todays date - respective date) <= starting_date_delta
             holds true """
 
     earliest_possible_date: datetime.date = (datetime.date.today() - datetime.timedelta(days=day_delta))
 
-    for training_date in training_dates:
-        if (converted_date := string_2_date(training_date)) >= earliest_possible_date:
-            return converted_date
-    raise AttributeError
+    return first(
+        map(string_2_date, training_dates),
+        key=lambda date: date >= earliest_possible_date
+    )
